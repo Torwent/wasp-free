@@ -1,0 +1,172 @@
+{$DEFINE SRL_USE_REMOTEINPUT}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$I SRL/osr.simba}
+{$I WaspLib/osr.simba}
+
+begin
+  Login.PlayerIndex  := 0;
+  AntibanEnabled     := True; //Enables most antiban
+  BreaksEnabled      := True; //Enables short breaks
+  SleepEnabled       := True; //Enables sleep breaks
+  RemoteInputEnabled := True; //Enables remote input
+end;
+
+type
+  ERSStall = (
+    FRUIT_STALL
+  );
+var
+  CurrentStall: ERSStall := ERSStall.FRUIT_STALL;
+
+type
+  EStallRobberState = (
+    FIND_STALL,
+    ROB_STALL,
+    DROP_LOOT
+  );
+
+  TStallRobber = record(TBaseWalkerScript)
+    State: EStallRobberState;
+
+    Stall: PRSObject;
+    DropList: TRSItemArray;
+  end;
+
+procedure TAntiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
+  Antiban.MinZoom := 5;
+  Antiban.MaxZoom := 50;
+end;
+
+procedure TStallRobber.SetupStall;
+begin
+  case CurrentStall of
+    ERSStall.FRUIT_STALL:
+      begin
+        RSW.Setup('Zeah');
+        Stall := @RSObjects.FruitStalls;
+        DropList := [
+          'Cooking apple', 'Banana', 'Jangerberries', 'Lemon', 'Redberries',
+          'Pineapple', 'Lime', 'Strawberry', 'Strange fruit',
+          'Golovanova fruit top', 'Papaya fruit', 'Silk'
+        ];
+      end;
+  end;
+end;
+
+procedure TStallRobber.Init; override;
+begin
+  Name := 'AIO StallRobber';
+  Version := 'v2.0.0';
+
+  inherited;
+
+  Self.SetupStall;
+
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+end;
+
+
+function TStallRobber.HasLoot: Boolean;
+var
+  Slots: TIntegerArray;
+begin
+  Result := Inventory.FindItems(DropList, Slots);
+end;
+
+
+function TStallRobber.GetState: EStallRobberState;
+begin
+  if Inventory.IsFull and Self.HasLoot then
+    Exit(DROP_LOOT)
+  if MainScreen.IsUpText('Steal-from') then
+    Exit(ROB_STALL)
+  else if RSW.AtTile(Stall^.Tiles) then
+    Exit(FIND_STALL);
+end;
+
+procedure TStallRobber.Run;
+begin
+  ClearDebug;
+  Self.Init;
+
+  while True do
+  begin
+    State := Self.GetState;
+    Action := ToStr(State);
+    Self.ProcessWhileWaiting;
+
+    case State of
+      DROP_LOOT: Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
+      ROB_STALL:
+      begin
+        Mouse.Click(MOUSE_LEFT);
+        if MainScreen.DidRedClick then
+          XPBar.WaitXPDrop(2000);
+      end;
+      FIND_STALL:
+      begin
+        if Stall^.Click then
+          if XPBar.WaitXPDrop(2000) then
+            Wait(1200);
+      end;
+    end;
+
+    if Self.DoAntiban and not RSClient.IsLoggedIn then
+      Login.LoginPlayer;
+  end;
+end;
+
+var
+  StallRobber: TStallRobber;
+
+type
+  TStallRobberConfig = record(TScriptConfig)
+    StallSelector: TLabeledCombobox;
+  end;
+
+procedure TStallRobberConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+  CurrentStall := ERSStall(StallSelector.Combobox.getItemIndex);
+end;
+
+procedure TStallRobberConfig.Setup; override;
+begin
+  inherited;
+
+  with StallSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Stall:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetWidth(200);
+    Combobox.setStyle(csDropDownList);
+    Combobox.getItems.Add('Fruit stall');
+    Combobox.setItemIndex(Ord(CurrentStall));
+  end;
+
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TStallRobberConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var
+  StallRobberConfig: TStallRobberConfig;
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  Sync(@StallRobberConfig.Run);
+  {$ENDIF}
+  StallRobber.Run
+end.

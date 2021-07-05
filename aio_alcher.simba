@@ -1,0 +1,474 @@
+{$IFNDEF SCRIPT_CHAIN}
+  {$DEFINE SRL_USE_REMOTEINPUT}
+  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$I SRL/osr.simba}
+  {$I WaspLib/osr.simba}
+
+  begin
+    Login.PlayerIndex  := 0;
+    AntibanEnabled     := True; //Enables most antiban
+    BreaksEnabled      := True; //Enables short breaks
+    SleepEnabled       := True; //Enables sleep breaks
+    RemoteInputEnabled := True; //Enables remote input
+  end;
+{$ENDIF}
+
+var
+  AlchSpell: ERSSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
+  LossProtection: Boolean := True;
+
+const
+  ALCH_ITEMS: TRSItemArray = [
+    'Onyx bolts (e)', '9282', '9283', '9284', '9285', 'Yew longbow',
+    'Magic longbow', 'Adamant platebody', 'Rune 2h sword', 'Rune axe',
+    'Rune battleaxe', 'Rune boots', 'Rune cane', 'Rune chainbody', 'Rune claws',
+    'Rune crossbow', 'Rune dagger', 'Rune dagger(p+)', 'Rune full helm',
+    'Rune halberd', 'Rune hasta', 'Rune kiteshield', 'Rune longsword',
+    'Rune mace', 'Rune med helm','Rune pickaxe', 'Rune platebody',
+    'Rune platelegs', 'Rune plateskirt', 'Rune scimitar', 'Rune spear',
+    'Rune sq shield', 'Rune sword', 'Runite crossbow (u)', 'Runite limbs',
+
+    'noted Yew longbow', 'noted Magic longbow', 'noted Adamant platebody',
+    'noted Rune 2h sword', 'noted Rune axe', 'noted Rune battleaxe',
+    'noted Rune boots', 'noted Rune cane', 'noted Rune chainbody',
+    'noted Rune claws', 'noted Rune crossbow', 'noted Rune dagger',
+    'noted Rune dagger(p+)', 'noted Rune full helm', 'noted Rune halberd',
+    'noted Rune hasta', 'noted Rune kiteshield', 'noted Rune longsword',
+    'noted Rune mace', 'noted Rune med helm', 'noted Rune pickaxe',
+    'noted Rune platebody', 'noted Rune platelegs', 'noted Rune plateskirt',
+    'noted Rune scimitar', 'noted Rune spear', 'noted Rune sq shield',
+    'noted Rune sword', 'noted Runite crossbow (u)', 'noted Runite limbs'
+  ];
+
+type
+  EAlcherState = (
+    OPEN_BANK,
+    WITHDRAW_NATS,
+    WITHDRAW_MONEY,
+
+    OPEN_COLLECT,
+    HANDLE_COLLECT,
+
+    CLOSE_INTERFACE,
+
+    OPEN_MAGIC_TAB,
+    CHOOSE_SPELL,
+
+    OPEN_INV_TAB,
+    CHOOSE_ITEM,
+    DESELECT_ITEM,
+    HANDLE_WARNING,
+    WALK_ALCH,
+
+    CLOSE_CONTEXT,
+
+    END_SCRIPT
+  );
+
+  TAlcher = record(TBaseBankScript)
+    State: EAlcherState;
+
+    CoinArray: TRSItemArray;
+    AlchItem: TRSItem;
+  end;
+
+procedure Antiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
+  Antiban.MinZoom := 10;
+  Antiban.MaxZoom := 90;
+end;
+
+procedure TAlcher.Init; override;
+begin
+  Name := 'AIO Alcher';
+  Version := 'v2.1.0';
+
+  inherited;
+
+  RSW.Setup('world_x4206y2306');
+  ScriptBank := @RSObjects.GEBank;
+  CoinArray := [617, 995, 996, 997, 998, 999, 1000, 1001, 1002, 1003, 1004];
+
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
+end;
+
+
+procedure TAlcher.SetupAlchItems;
+var
+  Item: TRSItem;
+  Slot: Int32;
+  ItemString: String;
+begin
+  if not Inventory.Open then
+    Exit;
+
+  for Item in ALCH_ITEMS do
+  begin
+    if Inventory.FindItem(Item, Slot) then
+    begin
+      ItemString := ToStr(Item);
+      case Item of
+        '9282', '9283', '9284', '9285': ItemString := 'Onyx bolts (e)';
+      end;
+
+      Writeln('Found possible item to alch: ', ItemString + '.');
+
+      if ItemString.Contains('noted ') then
+        ItemString := ItemString.After('noted ');
+
+      ActionProfit := ItemInfo.GetHighAlchemyProfit(ItemString);
+      Writeln('Profit per alch: ', ActionProfit, '.');
+
+      if not LossProtection or (ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
+      begin
+        ExtraInfo := ' Current Item: ' +  ItemString + ' for ' + ToStr(ActionProfit) + ' each alch.';
+        AlchItem := Item;
+        Exit;
+      end;
+
+      Writeln('Item is not profitable');
+    end;
+  end;
+
+  TerminateScript('Can''t find items that are worth alching');
+end;
+
+
+function TAlcher.Withdraw(Item: TRSItem): Boolean;
+var
+  InvCount: Int32;
+begin
+  if ToStr(Item) = 'Coins' then
+  begin
+    if BankTab = -1 then
+      BankTab := Bank.FindItemTab('Nature rune');
+
+    for Item in CoinArray do
+    begin
+      InvCount := Inventory.CountItemStack(Item);
+      if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
+      begin
+        WaitUntil(Inventory.CountItemStack(Item) > InvCount, 100, 3000);
+        Break;
+      end;
+    end;
+  end
+  else
+  begin
+    if BankTab = -1 then
+      BankTab := Bank.FindItemTab(Item);
+
+    InvCount := Inventory.CountItemStack(Item);
+    if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
+      WaitUntil(Inventory.CountItemStack(Item) > InvCount, 100, 3000);
+  end;
+
+  if BankEmpty := ((not Result and (InterfaceArea.IsClassicOpen and Bank.IsOpen)) and
+                    not Bank.HasItem(BankTab, Item)) then
+    if CollectEmpty and CollectTimer.IsFinished then
+      CollectEmpty := False;
+end;
+
+function TAlcher.HandleCollectBox: Boolean;
+var
+  ItemArray: TRSItemArray;
+begin
+  if not CollectBox.IsOpen then
+    Exit;
+
+  ItemArray := CoinArray;
+  ItemArray += 'Nature rune';
+
+  if CollectBox.FindItems(ItemArray) then
+  begin
+    if Result := CollectEmpty := CollectBox.CollectToBank then
+      WaitUntil(not CollectBox.FindItems(ItemArray), 100, 3000);
+    BankEmpty := not CollectEmpty;
+  end
+  else
+    CollectEmpty := True;
+
+  CollectTimer.Restart;
+end;
+
+
+
+function TAlcher.ChooseSpell: Boolean;
+begin
+  if not Magic.IsOpen and not Magic.CanActivate(AlchSpell) then
+    Exit;
+  Result := Magic.CastSpell(AlchSpell);
+end;
+
+function TAlcher.MoveItem: Boolean;
+var
+  Slot: Int32;
+begin
+  if Inventory.FindItem(AlchItem, Slot) and (Slot = 11) then
+    Exit;
+
+  Result := Inventory.Drag(Slot, 11);
+end;
+
+function TAlcher.ChooseItem: Boolean;
+var
+  Slot: Int32;
+  Slots: TIntegerArray;
+begin
+    if not Inventory.IsOpen then
+      Exit;
+
+    if ToStr(AlchItem) = '' then
+      Self.SetupAlchItems;
+
+    if Inventory.FindItem(AlchItem, Slot) then
+    begin
+      if Inventory.ItemIsStackable(AlchItem) and (Slot <> 11) then
+      begin
+        if ChooseOption.Open then
+          ChooseOption.Select('Cancel');
+        Self.MoveItem;
+        Exit(False);
+      end;
+
+      if SRL.Dice(99.95) and Inventory.ClickSlot(Slot) then
+      begin
+        if WaitUntil(Magic.IsOpen, 50, SRL.TruncatedGauss(1200, 2000)) then
+        begin
+          TotalActions += 1;
+          TotalProfit += ActionProfit;
+
+          Wait(2800, 3000);
+          Exit(True);
+        end
+        else
+          Wait(600, 800);
+      end
+      else
+      begin
+        Slots := Inventory.GetEmptySlots;
+        Inventory.MouseSlot(Inventory.RandomSlotNearby(Slot, Slots), MOUSE_LEFT);
+        Exit(False);
+      end;
+    end
+    else
+      Self.SetupAlchItems;
+end;
+
+function TAlcher.HandleWarning: Boolean;
+begin
+  if Chat.HasContinue then
+    Chat.ClickContinue();
+  Chat.ClickOption('Cancel the', False);
+
+  if not Magic.Open then
+    Exit;
+
+  if Magic.MouseSpell(AlchSpell, MOUSE_RIGHT) and ChooseOption.IsOpen then
+    ChooseOption.Select('Warnings');
+
+  WaitUntil(Chat.HasContinue, 50, 2000);
+  Chat.ClickContinue();
+  WaitUntil(Chat.ClickOption('Set value', False), 50, 3000);
+  Wait(2000);
+  Result := Chat.AnswerQuery('Set value threshold for', '50000', 1000);
+  WaitUntil(Chat.HasContinue, 50, 2000);
+  Chat.ClickContinue();
+  WaitUntil(Chat.ClickOption('Cancel', False), 50, 3000);
+  Wait(2000);
+end;
+
+
+function TAlcher.Terminate: Boolean; override;
+begin
+  Result := False;
+end;
+
+
+function TAlcher.GetState: EAlcherState;
+begin
+  if ChooseOption.IsOpen then
+    Exit(EAlcherState.CLOSE_CONTEXT)
+
+  else if InterfaceArea.HasInterface then
+  begin
+    if Bank.IsOpen then
+    begin
+      if not Inventory.FindItem('Nature rune') then
+        Exit(EAlcherState.WITHDRAW_NATS)
+      else if not Inventory.FindItems(CoinArray) then
+        Exit(EAlcherState.WITHDRAW_MONEY)
+      else
+        Exit(EAlcherState.CLOSE_INTERFACE);
+    end
+
+    else if CollectBox.IsOpen then
+    begin
+      if CollectEmpty then
+        Exit(EAlcherState.CLOSE_INTERFACE)
+      else
+        Exit(EAlcherState.HANDLE_COLLECT);
+    end
+
+    else
+      Exit(EAlcherState.CLOSE_INTERFACE);
+  end
+
+  else if Chat.HasContinue then
+    Exit(EAlcherState.HANDLE_WARNING)
+
+  else if not RSW.AtTile(ScriptBank^.Tiles, 30) and
+          RSW.AtTile(ScriptBank^.Tiles, 800) then
+    Exit(EAlcherState.WALK_ALCH)
+
+  else if Magic.IsOpen then
+  begin
+    if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
+      TerminateScript('Not on Standard Spell Book')
+    else if Magic.IsSpellSelected(AlchSpell) then
+      Exit(EAlcherState.OPEN_INV_TAB)
+    else if not Magic.CanActivate(AlchSpell) and not Inventory.FindItem('Nature rune') then
+    begin
+      if BankEmpty and CollectEmpty then
+        Exit(EAlcherState.END_SCRIPT)
+      else if BankEmpty then
+        Exit(EAlcherState.OPEN_COLLECT)
+      else
+        Exit(EAlcherState.OPEN_BANK);
+    end
+    else
+      Exit(EAlcherState.CHOOSE_SPELL);
+  end
+
+  else if Inventory.IsOpen then
+  begin
+    if MainScreen.IsUpText('Cast') and MainScreen.IsUpText('>') then
+      Exit(EAlcherState.CHOOSE_ITEM)
+    else
+    begin
+      if Inventory.GetSelectedSlot <> -1 then
+        Exit(EAlcherState.DESELECT_ITEM)
+      else
+        Exit(EAlcherState.OPEN_MAGIC_TAB);
+    end;
+  end
+
+  else
+    Exit(EAlcherState.OPEN_MAGIC_TAB);
+end;
+
+
+procedure TAlcher.Run();
+begin
+  ClearDebug;
+  Self.Init;
+
+  while True do
+  begin
+    State := Self.GetState;
+    Action := ToStr(State);
+    Self.ProcessWhileWaiting;
+
+    case State of
+      EAlcherState.WALK_ALCH: RSW.ActionWebWalk(ERSAction.ALCH, RSW.GetClosestTile(ScriptBank^.Tiles), 10, 0.2);
+
+      EAlcherState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      EAlcherState.WITHDRAW_NATS: Self.Withdraw('Nature rune');
+      EAlcherState.WITHDRAW_MONEY: Self.Withdraw('Coins');
+
+      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
+      EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox;
+      EAlcherState.CLOSE_INTERFACE: InterfaceArea.Close(SRL.Dice(95));
+
+      EAlcherState.CHOOSE_SPELL: Self.ChooseSpell;
+      EAlcherState.CHOOSE_ITEM: Self.ChooseItem;
+      EAlcherState.OPEN_MAGIC_TAB: Magic.Open;
+      EAlcherState.OPEN_INV_TAB: Inventory.Open;
+      EAlcherState.HANDLE_WARNING: Self.HandleWarning;
+      EAlcherState.DESELECT_ITEM: Inventory.MouseSlot(Inventory.GetSelectedSlot, MOUSE_LEFT);
+      EAlcherState.CLOSE_CONTEXT: ChooseOption.Close;
+
+      EAlcherState.END_SCRIPT: Break;
+    end;
+
+    if Self.DoAntiban and not RSClient.IsLoggedIn then
+      Login.LoginPlayer;
+  end;
+
+  if not Self.Terminate then
+    TerminateScript(Name + ' didn''t terminate properly. Stopping execution.');
+end;
+
+var
+  Alcher: TAlcher;
+
+type
+  TAlcherConfig = record(TScriptConfig)
+    AlchSelector: TLabeledCombobox;
+    IgnoreProfit: TLabeledCheckbox;
+  end;
+
+procedure TAlcherConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+  case AlchSelector.Combobox.getItemIndex of
+    0: AlchSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
+    1: AlchSpell := ERSSpell.LOW_LEVEL_ALCHEMY;
+  end;
+
+  LossProtection := IgnoreProfit.Checkbox.getState = cbChecked;
+end;
+
+procedure TAlcherConfig.Setup; override;
+begin
+  inherited;
+
+  with AlchSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Alchemy spell:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetWidth(200);
+    Combobox.setStyle(csDropDownList);
+    Combobox.getItems.Add('High alchemy');
+    Combobox.getItems.Add('Low alchemy');
+    Combobox.setItemIndex(0);
+  end;
+
+
+  with IgnoreProfit do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Loss protection:');
+    SetLeft(RemoteInputState.getLeft + RemoteInputState.GetWidth + 5);
+    SetTop(ScriptSettingsPanel.getHeight - 35);
+    SetEnabled(True);
+  end;
+
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TAlcherConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var
+  AlcherConfig: TAlcherConfig;
+
+{$IFNDEF SCRIPT_CHAIN}
+begin
+  {$IFDEF SCRIPT_GUI}
+  Sync(@AlcherConfig.Run);
+  {$ENDIF}
+  Alcher.Run
+end.
+{$ENDIF}

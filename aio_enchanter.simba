@@ -1,0 +1,524 @@
+{$IFNDEF SCRIPT_CHAIN}
+  {$DEFINE SRL_USE_REMOTEINPUT}
+  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$I SRL/osr.simba}
+  {$I WaspLib/osr.simba}
+
+  begin
+    Login.PlayerIndex  := 0;
+    AntibanEnabled     := True; //Enables most antiban
+    BreaksEnabled      := True; //Enables short breaks
+    SleepEnabled       := True; //Enables sleep breaks
+    RemoteInputEnabled := True; //Enables remote input
+  end;
+{$ENDIF}
+
+var
+  RegularJewel: TRSItem = 'Sapphire ring';
+
+type
+  EEnchanterState = (
+    LEVEL_UP,
+    CLOSE_CONTEXT,
+
+    OPEN_BANK,
+    WITHDRAW_TOOL,
+    WITHDRAW_MATERIAL,
+    DEPOSIT_PRODUCT,
+
+    OPEN_COLLECT,
+    HANDLE_COLLECT,
+    CLOSE_INTERFACE,
+
+    OPEN_MAGIC,
+    OPEN_INVENTORY,
+
+    CAST_SPELL,
+    ENCHANT_JEWEL,
+    CANCEL_SPELL,
+    WAIT_ENCHANT,
+
+    END_SCRIPT
+  );
+
+  TEnchanter = record(TBaseBankScript)
+    State: EEnchanterState;
+
+    Spell: ERSSpell;
+    CosmicRune: TRSItem;
+    EnchantedJewel: TRSItem;
+    Enchanting: Boolean;
+  end;
+
+function TRSXPBar.FindXPDrop: Boolean; override;
+begin
+  if Result := inherited then WL.Activity.Restart;
+end;
+
+procedure TAntiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
+  Antiban.MinZoom := 15;
+  Antiban.MaxZoom := 85;
+end;
+
+
+procedure TEnchanter.SetSpell;
+var
+  ItemString: String := ToStr(RegularJewel);
+begin
+  if ItemString.Contains(['Opal', 'Sapphire']) then
+    Spell := ERSSpell.LVL1_ENCHANT
+  else if ItemString.Contains(['Jade', 'Emerald']) then
+    Spell := ERSSpell.LVL2_ENCHANT
+  else if ItemString.Contains(['Topaz', 'Ruby']) then
+    Spell := ERSSpell.LVL3_ENCHANT
+  else if ItemString.Contains('Diamond') then
+    Spell := ERSSpell.LVL4_ENCHANT
+  else if ItemString.Contains('Dragon') then
+    Spell := ERSSpell.LVL5_ENCHANT
+  else if ItemString.Contains('Onyx') then
+    Spell := ERSSpell.LVL6_ENCHANT
+  else if ItemString.Contains('Zenyte') then
+    Spell := ERSSpell.LVL7_ENCHANT
+end;
+
+procedure TEnchanter.SetEnchantedJewel;
+var
+  ItemString: String := ToStr(RegularJewel);
+begin
+
+  if ItemString.Contains('Opal') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of pursuit'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Dodgy necklace'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Expeditious bracelet'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of bounty';
+  end
+
+  else if ItemString.Contains('Jade') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of returning(5)'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Necklace of passage(5)'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Flamtaer bracelet'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of Chemistry';
+  end
+
+  else if ItemString.Contains('Topaz') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Efaritay''s aid'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Necklace of faith'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Bracelet of slaughter'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Burning amulet(5)';
+  end
+
+  else if ItemString.Contains('Sapphire') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of recoil'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Games necklace(8)'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Bracelet of clay'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of magic';
+  end
+
+  else if ItemString.Contains('Emerald') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of dueling(8)'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Binding necklace'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Castle wars bracelet(3)'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of defence';
+  end
+
+  else if ItemString.Contains('Ruby') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of forging'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Digsite pendant (5)'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Inoculation bracelet'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of strength';
+  end
+
+  else if ItemString.Contains('Diamond') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of life'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Phoenix necklace'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Abyssal bracelet(5)'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of power';
+  end
+
+  else if ItemString.Contains('Dragon') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of wealth'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Skills necklace'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Combat bracelet(4)'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of glory(4)';
+  end
+
+  else if ItemString.Contains('Onyx') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of stone'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Berserker necklace'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Regen bracelet'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of fury';
+  end
+
+  else if ItemString.Contains('Zenyte') then
+  begin
+    if ItemString.Contains('ring') then
+      EnchantedJewel := 'Ring of suffering'
+    else if ItemString.Contains('necklace') then
+      EnchantedJewel := 'Necklace of anguish'
+    else if ItemString.Contains('bracelet') then
+      EnchantedJewel := 'Tormented bracelet'
+    else if ItemString.Contains('amulet') then
+      EnchantedJewel := 'Amulet of torture';
+  end;
+
+
+end;
+
+procedure TEnchanter.Init; override;
+begin
+  Name := 'AIO Enchanter';
+  Version := 'v2.0.1';
+
+  inherited;
+
+  RSW.Setup('world_x4206y2306');
+  ScriptBank := @RSObjects.GEBank;
+
+  ExtraInfo := ' Currently enchanting: ' + RegularJewel + '.';
+
+  CosmicRune := 'Cosmic rune';
+  Self.SetSpell;
+  Self.SetEnchantedJewel;
+
+  ActionProfit := (
+    ItemInfo.GetAveragePrice(EnchantedJewel) -
+    ItemInfo.GetAveragePrice(CosmicRune) + ItemInfo.GetAveragePrice(RegularJewel)
+  );
+
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
+end;
+
+
+function TEnchanter.HasTool: Boolean
+var
+  Slots: TIntegerArray;
+begin
+  Result := Inventory.FindItem(CosmicRune, Slots);
+end;
+
+function TEnchanter.HasMaterial: Boolean
+var
+  Slots: TIntegerArray;
+begin
+  Result := Inventory.FindItem(RegularJewel, Slots);
+end;
+
+function TEnchanter.HasProduct: Boolean
+var
+  Slots: TIntegerArray;
+begin
+  Result := Inventory.FindItem(EnchantedJewel, Slots);
+end;
+
+
+
+
+function TEnchanter.EnchantJewel: Boolean;
+begin
+  if Result := Inventory.ClickItem(RegularJewel) then
+  begin
+    Enchanting := SRL.Dice(20 * BioHash);
+    WaitUntil(Magic.IsOpen, 50, 2000);
+  end;
+end;
+
+function TEnchanter.WaitEnchanting: Boolean;
+begin
+  if Enchanting then
+    Result := Enchanting := Self.HasTool and Self.HasMaterial and XPBar.WaitXPDrop(2000)
+  else
+    Result := Enchanting := XPBar.WaitXPDrop(2000);
+end;
+
+function TEnchanter.DeselectSpell: Boolean;
+var
+  Selected: ERSSpell;
+begin
+  if Magic.IsOpen then
+  begin
+    if (Selected := Magic.GetSelectedSpell) <> ERSSpell.UNKNOWN then
+    begin
+      Magic.MouseSpell(Selected, MOUSE_LEFT);
+      Result := Magic.GetSelectedSpell = ERSSpell.UNKNOWN;
+    end;
+  end
+  else if MainScreen.IsUpText('Cast') then
+  begin
+    ChooseOption.Open;
+    ChooseOption.Select('Cancel');
+  end;
+end;
+
+
+function TEnchanter.Withdraw(Item: TRSItem): Boolean;
+var
+  InvCount: Int32;
+begin
+  if BankTab = -1 then
+    BankTab := Bank.FindItemTab(Item);
+
+  InvCount := Inventory.Count;
+  if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
+     WaitUntil(Inventory.Count > InvCount, 100, 3000);
+
+  if BankEmpty := (not Result and not Bank.HasItem(BankTab, Item)) then
+    if CollectEmpty and CollectTimer.IsFinished then
+      CollectEmpty := False;
+end;
+
+function TEnchanter.Deposit: Boolean;
+var
+  ItemCount: Int32 := Inventory.CountItem(EnchantedJewel);
+begin
+  if Result := Bank.DepositItem(BankTab, [EnchantedJewel, BANK_DEPOSIT_ALL], True) then
+    if WaitUntil(Inventory.CountItem(EnchantedJewel) = 0, 100, 3000) then
+      TotalActions += ItemCount;
+end;
+
+
+function TEnchanter.HandleCollectBox: Boolean;
+var
+  Slots: TIntegerArray;
+begin
+  if CollectBox.FindItems([RegularJewel, CosmicRune], Slots) then
+  begin
+    if Result := CollectEmpty := CollectBox.CollectToBank then
+      WaitUntil(not CollectBox.FindItems([RegularJewel, CosmicRune], Slots), 100, 3000);
+    BankEmpty := not CollectEmpty;
+  end
+  else
+    CollectEmpty := True;
+
+  CollectTimer.Restart;
+end;
+
+
+function TEnchanter.GetState: EEnchanterState;
+begin
+  if WL.Activity.IsFinished then
+    Exit(EEnchanterState.END_SCRIPT)
+
+  else if ChooseOption.IsOpen then
+    Exit(EEnchanterState.CLOSE_CONTEXT)
+
+  else if Chat.LeveledUp then
+  begin
+    Enchanting := False;
+    Exit(EEnchanterState.LEVEL_UP);
+  end
+
+  else if InterfaceArea.HasInterface then
+  begin
+    if Bank.IsOpen then
+    begin
+      if Self.HasProduct then
+        Exit(EEnchanterState.DEPOSIT_PRODUCT)
+
+      else if BankEmpty or (Self.HasTool and Self.HasProduct) then
+        Exit(EEnchanterState.CLOSE_INTERFACE)
+
+      else if not Self.HasTool then
+        Exit(EEnchanterState.WITHDRAW_TOOL)
+
+      else if not Self.HasMaterial then
+        Exit(EEnchanterState.WITHDRAW_MATERIAL);
+    end
+
+    else if CollectBox.IsOpen then
+    begin
+      if CollectEmpty or (Self.HasTool and Self.HasMaterial) then
+        Exit(EEnchanterState.CLOSE_INTERFACE)
+      else
+        Exit(EEnchanterState.HANDLE_COLLECT);
+    end
+
+    else
+      Exit(EEnchanterState.CLOSE_INTERFACE);
+  end
+
+  else if Inventory.IsOpen then
+  begin
+    if Self.HasTool and Self.HasMaterial then
+    begin
+      if MainScreen.IsUpText('>') then
+        Exit(EEnchanterState.ENCHANT_JEWEL)
+      else if Enchanting then
+        Exit(EEnchanterState.WAIT_ENCHANT)
+      else
+        Exit(EEnchanterState.OPEN_MAGIC);
+    end
+
+    else
+    begin
+      if MainScreen.IsUpText('>') then
+        Exit(EEnchanterState.CANCEL_SPELL)
+      if BankEmpty and CollectEmpty then
+        Exit(EEnchanterState.END_SCRIPT)
+      else if BankEmpty then
+        Exit(EEnchanterState.OPEN_COLLECT)
+      else
+        Exit(EEnchanterState.OPEN_BANK);
+    end
+  end
+
+  else if Magic.IsOpen then
+  begin
+    if Enchanting or Magic.IsSpellSelected(SPELL) then
+      Exit(OPEN_INVENTORY)
+    else
+      Exit(CAST_SPELL);
+  end
+  else
+    Exit(EEnchanterState.OPEN_MAGIC);
+
+end;
+
+function TEnchanter.Terminate: Boolean; override;
+begin
+  if inherited then
+    for 0 to 5 do
+      if Result := Bank.WithdrawItem(BankTab, [EnchantedJewel, BANK_WITHDRAW_ALL, True], True) then
+        Break;
+end;
+
+procedure TEnchanter.Run;
+begin
+  ClearDebug;
+  Self.Init;
+
+  while True do
+  begin
+    State := Self.GetState;
+    Action := ToStr(State);
+    Self.ProcessWhileWaiting;
+
+    case State of
+      EEnchanterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      EEnchanterState.WITHDRAW_TOOL: Self.Withdraw(CosmicRune);
+      EEnchanterState.WITHDRAW_MATERIAL: Self.Withdraw(RegularJewel);
+      EEnchanterState.DEPOSIT_PRODUCT: Self.Deposit;
+
+      EEnchanterState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
+      EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox;
+      EEnchanterState.CLOSE_INTERFACE: InterfaceArea.Close(SRL.Dice(95));
+
+      EEnchanterState.WAIT_ENCHANT: Enchanting := XPBar.WaitXPDrop(2000);
+      EEnchanterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(75));
+
+      EEnchanterState.OPEN_MAGIC: Magic.Open;
+      EEnchanterState.OPEN_INVENTORY: Inventory.Open;
+      EEnchanterState.CAST_SPELL: Magic.CastSpell(SPELL);
+      EEnchanterState.ENCHANT_JEWEL: Self.EnchantJewel;
+      EEnchanterState.CANCEL_SPELL: Self.DeselectSpell;
+
+      EEnchanterState.END_SCRIPT: Break;
+    end;
+
+    if Self.DoAntiban and not RSClient.IsLoggedIn then
+      Login.LoginPlayer;
+  end;
+
+  if not Self.Terminate then
+    TerminateScript('aio_enchanter didn''t terminate properly. Stopping execution.');
+end;
+
+var
+  Enchanter: TEnchanter;
+
+type
+  TEnchanterConfig = record(TScriptConfig)
+    JewelSelector: TLabeledEdit;
+  end;
+
+procedure TEnchanterConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+  RegularJewel := JewelSelector.Edit.getText;
+end;
+
+procedure TEnchanterConfig.Setup; override;
+begin
+  inherited;
+
+  with JewelSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Jewel name (must be the exact name):');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetWidth(200);
+    SetText(RegularJewel);
+  end;
+
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TEnchanterConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var
+  EnchanterConfig: TEnchanterConfig;
+
+{$IFNDEF SCRIPT_CHAIN}
+begin
+  {$IFDEF SCRIPT_GUI}
+  Sync(@EnchanterConfig.Run);
+  {$ENDIF}
+  Enchanter.Run
+end.
+{$ENDIF}

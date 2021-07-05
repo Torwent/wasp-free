@@ -1,0 +1,257 @@
+{$DEFINE SRL_USE_REMOTEINPUT}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$I SRL/osr.simba}
+{$I WaspLib/osr.simba}
+
+begin
+  Login.PlayerIndex  := 0;
+  AntibanEnabled     := True; //Enables most antiban
+  BreaksEnabled      := True; //Enables short breaks
+  SleepEnabled       := True; //Enables sleep breaks
+  RemoteInputEnabled := True; //Enables remote input
+end;
+
+type
+  EState = (
+    WAIT_STATE,
+    GET_PLANKS,
+    EXIT_HOUSE,
+    ENTER_HOUSE,
+    BUILD_LARDER,
+    HANDLE_FURNITURE_UI,
+    DESTROY_LARDER,
+    LEVEL_UP,
+    HANDLE_PHIALS_CHAT,
+    HANDLE_LARDER_CHAT
+  );
+
+  TBuilder = record(TBaseWalkerScript)
+    State: EState;
+    POH: TRSWalker;
+
+    BuiltLarder: TRSObject;
+    LarderSpace: TRSObject;
+    LarderIsBuilt: Boolean;
+  end;
+
+procedure TAntiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.CONSTRUCTION, ERSSkill.TOTAL];
+  Antiban.MinZoom := 1;
+  Antiban.MaxZoom := 35;
+end;
+
+procedure TBuilder.Init; override;
+begin
+  Name := 'Phials construction';
+  Version := 'v2.0.0';
+
+  inherited;
+
+  RSW.Setup('world_x3370y3166');
+  POH.Setup('poh');
+
+  BuiltLarder.SetupCommon;
+  BuiltLarder.UpText := ['Larder'];
+  BuiltLarder.Finder.ColorClusters += [CTS2(6916239, 10, 0.33, 1.18), CTS2(4154749, 9, 0.13, 0.65), 150];
+  BuiltLarder.SetupCommon(@RSW, 7, [[3504, 3286], [3504, 3286], [3507, 3290], [3507, 3290]]);
+
+  LarderSpace.SetupCommon;
+  LarderSpace.UpText := ['2 more'];
+  LarderSpace.Finder.ColorClusters += [CTS2(10529472, 16, 0.25, 0.95), CTS2(8884636, 16, 0.16, 0.18), 80];
+  LarderSpace.SetupCommon(@RSW, 7, [[3504, 3286], [3504, 3286], [3507, 3290], [3507, 3290]]);
+
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
+end;
+
+
+function TBuilder.InPOH: Boolean;
+var
+  B: TBox := Minimap.Bounds;
+begin
+  B.X1 += 25;
+  B.Y1 += 25;
+  B.X2 -= 25;
+  B.Y2 -= 25;
+  Result := (SRL.CountColor(CTS0(4286836, 15), B) > 1000) or (SRL.CountColor(CTS0(3625827, 15), B) > 1000);
+end;
+
+
+function TBuilder.EnterHouse: Boolean;
+begin
+  if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 8000);
+    Result := WaitUntil(Self.InPOH, 200, 5000);
+  end;
+end;
+
+function TBuilder.BuildLarder: Boolean;
+begin
+  if LarderSpace.SelectOption(['Build']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 5000);
+    Result := WaitUntil(InterfaceArea.IsClassicOpen, 200, 3000);
+  end;
+end;
+
+function TBuilder.DestroyLarder: Boolean;
+begin
+  if BuiltLarder.SelectOption(['Remove']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 5000);
+    Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
+  end;
+end;
+
+
+
+function TBuilder.GetPlanks: Boolean;
+begin
+  if Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click then
+    Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000)
+  else if RSW.WebWalk(RSW.GetClosestTile(RSNPCs.Phials.Tiles), 8, 0.3) and
+          (Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click) then
+    Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
+end;
+
+function TBuilder.HandleLarderChat: Boolean;
+begin
+  Keyboard.PressKey(VK_1);
+  Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
+  LarderIsBuilt := not Result;
+end;
+
+function TBuilder.HandleFurniture: Boolean;
+begin
+  Keyboard.PressKey(VK_2);
+  Result := LarderIsBuilt := WaitUntil(not InterfaceArea.IsClassicOpen, 100, 3000);
+  if not Result then
+    InterfaceArea.Close(True);
+end;
+
+function TBuilder.GetState: EState;
+var
+  S: String := Chat.GetChatTitle;
+begin
+  if Chat.LeveledUp then
+    Exit(EState.LEVEL_UP)
+
+  else if S.Contains('remove') then
+    Exit(EState.HANDLE_LARDER_CHAT)
+
+  else if S.Contains('Select') then
+    Exit(EState.HANDLE_PHIALS_CHAT)
+
+  else if InterfaceArea.IsClassicOpen then
+    Exit(EState.HANDLE_FURNITURE_UI)
+
+  else if not Self.InPOH then
+  begin
+    if Inventory.IsFull then
+      Exit(EState.ENTER_HOUSE)
+    else
+      Exit(EState.GET_PLANKS);
+  end
+
+  else if Inventory.Count > 4 then
+  begin
+    if LarderIsBuilt then
+      Exit(EState.DESTROY_LARDER)
+    else if not LarderIsBuilt then
+      Exit(EState.BUILD_LARDER)
+    else
+      Writeln('Stuck here?');
+  end
+
+  else if LarderIsBuilt then
+    Exit(EState.DESTROY_LARDER)
+
+  else
+    Exit(EState.EXIT_HOUSE);
+end;
+
+procedure TBuilder.Run;
+begin
+  ClearDebug;
+  Self.Init;
+
+  while True do
+  begin
+    State := Self.GetState;
+    Action := ToStr(State);
+    Self.ProcessWhileWaiting;
+
+    case State of
+      EState.LEVEL_UP: Chat.HandleLevelUp(True);
+      EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat;
+      EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
+      EState.HANDLE_FURNITURE_UI: Self.HandleFurniture;
+
+      EState.EXIT_HOUSE: Options.LeaveHouse;
+      EState.GET_PLANKS: Self.GetPlanks;
+
+      EState.ENTER_HOUSE: Self.EnterHouse;
+      EState.BUILD_LARDER: Self.BuildLarder;
+      EState.DESTROY_LARDER: Self.DestroyLarder;
+
+      EState.WAIT_STATE: Wait(500, 800);
+    end;
+
+    if Self.DoAntiban and not RSClient.IsLoggedIn then Login.LoginPlayer;
+  end;
+end;
+
+var
+  Builder: TBuilder;
+
+type
+  TBuilderConfig = record(TScriptConfig)
+    BuilderInfo: TLabel;
+  end;
+
+procedure TBuilderConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+end;
+
+procedure TBuilderConfig.Setup; override;
+begin
+  inherited;
+
+  with BuilderInfo do
+  begin
+    Init(ScriptSettingsPanel);
+    setParent(ScriptSettingsPanel);
+
+    SetCaption('There''s no settings for this script.' + STR_NEW_LINE +
+               'Only works with a very specific house layout atm.' +
+               STR_NEW_LINE + 'Check discord for more information');
+
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+  end;
+
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TBuilderConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var
+  BuilderConfig: TBuilderConfig;
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  Sync(@BuilderConfig.Run);
+  {$ENDIF}
+  Builder.Run
+end.

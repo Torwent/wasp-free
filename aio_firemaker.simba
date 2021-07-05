@@ -1,0 +1,261 @@
+{$IFNDEF SCRIPT_CHAIN}
+  {$DEFINE SRL_USE_REMOTEINPUT}
+  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$I SRL/osr.simba}
+  {$I WaspLib/osr.simba}
+
+  begin
+    Login.PlayerIndex  := 0;
+    AntibanEnabled     := True; //Enables most antiban
+    BreaksEnabled      := True; //Enables short breaks
+    SleepEnabled       := True; //Enables sleep breaks
+    RemoteInputEnabled := True; //Enables remote input
+  end;
+{$ENDIF}
+
+var
+  Logs: TRSItem = 'Yew logs';
+
+type
+  EBurnerState = (
+    WAIT_STATE,
+    BURN_LOG,
+    OPEN_BANK,
+    WITHDRAW_LOG,
+    WITHDRAW_TOOL,
+    CLOSE_INTERFACE,
+    TELEPORT,
+    WALK_SPOT,
+    LEVEL_UP,
+    CLOSE_CONTEXT,
+    END_SCRIPT
+  );
+
+  TLogBurner = record(TBaseBankScript)
+    State: EBurnerState;
+    NextStartingPoint: TPoint;
+    StartingPoints: TPointArray;
+
+    Tool: TRSBankWithdrawItem;
+    Material: TRSBankWithdrawItem;
+  end;
+
+function TRSXPBar.FindXPDrop: Boolean; override;
+var
+  TPA: TPointArray;
+  Box: TBox;
+begin
+  Box := [Self.X2 - 20, Self.Y2 + 100, Self.X2, Self.Y2 + 155];
+  Result := FindColors(TPA, 16777215, Box);
+
+  if Result then
+    WL.Activity.Restart;
+end;
+
+procedure TAntiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.FIREMAKING, ERSSkill.TOTAL];
+  Antiban.MinZoom := 15;
+  Antiban.MaxZoom := 40;
+end;
+
+procedure TLogBurner.Init; override;
+begin
+  Name := 'AIO Firemaker';
+  Version := 'v2.0.0';
+
+  inherited;
+
+  RSW.Setup('world_x4206y2306');
+  ScriptBank := @RSObjects.VarrockWestBank;
+
+  Tool := ['Tinderbox', 1, False];
+  Material := [Logs, BANK_WITHDRAW_ALL, False];
+
+  StartingPoints := [[4658, 2732], [4658, 2736]];
+  NextStartingPoint := StartingPoints[0];
+
+  RSW.ScreenWalk := True;
+
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
+end;
+
+
+procedure TLogBurner.ChangeStartingPoint;
+begin
+  if NextStartingPoint = StartingPoints[0] then
+    NextStartingPoint := StartingPoints[1]
+  else
+    NextStartingPoint := StartingPoints[0];
+end;
+
+function TLogBurner.Teleport: Boolean;
+begin
+  if Magic.Open and not Magic.CanActivate(ERSSPell.VARROCK_TELEPORT) then
+    RSW.WebWalk(NextStartingPoint, 40, 0.2)
+  else if Magic.CastSpell(ERSSpell.VARROCK_TELEPORT) then
+    Wait(1200);
+
+  Result := WaitUntil(RSW.AtTile(NextStartingPoint, 40), 100, 9000);
+
+  if Result then
+    Wait(1200);
+end;
+
+function TLogBurner.WalkNextPoint: Boolean;
+begin
+  if Result := RSW.WebWalk(NextStartingPoint) then
+     Self.ChangeStartingPoint;
+end;
+
+function TLogBurner.Withdraw(Item: TRSBankWithdrawItem): Boolean;
+var
+  UseQuantityButton: Boolean := Item.Quantity <> 1;
+  InvCount: Int32;
+begin
+  if BankTab = -1 then
+    BankTab := Bank.FindItemTab(Item.Item);
+
+  InvCount := Inventory.Count;
+  if Result := Bank.WithdrawItem(BankTab, Item, UseQuantityButton) then
+    WaitUntil(Inventory.Count > InvCount, 100, 3000);
+
+end;
+
+function TLogBurner.BurnLogs: Boolean;
+begin
+  if Inventory.Use(Tool.Item, Material.Item) then
+    Result := WaitUntil(XPBar.FindXPDrop, 50, 3000);
+
+  if Result then
+    WaitUntil(not XPBar.FindXPDrop, 50, 3000);
+end;
+
+
+function TLogBurner.GetState: EBurnerState;
+begin
+  if WL.Activity.IsFinished then
+    Exit(EBurnerState.END_SCRIPT)
+
+  else if ChooseOption.IsOpen then
+    Exit(EBurnerState.CLOSE_CONTEXT)
+
+  else if Chat.LeveledUp then
+    Exit(EBurnerState.LEVEL_UP)
+
+  else if InterfaceArea.HasInterface then
+  begin
+
+    if Bank.IsOpen then
+    begin
+      if Inventory.FindItem(Tool.Item) and Inventory.FindItem(Material.Item) then
+        Exit(EBurnerState.CLOSE_INTERFACE)
+      else if not Inventory.FindItem(Tool.Item) then
+        Exit(EBurnerState.WITHDRAW_TOOL)
+      else if not Inventory.FindItem(Material.Item) then
+        Exit(EBurnerState.WITHDRAW_LOG);
+    end
+
+    else
+      Exit(EBurnerState.CLOSE_INTERFACE);
+  end
+
+  if Inventory.FindItem(Tool.Item) and Inventory.FindItem(Material.Item) then
+  begin
+    if RSW.AtTile(CurrentBank^.Tiles, 10) then
+      Exit(EBurnerState.TELEPORT)
+    else if Inventory.IsFull and not RSW.AtTile(NextStartingPoint, 4) then
+      Exit(EBurnerState.WALK_SPOT)
+    else
+      Exit(EBurnerState.BURN_LOG);
+  end
+
+  else
+    Exit(EBurnerState.OPEN_BANK);
+end;
+
+procedure TLogBurner.Run;
+begin
+  ClearDebug;
+  Self.Init;
+
+  while True do
+  begin
+    State := Self.GetState;
+    Action := ToStr(State);
+    Self.ProcessWhileWaiting;
+
+    case State of
+      EBurnerState.WAIT_STATE: Wait(800, 850);
+      EBurnerState.BURN_LOG: Self.BurnLogs;
+      EBurnerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      EBurnerState.WITHDRAW_LOG: Self.Withdraw(Material);
+      EBurnerState.WITHDRAW_TOOL: Self.Withdraw(Tool);
+      EBurnerState.CLOSE_INTERFACE: InterfaceArea.Close(True);
+      EBurnerState.TELEPORT: Self.Teleport;
+      EBurnerState.WALK_SPOT: Self.WalkNextPoint;
+      EBurnerState.LEVEL_UP: Chat.HandleLevelUp(True);
+      EBurnerState.CLOSE_CONTEXT: ChooseOption.Close;
+      EBurnerState.END_SCRIPT: Break;
+    end;
+
+    Antiban.DismissRandom;
+    if Self.DoAntiban and not RSClient.IsLoggedIn then
+      Login.LoginPlayer;
+  end;
+end;
+
+var
+  LogBurner: TLogBurner;
+
+
+type
+  TBurnerConfig = record(TScriptConfig)
+    LogSelector: TLabeledEdit;
+  end;
+
+procedure TBurnerConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+  Logs := LogSelector.Edit.getText;
+end;
+
+procedure TBurnerConfig.Setup; override;
+begin
+  inherited;
+
+  with LogSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Logs name (must be the exact name):');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetWidth(200);
+    SetText(Logs);
+  end;
+
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TBurnerConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var
+  BurnerConfig: TBurnerConfig;
+
+{$IFNDEF SCRIPT_CHAIN}
+begin
+  {$IFDEF SCRIPT_GUI}
+  Sync(@BurnerConfig.Run);
+  {$ENDIF}
+  LogBurner.Run
+end.
+{$ENDIF}
