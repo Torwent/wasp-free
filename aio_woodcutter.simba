@@ -37,7 +37,7 @@ type
     WALK_SPOT,
     WAIT_STATE,
 
-    EQUIP_LUMBERJACK,
+    EQUIP_GEAR,
     PICKUP_NEST,
     LEVEL_UP,
     USE_SPEC,
@@ -57,10 +57,10 @@ type
     RSTree: PRSObject;
     TreeTimerMultiplier: Int32;
 
-    AxeType: TCTS2Color;
-    AxeShift: Int32;
+    ToolType: TCTS2Color;
+    ToolShift: Int32;
 
-    LumberJackOutfit: TRSItemArray;
+    GearOutfit: TRSItemArray;
     Plank: TRSItem;
     PlankPrice: Int32;
     SawmillString: String;
@@ -156,14 +156,11 @@ end;
 procedure TWoodcutter.SetupBank;
 begin
 
-  RSTree^.Filter.Walker := False;
-
   case BankLocation of
     WC_GUILD:
       begin
         RSW.Setup('zeah_x1564y2293');
         ScriptBank := @RSObjects.WCGuildBank;
-        RSTree^.Filter.Walker := True;
         UseBank := True;
       end;
 
@@ -192,7 +189,6 @@ begin
       begin
         RSW.Setup('world_x3953y2363');
         ScriptBank := @RSObjects.EdgevilleBank;
-        RSTree^.Filter.Walker := True;
         UseBank := True;
       end;
 
@@ -215,65 +211,66 @@ begin
 end;
 
 
-procedure TWoodcutter.SetupAxe;
+procedure TWoodcutter.SetupTool;
 begin
   if not Equipment.Open then
     Exit;
 
-  AxeShift := 30;
+  ToolShift := 30;
   if Equipment.FindItem('Crystal axe') or  Equipment.FindItem('Crystal axe (inactive)') then
   begin
-    AxeShift := 110;
-    AxeType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
   end
   else if Equipment.FindItem('Infernal axe') then
   begin
-    AxeShift := 110;
-    AxeType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
   end
   else if Equipment.FindItem('3rd age axe') then
   begin
-    AxeShift := 110;
-    AxeType := CTS2(397665, 9, 0.16, 1.39);
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39);
   end
   if Equipment.FindItem('Dragon axe') then
   begin
-    AxeShift := 110;
-    AxeType := CTS2(397665, 9, 0.16, 1.39);
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39);
   end
   else if Equipment.FindItem('Gilded axe') then
-    AxeType := CTS2(1019842, 14, 0.02, 0.63)
+    ToolType := CTS2(1019842, 14, 0.02, 0.63)
   else if Equipment.FindItem('Rune axe') then
-    AxeType := CTS2(6050622, 12, 0.10, 0.11)
+    ToolType := CTS2(6050622, 12, 0.10, 0.11)
   else if Equipment.FindItem('Adamant axe') then
-    AxeType := CTS2(3951419, 11, 0.13, 0.16)
+    ToolType := CTS2(3951419, 11, 0.13, 0.16)
   else if Equipment.FindItem('Mithril axe') then
-    AxeType := CTS2(4534853, 17, 1.11, 0.34)
+    ToolType := CTS2(4534853, 17, 1.11, 0.34)
   else if Equipment.FindItem('Black axe') then
-    AxeType := CTS2(1118485, 1, 0.01, 0.01)
+    ToolType := CTS2(1118485, 1, 0.01, 0.01)
   else if Equipment.FindItem('Steel axe') then
-    AxeType := CTS2(6711151, 17, 0.11, 0.07)
+    ToolType := CTS2(6711151, 17, 0.11, 0.07)
   else if Equipment.FindItem('Iron axe') then
-    AxeType := CTS2(4671309, 11, 0.28, 0.09)
+    ToolType := CTS2(4671309, 11, 0.28, 0.09)
   else if Equipment.FindItem('Bronze axe') then
-    AxeType := CTS2(1979716, 9, 0.10, 0.24);
+    ToolType := CTS2(1979716, 9, 0.10, 0.24);
 end;
 
 procedure TWoodcutter.Init; override;
 begin
   Name := 'AIO Woodcutter';
-  Version := 'v2.0.0';
+  Version := 'v2.0.5';
 
   inherited;
 
   Self.SetupTree;
   Self.SetupBank;
 
-  LumberJackOutfit := [
+  GearOutfit := [
     'Lumberjack hat',
     'Lumberjack top',
     'Lumberjack legs',
-    'Lumberjack boots'
+    'Lumberjack boots',
+    'Strung rabbit foot'
   ];
 
   if not RSClient.IsLoggedIn then
@@ -281,7 +278,7 @@ begin
 
   Options.SetZoomLevel(SRL.TruncatedGauss(35, 75));
 
-  Self.SetupAxe;
+  Self.SetupTool;
 end;
 
 
@@ -290,6 +287,16 @@ begin
   if Result := inherited then WL.Activity.Restart;
 end;
 
+
+function TWoodcutter.GetToolShift: Int32;
+begin
+  if MM2MS.ZoomLevel > -1 then
+    Result := Round(ToolShift * MM2MS.ZoomLevel / 50)
+  else
+    Result := ToolShift;
+end;
+
+
 function TWoodcutter.CutTree: Boolean;
 begin
   Result := Woodcutting := RSTree^.Click;
@@ -297,29 +304,29 @@ begin
     Wait(800, 1200);
 end;
 
-function TWoodcutter.HasLumberjack: Boolean;
+function TWoodcutter.HasGear: Boolean;
 var
   Item: TRSItem;
 begin
-  for Item in LumberJackOutfit do
+  for Item in GearOutfit do
     if Inventory.FindItem(Item) then
       Exit(True);
 
   Result := False;
 end;
 
-function TWoodcutter.EquipLumberjack: Boolean;
+function TWoodcutter.EquipGear: Boolean;
 var
   Item: TRSItem;
 begin
-  for Item in LumberJackOutfit do
+  for Item in GearOutfit do
     if Inventory.ClickItem(Item) then
       Wait(200, 300);
 
-  Result := not Self.HasLumberjack;
+  Result := not Self.HasGear;
 end;
 
-function TWoodcutter.DropLogs: Boolean;
+function TWoodcutter.DropItems: Boolean;
 var
   InvCount: Int32 := 28;
 begin
@@ -397,7 +404,7 @@ begin
   B.Y1 -= 30;
   B.X2 += 40;
   B.Y2 += 15;
-  Result := Woodcutting := SRL.IsColorAnimating(AxeType, B, AxeShift, 350, 10 * TreeTimerMultiplier)
+  Result := Woodcutting := SRL.IsColorAnimating(ToolType, B, Self.GetToolShift, 350, 10 * TreeTimerMultiplier)
 end;
 
 function TWoodcutter.WaitCutting: Boolean;
@@ -431,8 +438,8 @@ begin
       Exit(EWoodcutterState.CLOSE_INTERFACE);
   end
 
-  else if Self.HasLumberjack then
-    Exit(EWoodcutterState.EQUIP_LUMBERJACK)
+  else if Self.HasGear then
+    Exit(EWoodcutterState.EQUIP_GEAR)
 
   else if Inventory.IsFull then
   begin
@@ -484,13 +491,13 @@ begin
       EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSW.GetClosestTile(RSTree^.Tiles), 5, 0.2);
       EWoodcutterState.WAIT_STATE: Self.WaitCutting;
       EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(70));
-      EWoodcutterState.EQUIP_LUMBERJACK: Self.EquipLumberjack;
+      EWoodcutterState.EQUIP_GEAR: Self.EquipGear;
       EWoodcutterState.USE_SPEC: Minimap.EnableSpec(100);
       EWoodcutterState.PICKUP_NEST: Self.PickNest;
       EWoodcutterState.CUT_TREE: Self.CutTree;
       EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill;
       EWoodcutterState.HANDLE_MAKE: Self.MakePlanks;
-      EWoodcutterState.DROP_ITEMS: Self.DropLogs;
+      EWoodcutterState.DROP_ITEMS: Self.DropItems;
       EWoodcutterState.END_SCRIPT: Break;
     end;
 
@@ -500,7 +507,7 @@ begin
 end;
 
 var
-  PowerCutter: TWoodcutter;
+  Woodcutter: TWoodcutter;
 
 type
   TCutterConfig = record(TScriptConfig)
@@ -703,5 +710,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@CutterConfig.Run);
   {$ENDIF}
-  PowerCutter.Run
+  Woodcutter.Run
 end.
