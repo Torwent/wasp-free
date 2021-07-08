@@ -1,0 +1,577 @@
+{$DEFINE SRL_USE_REMOTEINPUT}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$I SRL/osr.simba}
+{$I WaspLib/osr.simba}
+
+begin
+  Login.PlayerIndex  := 0;
+  AntibanEnabled     := True; //Enables most antiban
+  BreaksEnabled      := True; //Enables short breaks
+  SleepEnabled       := True; //Enables sleep breaks
+  RemoteInputEnabled := True; //Enables remote input
+end;
+
+type
+  ERSBank = (
+    POWER_MINE, VARROCK_EAST, VARROCK_WEST,
+    CRAFT_GUILD, MINING_GUILD
+  );
+
+  ERSRock = (
+    CLAY, TIN, COPPER, IRON, SILVER, COAL, GOLD,
+    MITHRIL, ADAMANTITE, RUNITE, AMETHYST
+  );
+
+var
+  CurrentRock: ERSRock := ERSRock.IRON;
+  BankLocation: ERSBank := ERSBank.POWER_MINE;
+
+type
+  EMinerState = (
+    OPEN_BANK,
+    DEPOSIT_ITEMS,
+    CLOSE_INTERFACE,
+
+    WALK_SPOT,
+    WAIT_STATE,
+
+    EQUIP_GEAR,
+    LEVEL_UP,
+    USE_SPEC,
+    MINE_ROCK,
+
+    DROP_ITEMS,
+
+    END_SCRIPT
+  );
+
+  TMiner = record(TBaseBankScript)
+    State: EMinerState;
+
+    RSRock: PRSObject;
+    RockTimerMultiplier: Int32;
+
+    ToolType: TCTS2Color;
+    ToolShift: Int32;
+
+    ProspectorOutfit: TRSItemArray;
+    BankList: TRSItemArray;
+    DropList: TRSItemArray;
+
+    Mining: Boolean;
+    UseBank: Boolean;
+  end;
+
+procedure TAntiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.MINING, ERSSkill.TOTAL];
+  Antiban.MinZoom := 10;
+  Antiban.MaxZoom := 75;
+end;
+
+
+procedure TMiner.SetupRock;
+begin
+  RockTimerMultiplier := 1;
+
+  case CurrentRock of
+    ERSRock.CLAY:       RSRock := @RSObjects.ClayRock;
+    ERSRock.TIN:        RSRock := @RSObjects.TinRock;
+    ERSRock.COPPER:     RSRock := @RSObjects.CopperRock;
+    ERSRock.IRON:       RSRock := @RSObjects.IronRock;
+    ERSRock.SILVER:     RSRock := @RSObjects.SilverRock;
+    ERSRock.COAL:       RSRock := @RSObjects.CoalRock;
+    ERSRock.GOLD:       RSRock := @RSObjects.GoldRock;
+    ERSRock.MITHRIL:    RSRock := @RSObjects.MithrilRock;
+    ERSRock.ADAMANTITE: RSRock := @RSObjects.AdamantiteRock;
+    ERSRock.RUNITE:     RSRock := @RSObjects.RuniteRock;
+    ERSRock.AMETHYST:   RSRock := @RSObjects.AmethystRock;
+  end;
+
+  if Ord(CurrentRock) >= Ord(ERSRock.SILVER) then
+    RockTimerMultiplier += 1;
+
+  if Ord(CurrentRock) >= Ord(ERSRock.COAL) then
+    RockTimerMultiplier += 2;
+
+  if Ord(CurrentRock) >= Ord(ERSRock.MITHRIL) then
+    RockTimerMultiplier += 2;
+
+  if Ord(CurrentRock) >= Ord(ERSRock.ADAMANTITE) then
+    RockTimerMultiplier += 2;
+
+  if Ord(CurrentRock) >= Ord(ERSRock.RUNITE) then
+    RockTimerMultiplier += 2;
+
+  DropList := [
+    'Clay', 'Tin ore', 'Copper ore',
+    'Iron ore', 'Silver ore', 'Gold ore'
+  ];
+
+  BankList := DropList;
+
+  BankList += 'Coal ore';
+  BankList += 'Mithril ore';
+  BankList += 'Adamantite ore';
+  BankList += 'Amethyst';
+  BankList += 'Unidentified minerals';
+
+  BankList += 'Clue geode (beginner)';
+  BankList += 'Clue geode (easy)';
+  BankList += 'Clue geode (medium)';
+  BankList += 'Clue geode (hard)';
+  BankList += 'Clue geode (elite)';
+
+  BankList += 'Clue scroll (beginner)';
+  BankList += 'Clue scroll (easy)';
+  BankList += 'Clue scroll (medium)';
+  BankList += 'Clue scroll (hard)';
+  BankList += 'Clue scroll (elite)';
+end;
+
+procedure TMiner.SetupBank;
+begin
+
+  RSRock^.Filter.Walker := False;
+
+  case BankLocation of
+    MINING_GUILD:
+      begin
+        RSW.Setup('world_x2708y497');
+        ScriptBank := @RSObjects.MiningGuildBank;
+        UseBank := True;
+      end;
+
+    CRAFT_GUILD:
+      begin
+        RSW.Setup('world_x3370y3166');
+        ScriptBank := @RSObjects.CraftGuildBank;
+        UseBank := True;
+      end;
+
+    VARROCK_EAST:
+      begin
+        RSW.Setup('world_x3953y2363');
+        ScriptBank := @RSObjects.VarrockEastBank;
+        UseBank := True;
+      end;
+
+    VARROCK_WEST:
+      begin
+        RSW.Setup('world_x3953y2363');
+        ScriptBank := @RSObjects.VarrockWestBank;
+        UseBank := True;
+      end;
+
+    POWER_MINE: UseBank := False;
+  end;
+end;
+
+
+procedure TMiner.SetupTool;
+begin
+  if not Equipment.Open then Exit;
+
+  ToolShift := 30;
+  if Equipment.FindItem('Crystal pickaxe') or  Equipment.FindItem('Crystal axe (inactive)') then
+  begin
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+  end
+  else if Equipment.FindItem('Infernal pickaxe') then
+  begin
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+  end
+  else if Equipment.FindItem('3rd age pickaxe') then
+  begin
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39);
+  end
+  if Equipment.FindItem('Dragon pickaxe') then
+  begin
+    ToolShift := 110;
+    ToolType := CTS2(397665, 9, 0.16, 1.39);
+  end
+  else if Equipment.FindItem('Gilded pickaxe') then
+    ToolType := CTS2(1019842, 14, 0.02, 0.63)
+  else if Equipment.FindItem('Rune pickaxe') then
+    ToolType := CTS2(6050622, 12, 0.10, 0.11)
+  else if Equipment.FindItem('Adamant pickaxe') then
+    ToolType := CTS2(3951419, 11, 0.13, 0.16)
+  else if Equipment.FindItem('Mithril pickaxe') then
+    ToolType := CTS2(4534853, 17, 1.11, 0.34)
+  else if Equipment.FindItem('Black pickaxe') then
+    ToolType := CTS2(1118485, 1, 0.01, 0.01)
+  else if Equipment.FindItem('Steel pickaxe') then
+    ToolType := CTS2(6711151, 17, 0.11, 0.07)
+  else if Equipment.FindItem('Iron pickaxe') then
+    ToolType := CTS2(4671309, 11, 0.28, 0.09)
+  else if Equipment.FindItem('Bronze pickaxe') then
+    ToolType := CTS2(1979716, 9, 0.10, 0.24);
+end;
+
+procedure TMiner.Init; override;
+begin
+  Name := 'AIO Miner';
+  Version := 'v2.0.0';
+
+  inherited;
+
+  Self.SetupRock;
+  Self.SetupBank;
+
+  ProspectorOutfit := [
+    'Prospector helmet',
+    'Prospector jacket',
+    'Prospector legs',
+    'Prospector boots',
+    'Varrock armour 1',
+    'Varrock armour 2',
+    'Varrock armour 3',
+    'Varrock armour 4',
+    'Mining gloves',
+    'Superior mining gloves',
+    'Expert mining gloves',
+    'Mining cape',
+    'Mining cape(t)',
+    'Elven signet',
+    'Celestial ring',
+    'Celestial signet'
+  ];
+
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  Self.SetupTool;
+end;
+
+
+function TRSXPBar.FindXPDrop: Boolean; override;
+begin
+  if Result := inherited then WL.Activity.Restart;
+end;
+
+function TMiner.GetToolShift: Int32;
+begin
+  if MM2MS.ZoomLevel > -1 then
+    Result := Round(ToolShift * MM2MS.ZoomLevel / 50)
+  else
+    Result := ToolShift;
+end;
+
+function TMiner.MineRock: Boolean;
+begin
+  Result := Mining := RSRock^.Click or RSRock^.WalkClick;
+  if Result then Wait(800, 1200);
+end;
+
+function TMiner.HasGear: Boolean;
+var
+  Item: TRSItem;
+begin
+  for Item in ProspectorOutfit do
+    if Inventory.FindItem(Item) then
+      Exit(True);
+
+  Result := False;
+end;
+
+function TMiner.EquipGear: Boolean;
+var
+  Item: TRSItem;
+begin
+  for Item in ProspectorOutfit do
+    if Inventory.ClickItem(Item) then
+      Wait(200, 300);
+
+  Result := not Self.HasGear;
+end;
+
+function TMiner.DropItems: Boolean;
+var
+  InvCount: Int32 := 28;
+begin
+  Result := Inventory.ShiftDrop(DropList, Inventory.RandomPattern);
+
+  TotalActions += (InvCount - Inventory.Count);
+end;
+
+
+
+function TSRL.GetColorPixelShift(Color: TCTS2Color; Area: TBox; WaitTime: UInt32; out XPDrop: Boolean): Int32; overload;
+var
+  Before, After: Int32;
+  TPA: TPointArray;
+  ATPA: T2DPointArray;
+  MaxTime: UInt64;
+begin
+  MaxTime := GetTickCount + WaitTime;
+
+  if WaitUntil((SRL.FindColors(TPA, Color, Area) > 0) or (XPDrop := XPBar.FindXPDrop), 100, WaitTime) then
+  begin
+    if XPDrop then
+      Exit;
+
+    ATPA := TPA.Cluster(2);
+    TPA := ATPA.Biggest;
+    Area := TPA.Bounds;
+  end
+  else
+    Exit;
+
+  Before := BitmapFromClient(Area);
+  Wait(MaxTime - GetTickCount);
+  After := BitmapFromClient(Area);
+  Result := CalculatePixelShift(Before, After, [0, 0, (Area.X2 - Area.X1), (Area.Y2 - Area.Y1)]);
+  FreeBitmap(Before);
+  FreeBitmap(After);
+end;
+
+
+function TSRL.IsColorAnimating(Color: TCTS2Color; Area:TBox; Shift, WaitTime:UInt32; Iter:UInt32 = 1): Boolean; override;
+var
+  i: Int32;
+  XPDrop: Boolean;
+begin
+  for i := 1 to Iter do
+  begin
+    if Inventory.IsFull or XPDrop then
+      Exit(False)
+
+    else if Self.GetColorPixelShift(Color, Area, WaitTime, XPDrop) > Shift then
+      Exit(True);
+  end;
+end;
+
+function TMiner.IsMining: Boolean;
+var
+  B: TBox := MainScreen.GetPlayerBox;
+begin
+  B.X1 -= 40;
+  B.Y1 -= 30;
+  B.X2 += 40;
+  B.Y2 += 15;
+  Result := Mining := SRL.IsColorAnimating(ToolType, B, Self.GetToolShift, 350, 10 * RockTimerMultiplier)
+end;
+
+function TMiner.WaitMining: Boolean;
+begin
+  if Result := Self.IsMining then WL.Activity.Restart;
+end;
+
+function TMiner.GetState: EMinerState;
+begin
+  if XPBar.FindXPDrop then
+    Exit(EMinerState.WAIT_STATE)
+
+  else if WL.Activity.IsFinished then
+    Exit(EMinerState.END_SCRIPT)
+
+  else if Chat.LeveledUp then
+  begin
+    Mining := False;
+    Exit(EMinerState.LEVEL_UP);
+  end
+
+  else if InterfaceArea.HasInterface then
+  begin
+    if Bank.IsOpen and Inventory.FindItems(BankList) then
+      Exit(EMinerState.DEPOSIT_ITEMS)
+    else
+      Exit(EMinerState.CLOSE_INTERFACE);
+  end
+
+  else if Self.HasGear then
+    Exit(EMinerState.EQUIP_GEAR)
+
+  else if Inventory.IsFull then
+  begin
+    Mining := False;
+
+    if not UseBank then
+      Exit(EMinerState.DROP_ITEMS)
+
+    else
+      Exit(EMinerState.OPEN_BANK);
+  end
+
+  else if Mining then
+    Exit(EMinerState.WAIT_STATE)
+
+  else if UseBank and not RSW.AtTile(RSRock^.Tiles, 15) then
+    Exit(EMinerState.WALK_SPOT)
+
+  else if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
+    Exit(EMinerState.USE_SPEC)
+
+  else
+    Exit(EMinerState.MINE_ROCK);
+end;
+
+procedure TMiner.Run;
+begin
+  ClearDebug;
+  Self.Init;
+
+  while True do
+  begin
+    State := Self.GetState;
+    Action := ToStr(State);
+    ExtraInfo := ' Bank: ' + ToStr(UseBank);
+    Self.ProcessWhileWaiting;
+
+    case State of
+      EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      EMinerState.DEPOSIT_ITEMS: Bank.DepositItems(BankTab, BankList, True);
+      EMinerState.CLOSE_INTERFACE: InterfaceArea.Close(True);
+      EMinerState.WALK_SPOT: RSW.WebWalk(RSW.GetClosestTile(RSRock^.Tiles), 5, 0.2);
+      EMinerState.WAIT_STATE: Self.WaitMining;
+      EMinerState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(70));
+      EMinerState.EQUIP_GEAR: Self.EquipGear;
+      EMinerState.USE_SPEC: Minimap.EnableSpec(100);
+      EMinerState.MINE_ROCK: Self.MineRock;
+      EMinerState.DROP_ITEMS: Self.DropItems;
+      EMinerState.END_SCRIPT: Break;
+    end;
+
+    if Self.DoAntiban and not RSClient.IsLoggedIn then
+      Login.LoginPlayer;
+  end;
+end;
+
+var Miner: TMiner;
+
+type
+  TMinerConfig = record(TScriptConfig)
+    RockSelector: TLabeledCombobox;
+    BankSelector: TLabeledCombobox;
+  end;
+
+procedure TMinerConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+  CurrentRock := ERSRock(RockSelector.Combobox.getItemIndex);
+
+  case BankSelector.Combobox.getText of
+    'Power mine (mine and drop)': BankLocation := ERSBank.POWER_MINE;
+    'P2P Mining Guild':           BankLocation := ERSBank.MINING_GUILD;
+    'Crafting guild':             BankLocation := ERSBank.CRAFT_GUILD;
+    'Varrock west':               BankLocation := ERSBank.VARROCK_WEST;
+    'Varrock east':               BankLocation := ERSBank.VARROCK_EAST;
+  end;
+end;
+
+
+procedure TMinerConfig.RockSelectorOnChange(Sender: TObject);
+begin
+  BankSelector.Clear;
+
+  case ERSRock(RockSelector.Combobox.getItemIndex) of
+    ERSRock.CLAY:
+      begin
+        BankSelector.AddItem('Power mine (mine and drop)');
+        BankSelector.AddItem('Crafting guild');
+        BankSelector.AddItem('Varrock west');
+      end;
+
+    ERSRock.TIN:
+      begin
+        BankSelector.AddItem('Power mine (mine and drop)');
+        BankSelector.AddItem('Varrock east');
+        BankSelector.AddItem('Varrock west');
+      end;
+
+    ERSRock.COPPER:
+      begin
+        BankSelector.AddItem('Power mine (mine and drop)');
+        BankSelector.AddItem('Varrock east');
+      end;
+
+    ERSRock.IRON:
+      begin
+        BankSelector.AddItem('Power mine (mine and drop)');
+        BankSelector.AddItem('P2P Mining Guild');
+        BankSelector.AddItem('Varrock east');
+        BankSelector.AddItem('Varrock west');
+      end;
+
+    ERSRock.SILVER:
+      begin
+        BankSelector.AddItem('Power mine (mine and drop)');
+        BankSelector.AddItem('Crafting guild');
+        BankSelector.AddItem('Varrock west');
+      end;
+
+    ERSRock.GOLD:
+      begin
+        BankSelector.AddItem('Power mine (mine and drop)');
+        BankSelector.AddItem('Crafting guild');
+      end;
+
+    else
+      BankSelector.AddItem('P2P Mining Guild');
+
+  end;
+
+  BankSelector.SetItemIndex(0);
+end;
+
+procedure TMinerConfig.Setup; override;
+begin
+  inherited;
+
+  with RockSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Rock type:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetWidth(200);
+    Combobox.setStyle(csDropDownList);
+    AddItem('Clay');
+    AddItem('Tin');
+    AddItem('Copper');
+    AddItem('Iron');
+    AddItem('Silver');
+    AddItem('Coal');
+    AddItem('Gold');
+    AddItem('Mithril');
+    AddItem('Adamantite');
+    AddItem('Runite (doesn''t hop worlds)');
+    AddItem('Amethyst');
+    Combobox.setItemIndex(Ord(CurrentRock));
+    Combobox.SetOnChange(@Self.RockSelectorOnChange);
+  end;
+
+  with BankSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Bank location:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 45);
+    SetWidth(RockSelector.GetWidth);
+    Combobox.setStyle(csDropDownList);
+  end;
+
+  Self.RockSelectorOnChange(BankSelector.Combobox);
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TMinerConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var MinerConfig: TMinerConfig;
+
+begin
+  {$IFDEF SCRIPT_GUI}
+    Sync(@MinerConfig.Run);
+  {$ENDIF}
+  Miner.Run
+end.
