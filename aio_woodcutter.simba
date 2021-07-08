@@ -409,8 +409,7 @@ end;
 
 function TWoodcutter.WaitCutting: Boolean;
 begin
-  if Result := Self.IsCutting then
-    WL.Activity.Restart;
+  if Result := Self.IsCutting then WL.Activity.Restart;
 end;
 
 function TWoodcutter.GetState: EWoodcutterState;
@@ -464,7 +463,7 @@ begin
   else if Self.CheckNest then
     Exit(EWoodcutterState.PICKUP_NEST)
 
-  else if (Minimap.GetSpecLevel = 100) and Minimap.IsSpecWeapon then
+  else if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
     Exit(EWoodcutterState.USE_SPEC)
 
   else
