@@ -14,7 +14,7 @@
 {$ENDIF}
 
 var
-  RegularJewel: TRSItem = 'Sapphire ring';
+  RegularJewel: TRSItem = 'Ruby necklace';
 
 type
   EEnchanterState = (
