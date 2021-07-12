@@ -13,8 +13,12 @@
   end;
 {$ENDIF}
 
+type
+  ERSGlassItem = (BEER, LANTERN, LAMP, VIAL,
+                  FISHBOWL, ORB, LENS, BULB, BEST);
+
 var
-  GlassItem: TRSItem = 'Empty fishbowl';
+  CurrentGlass: ERSGlassItem = ERSGlassItem.ORB;
 
 type
   EBlowerState = (
@@ -72,7 +76,17 @@ begin
   else X_Number := Random(27, 9999);
   Material := ['Molten glass', X_Number, False];
 
-  Product := [GlassItem, X_Number];
+  case CurrentGlass of
+    ERSGlassItem.BEER:     Product := ['Beer glass', X_Number];
+    ERSGlassItem.LANTERN:  Product := ['Empty candle lantern', X_Number];
+    ERSGlassItem.LAMP:     Product := ['Empty oil lamp', X_Number];
+    ERSGlassItem.VIAL:     Product := ['Vial', X_Number];
+    ERSGlassItem.FISHBOWL: Product := ['Empty fishbowl', X_Number];
+    ERSGlassItem.ORB:      Product := ['Unpowered orb', X_Number];
+    ERSGlassItem.LENS:     Product := ['Lantern lens', X_Number];
+    ERSGlassItem.BULB:     Product := ['Empty light orb', X_Number];
+  end;
+
 end;
 
 procedure TBlower.Init; override;
@@ -89,7 +103,7 @@ begin
 
   Self.SetupItems;
 
-  ExtraInfo := 'Blowing item: ' + GlassItem + '.';
+  ExtraInfo := 'Blowing item: ' + Product.Item + '.';
 
   ProductCost := ItemInfo.GetAveragePrice(Material.Item);
 
@@ -99,7 +113,10 @@ begin
   );
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  CurrentLevel := Stats.GetCurrentLevel(ERSSkill.CRAFTING);
 end;
+
 
 
 function TBlower.HasRandomItem: Boolean;
@@ -215,8 +232,24 @@ end;
 
 
 function TBlower.HandleMake: Boolean;
+var
+  MakeStringArray: TStringArray;
+  ItemIndex: Int32;
+  i: Int32;
 begin
-  Blowing := Result := Make.Select(ToStr(Product.Item).Replace('Empty', '').Strip(), MAKE_QUANTITY_ALL, SRL.Dice(98.5));
+  MakeStringArray := [
+    'Beer glass', 'Candle lantern', 'Oil lamp', 'Vial', 'Fishbowl',
+    'Unpowered staff orb', 'Lantern lens', 'Light orb'
+  ];
+
+  for i := Ord(Low(ERSGlassItem)) to Ord(High(ERSGlassItem)) do
+    if CurrentGlass = ERSGlassItem(i) then
+    begin
+      ItemIndex := i;
+      Break;
+    end;
+
+  Blowing := Result := Make.Select(ItemIndex, MAKE_QUANTITY_ALL, SRL.Dice(98.5));
   if Result then WaitUntil(not Make.IsOpen, 50, 2000);
 end;
 
@@ -348,16 +381,18 @@ end;
 var
   Blower: TBlower;
 
+
+
 type
   TBlowerConfig = record(TScriptConfig)
-    GlassSelector: TLabeledEdit;
+    GlassSelector: TLabeledCombobox;
   end;
 
 procedure TBlowerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  GlassItem := GlassSelector.Edit.getText;
+  CurrentGlass := ERSGlassItem(GlassSelector.Combobox.getItemIndex);
 end;
 
 procedure TBlowerConfig.Setup; override;
@@ -367,11 +402,21 @@ begin
   with GlassSelector do
   begin
     Init(ScriptSettingsPanel);
-    SetCaption('Glass item name (must be the exact name):');
+    SetCaption('Glass item:');
     SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
     SetWidth(200);
-    SetText(GlassItem);
+    Combobox.setStyle(csDropDownList);
+    AddItem('Beer glass');
+    AddItem('Candle lantern');
+    AddItem('Oil lamp');
+    AddItem('Vial');
+    AddItem('Fishbowl');
+    AddItem('Unpowered orb');
+    AddItem('Lantern lens');
+    AddItem('Light orb');
+    AddItem('Best available');
+    Combobox.setItemIndex(Ord(CurrentGlass));
   end;
 
   StartButton.setOnClick(@Self.StartScript);
