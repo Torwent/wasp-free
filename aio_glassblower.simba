@@ -19,7 +19,7 @@ type
                   FISHBOWL, ORB, LENS, BULB, BEST);
 
 var
-  CurrentGlass: ERSGlassItem = ERSGlassItem.ORB;
+  CurrentGlass: ERSGlassItem = ERSGlassItem.BEST;
 
 type
   EBlowerState = (
@@ -51,7 +51,11 @@ type
     Material: TRSBankWithdrawItem;
     Product: TRSBankDepositItem;
     Blowing: Boolean;
+    CurrentLevel: Int32;
+    UseBestItem: Boolean;
+    ItemChanged: Boolean;
   end;
+
 
 function TRSXPBar.FindXPDrop: Boolean; override;
 begin
@@ -67,10 +71,34 @@ begin
   Antiban.MaxZoom := 85;
 end;
 
+procedure TBlower.SetupProduct;
+var
+  CurrentLevelItem: ERSGlassItem;
+begin
+  case CurrentLevel of
+    1..3:   CurrentLevelItem := ERSGlassItem.BEER;
+    4..11:  CurrentLevelItem := ERSGlassItem.LANTERN;
+    12..32: CurrentLevelItem := ERSGlassItem.LAMP;
+    33..41: CurrentLevelItem := ERSGlassItem.VIAL;
+    42..45: CurrentLevelItem := ERSGlassItem.FISHBOWL;
+    46..48: CurrentLevelItem := ERSGlassItem.ORB;
+    49..86: CurrentLevelItem := ERSGlassItem.LENS;
+    else    CurrentLevelItem := ERSGlassItem.BULB;
+  end;
+
+  if CurrentLevelItem <> CurrentGlass then
+  begin
+    CurrentGlass := CurrentLevelItem;
+    ItemChanged := True;
+  end;
+end;
+
 procedure TBlower.SetupItems;
 var
+  ProductCost: Int32;
   X_Number: Int32;
 begin
+  if not ItemChanged then Exit;
 
   Tool := ['Glassblowing pipe', 1, False];
   if SRL.Dice(70) then X_Number := BANK_WITHDRAW_ALL
@@ -88,30 +116,29 @@ begin
     ERSGlassItem.BULB:     Product := ['Empty light orb', X_Number];
   end;
 
-end;
-
-procedure TBlower.Init; override;
-var
-  ProductCost: Int32;
-begin
-  Name := 'AIO Glassblower';
-  Version := 'v2.0.0';
-
-  inherited;
-
-  RSW.Setup('world_x4206y2306');
-  ScriptBank := @RSObjects.GEBank;
-
-  Self.SetupItems;
-
   ExtraInfo := 'Blowing item: ' + Product.Item + '.';
-
   ProductCost := ItemInfo.GetAveragePrice(Material.Item);
 
   ActionProfit := (
     ItemInfo.GetAveragePrice(Product.Item) -
     ProductCost
   );
+
+  ItemChanged := False;
+end;
+
+procedure TBlower.Init; override;
+begin
+  Name := 'AIO Glassblower';
+  Version := 'v2.0.3';
+
+  inherited;
+
+  RSW.Setup('world_x4206y2306');
+  ScriptBank := @RSObjects.GEBank;
+
+  UseBestItem := CurrentGlass = ERSGlassItem.Best;
+  ItemChanged := True;
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
@@ -346,6 +373,11 @@ begin
 
   while True do
   begin
+    if UseBestItem then
+      Self.SetupProduct;
+
+    Self.SetupItems;
+
     State := GetState;
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
@@ -383,6 +415,12 @@ var
   Blower: TBlower;
 
 
+function TRSChat.HandleLevelUp(UseKeyboard: Boolean = True): Boolean; override;
+begin
+  Result := inherited;
+
+  Blower.CurrentLevel += 1;
+end;
 
 type
   TBlowerConfig = record(TScriptConfig)
