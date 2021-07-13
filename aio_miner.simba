@@ -90,6 +90,8 @@ begin
     ERSRock.AMETHYST:   RSRock := @RSObjects.AmethystRock;
   end;
 
+  RSRock^.Filter.UpText := False;
+
   if Ord(CurrentRock) >= Ord(ERSRock.SILVER) then
     RockTimerMultiplier += 1;
 
@@ -112,7 +114,7 @@ begin
 
   BankList := DropList;
 
-  BankList += 'Coal ore';
+  BankList += 'Coal';
   BankList += 'Mithril ore';
   BankList += 'Adamantite ore';
   BankList += 'Amethyst';
@@ -128,7 +130,7 @@ begin
   BankList += 'Clue scroll (easy)';
   BankList += 'Clue scroll (medium)';
   BankList += 'Clue scroll (hard)';
-  BankList += 'Clue scroll (elite)';
+  BankList += 12073;
 end;
 
 procedure TMiner.SetupBank;
@@ -172,45 +174,86 @@ end;
 
 procedure TMiner.SetupTool;
 begin
-  if not Equipment.Open then Exit;
-
   ToolShift := 30;
-  if Equipment.FindItem('Crystal pickaxe') or  Equipment.FindItem('Crystal axe (inactive)') then
+  if Equipment.Open then
   begin
-    ToolShift := 110;
-    ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
-  end
-  else if Equipment.FindItem('Infernal pickaxe') then
+    if Equipment.FindItem('Crystal pickaxe') or  Equipment.FindItem('Crystal axe (inactive)') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+    end
+    else if Equipment.FindItem('Infernal pickaxe') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+    end
+    else if Equipment.FindItem('3rd age pickaxe') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39);
+    end
+    if Equipment.FindItem('Dragon pickaxe') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39);
+    end
+    else if Equipment.FindItem('Gilded pickaxe') then
+      ToolType := CTS2(1019842, 14, 0.02, 0.63)
+    else if Equipment.FindItem('Rune pickaxe') then
+      ToolType := CTS2(6050622, 12, 0.10, 0.11)
+    else if Equipment.FindItem('Adamant pickaxe') then
+      ToolType := CTS2(3951419, 11, 0.13, 0.16)
+    else if Equipment.FindItem('Mithril pickaxe') then
+      ToolType := CTS2(4534853, 17, 1.11, 0.34)
+    else if Equipment.FindItem('Black pickaxe') then
+      ToolType := CTS2(1118485, 1, 0.01, 0.01)
+    else if Equipment.FindItem('Steel pickaxe') then
+      ToolType := CTS2(6711151, 17, 0.11, 0.07)
+    else if Equipment.FindItem('Iron pickaxe') then
+      ToolType := CTS2(4671309, 11, 0.28, 0.09)
+    else if Equipment.FindItem('Bronze pickaxe') then
+      ToolType := CTS2(1979716, 9, 0.10, 0.24);
+  end;
+
+  if (ToolType = []) and Inventory.Open then
   begin
-    ToolShift := 110;
-    ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
-  end
-  else if Equipment.FindItem('3rd age pickaxe') then
-  begin
-    ToolShift := 110;
-    ToolType := CTS2(397665, 9, 0.16, 1.39);
-  end
-  if Equipment.FindItem('Dragon pickaxe') then
-  begin
-    ToolShift := 110;
-    ToolType := CTS2(397665, 9, 0.16, 1.39);
-  end
-  else if Equipment.FindItem('Gilded pickaxe') then
-    ToolType := CTS2(1019842, 14, 0.02, 0.63)
-  else if Equipment.FindItem('Rune pickaxe') then
-    ToolType := CTS2(6050622, 12, 0.10, 0.11)
-  else if Equipment.FindItem('Adamant pickaxe') then
-    ToolType := CTS2(3951419, 11, 0.13, 0.16)
-  else if Equipment.FindItem('Mithril pickaxe') then
-    ToolType := CTS2(4534853, 17, 1.11, 0.34)
-  else if Equipment.FindItem('Black pickaxe') then
-    ToolType := CTS2(1118485, 1, 0.01, 0.01)
-  else if Equipment.FindItem('Steel pickaxe') then
-    ToolType := CTS2(6711151, 17, 0.11, 0.07)
-  else if Equipment.FindItem('Iron pickaxe') then
-    ToolType := CTS2(4671309, 11, 0.28, 0.09)
-  else if Equipment.FindItem('Bronze pickaxe') then
-    ToolType := CTS2(1979716, 9, 0.10, 0.24);
+    if Inventory.FindItem('Crystal pickaxe') or  Inventory.FindItem('Crystal axe (inactive)') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+    end
+    else if Inventory.FindItem('Infernal pickaxe') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+    end
+    else if Inventory.FindItem('3rd age pickaxe') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39);
+    end
+    if Inventory.FindItem('Dragon pickaxe') then
+    begin
+      ToolShift := 110;
+      ToolType := CTS2(397665, 9, 0.16, 1.39);
+    end
+    else if Inventory.FindItem('Gilded pickaxe') then
+      ToolType := CTS2(1019842, 14, 0.02, 0.63)
+    else if Inventory.FindItem('Rune pickaxe') then
+      ToolType := CTS2(6050622, 12, 0.10, 0.11)
+    else if Inventory.FindItem('Adamant pickaxe') then
+      ToolType := CTS2(3951419, 11, 0.13, 0.16)
+    else if Inventory.FindItem('Mithril pickaxe') then
+      ToolType := CTS2(4534853, 17, 1.11, 0.34)
+    else if Inventory.FindItem('Black pickaxe') then
+      ToolType := CTS2(1118485, 1, 0.01, 0.01)
+    else if Inventory.FindItem('Steel pickaxe') then
+      ToolType := CTS2(6711151, 17, 0.11, 0.07)
+    else if Inventory.FindItem('Iron pickaxe') then
+      ToolType := CTS2(4671309, 11, 0.28, 0.09)
+    else if Inventory.FindItem('Bronze pickaxe') then
+      ToolType := CTS2(1979716, 9, 0.10, 0.24);
+  end;
 end;
 
 procedure TMiner.Init; override;
@@ -264,7 +307,11 @@ end;
 function TMiner.MineRock: Boolean;
 begin
   Result := Mining := RSRock^.Click or RSRock^.WalkClick;
-  if Result then Wait(800, 1200);
+  if Result then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Wait(1000, 1200);
+  end;
 end;
 
 function TMiner.HasGear: Boolean;
@@ -353,20 +400,17 @@ begin
   B.Y1 -= 30;
   B.X2 += 40;
   B.Y2 += 15;
-  Result := Mining := SRL.IsColorAnimating(ToolType, B, Self.GetToolShift, 350, 10 * RockTimerMultiplier)
+  Result := Mining := SRL.IsColorAnimating(ToolType, B, Self.GetToolShift, 350, 3 * RockTimerMultiplier)
 end;
 
 function TMiner.WaitMining: Boolean;
 begin
-  if Result := Self.IsMining then WL.Activity.Restart;
+  Result := Self.IsMining;
 end;
 
 function TMiner.GetState: EMinerState;
 begin
-  if XPBar.FindXPDrop then
-    Exit(EMinerState.WAIT_STATE)
-
-  else if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished then
     Exit(EMinerState.END_SCRIPT)
 
   else if Chat.LeveledUp then
@@ -377,6 +421,7 @@ begin
 
   else if InterfaceArea.HasInterface then
   begin
+    Writeln(BankList);
     if Bank.IsOpen and Inventory.FindItems(BankList) then
       Exit(EMinerState.DEPOSIT_ITEMS)
     else
@@ -419,7 +464,7 @@ begin
   begin
     State := Self.GetState;
     Action := ToStr(State);
-    ExtraInfo := ' Bank: ' + ToStr(UseBank);
+    ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' ToolType: ' + ToStr(ToolType);
     Self.ProcessWhileWaiting;
 
     case State of
