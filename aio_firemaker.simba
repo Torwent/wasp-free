@@ -13,13 +13,19 @@
   end;
 {$ENDIF}
 
+type
+  ERSLogs = (REGULAR_LOGS, ACHEY_LOGS, OAK_LOGS, WILLOW_LOGS, TEAK_LOGS,
+             ARCTIC_LOGS, MAPLE_LOGS, MAHOGANY_LOGS, YEW_LOGS, BLISTER_LOGS,
+             MAGIC_LOGS, REDWOOD_LOGS);
+
 var
-  Logs: TRSItem = 'Yew logs';
+  CurrentLogs: ERSLogs := ERSLogs.OAK_LOGS;
 
 type
   EBurnerState = (
     WAIT_STATE,
     BURN_LOG,
+    CHANGE_START,
     OPEN_BANK,
     WITHDRAW_LOG,
     WITHDRAW_TOOL,
@@ -36,6 +42,7 @@ type
     NextStartingPoint: TPoint;
     StartingPoints: TPointArray;
 
+    Logs: TRSItem;
     Tool: TRSBankWithdrawItem;
     Material: TRSBankWithdrawItem;
   end;
@@ -61,16 +68,35 @@ begin
   Antiban.MaxZoom := 40;
 end;
 
+procedure TLogBurner.SetupLogs;
+begin
+  case CurrentLogs of
+    ERSLogs.REGULAR_LOGS:  Logs := 'Logs';
+    ERSLogs.ACHEY_LOGS:    Logs := 'Achey tree logs';
+    ERSLogs.OAK_LOGS:      Logs := 'Oak logs';
+    ERSLogs.WILLOW_LOGS:   Logs := 'Willow logs';
+    ERSLogs.TEAK_LOGS:     Logs := 'Teak logs';
+    ERSLogs.ARCTIC_LOGS:   Logs := 'Arctic pine logs';
+    ERSLogs.MAPLE_LOGS:    Logs := 'Maple logs';
+    ERSLogs.MAHOGANY_LOGS: Logs := 'Mahogany logs';
+    ERSLogs.YEW_LOGS:      Logs := 'Yew logs';
+    ERSLogs.BLISTER_LOGS:  Logs := 'Blisterwood logs';
+    ERSLogs.MAGIC_LOGS:    Logs := 'Magic logs';
+    ERSLogs.REDWOOD_LOGS:  Logs := 'Redwood logs';
+  end;
+end;
+
 procedure TLogBurner.Init; override;
 begin
   Name := 'AIO Firemaker';
-  Version := 'v2.0.0';
+  Version := 'v2.1.5';
 
   inherited;
 
   RSW.Setup('world_x4206y2306');
   ScriptBank := @RSObjects.VarrockWestBank;
 
+  Self.SetupLogs;
   Tool := ['Tinderbox', 1, False];
   Material := [Logs, BANK_WITHDRAW_ALL, False];
 
@@ -79,8 +105,7 @@ begin
 
   RSW.ScreenWalk := True;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
 end;
 
 
@@ -90,6 +115,8 @@ begin
     NextStartingPoint := StartingPoints[1]
   else
     NextStartingPoint := StartingPoints[0];
+
+  RSObjects.BurningFire.Tiles := RSW.GetLine(NextStartingPoint, 10, False);
 end;
 
 function TLogBurner.Teleport: Boolean;
@@ -128,10 +155,10 @@ end;
 function TLogBurner.BurnLogs: Boolean;
 begin
   if Inventory.Use(Tool.Item, Material.Item) then
-    Result := WaitUntil(XPBar.FindXPDrop, 50, 3000);
+    Result := WaitUntil(XPBar.FindXPDrop, 100, 20000);
 
   if Result then
-    WaitUntil(not XPBar.FindXPDrop, 50, 3000);
+    WaitUntil(not XPBar.FindXPDrop, 100, 3000);
 end;
 
 
@@ -165,10 +192,15 @@ begin
 
   if Inventory.FindItem(Tool.Item) and Inventory.FindItem(Material.Item) then
   begin
-    if RSW.AtTile(CurrentBank^.Tiles, 10) then
+    if RSW.AtTile(ScriptBank^.Tiles, 10) then
       Exit(EBurnerState.TELEPORT)
     else if Inventory.IsFull and not RSW.AtTile(NextStartingPoint, 4) then
-      Exit(EBurnerState.WALK_SPOT)
+    begin
+      if RSObjects.BurningFire.Find <> [] then
+        Exit(EBurnerState.CHANGE_START)
+      else
+        Exit(EBurnerState.WALK_SPOT);
+    end
     else
       Exit(EBurnerState.BURN_LOG);
   end
@@ -191,6 +223,7 @@ begin
     case State of
       EBurnerState.WAIT_STATE: Wait(800, 850);
       EBurnerState.BURN_LOG: Self.BurnLogs;
+      EBurnerState.CHANGE_START: Self.ChangeStartingPoint;
       EBurnerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EBurnerState.WITHDRAW_LOG: Self.Withdraw(Material);
       EBurnerState.WITHDRAW_TOOL: Self.Withdraw(Tool);
@@ -214,14 +247,14 @@ var
 
 type
   TBurnerConfig = record(TScriptConfig)
-    LogSelector: TLabeledEdit;
+    LogSelector: TLabeledCombobox;
   end;
 
 procedure TBurnerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  Logs := LogSelector.Edit.getText;
+  CurrentLogs := ERSLogs(LogSelector.Combobox.getItemIndex);
 end;
 
 procedure TBurnerConfig.Setup; override;
@@ -231,11 +264,24 @@ begin
   with LogSelector do
   begin
     Init(ScriptSettingsPanel);
-    SetCaption('Logs name (must be the exact name):');
+    SetCaption('Logs:');
     SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
     SetWidth(200);
-    SetText(Logs);
+    Combobox.setStyle(csDropDownList);
+    AddItem('Regular');
+    AddItem('Achey tree');
+    AddItem('Oak');
+    AddItem('Willow');
+    AddItem('Teak');
+    AddItem('Arctic pine');
+    AddItem('Maple');
+    AddItem('Mahogany');
+    AddItem('Yew');
+    AddItem('Blisterwood');
+    AddItem('Magic');
+    AddItem('Redwood');
+    Combobox.setItemIndex(Ord(CurrentLogs));
   end;
 
   StartButton.setOnClick(@Self.StartScript);
