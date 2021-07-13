@@ -310,7 +310,7 @@ begin
   if Result then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
-    Wait(1000, 1200);
+    Wait(1500, 2000);
   end;
 end;
 
