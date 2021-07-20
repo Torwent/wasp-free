@@ -220,7 +220,7 @@ begin
 
   inherited;
 
-  RSW.Setup('world_x4206y2306');
+  RSW.Setup('x7789y2306');
   ScriptBank := @RSObjects.GEBank;
 
   ExtraInfo := ' Currently enchanting: ' + RegularJewel + '.';

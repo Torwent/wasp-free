@@ -159,49 +159,49 @@ begin
   case BankLocation of
     WC_GUILD:
       begin
-        RSW.Setup('zeah_x1564y2293');
+        RSW.Setup('x1564y2293');
         ScriptBank := @RSObjects.WCGuildBank;
         UseBank := True;
       end;
 
     GE:
       begin
-        RSW.Setup('world_x3953y2363');
+        RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.VarrockEastBank;
         UseBank := True;
       end;
 
     VARROCK_EAST:
       begin
-        RSW.Setup('world_x3953y2363');
+        RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.VarrockEastBank;
         UseBank := True;
       end;
 
     VARROCK_WEST:
       begin
-        RSW.Setup('world_x3953y2363');
+        RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.VarrockWestBank;
         UseBank := True;
       end;
 
     EDGEVILLE:
       begin
-        RSW.Setup('world_x3953y2363');
+        RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.EdgevilleBank;
         UseBank := True;
       end;
 
     PRIFDDINAS:
       begin
-        RSW.Setup('world_x0y1905');
+        RSW.Setup('x3583y1905');
         ScriptBank := @RSObjects.PrifddinasBank;
         UseBank := True;
       end;
 
     DRAYNOR:
       begin
-        RSW.Setup('world_x4034y3214');
+        RSW.Setup('x7617y3214');
         ScriptBank := @RSObjects.DraynorBank;
         UseBank := True;
       end;

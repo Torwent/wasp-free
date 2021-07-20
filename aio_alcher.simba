@@ -88,7 +88,7 @@ begin
 
   inherited;
 
-  RSW.Setup('world_x4206y2306');
+  RSW.Setup('x7789y2306');
   ScriptBank := @RSObjects.GEBank;
   CoinArray := [617, 995, 996, 997, 998, 999, 1000, 1001, 1002, 1003, 1004];
 

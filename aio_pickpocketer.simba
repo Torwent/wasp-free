@@ -148,7 +148,7 @@ begin
   case PickedNPC of
     MAN:
       begin
-        RSW.Setup('world_x4034y3214');
+        RSW.Setup('x7617y3214');
         CurrentNPC := @RSNPCs.Man;
         LootArray := [CoinPouch];
 
@@ -170,7 +170,7 @@ begin
 
     KHARID_WARRIOR:
       begin
-        RSW.Setup('world_x4768y3606');
+        RSW.Setup('x8351y3606');
         CurrentNPC := @RSNPCs.KharidWarrior;
         LootArray := [CoinPouch];
 
@@ -194,7 +194,7 @@ begin
 
     MASTER_FARMER:
       begin
-        RSW.Setup('world_x4034y3214');
+        RSW.Setup('x7617y3214');
         CurrentNPC := @RSNPCs.MasterFarmer;
         LootArray := [
           5163, 5164, 5165, 5166, 5318, //potato
@@ -283,7 +283,7 @@ begin
 
     GUARD:
       begin
-        RSW.Setup('world_x3468y2796');
+        RSW.Setup('x7051y2796');
         CurrentNPC := @RSNPCs.Guard;
         LootArray := [CoinPouch];
 
@@ -302,7 +302,7 @@ begin
 
     KNIGHT_OF_ARDOUGNE:
       begin
-        RSW.Setup('world_x2140y3038');
+        RSW.Setup('x5723y3038');
         CurrentNPC := @RSNPCs.KnightOfArdougne;
         ScriptBank := @RSObjects.ArdougneSouthBank;
         //USE RUNELITE!
@@ -327,7 +327,7 @@ begin
 
     ELF:
       begin
-        RSW.Setup('world_x0y1905');
+        RSW.Setup('x3583y1905');
         CurrentNPC := @RSNPCs.Elf;
         ScriptBank := @RSObjects.PrifddinasBank;
 
@@ -366,7 +366,7 @@ begin
 
     TZHAAR:
       begin
-        RSW.Setup('world_x750y310');
+        RSW.Setup('x4333y310');
         CurrentNPC := @RSNPCs.TzhaarHur;
         LootArray := [
           'Tokkul', '6529', '6530', '6531', '6532', '6533', '6534',
@@ -395,7 +395,7 @@ begin
 
   StackableArray += Necklace; //not stackable but this array is used to not bank items
   StackableArray += 'Cosmic rune';
-  StackableArray += 'Lava battlestaff';
+  StackableArray += 21200;
 
   CurrentNPC^.Filter.Walker := False;
 end;
@@ -570,7 +570,7 @@ begin
     if Inventory.ClickItem(Item) then
       Wait(200, 300);
 
-  if Inventory.ClickItem('Lava battlestaff') then
+  if Inventory.ClickItem(21200) then
     Wait(200, 300);
 
   Result := not Self.HasRogue and not Inventory.FindItem('Lava battlestaff');

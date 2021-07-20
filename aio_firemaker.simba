@@ -19,13 +19,14 @@ type
              MAGIC_LOGS, REDWOOD_LOGS);
 
 var
-  CurrentLogs: ERSLogs := ERSLogs.OAK_LOGS;
+  CurrentLogs: ERSLogs := ERSLogs.MAPLE_LOGS;
 
 type
   EBurnerState = (
     WAIT_STATE,
     BURN_LOG,
     CHANGE_START,
+    SMALL_STEP,
     OPEN_BANK,
     WITHDRAW_LOG,
     WITHDRAW_TOOL,
@@ -42,6 +43,7 @@ type
     NextStartingPoint: TPoint;
     StartingPoints: TPointArray;
 
+    Fire: PRSObject;
     Logs: TRSItem;
     Tool: TRSBankWithdrawItem;
     Material: TRSBankWithdrawItem;
@@ -93,7 +95,7 @@ begin
 
   inherited;
 
-  RSW.Setup('world_x4206y2306');
+  RSW.Setup('x7789y2306');
   ScriptBank := @RSObjects.VarrockWestBank;
 
   Self.SetupLogs;
@@ -102,6 +104,8 @@ begin
 
   StartingPoints := [[4658, 2732], [4658, 2736]];
   NextStartingPoint := StartingPoints[0];
+
+  Fire := @RSObjects.BurningFire;
 
   RSW.ScreenWalk := True;
 
@@ -116,8 +120,25 @@ begin
   else
     NextStartingPoint := StartingPoints[0];
 
-  RSObjects.BurningFire.Tiles := RSW.GetLine(NextStartingPoint, 10, False);
+  Fire^.Tiles := RSW.GetLine(NextStartingPoint, 10, False);
 end;
+
+function TLogBurner.SmallStep: Boolean;
+var
+  Tile: TPoint;
+  Tiles: TPointArray := RSW.GetLine(RSW.GetMyPos, 1, True);
+begin
+  for Tile in Tiles do
+  begin
+    Fire^.Tiles := [Tile];
+    if Fire^.Find = [] then
+    begin
+      RSW.WebWalk(Tile, 1, 0.2);
+      Exit(True);
+    end;
+  end;
+end;
+
 
 function TLogBurner.Teleport: Boolean;
 begin
@@ -196,13 +217,19 @@ begin
       Exit(EBurnerState.TELEPORT)
     else if Inventory.IsFull and not RSW.AtTile(NextStartingPoint, 4) then
     begin
-      if RSObjects.BurningFire.Find <> [] then
+      if Fire^.Find <> [] then
         Exit(EBurnerState.CHANGE_START)
       else
         Exit(EBurnerState.WALK_SPOT);
     end
     else
-      Exit(EBurnerState.BURN_LOG);
+    begin
+      Fire^.Tiles := [RSW.GetMyPos];
+      //if Fire^.Find <> [] then
+      //  Exit(EBurnerState.SMALL_STEP)
+      //else
+        Exit(EBurnerState.BURN_LOG);
+    end;
   end
 
   else
@@ -224,6 +251,7 @@ begin
       EBurnerState.WAIT_STATE: Wait(800, 850);
       EBurnerState.BURN_LOG: Self.BurnLogs;
       EBurnerState.CHANGE_START: Self.ChangeStartingPoint;
+      EBurnerState.SMALL_STEP: Self.SmallStep;
       EBurnerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EBurnerState.WITHDRAW_LOG: Self.Withdraw(Material);
       EBurnerState.WITHDRAW_TOOL: Self.Withdraw(Tool);

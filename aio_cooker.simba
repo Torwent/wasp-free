@@ -90,7 +90,7 @@ begin
 
   inherited;
 
-  RSW.Setup('zeah_x1916y1841');
+  RSW.Setup('x1916y1841');
   ScriptBank := @RSObjects.HosidiusKitchenBank;
 
   Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];

@@ -141,28 +141,28 @@ begin
   case BankLocation of
     MINING_GUILD:
       begin
-        RSW.Setup('world_x2708y497');
+        RSW.Setup('x6291y497');
         ScriptBank := @RSObjects.MiningGuildBank;
         UseBank := True;
       end;
 
     CRAFT_GUILD:
       begin
-        RSW.Setup('world_x3370y3166');
+        RSW.Setup('x6953y3166');
         ScriptBank := @RSObjects.CraftGuildBank;
         UseBank := True;
       end;
 
     VARROCK_EAST:
       begin
-        RSW.Setup('world_x3953y2363');
+        RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.VarrockEastBank;
         UseBank := True;
       end;
 
     VARROCK_WEST:
       begin
-        RSW.Setup('world_x3953y2363');
+        RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.VarrockWestBank;
         UseBank := True;
       end;
