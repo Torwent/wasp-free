@@ -28,6 +28,10 @@ type
     HANDLE_DEPOSIT,
 
     TALK_DOMINIC,
+    CHOOSE_DREAM,
+    HANDLE_DOMINIC,
+    PAY_DOMINIC,
+
     OPEN_NMZSETUP,
     HANDLE_NMZSETUP,
     CLOSE_INTERFACE,
@@ -68,6 +72,8 @@ type
     MinAbsPoints: Int32;
     MinSpec: Int32;
 
+    DreamSetup: Boolean;
+
     DamageItem: TRSItem;
     Boosted: Boolean;
     BoostTimer: TCountDown;
@@ -97,7 +103,7 @@ begin
   else
     BoostTimer.Init(420000);
 
-  BoostAmount := 5;
+  BoostAmount := 8;
 
   SetLength(AbsPotion, 4);
   for i := 1 to 4 do
@@ -247,9 +253,9 @@ end;
 function TNMZFighter.PotAmountNeeded(Potion: TRSItemArray): Int32;
 begin
   if Potion = BoostPotion then
-    Result := BoostAmount - Self.CountDoses(BoostPotion)
+    Result := BoostAmount * 4 - Self.CountDoses(BoostPotion)
   else
-    Result := AbsAmount - Self.CountDoses(AbsPotion);
+    Result := Random(80, 999);
 end;
 
 
@@ -462,7 +468,7 @@ end;
 
 function TNMZFighter.HasEnoughAbs: Boolean;
 begin
-  Result := Inventory.CountItem(AbsPotion[3]) = AbsAmount;
+  Result := Inventory.CountItem(AbsPotion[3]) >= AbsAmount;
 end;
 
 function TNMZFighter.WithdrawPotion(Barrel: PRSObject): Boolean;
@@ -489,6 +495,21 @@ begin
 end;
 
 
+function TNMZFighter.HandleNMZSetup: Boolean;
+var
+  TPA: TPointArray;
+begin
+  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds) then
+  begin
+    Mouse.Move(TPA.Bounds);
+    MainScreen.IsUpText('Continue');
+    Mouse.Click(MOUSE_LEFT);
+    Result := WaitUntil(Self.InDream, 200, 10000);
+  end;
+end;
+
+
+
 function TNMZFighter.GetState: ENMZState;
 var
   Query: String; //to cache the query and title.
@@ -496,6 +517,8 @@ var
 begin
   if Self.InDream then
   begin
+    DreamSetup := False;
+
     if Self.NeedAbsorption then
       Exit(ENMZState.DRINK_ABSORPTION)
 
@@ -555,10 +578,10 @@ begin
           Exit(ENMZState.WITHDRAW_ABSORPTION);
       end
 
+      else if DreamSetup then
+        Exit(ENMZState.OPEN_NMZSETUP)
       else
-      begin
-
-      end;
+        Exit(ENMZState.TALK_DOMINIC);
     end
 
 
@@ -581,10 +604,26 @@ begin
         Exit(ENMZState.WITHDRAW_ABSORPTION);
     end
 
+    else if DreamSetup then
+    begin
+      if InterfaceArea.IsClassicOpen then
+        Exit(ENMZState.HANDLE_NMZSETUP)
+      else
+        Exit(ENMZState.OPEN_NMZSETUP);
+    end
     else
     begin
-
-
+      if 'dream would' in Title then
+        Exit(ENMZState.CHOOSE_DREAM)
+      else if 'Dominic' in Title then
+      begin
+        if 'deduct the money' in Chat.GetChat then
+          Exit(ENMZState.HANDLE_DOMINIC);
+      end
+      else if 'Agree' in Title then
+        Exit(ENMZState.PAY_DOMINIC)
+      else
+        Exit(ENMZState.TALK_DOMINIC);
     end;
   end;
 end;
@@ -603,6 +642,7 @@ begin
   begin
     State := Self.GetState;
     Action := ToStr(State);
+    ExtraInfo := 'InDream: ' + ToStr(InDream) + ' DreamSetup: ' + ToStr(DreamSetup);
     Self.ProcessWhileWaiting;
 
     case State of
@@ -617,9 +657,18 @@ begin
       DEPOSIT_ABSORPTION: Self.DepositPotion(@RSObjects.NMZAbsorptionBarrel);
       HANDLE_DEPOSIT: Chat.ClickOption('Yes');
 
-      TALK_DOMINIC: ;
-      OPEN_NMZSETUP: ;
-      HANDLE_NMZSETUP: ;
+      TALK_DOMINIC:
+        if RSNPCs.DominicOnion.SelectOption(['Dream']) then
+        begin
+          Minimap.WaitPlayerMoving(300, 10000);
+          WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
+        end;
+      CHOOSE_DREAM: Chat.ClickOption('Previous', False);
+      HANDLE_DOMINIC: Chat.ClickContinue;
+      PAY_DOMINIC: DreamSetup := Chat.ClickOption('Yes');
+
+      OPEN_NMZSETUP: RSObjects.NMZPotion.WalkClick;
+      HANDLE_NMZSETUP: Self.HandleNMZSetup;
       CLOSE_INTERFACE: InterfaceArea.Close;
 
       DRINK_BOOST: Self.DrinkPotion(BoostPotion);
