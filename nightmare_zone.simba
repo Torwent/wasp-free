@@ -529,8 +529,8 @@ begin
         Exit(ENMZState.WAIT_STATE2);
     end
 
-    else if WalkMiddleTimer.IsFinished then
-      Exit(ENMZState.WALK_MIDDLE)
+    //else if WalkMiddleTimer.IsFinished then
+    //  Exit(ENMZState.WALK_MIDDLE)
 
     else
       Exit(ENMZState.WAIT_STATE3);
