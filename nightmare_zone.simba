@@ -140,7 +140,7 @@ begin
   PowerSurge.UpText := ['Power', 'surge'];
   PowerSurge.SetupCommon;
   PowerSurge.Finder.Colors += CTS2(3977404, 17, 0.07, 1.24);
-  PowerSurge.Finder.MinShortSide := 17;
+  PowerSurge.Finder.MinShortSide := 20;
   PowerSurge.Finder.MaxLongSide := 40;
   PowerSurge.Filter.Walker := False;
 
@@ -273,12 +273,8 @@ begin
 end;
 
 function TNMZFighter.GetAbsorptionPoints: Int32;
-begin  //Less colors with higher tolerance didn't work well.
-  Result := OCR.RecognizeNumber([11, 55, 80, 76], TOCRColorRule.Create(
-    [16777215, 15198207, 14198207, 13487615, 12340191,
-     11284895, 9213759, 8168959, 7368959, 6316287,
-     5197823, 4013567, 3355647, 2566143, 1466143, 329215],
-    [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 40]), RS_FONT_QUILL);
+begin
+  Result := OCR.RecognizeNumber([10,41, 63,76], TOCRShadowRule.Create(30), RS_FONT_QUILL);
 end;
 
 function TNMZFighter.NeedAbsorption: Boolean;
