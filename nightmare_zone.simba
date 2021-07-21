@@ -103,6 +103,7 @@ begin
   else
     BoostTimer.Init(420000);
 
+  BoostTimer.Timeout := GetTickCount;
   BoostAmount := 8;
 
   SetLength(AbsPotion, 4);
@@ -125,7 +126,7 @@ end;
 procedure TNMZFighter.Init; override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v2.0.0';
+  Version := 'v2.0.5';
 
   inherited;
 
@@ -634,15 +635,16 @@ begin
   Self.Init;
   Self.SetupDamageItem;
 
-
-  Self.DrinkPotion(BoostPotion);
-  Self.DrinkPotion(AbsPotion);
-
   while True do
   begin
     State := Self.GetState;
     Action := ToStr(State);
-    ExtraInfo := 'InDream: ' + ToStr(InDream) + ' DreamSetup: ' + ToStr(DreamSetup);
+    ExtraInfo := 'InDream: ' + ToStr(InDream) +
+                 ' DreamSetup: ' + ToStr(DreamSetup) +
+                 ' BoostTimer: ' + ToStr(BoostTimer.TimeRemaining) +
+                 STR_NEW_LINE +
+                 ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished) +
+                 'NeedBoost: ' + ToSTR(Self.NeedBoost);
     Self.ProcessWhileWaiting;
 
     case State of
