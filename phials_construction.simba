@@ -50,7 +50,7 @@ begin
 
   inherited;
 
-  RSW.Setup('world_x3370y3166');
+  RSW.Setup('x6953y3166');
   POH.Setup('poh');
 
   BuiltLarder.SetupCommon;

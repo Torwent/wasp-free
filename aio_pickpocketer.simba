@@ -437,8 +437,19 @@ begin
       RogueEquipment += 'Rogue boots';
     end;
 
-    if Inventory.FindItem('Thieving cape(t)') then
+    //This are not part of rogue equipment but are useful while thieving
+    if Inventory.FindItem('Thieving cape') then
+      RogueEquipment += 'Thieving cape'
+    else if Inventory.FindItem('Thieving cape(t)') then
       RogueEquipment += 'Thieving cape(t)';
+
+    //Lava staves for shadow veil spell
+    if Inventory.FindItem('Lava battlestaff') then
+      RogueEquipment += 'Lava battlestaff'
+    else if Inventory.FindItem('Mystic lava staff') then
+      RogueEquipment += 'Mystic lava staff'
+    else if Inventory.FindItem(21200) then
+      RogueEquipment += 21200;
   end;
 
   if Equipment.Open then
@@ -473,8 +484,20 @@ begin
       RogueEquipment += 'Rogue boots';
     end;
 
-    if Equipment.FindItem('Thieving cape(t)') then
+
+    //This are not part of rogue equipment but are useful while thieving
+    if Equipment.FindItem('Thieving cape') then
+      RogueEquipment += 'Thieving cape'
+    else if Equipment.FindItem('Thieving cape(t)') then
       RogueEquipment += 'Thieving cape(t)';
+
+    //Lava staves for shadow veil spell
+    if Equipment.FindItem('Lava battlestaff') then
+      RogueEquipment += 'Lava battlestaff'
+    else if Equipment.FindItem('Mystic lava staff') then
+      RogueEquipment += 'Mystic lava staff'
+    else if Equipment.FindItem(21200) then
+      RogueEquipment += 21200;
 
   end;
 
@@ -485,17 +508,16 @@ begin
   ActionProfit += Round(ActionProfit * ProfitMultiplier);
 
   for Item in RogueEquipment do
-    StackableArray += Item;
+    StackableArray += Item; //Adding RogueEquipment to the non banking item list
 end;
 
 procedure TThiever.Init; override;
 begin
   Name    := 'AIO Pickpocketer';
-  Version := 'v2.0.2';
+  Version := 'v2.0.5';
 
   inherited;
 
-  BankTab := -1;
   UseRedemption := SuicideMode;
 
   CoinPouch := 'Coin pouch';
@@ -639,7 +661,7 @@ var
 begin
   Result := CurrentHP < StartingHP;
 
-  Died := CurrentHP < 1;
+  Died := (CurrentHP < 1) or ((StartingHP <= 5) and (CurrentHP >= 10));
 
   if Result and not Died then
     Self.OpenCoinPouch;

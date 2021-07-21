@@ -25,6 +25,7 @@ type
     ANSWER_ABSORPTION,
     DEPOSIT_BOOST,
     DEPOSIT_ABSORPTION,
+    HANDLE_DEPOSIT,
 
     TALK_DOMINIC,
     OPEN_NMZSETUP,
@@ -122,8 +123,9 @@ begin
 
   inherited;
 
-  RSWReal.Setup('world_x2048y3844');
-  RSWDream.Setup('world_x1701y280');
+  RSWDream.Setup('x5284y280');
+  RSWReal.Setup('x5631y3844');
+
 
   Self.SetupPotions;
   Self.SetupBoostBarrel;
@@ -160,14 +162,12 @@ begin
   PowerSurgeTimer.Timeout := GetTickCount;
   PowerSurgeTimer.Pause;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
 end;
 
 procedure TNMZFighter.SetupDamageItem;
 begin
-  if not Inventory.Open then
-    Exit;
+  if not Inventory.Open then Exit;
 
   if Inventory.FindItem('Locator orb') then
     DamageItem := 'Locator orb'
@@ -244,6 +244,15 @@ begin
     Result += Inventory.CountItem(Potion[i]) * (i + 1);
 end;
 
+function TNMZFighter.PotAmountNeeded(Potion: TRSItemArray): Int32;
+begin
+  if Potion = BoostPotion then
+    Result := BoostAmount - Self.CountDoses(BoostPotion)
+  else
+    Result := AbsAmount - Self.CountDoses(AbsPotion);
+end;
+
+
 function TNMZFighter.NeedBoost: Boolean;
 var
   Str: String;
@@ -264,12 +273,12 @@ begin
 end;
 
 function TNMZFighter.GetAbsorptionPoints: Int32;
-var
-  Filter: TCompareRules;
-begin
-  Filter.Color := 16777215; //only reads the white but that's good enough.
-  Filter.Tolerance := 10;
-  Result := OCR.RecognizeNumber([11,54, 80,76], Filter, RS_FONT_QUILL);
+begin  //Less colors with higher tolerance didn't work well.
+  Result := OCR.RecognizeNumber([11, 55, 80, 76], TOCRColorRule.Create(
+    [16777215, 15198207, 14198207, 13487615, 12340191,
+     11284895, 9213759, 8168959, 7368959, 6316287,
+     5197823, 4013567, 3355647, 2566143, 1466143, 329215],
+    [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 40]), RS_FONT_QUILL);
 end;
 
 function TNMZFighter.NeedAbsorption: Boolean;
@@ -462,15 +471,32 @@ end;
 
 function TNMZFighter.WithdrawPotion(Barrel: PRSObject): Boolean;
 begin
-  if Barrel^.Click then
+  if Barrel^.WalkSelectOption(['Take']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
     Result := Chat.FindQuery('How many doses', 5000, 100);
   end;
 end;
 
+function TNMZFighter.DepositPotion(Barrel: PRSObject): Boolean;
+begin
+  if Barrel^.WalkSelectOption(['Store']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
+  end;
+end;
+
+function TNMZFighter.HandleQuery(Amount: Int32): Boolean;
+begin
+  Result := Chat.AnswerQuery('How many', ToStr(Amount), 2000, 100);
+end;
+
 
 function TNMZFighter.GetState: ENMZState;
+var
+  Query: String; //to cache the query and title.
+  Title: String; //not doing multiple checks improves performance.
 begin
   if Self.InDream then
   begin
@@ -512,29 +538,50 @@ begin
 
   else
   begin
+    Query := Chat.GetQuery;
+    Title := Chat.GetChatTitle;
+
+    if 'How many doses' in Query then
+    begin
+      if not Self.HasEnoughBoost then
+      begin
+        if Potion.Lower in Query then
+          Exit(ENMZState.ANSWER_BOOST)
+        else
+          Exit(ENMZState.WITHDRAW_BOOST);
+      end
+
+      else if not Self.HasEnoughAbs then
+      begin
+        if 'absorption' in Query then
+          Exit(ENMZState.ANSWER_ABSORPTION)
+        else
+          Exit(ENMZState.WITHDRAW_ABSORPTION);
+      end
+
+      else
+      begin
+
+      end;
+    end
+
 
     if not Self.HasEnoughBoost then
     begin
       if Inventory.CountItem(BoostPotion[3]) > BoostAmount then
-        Exit(ENMZState.DEPOSIT_BOOST)
+      begin
+        if Potion.Lower in Title then
+          Exit(ENMZState.HANDLE_DEPOSIT)
+        else
+          Exit(ENMZState.DEPOSIT_BOOST)
+      end
       else if Inventory.CountItem(BoostPotion[3]) < BoostAmount then
         Exit(ENMZState.WITHDRAW_BOOST);
     end
 
     else if not Self.HasEnoughAbs then
     begin
-      if Chat.FindQuery('How many doses of', 0, 0) then
-      begin
-        if Chat.FindQuery('absorption', 0, 0) then
-          Exit(ENMZState.ANSWER_ABSORPTION)
-        else
-          Exit(ENMZState.ANSWER_BOOST);
-      end
-
-      else if Inventory.CountItem(BoostPotion[4]) < BoostAmount then
-        Exit(ENMZState.WITHDRAW_BOOST)
-
-      else if Inventory.CountItem(AbsPotion[4]) < AbsAmount then
+      if Inventory.CountItem(AbsPotion[3]) < AbsAmount then
         Exit(ENMZState.WITHDRAW_ABSORPTION);
     end
 
@@ -568,10 +615,11 @@ begin
 
       WITHDRAW_BOOST: Self.WithdrawPotion(BoostBarrel);
       WITHDRAW_ABSORPTION: Self.WithdrawPotion(@RSObjects.NMZAbsorptionBarrel);
-      ANSWER_BOOST: Chat.AnswerQuery('How many', '', 2000, 100);
-      ANSWER_ABSORPTION: Chat.AnswerQuery('How many', '', 2000, 100);
-      DEPOSIT_BOOST: ;
-      DEPOSIT_ABSORPTION: ;
+      ANSWER_BOOST: Self.HandleQuery(Self.PotAmountNeeded(BoostPotion));
+      ANSWER_ABSORPTION: Self.HandleQuery(Self.PotAmountNeeded(AbsPotion));
+      DEPOSIT_BOOST: Self.DepositPotion(BoostBarrel);
+      DEPOSIT_ABSORPTION: Self.DepositPotion(@RSObjects.NMZAbsorptionBarrel);
+      HANDLE_DEPOSIT: Chat.ClickOption('Yes');
 
       TALK_DOMINIC: ;
       OPEN_NMZSETUP: ;
