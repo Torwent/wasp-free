@@ -11,11 +11,15 @@ begin
   RemoteInputEnabled := True; //Enables remote input
 end;
 
+type
+  ERSNMZPotion = (OVERLOAD_POTION, SUPER_RANGING_POTION, SUPER_MAGIC_POTION);
+
 var
-  Potion: String = 'Overload';
+  CurrentPotion: ERSNMZPotion := ERSNMZPotion.OVERLOAD_POTION;
 
 type
   ENMZState = (
+    //Outside Dream.
     OPEN_NMZREWARD,
     BUY_POTS,
 
@@ -36,15 +40,19 @@ type
     HANDLE_NMZSETUP,
     CLOSE_INTERFACE,
 
+    //Inside Dream.
     DRINK_BOOST,
     DRINK_ABSORPTION,
+
     WALK_MIDDLE,
     WAIT_STATE1,
     WAIT_STATE2,
     WAIT_STATE3,
+
     USE_POWER,
     USE_SPEC,
     REEQUIP_GEAR,
+
     LOWER_HEALTH,
     FLICK_PRAYER
   );
@@ -57,19 +65,23 @@ type
     InsideDream: Boolean;
     DreamMiddle: TPoint;
 
+    Potion: String;
     BoostPotion: TRSItemArray;
     AbsPotion: TRSItemArray;
-    BoostBarrel: PRSObject;
 
-    RecurrentDamage: TRSObject;
-    PowerSurge: TRSObject;
-    Zapper: TRSObject;
+    BoostBarrel: PRSObject;
+    AbsBarrel: PRSObject;
 
     PowerSurgeTimer: TCountDown;
+    ZapperTimer: TCountDown;
 
     BoostAmount: Int32;
     AbsAmount: Int32;
     MinAbsPoints: Int32;
+
+    Weapon: TRSItem;
+    Shield: TRSItem;
+    SpecWeapon: TRSItem;
     MinSpec: Int32;
 
     DreamSetup: Boolean;
@@ -94,6 +106,12 @@ procedure TNMZFighter.SetupPotions;
 var
   i: Int32;
 begin
+  case CurrentPotion of
+    OVERLOAD_POTION:      Potion := 'Overload';
+    SUPER_RANGING_POTION: Potion := 'Super ranging';
+    SUPER_MAGIC_POTION:   Potion := 'Super magic';
+  end;
+
   SetLength(BoostPotion, 4);
   for i := 1 to 4 do
     BoostPotion[i-1] := Potion + ' (' + ToStr(i) + ')';
@@ -113,7 +131,7 @@ begin
   AbsAmount := 15;
 end;
 
-procedure TNMZFighter.SetupBoostBarrel;
+procedure TNMZFighter.SetupBarrels;
 begin
   if Potion.Contains('Overload') then
     BoostBarrel := @RSObjects.NMZOverloadBarrel
@@ -121,55 +139,17 @@ begin
     BoostBarrel := @RSObjects.NMZSuperMagicBarrel
   else if Potion.Contains('ranging') then
     BoostBarrel := @RSObjects.NMZSuperRangingBarrel;
+
+  AbsBarrel := @RSObjects.NMZAbsorptionBarrel;
 end;
 
-procedure TNMZFighter.Init; override;
+procedure TNMZFighter.SetupPowerUps;
 begin
-  Name := 'Nightmare Zone';
-  Version := 'v2.0.5';
-
-  inherited;
-
-  RSWDream.Setup('x5284y280');
-  RSWReal.Setup('x5631y3844');
-
-
-  Self.SetupPotions;
-  Self.SetupBoostBarrel;
-
-  RecurrentDamage.UpText := ['Recurrent', 'damage'];
-  RecurrentDamage.SetupCommon;
-  RecurrentDamage.Finder.Colors += CTS2(3492263, 8, 0.12, 2.26);
-  RecurrentDamage.Finder.MinShortSide := 17;
-  RecurrentDamage.Finder.MaxLongSide := 40;
-  RecurrentDamage.Filter.Walker := False;
-
-  PowerSurge.UpText := ['Power', 'surge'];
-  PowerSurge.SetupCommon;
-  PowerSurge.Finder.Colors += CTS2(3977404, 17, 0.07, 1.24);
-  PowerSurge.Finder.MinShortSide := 20;
-  PowerSurge.Finder.MaxLongSide := 40;
-  PowerSurge.Filter.Walker := False;
-
-  Zapper.UpText := ['Zapper'];
-  Zapper.SetupCommon;
-  Zapper.Finder.Colors += CTS2(10430899, 6, 0.30, 2.07);
-  Zapper.Finder.MinShortSide := 17;
-  Zapper.Finder.MaxLongSide := 40;
-  Zapper.Filter.Walker := False;
-
-  MinSpec := 50;
-
-  DreamMiddle := [5456, 453];
-  MinAbsPoints := 250;
-
-  PrayFlickTimer.Init(60000);
-  WalkMiddleTimer.Init(180000);
   PowerSurgeTimer.Init(45000);
   PowerSurgeTimer.Timeout := GetTickCount;
-  PowerSurgeTimer.Pause;
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  ZapperTimer.Init(65000);  //5 extra seconds for margin.
+  ZapperTimer.Timeout := GetTickCount;
 end;
 
 procedure TNMZFighter.SetupDamageItem;
@@ -178,45 +158,150 @@ begin
 
   if Inventory.FindItem('Locator orb') then
     DamageItem := 'Locator orb'
-  else if Inventory.FindItem(7510) then
+  else if Inventory.FindItem(7510) then  //7510 is rock cake ID
     DamageItem := 7510;
-
 
   Writeln('Damage item is: ' + ToStr(DamageItem));
 end;
 
-function TNMZFighter.InMultiCombat(Mode: ERSClientMode): Boolean;
+procedure TNMZFighter.SetupWeapons;
 var
-  B: TBox;
+  Weapons: TRSItemArray;
+  Shields: TRSItemArray;
+  SpecWeapons: TRSItemArray;
 begin
-  case Mode of
-    ERSClientMode.FIXED:
-      begin
-        B := InterfaceArea.Bounds;
-        B.X1 := B.X2 - 30;
-        B.Y1 := B.Y2 - 30;
-      end;
-    ERSClientMode.RESIZABLE_CLASSIC, ERSClientMode.RESIZABLE_MODERN:
-      begin
-        B := Minimap.Bounds;
-        B.X1 := B.X2 - 30;
-        B.Y1 := B.Y2 + 5;
-        B.Y2 := B.Y1 + 30;
-      end;
-  end;
+  Weapons := ['Ghrazi rapier', 'Blade of saeldor (c)', 'Inquisitor''s mace',
+              'Toktz-xil-ak', 'Abyssal whip', 'Abyssal bludgeon',
+              'Abyssal dagger', 'Abyssal dagger (p++)', 'Saradomin sword',
+              'Dragon scimitar', 'Dharok''s greataxe', 'Bow of faerdhinen (c)',
+              'Toxic blowpipe', 'Magic shortbow (i)', 'Armadyl crossbow',
+              'Dragon hunter crossbow', 'Dragon crossbow', 'Rune crossbow',
+              'Adamant dart', 'Mithril dart', ''];
 
-  Result := (SRL.CountColor(CTS0(4902655, 0), B) > 0) and (SRL.CountColor(CTS0(19109, 0), B) > 0)
+  Shields := ['Avernic defender', 'Dragon defender', 'Rune defender',
+              'Adamant defender', 'Mithril defender', 'Black defender',
+              'Steel defender', 'Iron defender', 'Bronze defender',
+              'Dragonfire shield', 'Toktz-ket-xil', 'Twisted buckler',
+              'Dragonfire ward', 'Odium ward', 'Book of law',
+              'Book of darkness', 'Unholy book', 'Book of war', ''];
+
+  SpecWeapons := ['Dragon claws', '24225', 'Abyssal dagger',
+                  'Abyssal dagger (p++)', 'Dragon dagger', 'Dragon dagger(p++)',
+                  'Magic shortbow (i)', 'Dragon crossbow', ''];
+
+  for Weapon in Weapons do
+    if Equipment.FindItem(Weapon) then Break;
+
+  for Shield in Shields do
+    if Equipment.FindItem(Shield) then Break;
+
+  for SpecWeapon in SpecWeapons do
+    if Inventory.FindItem(SpecWeapon) then Break;
+
+  case SpecWeapon of
+    'Dragon claws':         MinSpec := 50;
+    '24225':                MinSpec := 50;
+    'Abyssal dagger':       MinSpec := 50;
+    'Abyssal dagger (p++)': MinSpec := 50;
+    'Dragon dagger':        MinSpec := 25;
+    'Dragon dagger(p++)':   MinSpec := 25;
+    'Magic shortbow (i)':   MinSpec := 50;
+    'Dragon crossbow':      MinSpec := 60;
+    else
+    begin
+      case Weapon of
+        'Abyssal bludgeon':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 50;
+          end;
+
+        'Abyssal dagger':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 50;
+          end;
+
+        'Abyssal dagger (p++)':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 50;
+          end;
+
+        'Saradomin sword':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 100;
+          end;
+
+        'Dragon scimitar':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 55;
+          end;
+
+        'Magic shortbow (i)':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 50;
+          end;
+
+        'Armadyl crossbow':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 50;
+          end;
+
+        'Dragon crossbow':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 60;
+          end;
+
+        else
+          MinSpec := 200; //never spec
+      end;
+    end;
+  end;
 end;
+
+procedure TNMZFighter.Init; override;
+begin
+  Name := 'Nightmare Zone';
+  Version := 'v2.1.0';
+
+  inherited;
+
+  RSWDream.Setup('x5284y280');
+  RSWReal.Setup('x5631y3844');
+
+  Self.SetupPotions;
+  Self.SetupBarrels;
+  Self.SetupPowerUps;
+
+  DreamMiddle := [5456, 453];
+  MinAbsPoints := 250;
+
+  PrayFlickTimer.Init(60000);
+  WalkMiddleTimer.Init(180000);
+
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  Self.SetupWeapons;
+  Self.SetupDamageItem;
+end;
+
 
 function TNMZFighter.InDream: Boolean;
 begin
-  Result := InsideDream := Self.InMultiCombat(RSClient.Mode);
+  Result := InsideDream := MainScreen.InMultiCombat;
 
   if Result then
   begin
     BoostTimer.Resume;
     PrayFlickTimer.Resume;
     PowerSurgeTimer.Resume;
+    ZapperTimer.Resume;
   end
   else
   begin
@@ -224,24 +309,17 @@ begin
     BoostTimer.Pause;
     PrayFlickTimer.Pause;
     PowerSurgeTimer.Pause;
+    ZapperTimer.Pause;
+
+    BoostTimer.Timeout := GetTickCount;
+    PrayFlickTimer.Timeout := GetTickCount;
+    PowerSurgeTimer.Timeout := GetTickCount;
+    ZapperTimer.Timeout := GetTickCount;
   end;
 end;
 
-function TNMZFighter.HasBoostPot: Boolean;
-var
-  PotDose: TRSItem;
-  Slots: TIntegerArray;
-begin
-  if not Inventory.Open then
-    Exit;
 
-  for PotDose in BoostPotion do
-    Inventory.FindItem(PotDose, Slots);
-
-  Result := Slots <> [];
-end;
-
-
+//Outside Dream.
 function TNMZFighter.CountDoses(Potion: TRSItemArray): Int32;
 var
   PotDose: TRSItem;
@@ -259,6 +337,84 @@ begin
     Result := Random(80, 999);
 end;
 
+
+function TNMZFighter.HasEnoughBoost: Boolean;
+begin
+  Result := Inventory.CountItem(BoostPotion[3]) = BoostAmount;
+end;
+
+function TNMZFighter.HasEnoughAbs: Boolean;
+begin
+  Result := Inventory.CountItem(AbsPotion[3]) >= AbsAmount;
+end;
+
+
+function TNMZFighter.WithdrawPotion(Barrel: PRSObject): Boolean;
+var
+  Str: String;
+begin
+  case Barrel of
+    BoostBarrel: Str := 'Take ' + Potion;
+    AbsBarrel:   Str := 'Take Absorption';
+  end;
+
+  if Barrel^.WalkSelectOption([Str]) then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := Chat.FindQuery('How many doses', 5000, 100);
+  end;
+end;
+
+function TNMZFighter.DepositPotion(Barrel: PRSObject): Boolean;
+begin
+  if Barrel^.WalkSelectOption(['Store']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
+  end;
+end;
+
+function TNMZFighter.HandleQuery(Amount: Int32): Boolean;
+begin
+  Result := Chat.AnswerQuery('How many', ToStr(Amount), 2000, 100);
+end;
+
+function TNMZFighter.TalkWithDominic: Boolean;
+begin
+  if RSNPCs.DominicOnion.WalkSelectOption(['Dream']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
+  end;
+end;
+
+function TNMZFighter.HandleNMZSetup: Boolean;
+var
+  TPA: TPointArray;
+begin
+  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds) then
+  begin
+    Mouse.Move(TPA.Bounds);
+    MainScreen.IsUpText('Continue');
+    Mouse.Click(MOUSE_LEFT);
+    Result := WaitUntil(Self.InDream, 200, 10000);
+  end;
+end;
+
+
+//Inside Dream.
+function TNMZFighter.HasBoostPot: Boolean;
+var
+  PotDose: TRSItem;
+  Slots: TIntegerArray;
+begin
+  if not Inventory.Open then Exit;
+
+  for PotDose in BoostPotion do
+    Inventory.FindItem(PotDose, Slots);
+
+  Result := Slots <> [];
+end;
 
 function TNMZFighter.NeedBoost: Boolean;
 var
@@ -286,7 +442,7 @@ end;
 
 function TNMZFighter.NeedAbsorption: Boolean;
 begin
-  Result := Self.GetAbsorptionPoints < MinAbsPoints;
+  Result := (Self.GetAbsorptionPoints < MinAbsPoints) and Inventory.FindItems(AbsPotion);
 end;
 
 function TNMZFighter.NeedLowerHP: Boolean;
@@ -306,31 +462,6 @@ begin
   ExtraInfo := ' Boosted: ' + ToStr(Boosted) + ' and Result: ' + ToStr(Result);
 end;
 
-function TNMZFighter.CanSpec: Boolean;
-var
-  BoostName: String := ToStr(BoostPotion[0]);
-begin
-  if BoostName.Contains('Overload') then
-    Result := (Minimap.GetSpecLevel >= MinSpec) and (Inventory.FindItem(24225) and Inventory.HasSpace(1))
-  else
-    Result := Minimap.GetSpecLevel >= MinSpec;
-end;
-
-function TNMZFighter.PowerUpAvailable: Boolean;
-begin
-  Writeln('Recurrent damage: ', RecurrentDamage.Find);
-  Writeln('Power surge: ', PowerSurge.Find);
-  Writeln('Zapper: ', Zapper.Find);
-
-  Result := (RecurrentDamage.Find <> []) or (PowerSurge.Find <> []);
-end;
-
-function TNMZFighter.NeedReEquip: Boolean;
-begin
-  if not PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= MinSpec) then
-    Exit;
-  Result := Inventory.FindItem('Toktz-xil-ak') or Inventory.FindItem('Dragon defender');
-end;
 
 
 function TNMZFighter.LowerHealth: Boolean;
@@ -368,8 +499,7 @@ var
   Slot, Slot2: Int32;
   Str: String;
 begin
-  if not Inventory.Open then
-    Exit;
+  if not Inventory.Open then Exit;
 
   for PotDose in Potion do
   begin
@@ -416,97 +546,75 @@ begin
     PrayFlickTimer.Restart(Random(100, 20000));
 end;
 
+
+function TNMZFighter.PowerUpAvailable: Boolean;
+begin
+  Result := (RSObjects.NMZRecurrentDamage.Find <> []) or
+            (RSObjects.NMZPowerSurge.Find <> []) or
+            (ZapperTimer.IsFinished and (RSObjects.NMZZapper.Find <> []));
+end;
+
 function TNMZFighter.GetPowerUp: Boolean;
 begin
-  if RecurrentDamage.Click then
+  if RSObjects.NMZRecurrentDamage.Click then
   begin
-    Minimap.WaitPlayerMoving(300, 6000);
+    Minimap.WaitPlayerMoving(300, 10000);
     Result := WaitUntil(not Self.PowerUpAvailable, 100, 5000);
-  end else if PowerSurge.Click then
+  end
+  else if RSObjects.NMZPowerSurge.Click then
   begin
-    Minimap.WaitPlayerMoving(300, 6000);
-    Result := WaitUntil(not Self.PowerUpAvailable, 100, 5000);
+    Minimap.WaitPlayerMoving(300, 10000);
+    if Result := WaitUntil(not Self.PowerUpAvailable, 100, 5000) then
+      PowerSurgeTimer.Restart;
+  end
+  else if RSObjects.NMZZapper.Click then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    ZapperTimer.Restart;
+    Result := True;
   end;
+end;
+
+
+function TNMZFighter.CanSpec: Boolean;
+begin
+  Result := (Minimap.GetSpecLevel >= MinSpec) and
+            ((SpecWeapon = Weapon) or Inventory.FindItem(Weapon) or
+            (Inventory.FindItem(SpecWeapon) and Inventory.HasSpace(1)));
 end;
 
 function TNMZFighter.DoSpec: Boolean;
-var
-  BoostName: String := ToStr(BoostPotion[0]);
 begin
-  if BoostName.Contains('Overload') then
-    if Inventory.ClickItem(24225) then
-      Result := WaitUntil(
-        Inventory.FindItem('Toktz-xil-ak') and Inventory.FindItem('Dragon defender'),
-        100,
-        2000
-      )
-    else if Inventory.FindItem('Toktz-xil-ak') and Inventory.FindItem('Dragon defender') then
-      Result := True;
+  if SpecWeapon <> Weapon then
+  begin
+    if Inventory.ClickItem(SpecWeapon) then
+      Result := WaitUntil(Inventory.FindItem(Weapon), 100, 2000);
+  end;
 
-  if Result := Minimap.EnableSpec(MinSpec) then
-    Wait(200, 300);
+  Result := Minimap.EnableSpec(MinSpec);
+  if (SpecWeapon = '24225') then Result := True;
+
+  if Result and (SpecWeapon <> '24225') then
+    Wait(200, 300)
+  else
+    Wait(15, 50);
 end;
 
-function TNMZFighter.ReEquipGear: Boolean;
-begin
-  if Inventory.ClickItem('Toktz-xil-ak') then
-    if not WaitUntil(not Inventory.FindItem('Toktz-xil-ak'), 100, 2000) then
-      Exit;
 
-  if Inventory.ClickItem('Dragon defender') then
-    if not WaitUntil(not Inventory.FindItem('Dragon defender'), 100, 2000) then
-      Exit;
+function TNMZFighter.NeedRegear: Boolean;
+begin
+  if not PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= MinSpec) then
+    Exit;
+  Result := Inventory.FindItem(Weapon) or Inventory.FindItem(Shield);
+end;
+
+function TNMZFighter.ReGear: Boolean;
+begin
+  Inventory.ClickItem(Weapon);
+  Inventory.ClickItem(Shield);
 
   Wait(600, 800);
-  Result := True;
-end;
-
-
-function TNMZFighter.HasEnoughBoost: Boolean;
-begin
-  Result := Inventory.CountItem(BoostPotion[3]) = BoostAmount;
-end;
-
-function TNMZFighter.HasEnoughAbs: Boolean;
-begin
-  Result := Inventory.CountItem(AbsPotion[3]) >= AbsAmount;
-end;
-
-function TNMZFighter.WithdrawPotion(Barrel: PRSObject): Boolean;
-begin
-  if Barrel^.WalkSelectOption(['Take']) then
-  begin
-    Minimap.WaitPlayerMoving(300, 10000);
-    Result := Chat.FindQuery('How many doses', 5000, 100);
-  end;
-end;
-
-function TNMZFighter.DepositPotion(Barrel: PRSObject): Boolean;
-begin
-  if Barrel^.WalkSelectOption(['Store']) then
-  begin
-    Minimap.WaitPlayerMoving(300, 10000);
-    Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
-  end;
-end;
-
-function TNMZFighter.HandleQuery(Amount: Int32): Boolean;
-begin
-  Result := Chat.AnswerQuery('How many', ToStr(Amount), 2000, 100);
-end;
-
-
-function TNMZFighter.HandleNMZSetup: Boolean;
-var
-  TPA: TPointArray;
-begin
-  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds) then
-  begin
-    Mouse.Move(TPA.Bounds);
-    MainScreen.IsUpText('Continue');
-    Mouse.Click(MOUSE_LEFT);
-    Result := WaitUntil(Self.InDream, 200, 10000);
-  end;
+  Result := not Self.NeedRegear;
 end;
 
 
@@ -538,7 +646,7 @@ begin
     else if Minimap.IsSpecEnabled then
       Exit(ENMZState.WAIT_STATE1)
 
-    else if Self.NeedReEquip then
+    else if Self.NeedRegear then
       Exit(ENMZState.REEQUIP_GEAR)
 
     else if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished then
@@ -633,38 +741,35 @@ procedure TNMZFighter.Run;
 begin
   ClearDebug;
   Self.Init;
-  Self.SetupDamageItem;
 
   while True do
   begin
     State := Self.GetState;
     Action := ToStr(State);
-    ExtraInfo := 'InDream: ' + ToStr(InDream) +
+    ExtraInfo := ' InDream: ' + ToStr(InDream) +
                  ' DreamSetup: ' + ToStr(DreamSetup) +
                  ' BoostTimer: ' + ToStr(BoostTimer.TimeRemaining) +
                  STR_NEW_LINE +
                  ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished) +
-                 'NeedBoost: ' + ToSTR(Self.NeedBoost);
+                 ' NeedBoost: ' + ToSTR(Self.NeedBoost);
     Self.ProcessWhileWaiting;
 
     case State of
+      //Outside Dream.
       OPEN_NMZREWARD: ;
       BUY_POTS: ;
 
       WITHDRAW_BOOST: Self.WithdrawPotion(BoostBarrel);
-      WITHDRAW_ABSORPTION: Self.WithdrawPotion(@RSObjects.NMZAbsorptionBarrel);
+      WITHDRAW_ABSORPTION: Self.WithdrawPotion(AbsBarrel);
+
       ANSWER_BOOST: Self.HandleQuery(Self.PotAmountNeeded(BoostPotion));
       ANSWER_ABSORPTION: Self.HandleQuery(Self.PotAmountNeeded(AbsPotion));
+
       DEPOSIT_BOOST: Self.DepositPotion(BoostBarrel);
-      DEPOSIT_ABSORPTION: Self.DepositPotion(@RSObjects.NMZAbsorptionBarrel);
+      DEPOSIT_ABSORPTION: Self.DepositPotion(AbsBarrel);
       HANDLE_DEPOSIT: Chat.ClickOption('Yes');
 
-      TALK_DOMINIC:
-        if RSNPCs.DominicOnion.SelectOption(['Dream']) then
-        begin
-          Minimap.WaitPlayerMoving(300, 10000);
-          WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
-        end;
+      TALK_DOMINIC: Self.TalkWithDominic;
       CHOOSE_DREAM: Chat.ClickOption('Previous', False);
       HANDLE_DOMINIC: Chat.ClickContinue;
       PAY_DOMINIC: DreamSetup := Chat.ClickOption('Yes');
@@ -673,21 +778,26 @@ begin
       HANDLE_NMZSETUP: Self.HandleNMZSetup;
       CLOSE_INTERFACE: InterfaceArea.Close;
 
+      //Inside Dream.
       DRINK_BOOST: Self.DrinkPotion(BoostPotion);
       DRINK_ABSORPTION: Self.DrinkPotion(AbsPotion);
+
       WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
-      WAIT_STATE1: Wait(800, 1200);
-      WAIT_STATE2: Wait(800, 1200);
-      WAIT_STATE3: Wait(800, 1200);
+      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: Wait(800, 1200);
+
       USE_POWER: Self.GetPowerUp;
       USE_SPEC: Self.DoSpec;
-      REEQUIP_GEAR: Self.ReEquipGear;
+      REEQUIP_GEAR: Self.ReGear;
+
       LOWER_HEALTH: Self.LowerHealth;
       FLICK_PRAYER: Self.FlickPrayer;
     end;
 
     if InsideDream then
-      Self.DoAntiban(False, False)
+    begin
+      if PowerSurgeTimer.IsFinished then
+        Self.DoAntiban(False, False);
+    end
     else if Self.DoAntiban and not RSClient.IsLoggedIn then
       Login.LoginPlayer;
   end;
@@ -698,7 +808,7 @@ var
 
 type
   TNMZConfig = record(TScriptConfig)
-    PotionSelector: TLabeledEdit;
+    PotionSelector: TLabeledCombobox;
     NMZInfo: TLabel;
   end;
 
@@ -706,7 +816,7 @@ procedure TNMZConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  Potion := PotionSelector.Edit.getText;
+  CurrentPotion := ERSNMZPotion(PotionSelector.Combobox.getItemIndex)
 end;
 
 procedure TNMZConfig.Setup; override;
@@ -716,11 +826,15 @@ begin
   with PotionSelector do
   begin
     Init(ScriptSettingsPanel);
-    SetCaption('Boost potion (must be the exact name without doses):');
+    SetCaption('NMZ Potion:');
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
     SetWidth(200);
-    SetText(Potion);
+    Combobox.setStyle(csDropDownList);
+    AddItem('Overload');
+    AddItem('Super ranging');
+    AddItem('Super magic');
+    Combobox.setItemIndex(Ord(CurrentPotion));
   end;
 
   with NMZInfo do
@@ -728,12 +842,14 @@ begin
     Init(ScriptSettingsPanel);
     setParent(ScriptSettingsPanel);
 
-    SetCaption('Only works inside dream atm and needs a major rework.' +
+    SetCaption('Should work with most setups.' +
                 STR_NEW_LINE +
-               'Should be safe but use with caution.');
+               'Start with main weapon and shield equipped and' +
+               STR_NEW_LINE +
+               'spec weapon in the inventory.');
 
     SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(PotionSelector.getTop + PotionSelector.getHeight + 2);
+    SetTop(PotionSelector.Combobox.GetTop + PotionSelector.Combobox.getHeight + 2);
   end;
 
   StartButton.setOnClick(@Self.StartScript);
