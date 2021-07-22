@@ -320,6 +320,21 @@ end;
 
 
 //Outside Dream.
+function TNMZFighter.OpenChest: Boolean;
+begin
+  if RSObjects.NMZChest.WalkClick then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := WaitUntil(InterfaceArea.IsClassicOpen, 100, 5000);
+  end;
+end;
+
+function TNMZFighter.HandleChest: Boolean;
+begin
+  Result := True;
+end;
+
+
 function TNMZFighter.CountDoses(Potion: TRSItemArray): Int32;
 var
   PotDose: TRSItem;
@@ -756,8 +771,8 @@ begin
 
     case State of
       //Outside Dream.
-      OPEN_NMZREWARD: ;
-      BUY_POTS: ;
+      OPEN_NMZREWARD: Self.OpenChest;
+      BUY_POTS: Self.HandleChest;
 
       WITHDRAW_BOOST: Self.WithdrawPotion(BoostBarrel);
       WITHDRAW_ABSORPTION: Self.WithdrawPotion(AbsBarrel);
@@ -844,9 +859,9 @@ begin
 
     SetCaption('Should work with most setups.' +
                 STR_NEW_LINE +
-               'Start with main weapon and shield equipped and' +
+               'Start with Main Weapon and Shield equipped and' +
                STR_NEW_LINE +
-               'spec weapon in the inventory.');
+               'Spec Weapon in the inventory.');
 
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(PotionSelector.Combobox.GetTop + PotionSelector.Combobox.getHeight + 2);
