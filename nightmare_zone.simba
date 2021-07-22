@@ -190,13 +190,13 @@ begin
                   'Magic shortbow (i)', 'Dragon crossbow', ''];
 
   for Weapon in Weapons do
-    if Equipment.FindItem(Weapon) then Break;
+    if (Weapon = '') or Equipment.FindItem(Weapon) then Break;
 
   for Shield in Shields do
-    if Equipment.FindItem(Shield) then Break;
+    if (Shield = '') or Equipment.FindItem(Shield) then Break;
 
   for SpecWeapon in SpecWeapons do
-    if Inventory.FindItem(SpecWeapon) then Break;
+    if (SpecWeapon = '') or Inventory.FindItem(SpecWeapon) then Break;
 
   case SpecWeapon of
     'Dragon claws':         MinSpec := 50;
@@ -291,6 +291,37 @@ begin
   Self.SetupDamageItem;
 end;
 
+//override to move the camera less.
+function TRSObject._HoverHelper(Attempts: Int32): Boolean; override;
+var
+  Attempt: Int32;
+  ATPA: T2DPointArray;
+  Points: TPointArray;
+  CompassAngle: Double;
+begin
+  for Attempt := 0 to Attempts do
+  begin
+    if Filter.UpText and MainScreen.IsUpText(UpText) then
+      Exit(True);
+
+    if (ATPA := Self.Find) <> [] then
+    begin
+      if Attempt < 2 then
+        Points := ATPA[0] // 0 for the closest one.
+      else
+        Points := ATPA[Random(0, High(ATPA))];
+
+      if Points <> [] then
+      begin
+        Mouse.Move(Points[Random(0, High(Points))]);
+        if not Filter.UpText then
+          Exit(True);
+      end;
+    end
+    else Exit(False);
+  end;
+end;
+
 
 function TNMZFighter.InDream: Boolean;
 begin
@@ -335,13 +366,12 @@ begin
 end;
 
 
-function TNMZFighter.CountDoses(Potion: TRSItemArray): Int32;
+function TNMZFighter.CountDoses(PotionArray: TRSItemArray): Int32;
 var
-  PotDose: TRSItem;
   i: Int32;
 begin
-  for i := 0 to High(Potion) do
-    Result += Inventory.CountItem(Potion[i]) * (i + 1);
+  for i := 0 to High(PotionArray) do
+    Result += Inventory.CountItem(PotionArray[i]) * (i + 1);
 end;
 
 function TNMZFighter.PotAmountNeeded(Potion: TRSItemArray): Int32;
@@ -390,8 +420,11 @@ begin
 end;
 
 function TNMZFighter.HandleQuery(Amount: Int32): Boolean;
+var
+  InvCount: Int32 := Inventory.Count;
 begin
-  Result := Chat.AnswerQuery('How many', ToStr(Amount), 2000, 100);
+  Chat.AnswerQuery('How many', ToStr(Amount), 2000, 100);
+  Result := WaitUntil(InvCount <> Inventory.Count, 100, 3000);
 end;
 
 function TNMZFighter.TalkWithDominic: Boolean;
@@ -400,6 +433,16 @@ begin
   begin
     Minimap.WaitPlayerMoving(300, 10000);
     Result := WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
+  end;
+end;
+
+
+function TNMZFighter.OpenNMZSetup: Boolean;
+begin
+  if RSObjects.NMZPotion.WalkClick then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := WaitUntil(InterfaceArea.IsClassicOpen, 100, 5000);
   end;
 end;
 
@@ -507,43 +550,46 @@ begin
     Result := True;
 end;
 
-function TNMZFighter.DrinkPotion(Potion: TRSItemArray): Boolean;
+function TNMZFighter.DrinkPotion(PotionArray: TRSItemArray): Boolean;
 var
-  DoseCount: Int32 := Self.CountDoses(Potion);
-  PotDose: TRSItem;
-  Slot, Slot2: Int32;
-  Str: String;
+  DoseCount: Int32 := Self.CountDoses(PotionArray);
+  i: Int32;
+  Slot: Int32;
+  CurrentHP: Int32;
+  PotStr: String := ToStr(PotionArray[0]);
 begin
   if not Inventory.Open then Exit;
 
-  for PotDose in Potion do
+  for i := 0 to High(PotionArray) do
   begin
-    Str := ToStr(PotDose);
-    if Inventory.FindItem(PotDose, Slot) then
-      Break
-    else if Str.Contains('4') then
-      Exit;
+    if Inventory.FindItem(PotionArray[i], Slot) then Break
+    else if i = High(PotionArray) then Exit;
   end;
+
+  if PotStr.Contains('Overload') then
+    CurrentHP := Minimap.GetHPLevel;
 
   if Inventory.ClickSlot(Slot) then
     Result := WaitUntil(
-      Self.CountDoses(Potion) < DoseCount, 100, 2000
-    );
+              Self.CountDoses(PotionArray) < DoseCount, 100, 2000);
 
   if Result then
   begin
-    if (Potion = BoostPotion) then
+    if (PotionArray = BoostPotion) then
     begin
-      Boosted := True;
-      BoostTimer.Restart(Random(1000, 15000));
-      if Str.Contains('Overload') then
-        Wait(8000, 10000)
+      if PotStr.Contains('Overload') then
+      begin
+        if not WaitUntil(Minimap.GetHPLevel <= CurrentHP - 45, 100, 12000) then
+          Exit(False);
+      end
       else
         Wait(800, 1200);
+
+      Boosted := True;
+      BoostTimer.Restart(Random(1000, 15000));
     end
 
-    else
-      MinAbsPoints := Random(300, 940);
+    else MinAbsPoints := Random(300, 940);
   end;
 end;
 
@@ -579,14 +625,13 @@ begin
   else if RSObjects.NMZPowerSurge.Click then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
-    if Result := WaitUntil(not Self.PowerUpAvailable, 100, 5000) then
+    if Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000) then
       PowerSurgeTimer.Restart;
   end
-  else if RSObjects.NMZZapper.Click then
+  else if Result := RSObjects.NMZZapper.Click then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
     ZapperTimer.Restart;
-    Result := True;
   end;
 end;
 
@@ -620,7 +665,8 @@ function TNMZFighter.NeedRegear: Boolean;
 begin
   if not PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= MinSpec) then
     Exit;
-  Result := Inventory.FindItem(Weapon) or Inventory.FindItem(Shield);
+  Result := ((Weapon <> '') and Inventory.FindItem(Weapon)) or
+            ((Shield <> '') and Inventory.FindItem(Shield));
 end;
 
 function TNMZFighter.ReGear: Boolean;
@@ -766,7 +812,10 @@ begin
                  ' BoostTimer: ' + ToStr(BoostTimer.TimeRemaining) +
                  STR_NEW_LINE +
                  ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished) +
-                 ' NeedBoost: ' + ToSTR(Self.NeedBoost);
+                 ' NeedBoost: ' + ToSTR(Self.NeedBoost) +
+                 STR_NEW_LINE +
+                 ' Weapon: ' + ToStr(Weapon) + ' Shield: ' + ToStr(Shield) +
+                 ' SpecWeapon: ' + ToStr(SpecWeapon);
     Self.ProcessWhileWaiting;
 
     case State of
@@ -789,7 +838,7 @@ begin
       HANDLE_DOMINIC: Chat.ClickContinue;
       PAY_DOMINIC: DreamSetup := Chat.ClickOption('Yes');
 
-      OPEN_NMZSETUP: RSObjects.NMZPotion.WalkClick;
+      OPEN_NMZSETUP: Self.OpenNMZSetup;
       HANDLE_NMZSETUP: Self.HandleNMZSetup;
       CLOSE_INTERFACE: InterfaceArea.Close;
 
