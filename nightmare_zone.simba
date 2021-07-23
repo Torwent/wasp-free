@@ -45,6 +45,7 @@ type
     DRINK_ABSORPTION,
 
     WALK_MIDDLE,
+    ATTACK_NPC,
     WAIT_STATE1,
     WAIT_STATE2,
     WAIT_STATE3,
@@ -54,7 +55,9 @@ type
     REEQUIP_GEAR,
 
     LOWER_HEALTH,
-    FLICK_PRAYER
+    FLICK_PRAYER,
+
+    END_SCRIPT
   );
 
   TNMZFighter = record(TBaseScript)
@@ -63,6 +66,9 @@ type
     RSWDream: TRSWalker;
 
     InsideDream: Boolean;
+    DreamSetup: Boolean;
+    Boosted: Boolean;
+
     DreamMiddle: TPoint;
 
     Potion: String;
@@ -71,26 +77,24 @@ type
 
     BoostBarrel: PRSObject;
     AbsBarrel: PRSObject;
-
-    PowerSurgeTimer: TCountDown;
-    ZapperTimer: TCountDown;
+    EnemyNPC: TRSNPC;
 
     BoostAmount: Int32;
     AbsAmount: Int32;
     MinAbsPoints: Int32;
+    MinSpec: Int32;
 
+    DamageItem: TRSItem;
     Weapon: TRSItem;
     Shield: TRSItem;
     SpecWeapon: TRSItem;
-    MinSpec: Int32;
 
-    DreamSetup: Boolean;
-
-    DamageItem: TRSItem;
-    Boosted: Boolean;
+    PowerSurgeTimer: TCountDown;
+    ZapperTimer: TCountDown;
     BoostTimer: TCountDown;
     PrayFlickTimer: TCountDown;
     WalkMiddleTimer: TCountDown;
+    XPDropTimer: TCountDown;
   end;
 
 procedure TAntiban.Setup; override;
@@ -279,6 +283,10 @@ begin
   Self.SetupBarrels;
   Self.SetupPowerUps;
 
+  EnemyNPC.SetupCommon;
+  EnemyNPC.UpText := ['Attack'];
+  EnemyNPC.Filter.Finder := False;
+
   DreamMiddle := [5456, 453];
   MinAbsPoints := 250;
 
@@ -322,7 +330,6 @@ begin
   end;
 end;
 
-
 function TNMZFighter.InDream: Boolean;
 begin
   Result := InsideDream := MainScreen.InMultiCombat;
@@ -333,6 +340,7 @@ begin
     PrayFlickTimer.Resume;
     PowerSurgeTimer.Resume;
     ZapperTimer.Resume;
+    WL.Activity.Restart;
   end
   else
   begin
@@ -436,6 +444,11 @@ begin
   end;
 end;
 
+function TNMZFighter.HandlePayment: Boolean;
+begin
+  if Chat.ClickOption('Yes') then
+    Result := DreamSetup := WaitUntil(not ('Agree' in Chat.GetChatTitle), 100, 3000);
+end;
 
 function TNMZFighter.OpenNMZSetup: Boolean;
 begin
@@ -679,6 +692,11 @@ begin
 end;
 
 
+function TNMZFighter.AttackNPC: Boolean;
+begin
+  Result := EnemyNPC.Click;
+end;
+
 
 function TNMZFighter.GetState: ENMZState;
 var
@@ -714,6 +732,8 @@ begin
     begin
       if Self.PowerUpAvailable then
         Exit(ENMZState.USE_POWER)
+      else if XPDropTimer.IsFinished then
+        Exit(ENMZState.ATTACK_NPC)
       else
         Exit(ENMZState.WAIT_STATE2);
     end
@@ -727,6 +747,9 @@ begin
 
   else
   begin
+    if WL.Activity.IsFinished then
+      Exit(ENMZState.END_SCRIPT);
+
     Query := Chat.GetQuery;
     Title := Chat.GetChatTitle;
 
@@ -778,6 +801,11 @@ begin
     begin
       if InterfaceArea.IsClassicOpen then
         Exit(ENMZState.HANDLE_NMZSETUP)
+      else if 'When you purchase' in Chat.GetChat then
+      begin
+        DreamSetup := False;
+        Exit(ENMZState.TALK_DOMINIC);
+      end
       else
         Exit(ENMZState.OPEN_NMZSETUP);
     end
@@ -819,6 +847,8 @@ begin
     Self.ProcessWhileWaiting;
 
     case State of
+      END_SCRIPT: Break;
+
       //Outside Dream.
       OPEN_NMZREWARD: Self.OpenChest;
       BUY_POTS: Self.HandleChest;
@@ -836,7 +866,7 @@ begin
       TALK_DOMINIC: Self.TalkWithDominic;
       CHOOSE_DREAM: Chat.ClickOption('Previous', False);
       HANDLE_DOMINIC: Chat.ClickContinue;
-      PAY_DOMINIC: DreamSetup := Chat.ClickOption('Yes');
+      PAY_DOMINIC: Self.HandlePayment;
 
       OPEN_NMZSETUP: Self.OpenNMZSetup;
       HANDLE_NMZSETUP: Self.HandleNMZSetup;
@@ -847,7 +877,8 @@ begin
       DRINK_ABSORPTION: Self.DrinkPotion(AbsPotion);
 
       WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
-      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: Wait(800, 1200);
+      ATTACK_NPC: Self.AttackNPC;
+      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPBar.WaitXPDrop(1200);
 
       USE_POWER: Self.GetPowerUp;
       USE_SPEC: Self.DoSpec;
@@ -869,6 +900,11 @@ end;
 
 var
   NMZFighter: TNMZFighter;
+
+function TRSXPBar.FindXPDrop: Boolean; override;
+begin
+  if Result := inherited then NMZFighter.XPDropTimer.Restart;
+end;
 
 type
   TNMZConfig = record(TScriptConfig)
