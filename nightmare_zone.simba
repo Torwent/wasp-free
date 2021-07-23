@@ -305,7 +305,6 @@ var
   Attempt: Int32;
   ATPA: T2DPointArray;
   Points: TPointArray;
-  CompassAngle: Double;
 begin
   for Attempt := 0 to Attempts do
   begin
