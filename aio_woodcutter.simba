@@ -314,8 +314,7 @@ begin
     'Strung rabbit foot'
   ];
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
   Options.SetZoomLevel(SRL.TruncatedGauss(35, 75));
 
