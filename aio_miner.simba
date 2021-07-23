@@ -109,10 +109,14 @@ begin
 
   DropList := [
     'Clay', 'Tin ore', 'Copper ore',
-    'Iron ore', 'Silver ore', 'Gold ore'
+    'Iron ore', 'Silver ore', 'Gold ore', 'Uncut sapphire'
   ];
 
   BankList := DropList;
+
+  BankList += 'Uncut emerald';
+  BankList += 'Uncut ruby';
+  BankList += 'Uncut diamond';
 
   BankList += 'Coal';
   BankList += 'Mithril ore';
@@ -469,7 +473,7 @@ begin
 
     case State of
       EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      EMinerState.DEPOSIT_ITEMS: Bank.DepositItems(BankTab, BankList, True);
+      EMinerState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
       EMinerState.CLOSE_INTERFACE: InterfaceArea.Close(True);
       EMinerState.WALK_SPOT: RSW.WebWalk(RSW.GetClosestTile(RSRock^.Tiles), 5, 0.2);
       EMinerState.WAIT_STATE: Self.WaitMining;

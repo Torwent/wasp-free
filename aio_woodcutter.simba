@@ -525,7 +525,7 @@ begin
 
     case State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItems(BankTab, BankList, True);
+      EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
       EWoodcutterState.CLOSE_INTERFACE: InterfaceArea.Close(True);
       EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSW.GetClosestTile(RSTree^.Tiles), 5, 0.2);
       EWoodcutterState.WAIT_STATE: Self.WaitCutting;
