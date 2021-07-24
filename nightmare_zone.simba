@@ -1,4 +1,4 @@
-{$DEFINE SRL_USE_REMOTEINPUT}
+{.$DEFINE SRL_USE_REMOTEINPUT}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
@@ -281,6 +281,7 @@ begin
   end;
 end;
 
+
 procedure TNMZFighter.Init; override;
 begin
   Name := 'Nightmare Zone';
@@ -309,6 +310,9 @@ begin
   Self.SetupWeapons;
   Self.SetupDamageItem;
 end;
+
+var
+  NMZFighter: TNMZFighter;
 
 //override to move the camera less.
 function TRSObject._HoverHelper(Attempts: Int32): Boolean; override;
@@ -339,6 +343,13 @@ begin
     else Exit(False);
   end;
 end;
+
+function TRSXPBar.FindXPDrop: Boolean; override;
+begin
+  if Result := inherited then NMZFighter.XPDropTimer.Restart;
+end;
+
+
 
 function TNMZFighter.InDream: Boolean;
 begin
@@ -742,6 +753,8 @@ begin
     begin
       if Self.PowerUpAvailable then
         Exit(ENMZState.USE_POWER)
+      else if XPBar.FindXPDrop then
+        Exit(ENMZState.WAIT_STATE2)
       else if XPDropTimer.IsFinished then
         Exit(ENMZState.ATTACK_NPC)
       else
@@ -908,14 +921,6 @@ begin
   end;
 end;
 
-var
-  NMZFighter: TNMZFighter;
-
-function TRSXPBar.FindXPDrop: Boolean; override;
-begin
-  if Result := inherited then NMZFighter.XPDropTimer.Restart;
-end;
-
 type
   TNMZConfig = record(TScriptConfig)
     PotionSelector: TLabeledCombobox;
@@ -975,11 +980,9 @@ end;
 var
   NMZConfig: TNMZConfig;
 
-{$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
   Sync(@NMZConfig.Run);
   {$ENDIF}
   NMZFighter.Run
 end.
-{$ENDIF}
