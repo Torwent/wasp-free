@@ -147,6 +147,18 @@ begin
   AbsBarrel := @RSObjects.NMZAbsorptionBarrel;
 end;
 
+procedure TNMZFighter.SetupTimers;
+begin
+  DreamMiddle := [5456, 453];
+
+  PrayFlickTimer.Init(60000);
+  WalkMiddleTimer.Init(180000);
+  WalkMiddleTimer.Timeout := GetTickCount;
+  XPDropTimer.Init(120000);
+  XPDropTimer.Timeout := GetTickCount;
+end;
+
+
 procedure TNMZFighter.SetupPowerUps;
 begin
   PowerSurgeTimer.Init(45000);
@@ -282,16 +294,15 @@ begin
   Self.SetupPotions;
   Self.SetupBarrels;
   Self.SetupPowerUps;
+  Self.SetupTimers;
 
   EnemyNPC.SetupCommon;
   EnemyNPC.UpText := ['Attack'];
   EnemyNPC.Filter.Finder := False;
 
-  DreamMiddle := [5456, 453];
+
   MinAbsPoints := 250;
 
-  PrayFlickTimer.Init(60000);
-  WalkMiddleTimer.Init(180000);
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
@@ -539,14 +550,14 @@ var
   Slot: Int32;
   CurrentHP: Int32;
 begin
-  if not Inventory.Open then
-    Exit;
+  if not Inventory.Open then Exit;
 
   if Inventory.FindItem(DamageItem, Slot) then
     repeat
+      if not Self.InDream then Exit;
+
       CurrentHP := Minimap.GetHPLevel;
-      if CurrentHP = 1 then
-        Exit(True);
+      if CurrentHP = 1 then Exit(True);
 
       if ToStr(DamageItem) = 'Locator orb' then
         Inventory.ClickSlot(Slot)
