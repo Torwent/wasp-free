@@ -84,7 +84,7 @@ end;
 procedure TAlcher.Init; override;
 begin
   Name := 'AIO Alcher';
-  Version := 'v2.1.0';
+  Version := 'v2.1.1';
 
   inherited;
 
@@ -321,8 +321,8 @@ begin
   else if Chat.HasContinue then
     Exit(EAlcherState.HANDLE_WARNING)
 
-  else if not RSW.AtTile(ScriptBank^.Tiles, 30) and
-          RSW.AtTile(ScriptBank^.Tiles, 800) then
+  else if not RSW.AtTile(ScriptBank^.TileArray, 30) and
+          RSW.AtTile(ScriptBank^.TileArray, 800) then
     Exit(EAlcherState.WALK_ALCH)
 
   else if Magic.IsOpen then
@@ -374,7 +374,7 @@ begin
     Self.ProcessWhileWaiting;
 
     case State of
-      EAlcherState.WALK_ALCH: RSW.ActionWebWalk(ERSAction.ALCH, RSW.GetClosestTile(ScriptBank^.Tiles), 10, 0.2);
+      EAlcherState.WALK_ALCH: RSW.ActionWebWalk(ERSAction.ALCH, RSW.GetClosestTile(ScriptBank^.TileArray), 10, 0.2);
 
       EAlcherState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EAlcherState.WITHDRAW_NATS: Self.Withdraw('Nature rune');

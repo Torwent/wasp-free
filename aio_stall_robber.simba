@@ -60,7 +60,7 @@ end;
 procedure TStallRobber.Init; override;
 begin
   Name := 'AIO StallRobber';
-  Version := 'v2.0.0';
+  Version := 'v2.0.1';
 
   inherited;
 
@@ -84,7 +84,7 @@ begin
     Exit(DROP_LOOT)
   if MainScreen.IsUpText('Steal-from') then
     Exit(ROB_STALL)
-  else if RSW.AtTile(Stall^.Tiles) then
+  else if RSW.AtTile(Stall^.TileArray) then
     Exit(FIND_STALL);
 end;
 

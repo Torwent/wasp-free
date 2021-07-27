@@ -285,7 +285,7 @@ end;
 procedure TNMZFighter.Init; override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v2.1.0';
+  Version := 'v2.1.1';
 
   inherited;
 
@@ -326,7 +326,7 @@ begin
     if Filter.UpText and MainScreen.IsUpText(UpText) then
       Exit(True);
 
-    if (ATPA := Self.Find) <> [] then
+    if Self.Find(ATPA) then
     begin
       if Attempt < 2 then
         Points := ATPA[0] // 0 for the closest one.
@@ -644,9 +644,9 @@ end;
 
 function TNMZFighter.PowerUpAvailable: Boolean;
 begin
-  Result := (RSObjects.NMZRecurrentDamage.Find <> []) or
-            (RSObjects.NMZPowerSurge.Find <> []) or
-            (ZapperTimer.IsFinished and (RSObjects.NMZZapper.Find <> []));
+  Result := RSObjects.NMZRecurrentDamage.Find or
+            RSObjects.NMZPowerSurge.Find or
+            (ZapperTimer.IsFinished and RSObjects.NMZZapper.Find);
 end;
 
 function TNMZFighter.GetPowerUp: Boolean;

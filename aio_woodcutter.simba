@@ -299,7 +299,7 @@ end;
 procedure TWoodcutter.Init; override;
 begin
   Name := 'AIO Woodcutter';
-  Version := 'v2.0.6';
+  Version := 'v2.0.7';
 
   inherited;
 
@@ -393,7 +393,7 @@ end;
 
 function TWoodcutter.CheckNest: Boolean;
 begin
-  Result := RSGroundItems.BirdNest.Find <> [];
+  Result := RSGroundItems.BirdNest.Find;
 end;
 
 function TWoodcutter.PickNest: Boolean;
@@ -497,7 +497,7 @@ begin
   else if Woodcutting then
     Exit(EWoodcutterState.WAIT_STATE)
 
-  else if UseBank and not RSW.AtTile(RSTree^.Tiles, 15) then
+  else if UseBank and not RSW.AtTile(RSTree^.TileArray, 15) then
     Exit(EWoodcutterState.WALK_SPOT)
 
   else if Self.CheckNest then
@@ -527,7 +527,7 @@ begin
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
       EWoodcutterState.CLOSE_INTERFACE: InterfaceArea.Close(True);
-      EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSW.GetClosestTile(RSTree^.Tiles), 5, 0.2);
+      EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree^.TileArray, 10, 0.2);
       EWoodcutterState.WAIT_STATE: Self.WaitCutting;
       EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(70));
       EWoodcutterState.EQUIP_GEAR: Self.EquipGear;

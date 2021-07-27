@@ -46,7 +46,7 @@ end;
 procedure TBuilder.Init; override;
 begin
   Name := 'Phials construction';
-  Version := 'v2.0.0';
+  Version := 'v2.0.1';
 
   inherited;
 
@@ -113,7 +113,7 @@ function TBuilder.GetPlanks: Boolean;
 begin
   if Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click then
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000)
-  else if RSW.WebWalk(RSW.GetClosestTile(RSNPCs.Phials.Tiles), 8, 0.3) and
+  else if RSW.WebWalk(RSNPCs.Phials.TileArray, 8, 0.3) and
           (Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click) then
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
 end;

@@ -91,7 +91,7 @@ end;
 procedure TLogBurner.Init; override;
 begin
   Name := 'AIO Firemaker';
-  Version := 'v2.1.5';
+  Version := 'v2.1.7';
 
   inherited;
 
@@ -120,7 +120,7 @@ begin
   else
     NextStartingPoint := StartingPoints[0];
 
-  Fire^.Tiles := RSW.GetLine(NextStartingPoint, 10, False);
+  Fire^.TileArray := RSW.GetLine(NextStartingPoint, 10, False);
 end;
 
 function TLogBurner.SmallStep: Boolean;
@@ -130,8 +130,8 @@ var
 begin
   for Tile in Tiles do
   begin
-    Fire^.Tiles := [Tile];
-    if Fire^.Find = [] then
+    Fire^.TileArray := [Tile];
+    if Fire^.Find then
     begin
       RSW.WebWalk(Tile, 1, 0.2);
       Exit(True);
@@ -213,18 +213,18 @@ begin
 
   if Inventory.FindItem(Tool.Item) and Inventory.FindItem(Material.Item) then
   begin
-    if RSW.AtTile(ScriptBank^.Tiles, 10) then
+    if RSW.AtTile(ScriptBank^.TileArray, 10) then
       Exit(EBurnerState.TELEPORT)
     else if Inventory.IsFull and not RSW.AtTile(NextStartingPoint, 4) then
     begin
-      if Fire^.Find <> [] then
+      if Fire^.Find then
         Exit(EBurnerState.CHANGE_START)
       else
         Exit(EBurnerState.WALK_SPOT);
     end
     else
     begin
-      Fire^.Tiles := [RSW.GetMyPos];
+      Fire^.TileArray := [RSW.GetMyPos];
       //if Fire^.Find <> [] then
       //  Exit(EBurnerState.SMALL_STEP)
       //else

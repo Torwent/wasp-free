@@ -4,7 +4,7 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex  := 0;
+  Login.PlayerIndex  := 4;
   AntibanEnabled     := True; //Enables most antiban
   BreaksEnabled      := True; //Enables short breaks
   SleepEnabled       := True; //Enables sleep breaks
@@ -77,17 +77,71 @@ begin
   RockTimerMultiplier := 1;
 
   case CurrentRock of
-    ERSRock.CLAY:       RSRock := @RSObjects.ClayRock;
-    ERSRock.TIN:        RSRock := @RSObjects.TinRock;
-    ERSRock.COPPER:     RSRock := @RSObjects.CopperRock;
-    ERSRock.IRON:       RSRock := @RSObjects.IronRock;
-    ERSRock.SILVER:     RSRock := @RSObjects.SilverRock;
-    ERSRock.COAL:       RSRock := @RSObjects.CoalRock;
-    ERSRock.GOLD:       RSRock := @RSObjects.GoldRock;
-    ERSRock.MITHRIL:    RSRock := @RSObjects.MithrilRock;
-    ERSRock.ADAMANTITE: RSRock := @RSObjects.AdamantiteRock;
-    ERSRock.RUNITE:     RSRock := @RSObjects.RuniteRock;
-    ERSRock.AMETHYST:   RSRock := @RSObjects.AmethystRock;
+    ERSRock.CLAY:
+      begin
+        RSRock := @RSObjects.ClayRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Clay');
+      end;
+
+    ERSRock.TIN:
+    begin
+      RSRock := @RSObjects.TinRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Tin ore');
+      end;
+
+    ERSRock.COPPER:
+      begin
+        RSRock := @RSObjects.CopperRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Copper ore');
+      end;
+
+    ERSRock.IRON:
+      begin
+        RSRock := @RSObjects.IronRock; 
+        ActionProfit := ItemInfo.GetAveragePrice('Iron ore');
+      end;
+
+    ERSRock.SILVER:
+      begin
+        RSRock := @RSObjects.SilverRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Silver ore');
+      end;
+
+    ERSRock.COAL:
+      begin
+        RSRock := @RSObjects.CoalRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Coal');
+      end;
+
+    ERSRock.GOLD:
+      begin
+        RSRock := @RSObjects.GoldRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Gold ore');
+      end;
+
+    ERSRock.MITHRIL:
+      begin
+        RSRock := @RSObjects.MithrilRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Mithril ore');
+      end;
+
+    ERSRock.ADAMANTITE:
+      begin
+        RSRock := @RSObjects.AdamantiteRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Adamantite ore');
+      end;
+
+    ERSRock.RUNITE:
+      begin
+        RSRock := @RSObjects.RuniteRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Runite ore');
+      end;
+
+    ERSRock.AMETHYST:
+      begin
+        RSRock := @RSObjects.AmethystRock;
+        ActionProfit := ItemInfo.GetAveragePrice('Amethyst');
+      end;
   end;
 
   RSRock^.Filter.UpText := False;
@@ -263,7 +317,7 @@ end;
 procedure TMiner.Init; override;
 begin
   Name := 'AIO Miner';
-  Version := 'v2.0.0';
+  Version := 'v2.0.1';
 
   inherited;
 
@@ -449,7 +503,7 @@ begin
   else if Mining then
     Exit(EMinerState.WAIT_STATE)
 
-  else if UseBank and not RSW.AtTile(RSRock^.Tiles, 15) then
+  else if UseBank and not RSW.AtTile(RSRock^.TileArray, 15) then
     Exit(EMinerState.WALK_SPOT)
 
   else if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
@@ -475,7 +529,7 @@ begin
       EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EMinerState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
       EMinerState.CLOSE_INTERFACE: InterfaceArea.Close(True);
-      EMinerState.WALK_SPOT: RSW.WebWalk(RSW.GetClosestTile(RSRock^.Tiles), 5, 0.2);
+      EMinerState.WALK_SPOT: RSW.WebWalk(RSRock^.TileArray, 5, 0.2);
       EMinerState.WAIT_STATE: Self.WaitMining;
       EMinerState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(70));
       EMinerState.EQUIP_GEAR: Self.EquipGear;
@@ -516,6 +570,8 @@ end;
 
 procedure TMinerConfig.RockSelectorOnChange(Sender: TObject);
 begin
+  Writeln(Sender, ' has changed');
+
   BankSelector.Clear;
 
   case ERSRock(RockSelector.Combobox.getItemIndex) of

@@ -67,6 +67,7 @@ type
 
     CoinPouch: TRSItem;
     Necklace: TRSItem;
+    ValuableItem: TRSItem;
 
     CoinArray: TRSItemArray;
     FoodArray: TRSItemArray;
@@ -78,6 +79,7 @@ type
     GearAmount: Int32;
     NeckQuantity: Int32;
     FoodQuantity: Int32;
+    ValuableItemValue: Int32;
 
     NeckTimer: TCountDown;
     ShadowVeilTimer: TCountDown;
@@ -306,7 +308,7 @@ begin
         CurrentNPC := @RSNPCs.KnightOfArdougne;
         ScriptBank := @RSObjects.ArdougneSouthBank;
         //USE RUNELITE!
-        CurrentNPC^.Filter.Minimap := False;
+        CurrentNPC^.Filter.MinimapDot := False;
 
         LootArray := [CoinPouch];
 
@@ -336,6 +338,10 @@ begin
           'Fire orb', 'Diamond', 'Gold ore', 23866, 23966, 23967,
           23968, 23969, 23970, 'Enhanced crystal teleport seed'
         ];
+
+        ActionProfit := 560;
+        ValuableItem := 'Enhanced crystal teleport seed';
+        ValuableItemValue := ItemInfo.GetAveragePrice(ValuableItem);
 
         for Item in CoinArray do
           LootArray += Item;
@@ -514,7 +520,7 @@ end;
 procedure TThiever.Init; override;
 begin
   Name    := 'AIO Pickpocketer';
-  Version := 'v2.0.5';
+  Version := 'v2.0.7';
 
   inherited;
 
@@ -733,8 +739,8 @@ begin
   if not UseShadowVeil or not Magic.Open then
     Exit;
   if not Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
-    UseShadowVeil := False
-  else if Magic.CastSpell(ERSSpell.SHADOW_VEIL) then
+    Result := UseShadowVeil := False
+  else if Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL) then
     ShadowVeilTimer.Restart(Random(-5000, 5000));
 end;
 
@@ -750,14 +756,22 @@ begin
     if not Self.NecklaceExpired then FreshNeck := False;
 
     Self.CheckFailed(CurrentHP);
-    if Died then RSObjects.Gravestone.Tiles := RSW.GetArea(Position, 2);
+    if Died then RSObjects.Gravestone.TileArray := RSW.GetArea(Position, 2);
     WL.Activity.Restart;
   end;
 end;
 
 function TThiever.Deposit: Boolean;
+var
+  ItemCount: Int32;
 begin
+  ItemCount := Inventory.CountItem(ValuableItem);
   Result := Bank.DepositAllBut(BankTab, StackableArray);
+  if ItemCount > 0 then
+  begin
+    if Inventory.CountItem(ValuableItem) = 0 then
+      TotalProfit += (ItemCount * ValuableItemValue);
+  end;
 end;
 
 function TThiever.Withdraw(Item: TRSItem; Quantity: Int32): Boolean;
@@ -887,7 +901,7 @@ begin
       Exit(OPEN_BANK);
   end
 
-  else if not RSW.AtTile(CurrentNPC^.Tiles, 40) then
+  else if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
     Exit(WALK_TO_NPC)
 
   else if Self.HasRogue then
@@ -955,7 +969,7 @@ begin
       CHECK_NECKLACE: Self.CheckNeck;
       CLOSE_CONTEXT: ChooseOption.Close;
       DROP_ITEMS: Inventory.ShiftDrop(DropArray, Inventory.RandomPattern);
-      WALK_TO_NPC: RSW.WebWalk(RSW.GetClosestTile(CurrentNPC^.Tiles), 30, 0.2);
+      WALK_TO_NPC: RSW.WebWalk(CurrentNPC^.TileArray, 30, 0.2);
       EQUIP_ROGUE: Self.EquipRogue;
       LOOT_GRAVE: Self.LootGrave;
       ENABLE_REDEMPTION: Self.EnableRedemption;
@@ -987,6 +1001,7 @@ end;
 
 procedure TThieverConfig.NPCSelectorOnChange(Sender: TObject);
 begin
+  Writeln(Sender, ' has changed');
 
   case ENPC(NPCSelector.Combobox.getItemIndex) of
     MAN:
