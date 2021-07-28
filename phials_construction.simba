@@ -201,7 +201,8 @@ begin
       EState.WAIT_STATE: Wait(500, 800);
     end;
 
-    if Self.DoAntiban and not RSClient.IsLoggedIn then Login.LoginPlayer;
+    Self.DoAntiban;
+    if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 end;
 

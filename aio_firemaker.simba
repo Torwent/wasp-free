@@ -263,9 +263,8 @@ begin
       EBurnerState.END_SCRIPT: Break;
     end;
 
-    Antiban.DismissRandom;
-    if Self.DoAntiban and not RSClient.IsLoggedIn then
-      Login.LoginPlayer;
+    Self.DoAntiban;
+    if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 end;
 

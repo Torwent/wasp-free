@@ -916,8 +916,10 @@ begin
       if PowerSurgeTimer.IsFinished then
         Self.DoAntiban(False, False);
     end
-    else if Self.DoAntiban and not RSClient.IsLoggedIn then
-      Login.LoginPlayer;
+    else
+      Self.DoAntiban;
+
+    if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 end;
 

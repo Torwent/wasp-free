@@ -464,8 +464,8 @@ begin
       EEnchanterState.END_SCRIPT: Break;
     end;
 
-    if Self.DoAntiban and not RSClient.IsLoggedIn then
-      Login.LoginPlayer;
+    Self.DoAntiban;
+    if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 
   if not Self.Terminate then
