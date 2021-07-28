@@ -4,7 +4,7 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex  := 0;
+  Login.PlayerIndex  := 4;
   AntibanEnabled     := True; //Enables most antiban
   BreaksEnabled      := True; //Enables short breaks
   SleepEnabled       := True; //Enables sleep breaks
@@ -13,6 +13,8 @@ end;
 
 type
   ERSStall = (
+    TEA_STALL,
+    SILK_STALL,
     FRUIT_STALL
   );
 var
@@ -22,14 +24,19 @@ type
   EStallRobberState = (
     FIND_STALL,
     ROB_STALL,
-    DROP_LOOT
+    DROP_LOOT,
+    WALK_SPOT,
+    WAIT_STATE,
+    END_SCRIPT
   );
 
   TStallRobber = record(TBaseWalkerScript)
     State: EStallRobberState;
 
     Stall: PRSObject;
+    SafeSpot: TPoint;
     DropList: TRSItemArray;
+    StallCooldown: TCountDown;
   end;
 
 procedure TAntiban.Setup; override;
@@ -38,16 +45,35 @@ begin
 
   Antiban.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
   Antiban.MinZoom := 5;
-  Antiban.MaxZoom := 50;
+  Antiban.MaxZoom := 85;
 end;
 
 procedure TStallRobber.SetupStall;
 begin
   case CurrentStall of
+    ERSStall.TEA_STALL:
+      begin
+        RSW.Setup('x7536y2363');
+        Stall := @RSObjects.TeaStall;
+        StallCooldown.Init(7000);
+        SafeSpot := [8465, 2808];
+        DropList := ['Cup of tea'];
+      end;
+
+    ERSStall.SILK_STALL:
+      begin
+        RSW.Setup('x5723y3038');
+        Stall := @RSObjects.SilkStall;
+        StallCooldown.Init(5000);
+        SafeSpot := [6042, 3182];
+        DropList := ['Silk'];
+      end;
+
     ERSStall.FRUIT_STALL:
       begin
-        RSW.Setup('Zeah');
-        Stall := @RSObjects.FruitStalls;
+        RSW.Setup('x2468y1912');
+        Stall := @RSObjects.FruitStall;
+        StallCooldown.Init(2000);
         DropList := [
           'Cooking apple', 'Banana', 'Jangerberries', 'Lemon', 'Redberries',
           'Pineapple', 'Lime', 'Strawberry', 'Strange fruit',
@@ -55,6 +81,8 @@ begin
         ];
       end;
   end;
+
+  StallCooldown.Timeout := GetTickCount;
 end;
 
 procedure TStallRobber.Init; override;
@@ -77,13 +105,28 @@ begin
   Result := Inventory.FindItems(DropList, Slots);
 end;
 
+function TStallRobber.RobStall: Boolean;
+begin
+  if Stall^.WalkClick and XPBar.WaitXPDrop(2000) then
+  begin
+    StallCooldown.Restart(Random(-200, 200));
+    WL.Activity.Restart;
+  end;
+end;
+
 
 function TStallRobber.GetState: EStallRobberState;
 begin
-  if Inventory.IsFull and Self.HasLoot then
+  if WL.Activity.IsFinished then
+    Exit(END_SCRIPT)
+  else if Inventory.IsFull and Self.HasLoot then
     Exit(DROP_LOOT)
-  if MainScreen.IsUpText('Steal-from') then
+  else if MainScreen.IsUpText('Steal-from') then
     Exit(ROB_STALL)
+  else if not StallCooldown.IsFinished then
+    Exit(WAIT_STATE)
+  else if (SafeSpot <> []) and not RSW.AtTile(SafeSpot, 5) then
+    Exit(WALK_SPOT)
   else if RSW.AtTile(Stall^.TileArray) then
     Exit(FIND_STALL);
 end;
@@ -101,22 +144,14 @@ begin
 
     case State of
       DROP_LOOT: Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
-      ROB_STALL:
-      begin
-        Mouse.Click(MOUSE_LEFT);
-        if MainScreen.DidRedClick then
-          XPBar.WaitXPDrop(2000);
-      end;
-      FIND_STALL:
-      begin
-        if Stall^.Click then
-          if XPBar.WaitXPDrop(2000) then
-            Wait(1200);
-      end;
+      FIND_STALL, ROB_STALL: Self.RobStall;
+      WAIT_STATE: Wait(100, 200);
+      WALK_SPOT: RSW.WebWalk(SafeSpot, 3, 0.2);
+      END_SCRIPT: Break;
     end;
 
-    if Self.DoAntiban and not RSClient.IsLoggedIn then
-      Login.LoginPlayer;
+    Self.DoAntiban;
+    if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 end;
 
@@ -147,6 +182,8 @@ begin
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
+    Combobox.getItems.Add('Tea stall');
+    Combobox.getItems.Add('Silk stall');
     Combobox.getItems.Add('Fruit stall');
     Combobox.setItemIndex(Ord(CurrentStall));
   end;
