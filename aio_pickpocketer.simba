@@ -844,7 +844,7 @@ begin
   if ChooseOption.IsOpen then
     Exit(CLOSE_CONTEXT)
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
@@ -955,7 +955,7 @@ begin
       DEPOSIT_LOOT: Self.Deposit;
       WITHDRAW_FOOD: Self.WithdrawAny(FoodArray, FoodQuantity);
       WITHDRAW_NECKLACES: Self.Withdraw(Necklace, NeckQuantity);
-      CLOSE_INTERFACE: InterfaceArea.Close(True);
+      CLOSE_INTERFACE: MainScreen.CloseInterface;
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
       CHANGE_CHAT_FILTER: ChatButtons.ChangeState(ERSChatButton.GAME_CHAT, ERSChatButtonState.ENABLED);

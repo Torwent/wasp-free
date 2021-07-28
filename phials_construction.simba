@@ -94,7 +94,7 @@ begin
   if LarderSpace.SelectOption(['Build']) then
   begin
     Minimap.WaitPlayerMoving(300, 5000);
-    Result := WaitUntil(InterfaceArea.IsClassicOpen, 200, 3000);
+    Result := WaitUntil(MainScreen.IsClassicOpen, 200, 3000);
   end;
 end;
 
@@ -128,9 +128,9 @@ end;
 function TBuilder.HandleFurniture: Boolean;
 begin
   Keyboard.PressKey(VK_2);
-  Result := LarderIsBuilt := WaitUntil(not InterfaceArea.IsClassicOpen, 100, 3000);
+  Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
   if not Result then
-    InterfaceArea.Close(True);
+    MainScreen.CloseInterface;
 end;
 
 function TBuilder.GetState: EState;
@@ -146,7 +146,7 @@ begin
   else if S.Contains('Select') then
     Exit(EState.HANDLE_PHIALS_CHAT)
 
-  else if InterfaceArea.IsClassicOpen then
+  else if MainScreen.IsClassicOpen then
     Exit(EState.HANDLE_FURNITURE_UI)
 
   else if not Self.InPOH then

@@ -167,8 +167,8 @@ begin
       WaitUntil(Inventory.CountItemStack(Item) > InvCount, 100, 3000);
   end;
 
-  if BankEmpty := ((not Result and (InterfaceArea.IsClassicOpen and Bank.IsOpen)) and
-                    not Bank.HasItem(BankTab, Item)) then
+  if BankEmpty := ((not Result and Bank.IsOpen) and
+                    not Bank.FindItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -294,7 +294,7 @@ begin
   if ChooseOption.IsOpen then
     Exit(EAlcherState.CLOSE_CONTEXT)
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
@@ -382,7 +382,7 @@ begin
 
       EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EAlcherState.CLOSE_INTERFACE: InterfaceArea.Close(SRL.Dice(95));
+      EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface;
 
       EAlcherState.CHOOSE_SPELL: Self.ChooseSpell;
       EAlcherState.CHOOSE_ITEM: Self.ChooseItem;

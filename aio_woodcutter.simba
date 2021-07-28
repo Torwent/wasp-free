@@ -469,7 +469,7 @@ begin
   else if Make.IsOpen then
     Exit(EWoodcutterState.HANDLE_MAKE)
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
     if Bank.IsOpen and Inventory.FindItems(BankList) then
       Exit(EWoodcutterState.DEPOSIT_ITEMS)
@@ -526,10 +526,10 @@ begin
     case State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
-      EWoodcutterState.CLOSE_INTERFACE: InterfaceArea.Close(True);
+      EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface;
       EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree^.TileArray, 10, 0.2);
       EWoodcutterState.WAIT_STATE: Self.WaitCutting;
-      EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(70));
+      EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp;
       EWoodcutterState.EQUIP_GEAR: Self.EquipGear;
       EWoodcutterState.USE_SPEC: Minimap.EnableSpec(100);
       EWoodcutterState.PICKUP_NEST: Self.PickNest;

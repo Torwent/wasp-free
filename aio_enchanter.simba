@@ -311,7 +311,7 @@ begin
   if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
      WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.HasItem(BankTab, Item)) then
+  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -357,7 +357,7 @@ begin
     Exit(EEnchanterState.LEVEL_UP);
   end
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
@@ -450,7 +450,7 @@ begin
 
       EEnchanterState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
       EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EEnchanterState.CLOSE_INTERFACE: InterfaceArea.Close(SRL.Dice(95));
+      EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface;
 
       EEnchanterState.WAIT_ENCHANT: Enchanting := XPBar.WaitXPDrop(2000);
       EEnchanterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(75));

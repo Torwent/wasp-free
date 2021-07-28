@@ -175,7 +175,7 @@ begin
   if Result := Bank.WithdrawItem(BankTab, Item, UseQuantityButton) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.HasItem(BankTab, Item)) then
+  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -310,7 +310,7 @@ begin
   else if Make.IsOpen then
     Exit(EBlowerState.HANDLE_MAKE)
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
@@ -390,7 +390,7 @@ begin
 
       EBlowerState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
       EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EBlowerState.CLOSE_INTERFACE: InterfaceArea.Close(SRL.Dice(95));
+      EBlowerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
 
       EBlowerState.DO_GLASS: Self.DoGlass;
       EBlowerState.HANDLE_MAKE: Self.HandleMake;

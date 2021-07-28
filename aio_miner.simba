@@ -477,7 +477,7 @@ begin
     Exit(EMinerState.LEVEL_UP);
   end
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
     Writeln(BankList);
     if Bank.IsOpen and Inventory.FindItems(BankList) then
@@ -528,10 +528,10 @@ begin
     case State of
       EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EMinerState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
-      EMinerState.CLOSE_INTERFACE: InterfaceArea.Close(True);
+      EMinerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
       EMinerState.WALK_SPOT: RSW.WebWalk(RSRock^.TileArray, 5, 0.2);
       EMinerState.WAIT_STATE: Self.WaitMining;
-      EMinerState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(70));
+      EMinerState.LEVEL_UP: Chat.HandleLevelUp;
       EMinerState.EQUIP_GEAR: Self.EquipGear;
       EMinerState.USE_SPEC: Minimap.EnableSpec(100);
       EMinerState.MINE_ROCK: Self.MineRock;

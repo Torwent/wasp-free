@@ -285,7 +285,7 @@ end;
 procedure TNMZFighter.Init; override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v2.1.1';
+  Version := 'v2.1.0';
 
   inherited;
 
@@ -384,8 +384,8 @@ function TNMZFighter.OpenChest: Boolean;
 begin
   if RSObjects.NMZChest.WalkClick then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
-    Result := WaitUntil(InterfaceArea.IsClassicOpen, 100, 5000);
+    Minimap.WaitMoving;
+    Result := WaitUntil(MainScreen.IsClassicOpen, 100, 5000);
   end;
 end;
 
@@ -434,7 +434,7 @@ begin
 
   if Barrel^.WalkSelectOption([Str]) then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
+    Minimap.WaitMoving;
     Result := Chat.FindQuery('How many doses', 5000, 100);
   end;
 end;
@@ -443,7 +443,7 @@ function TNMZFighter.DepositPotion(Barrel: PRSObject): Boolean;
 begin
   if Barrel^.WalkSelectOption(['Store']) then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
+    Minimap.WaitMoving;
     Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
   end;
 end;
@@ -460,7 +460,7 @@ function TNMZFighter.TalkWithDominic: Boolean;
 begin
   if RSNPCs.DominicOnion.WalkSelectOption(['Dream']) then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
+    Minimap.WaitMoving;
     Result := WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
   end;
 end;
@@ -475,8 +475,8 @@ function TNMZFighter.OpenNMZSetup: Boolean;
 begin
   if RSObjects.NMZPotion.WalkClick then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
-    Result := WaitUntil(InterfaceArea.IsClassicOpen, 100, 5000);
+    Minimap.WaitMoving;
+    Result := WaitUntil(MainScreen.IsClassicOpen, 100, 5000);
   end;
 end;
 
@@ -653,18 +653,18 @@ function TNMZFighter.GetPowerUp: Boolean;
 begin
   if RSObjects.NMZRecurrentDamage.Click then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
-    Result := WaitUntil(not Self.PowerUpAvailable, 100, 5000);
+    Minimap.WaitMoving;
+    Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000);
   end
   else if RSObjects.NMZPowerSurge.Click then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
+    Minimap.WaitMoving;
     if Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000) then
       PowerSurgeTimer.Restart;
   end
   else if Result := RSObjects.NMZZapper.Click then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
+    Minimap.WaitMoving;
     ZapperTimer.Restart;
   end;
 end;
@@ -822,7 +822,7 @@ begin
 
     else if DreamSetup then
     begin
-      if InterfaceArea.IsClassicOpen then
+      if MainScreen.IsClassicOpen then
         Exit(ENMZState.HANDLE_NMZSETUP)
       else if 'When you purchase' in Chat.GetChat then
       begin
@@ -893,7 +893,7 @@ begin
 
       OPEN_NMZSETUP: Self.OpenNMZSetup;
       HANDLE_NMZSETUP: Self.HandleNMZSetup;
-      CLOSE_INTERFACE: InterfaceArea.Close;
+      CLOSE_INTERFACE: MainScreen.CloseInterface;
 
       //Inside Dream.
       DRINK_BOOST: Self.DrinkPotion(BoostPotion);

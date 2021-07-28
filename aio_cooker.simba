@@ -140,7 +140,7 @@ begin
   if Result := Bank.WithdrawItem(BankTab, Ingredient, True) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.HasItem(BankTab, Ingredient)) then
+  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Ingredient)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -227,7 +227,7 @@ begin
   else if Make.IsOpen then
     Exit(ECookerState.HANDLE_MAKE)
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
@@ -298,7 +298,7 @@ begin
 
       ECookerState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
       ECookerState.HANDLE_COLLECT: Self.HandleCollectBox;
-      ECookerState.CLOSE_INTERFACE: InterfaceArea.Close(SRL.Dice(95));
+      ECookerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
 
       ECookerState.LEVEL_UP: Chat.HandleLevelUp;
       ECookerState.DO_COOKING: Self.DoCooking;

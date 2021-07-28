@@ -194,7 +194,7 @@ begin
   else if Chat.LeveledUp then
     Exit(EBurnerState.LEVEL_UP)
 
-  else if InterfaceArea.HasInterface then
+  else if MainScreen.HasInterface then
   begin
 
     if Bank.IsOpen then
@@ -255,7 +255,7 @@ begin
       EBurnerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EBurnerState.WITHDRAW_LOG: Self.Withdraw(Material);
       EBurnerState.WITHDRAW_TOOL: Self.Withdraw(Tool);
-      EBurnerState.CLOSE_INTERFACE: InterfaceArea.Close(True);
+      EBurnerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
       EBurnerState.TELEPORT: Self.Teleport;
       EBurnerState.WALK_SPOT: Self.WalkNextPoint;
       EBurnerState.LEVEL_UP: Chat.HandleLevelUp(True);
