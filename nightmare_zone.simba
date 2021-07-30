@@ -4,11 +4,13 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex  := 0;
-  AntibanEnabled     := True; //Enables most antiban
-  BreaksEnabled      := True; //Enables short breaks
-  SleepEnabled       := True; //Enables sleep breaks
-  RemoteInputEnabled := True; //Enables remote input
+  Login.PlayerIndex     := 0;
+  AntibanEnabled        := True; //Enables Most Antiban
+  BreaksEnabled         := True; //Enables Short Breaks
+  SleepEnabled          := True; //Enables Sleep Breaks
+  RemoteInputEnabled    := True; //Enables Remote Input
+  ProgressReportEnabled := True; //Enables Graphical Progress Report
+  ScriptDebugEnabled    := False; //Enables Script Debugging
 end;
 
 type
@@ -152,9 +154,9 @@ begin
   DreamMiddle := [5456, 453];
 
   PrayFlickTimer.Init(60000);
-  WalkMiddleTimer.Init(180000);
+  WalkMiddleTimer.Init(190000 - Round(20000 * BioHash));
   WalkMiddleTimer.Timeout := GetTickCount;
-  XPDropTimer.Init(120000);
+  XPDropTimer.Init(30000 - Round(20000 * BioHash));
   XPDropTimer.Timeout := GetTickCount;
 end;
 
@@ -309,6 +311,20 @@ begin
 
   Self.SetupWeapons;
   Self.SetupDamageItem;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugObjectArray += BoostBarrel;
+    DebugObjectArray += AbsBarrel;
+    DebugObjectArray += @RSObjects.NMZChest;
+    DebugObjectArray += @RSObjects.NMZPotion;
+
+    DebugObjectArray += @RSObjects.NMZZapper;
+    DebugObjectArray += @RSObjects.NMZPowerSurge;
+    DebugObjectArray += @RSObjects.NMZRecurrentDamage;
+
+    DebugNPCArray += @RSNPCs.DominicOnion;
+  end;
 end;
 
 var
@@ -346,7 +362,7 @@ end;
 
 function TRSXPBar.FindXPDrop: Boolean; override;
 begin
-  if Result := inherited then NMZFighter.XPDropTimer.Restart;
+  if Result := inherited then NMZFighter.XPDropTimer.Restart(Random(-5000, 5000));
 end;
 
 
@@ -638,7 +654,7 @@ begin
   end;
 
   if Result then
-    PrayFlickTimer.Restart(Random(100, 20000));
+    PrayFlickTimer.Restart(Random(-20000, 20000));
 end;
 
 
@@ -868,6 +884,8 @@ begin
                  ' Weapon: ' + ToStr(Weapon) + ' Shield: ' + ToStr(Shield) +
                  ' SpecWeapon: ' + ToStr(SpecWeapon);
     Self.ProcessWhileWaiting;
+
+    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
 
     case State of
       END_SCRIPT: Break;
