@@ -550,6 +550,12 @@ begin
     Magic.CastSpell(ERSSpell.SHADOW_VEIL);
     ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetCurrentLevel(ERSSkill.MAGIC)));
   end;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugObjectArray += ScriptBank;
+    DebugNPCArray += CurrentNPC;
+  end;
 end;
 
 

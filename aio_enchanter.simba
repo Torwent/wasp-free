@@ -236,8 +236,9 @@ begin
     ItemInfo.GetAveragePrice(CosmicRune) + ItemInfo.GetAveragePrice(RegularJewel)
   );
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  if ScriptDebugEnabled then DebugObjectArray += ScriptBank;
 end;
 
 

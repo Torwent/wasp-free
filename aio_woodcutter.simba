@@ -321,6 +321,13 @@ begin
   Options.SetZoomLevel(SRL.TruncatedGauss(35, 75));
 
   Self.SetupTool;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugObjectArray += ScriptBank;
+    DebugObjectArray += RSTree;
+    DebugNPCArray += @RSNPCs.SawmillOperator;
+  end;
 end;
 
 

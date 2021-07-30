@@ -112,6 +112,12 @@ begin
   RSW.ScreenWalk := True;
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugObjectArray += ScriptBank;
+    DebugObjectArray += Fire;
+  end;
 end;
 
 

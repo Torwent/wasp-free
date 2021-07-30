@@ -97,6 +97,8 @@ begin
   Self.SetupStall;
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  if ScriptDebugEnabled then DebugObjectArray += Stall;
 end;
 
 

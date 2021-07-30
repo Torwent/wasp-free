@@ -106,8 +106,13 @@ begin
     ItemInfo.GetAveragePrice(Ingredient.Item)
   );
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugObjectArray += ScriptBank;
+    DebugObjectArray += @RSObjects.HosidiusKitchenOven;
+  end;
 end;
 
 

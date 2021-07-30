@@ -144,6 +144,8 @@ begin
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
   CurrentLevel := Stats.GetCurrentLevel(ERSSkill.CRAFTING);
+
+  if ScriptDebugEnabled then DebugObjectArray += ScriptBank;
 end;
 
 
