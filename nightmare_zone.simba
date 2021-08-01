@@ -96,7 +96,7 @@ type
     BoostTimer: TCountDown;
     PrayFlickTimer: TCountDown;
     WalkMiddleTimer: TCountDown;
-    XPDropTimer: TCountDown;
+    HitSplatTimer: TCountDown;
   end;
 
 procedure TAntiban.Setup; override;
@@ -156,8 +156,8 @@ begin
   PrayFlickTimer.Init(60000);
   WalkMiddleTimer.Init(190000 - Round(20000 * BioHash));
   WalkMiddleTimer.Timeout := GetTickCount;
-  XPDropTimer.Init(15000 - Round(7000 * BioHash));
-  XPDropTimer.Timeout := GetTickCount;
+  HitSplatTimer.Init(25000 - Round(15000 * BioHash));
+  HitSplatTimer.Timeout := GetTickCount;
 end;
 
 
@@ -359,12 +359,6 @@ begin
     else Exit(False);
   end;
 end;
-
-function TRSXPBar.FindXPDrop: Boolean; override;
-begin
-  if Result := inherited then NMZFighter.XPDropTimer.Restart(Random(-5000, 5000));
-end;
-
 
 
 function TNMZFighter.InDream: Boolean;
@@ -720,7 +714,7 @@ begin
   if (Weapon <> '') then
     Inventory.ClickItem(Weapon);
   if (Shield <> '') then
-  Inventory.ClickItem(Shield);
+    Inventory.ClickItem(Shield);
 
   Wait(600, 800);
   Result := not Self.NeedRegear;
@@ -741,6 +735,8 @@ begin
   if Self.InDream then
   begin
     DreamSetup := False;
+    if MainScreen.FindHitsplats then
+      HitSplatTimer.Restart;
 
     if Self.NeedAbsorption then
       Exit(ENMZState.DRINK_ABSORPTION)
@@ -769,7 +765,7 @@ begin
         Exit(ENMZState.USE_POWER)
       else if XPBar.FindXPDrop then
         Exit(ENMZState.WAIT_STATE2)
-      else if XPDropTimer.IsFinished then
+      else if HitSplatTimer.IsFinished then
         Exit(ENMZState.ATTACK_NPC)
       else
         Exit(ENMZState.WAIT_STATE2);
