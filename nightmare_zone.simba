@@ -735,8 +735,6 @@ begin
   if Self.InDream then
   begin
     DreamSetup := False;
-    if MainScreen.FindHitsplats then
-      HitSplatTimer.Restart;
 
     if Self.NeedAbsorption then
       Exit(ENMZState.DRINK_ABSORPTION)
@@ -763,8 +761,11 @@ begin
     begin
       if Self.PowerUpAvailable then
         Exit(ENMZState.USE_POWER)
-      else if XPBar.FindXPDrop then
-        Exit(ENMZState.WAIT_STATE2)
+      else if MainScreen.FindHitsplats then
+      begin
+        HitSplatTimer.Restart;
+        Exit(ENMZState.WAIT_STATE2);
+      end
       else if HitSplatTimer.IsFinished then
         Exit(ENMZState.ATTACK_NPC)
       else
