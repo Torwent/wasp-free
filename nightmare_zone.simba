@@ -156,7 +156,7 @@ begin
   PrayFlickTimer.Init(60000);
   WalkMiddleTimer.Init(190000 - Round(20000 * BioHash));
   WalkMiddleTimer.Timeout := GetTickCount;
-  XPDropTimer.Init(30000 - Round(20000 * BioHash));
+  XPDropTimer.Init(15000 - Round(7000 * BioHash));
   XPDropTimer.Timeout := GetTickCount;
 end;
 
@@ -382,10 +382,6 @@ begin
   else
   begin
     Boosted := False;
-    BoostTimer.Pause;
-    PrayFlickTimer.Pause;
-    PowerSurgeTimer.Pause;
-    ZapperTimer.Pause;
 
     BoostTimer.Timeout := GetTickCount;
     PrayFlickTimer.Timeout := GetTickCount;
@@ -721,7 +717,9 @@ end;
 
 function TNMZFighter.ReGear: Boolean;
 begin
-  Inventory.ClickItem(Weapon);
+  if (Weapon <> '') then
+    Inventory.ClickItem(Weapon);
+  if (Shield <> '') then
   Inventory.ClickItem(Shield);
 
   Wait(600, 800);
@@ -792,7 +790,10 @@ begin
     Query := Chat.GetQuery;
     Title := Chat.GetChatTitle;
 
-    if 'How many doses' in Query then
+    if Self.NeedRegear then
+      Exit(ENMZState.REEQUIP_GEAR)
+
+    else if 'How many doses' in Query then
     begin
       if not Self.HasEnoughBoost then
       begin
