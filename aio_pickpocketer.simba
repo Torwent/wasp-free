@@ -403,7 +403,6 @@ begin
 
   StackableArray += Necklace; //not stackable but this array is used to not bank items
   StackableArray += 'Cosmic rune';
-  StackableArray += 21200;
 
   CurrentNPC^.Filter.Walker := False;
 end;
@@ -773,7 +772,8 @@ function TThiever.Deposit: Boolean;
 var
   ItemCount: Int32;
 begin
-  ItemCount := Inventory.CountItem(ValuableItem);
+  if ToStr(ValuableItem) <> '' then
+    ItemCount := Inventory.CountItem(ValuableItem);
   Result := Bank.DepositAllBut(BankTab, StackableArray);
   if ItemCount > 0 then
   begin
@@ -810,6 +810,7 @@ var
   QuantityNeeded: Int32 := Quantity - ItemCount;
   InvCount: Int32;
 begin
+  Writeln(Items);
   for Item in Items do
   begin
     if BankTab = -1 then
@@ -1086,6 +1087,7 @@ begin
     SetWidth(50);
     SetHeight(10);
     SetEnabled(True);
+    Self.NPCSelectorOnChange(@SuicideState);
   end;
 
   StartButton.setOnClick(@Self.StartScript);
