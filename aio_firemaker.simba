@@ -128,13 +128,13 @@ begin
   else
     NextStartingPoint := StartingPoints[0];
 
-  Fire^.TileArray := RSW.GetLine(NextStartingPoint, 10, False);
+  Fire^.TileArray := PopulateTile(NextStartingPoint, [0, 0, 5, 5]);
 end;
 
 function TLogBurner.SmallStep: Boolean;
 var
   Tile: TPoint;
-  Tiles: TPointArray := RSW.GetLine(RSW.GetMyPos, 1, True);
+  Tiles: TPointArray := PopulateTile(RSW.GetMyPos, [1, 1, 0, 0]);
 begin
   for Tile in Tiles do
   begin
