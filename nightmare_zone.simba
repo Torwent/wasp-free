@@ -191,7 +191,8 @@ begin
   Weapons := ['Ghrazi rapier', 'Blade of saeldor (c)', 'Inquisitor''s mace',
               'Toktz-xil-ak', 'Abyssal whip', 'Abyssal bludgeon',
               'Abyssal dagger', 'Abyssal dagger (p++)', 'Saradomin sword',
-              'Dragon scimitar', 'Dharok''s greataxe', 'Bow of faerdhinen (c)',
+              'Dragon scimitar', 'Dragon sword', 'Dragon longsword',
+              'Dharok''s greataxe', 'Bow of faerdhinen (c)',
               'Toxic blowpipe', 'Magic shortbow (i)', 'Armadyl crossbow',
               'Dragon hunter crossbow', 'Dragon crossbow', 'Rune crossbow',
               'Adamant dart', 'Mithril dart', ''];
@@ -205,6 +206,7 @@ begin
 
   SpecWeapons := ['Dragon claws', '24225', 'Abyssal dagger',
                   'Abyssal dagger (p++)', 'Dragon dagger', 'Dragon dagger(p++)',
+                  'Dragon sword', 'Dragon longsword',
                   'Magic shortbow (i)', 'Dragon crossbow', ''];
 
   for Weapon in Weapons do
@@ -225,6 +227,8 @@ begin
     'Dragon dagger(p++)':   MinSpec := 25;
     'Magic shortbow (i)':   MinSpec := 50;
     'Dragon crossbow':      MinSpec := 60;
+    'Dragon sword':         MinSpec := 40;
+    'Dragon longsword':     MinSpec := 25;
     else
     begin
       case Weapon of
@@ -276,6 +280,18 @@ begin
             MinSpec := 60;
           end;
 
+        'Dragon sword':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 40;
+          end;
+
+        'Dragon longsword':
+          begin
+            SpecWeapon := Weapon;
+            MinSpec := 25;
+          end;
+
         else
           MinSpec := 200; //never spec
       end;
@@ -287,7 +303,7 @@ end;
 procedure TNMZFighter.Init; override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v2.1.0';
+  Version := 'v2.1.3';
 
   inherited;
 
@@ -303,9 +319,7 @@ begin
   EnemyNPC.UpText := ['Attack'];
   EnemyNPC.Filter.Finder := False;
 
-
   MinAbsPoints := 250;
-
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
@@ -735,8 +749,6 @@ begin
   if Self.InDream then
   begin
     DreamSetup := False;
-    if MainScreen.FindHitsplats then
-      HitSplatTimer.Restart;
 
     if Self.NeedAbsorption then
       Exit(ENMZState.DRINK_ABSORPTION)
@@ -763,8 +775,11 @@ begin
     begin
       if Self.PowerUpAvailable then
         Exit(ENMZState.USE_POWER)
-      else if XPBar.FindXPDrop then
-        Exit(ENMZState.WAIT_STATE2)
+      else if MainScreen.FindHitsplats then
+      begin
+        HitSplatTimer.Restart;
+        Exit(ENMZState.WAIT_STATE2);
+      end
       else if HitSplatTimer.IsFinished then
         Exit(ENMZState.ATTACK_NPC)
       else
