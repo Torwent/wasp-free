@@ -54,12 +54,8 @@ type
     END_SCRIPT
   );
 
-  TThiever = record(TBaseScript)
+  TThiever = record(TBaseBankScript)
     //init variables (to be set while the script is initiates)
-    RSW: TRSWalker;
-    ScriptBank: PRSObject;
-    BankTab: Int32;
-
     State: EThieverState;
 
     UseShadowVeil: Boolean;
@@ -763,7 +759,7 @@ begin
     if not Self.NecklaceExpired then FreshNeck := False;
 
     Self.CheckFailed(CurrentHP);
-    if Died then RSObjects.Gravestone.TileArray := RSW.GetArea(Position, 2);
+    if Died then RSObjects.Gravestone.TileArray := PopulateTile(Position, 2);
     WL.Activity.Restart;
   end;
 end;
@@ -788,6 +784,7 @@ var
   QuantityNeeded: Int32 := Quantity - ItemCount;
   InvCount: Int32;
 begin
+  Writeln(BankTab);
   if BankTab = -1 then
     BankTab := Bank.FindItemTab(Item);
 
