@@ -242,20 +242,6 @@ begin
 end;
 
 
-function TEnchanter.HasTool: Boolean
-var
-  Slots: TIntegerArray;
-begin
-  Result := Inventory.FindItem(CosmicRune, Slots);
-end;
-
-function TEnchanter.HasMaterial: Boolean
-var
-  Slots: TIntegerArray;
-begin
-  Result := Inventory.FindItem(RegularJewel, Slots);
-end;
-
 function TEnchanter.HasProduct: Boolean
 var
   Slots: TIntegerArray;
@@ -278,7 +264,7 @@ end;
 function TEnchanter.WaitEnchanting: Boolean;
 begin
   if Enchanting then
-    Result := Enchanting := Self.HasTool and Self.HasMaterial and XPBar.WaitXPDrop(2000)
+    Result := Enchanting := Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel) and XPBar.WaitXPDrop(2000)
   else
     Result := Enchanting := XPBar.WaitXPDrop(2000);
 end;
@@ -367,19 +353,19 @@ begin
       if Self.HasProduct then
         Exit(EEnchanterState.DEPOSIT_PRODUCT)
 
-      else if BankEmpty or (Self.HasTool and Self.HasProduct) then
+      else if BankEmpty or (Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel)) then
         Exit(EEnchanterState.CLOSE_INTERFACE)
 
-      else if not Self.HasTool then
+      else if not Inventory.FindItem(CosmicRune) then
         Exit(EEnchanterState.WITHDRAW_TOOL)
 
-      else if not Self.HasMaterial then
+      else if not Inventory.FindItem(RegularJewel) then
         Exit(EEnchanterState.WITHDRAW_MATERIAL);
     end
 
     else if CollectBox.IsOpen then
     begin
-      if CollectEmpty or (Self.HasTool and Self.HasMaterial) then
+      if CollectEmpty or (Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel)) then
         Exit(EEnchanterState.CLOSE_INTERFACE)
       else
         Exit(EEnchanterState.HANDLE_COLLECT);
@@ -391,7 +377,7 @@ begin
 
   else if Inventory.IsOpen then
   begin
-    if Self.HasTool and Self.HasMaterial then
+    if Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel) then
     begin
       if MainScreen.IsUpText('>') then
         Exit(EEnchanterState.ENCHANT_JEWEL)
