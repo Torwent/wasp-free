@@ -90,10 +90,10 @@ begin
   end;
 end;
 
-procedure TLogBurner.Init; override;
+procedure TLogBurner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Firemaker';
-  Version := 'v2.1.7';
+  Version := 'v2.1.8';
 
   inherited;
 
@@ -244,12 +244,12 @@ begin
     Exit(EBurnerState.OPEN_BANK);
 end;
 
-procedure TLogBurner.Run;
+procedure TLogBurner.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -339,6 +339,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BurnerConfig.Run);
   {$ENDIF}
-  LogBurner.Run
+  LogBurner.Run(MaxActions, MaxTime);
 end.
 {$ENDIF}

@@ -128,10 +128,10 @@ begin
   ItemChanged := False;
 end;
 
-procedure TBlower.Init; override;
+procedure TBlower.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Glassblower';
-  Version := 'v2.0.3';
+  Version := 'v2.0.5';
 
   inherited;
 
@@ -369,12 +369,12 @@ begin
         Break;
 end;
 
-procedure TBlower.Run;
+procedure TBlower.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     if UseBestItem then
       Self.SetupProduct;
@@ -420,9 +420,9 @@ var
   Blower: TBlower;
 
 
-function TRSChat.HandleLevelUp(UseKeyboard: Boolean = True): Boolean; override;
+function TRSChat.HandleLevelUp(Chance: Double = BioHash): Boolean; override;
 begin
-  Result := inherited;
+  Result := inherited(Chance);
 
   Blower.CurrentLevel += 1;
 end;
@@ -481,6 +481,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BlowerConfig.Run);
   {$ENDIF}
-  Blower.Run
+  Blower.Run(MaxActions, MaxTime);
 end.
 {$ENDIF}

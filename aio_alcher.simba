@@ -83,10 +83,10 @@ begin
   Antiban.MaxZoom := 90;
 end;
 
-procedure TAlcher.Init; override;
+procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Alcher';
-  Version := 'v2.1.1';
+  Version := 'v2.1.2';
 
   inherited;
 
@@ -364,12 +364,12 @@ begin
 end;
 
 
-procedure TAlcher.Run();
+procedure TAlcher.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -473,6 +473,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@AlcherConfig.Run);
   {$ENDIF}
-  Alcher.Run
+  Alcher.Run(MaxActions, MaxTime);
 end.
 {$ENDIF}

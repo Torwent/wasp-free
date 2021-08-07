@@ -84,10 +84,10 @@ begin
   Antiban.MaxZoom := 60;
 end;
 
-procedure TCooker.Init; override;
+procedure TCooker.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Cooker';
-  Version := 'v2.0.0';
+  Version := 'v2.0.1';
 
   inherited;
 
@@ -287,12 +287,12 @@ begin
 
 end;
 
-procedure TCooker.Run;
+procedure TCooker.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -373,6 +373,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@CookerConfig.Run);
   {$ENDIF}
-  Cooker.Run
+  Cooker.Run(MaxActions, MaxTime);
 end.
 {$ENDIF}

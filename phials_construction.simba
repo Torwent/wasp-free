@@ -45,10 +45,10 @@ begin
   Antiban.MaxZoom := 35;
 end;
 
-procedure TBuilder.Init; override;
+procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Phials construction';
-  Version := 'v2.0.1';
+  Version := 'v2.0.2';
 
   inherited;
 
@@ -176,12 +176,12 @@ begin
     Exit(EState.EXIT_HOUSE);
 end;
 
-procedure TBuilder.Run;
+procedure TBuilder.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -258,5 +258,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BuilderConfig.Run);
   {$ENDIF}
-  Builder.Run
+  Builder.Run(MaxActions, MaxTime);
 end.

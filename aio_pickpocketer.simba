@@ -514,10 +514,10 @@ begin
     StackableArray += Item; //Adding RogueEquipment to the non banking item list
 end;
 
-procedure TThiever.Init; override;
+procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name    := 'AIO Pickpocketer';
-  Version := 'v2.0.7';
+  Version := 'v2.0.8';
 
   inherited;
 
@@ -937,12 +937,12 @@ begin
     Exit(PICKPOCKET);
 end;
 
-procedure TThiever.Run;
+procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -1014,7 +1014,7 @@ begin
   case ENPC(NPCSelector.Combobox.getItemIndex) of
     MAN:
       begin
-        SuicideState.Checkbox.setEnabled(True);
+        SuicideState.Checkbox.setState(cbUnchecked);
         SuicideState.Checkbox.setEnabled(False);
       end;
 
@@ -1104,5 +1104,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@ThieverConfig.Run);
   {$ENDIF}
-  Thiever.Run
+  Thiever.Run(MaxActions, MaxTime);
 end.

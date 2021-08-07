@@ -298,10 +298,10 @@ begin
   end;
 end;
 
-procedure TWoodcutter.Init; override;
+procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Woodcutter';
-  Version := 'v2.0.7';
+  Version := 'v2.0.8';
 
   inherited;
 
@@ -519,12 +519,12 @@ begin
     Exit(EWoodcutterState.CUT_TREE);
 end;
 
-procedure TWoodcutter.Run;
+procedure TWoodcutter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -760,5 +760,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@CutterConfig.Run);
   {$ENDIF}
-  Woodcutter.Run
+  Woodcutter.Run(MaxActions, MaxTime);
 end.

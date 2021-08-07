@@ -215,10 +215,10 @@ begin
 
 end;
 
-procedure TEnchanter.Init; override;
+procedure TEnchanter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Enchanter';
-  Version := 'v2.0.1';
+  Version := 'v2.0.2';
 
   inherited;
 
@@ -420,12 +420,12 @@ begin
         Break;
 end;
 
-procedure TEnchanter.Run;
+procedure TEnchanter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -510,6 +510,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@EnchanterConfig.Run);
   {$ENDIF}
-  Enchanter.Run
+  Enchanter.Run(MaxActions, MaxTime);
 end.
 {$ENDIF}

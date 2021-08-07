@@ -300,10 +300,10 @@ begin
 end;
 
 
-procedure TNMZFighter.Init; override;
+procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v2.1.3';
+  Version := 'v2.1.4';
 
   inherited;
 
@@ -877,12 +877,12 @@ begin
   end;
 end;
 
-procedure TNMZFighter.Run;
+procedure TNMZFighter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -1016,5 +1016,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@NMZConfig.Run);
   {$ENDIF}
-  NMZFighter.Run
+  NMZFighter.Run(MaxActions, MaxTime);
 end.

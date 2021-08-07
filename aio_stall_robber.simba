@@ -87,10 +87,10 @@ begin
   StallCooldown.Timeout := GetTickCount;
 end;
 
-procedure TStallRobber.Init; override;
+procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO StallRobber';
-  Version := 'v2.0.1';
+  Version := 'v2.0.2';
 
   inherited;
 
@@ -135,12 +135,12 @@ begin
     Exit(FIND_STALL);
 end;
 
-procedure TStallRobber.Run;
+procedure TStallRobber.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
-  Self.Init;
+  Self.Init(MaxActions, MaxTime);
 
-  while True do
+  while not Self.ShouldStop do
   begin
     State := Self.GetState;
     Action := ToStr(State);
@@ -211,5 +211,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@StallRobberConfig.Run);
   {$ENDIF}
-  StallRobber.Run
+  StallRobber.Run(MaxActions, MaxTime);
 end.
