@@ -70,7 +70,6 @@ type
   TAlcher = record(TBaseBankScript)
     State: EAlcherState;
 
-    CoinArray: TRSItemArray;
     AlchItem: TRSItem;
   end;
 
@@ -86,16 +85,14 @@ end;
 procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Alcher';
-  Version := 'v2.1.2';
+  Version := 'v2.1.3';
 
   inherited;
 
   RSW.Setup('x7789y2306');
   ScriptBank := @RSObjects.GEBank;
-  CoinArray := [617, 995, 996, 997, 998, 999, 1000, 1001, 1002, 1003, 1004];
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
 end;
 
 
@@ -141,33 +138,8 @@ end;
 
 
 function TAlcher.Withdraw(Item: TRSItem): Boolean;
-var
-  InvCount: Int32;
 begin
-  if ToStr(Item) = 'Coins' then
-  begin
-    if BankTab = -1 then
-      BankTab := Bank.FindItemTab('Nature rune');
-
-    for Item in CoinArray do
-    begin
-      InvCount := Inventory.CountItemStack(Item);
-      if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
-      begin
-        WaitUntil(Inventory.CountItemStack(Item) > InvCount, 100, 3000);
-        Break;
-      end;
-    end;
-  end
-  else
-  begin
-    if BankTab = -1 then
-      BankTab := Bank.FindItemTab(Item);
-
-    InvCount := Inventory.CountItemStack(Item);
-    if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
-      WaitUntil(Inventory.CountItemStack(Item) > InvCount, 100, 3000);
-  end;
+  Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
 
   if BankEmpty := ((not Result and Bank.IsOpen) and
                     not Bank.FindItem(BankTab, Item)) then
@@ -179,10 +151,7 @@ function TAlcher.HandleCollectBox: Boolean;
 var
   ItemArray: TRSItemArray;
 begin
-  if not CollectBox.IsOpen then
-    Exit;
-
-  ItemArray := CoinArray;
+  ItemArray += 'Coins';
   ItemArray += 'Nature rune';
 
   if CollectBox.FindItems(ItemArray) then
@@ -191,8 +160,7 @@ begin
       WaitUntil(not CollectBox.FindItems(ItemArray), 100, 3000);
     BankEmpty := not CollectEmpty;
   end
-  else
-    CollectEmpty := True;
+  else CollectEmpty := True;
 
   CollectTimer.Restart;
 end;
@@ -302,7 +270,7 @@ begin
     begin
       if not Inventory.FindItem('Nature rune') then
         Exit(EAlcherState.WITHDRAW_NATS)
-      else if not Inventory.FindItems(CoinArray) then
+      else if not Inventory.FindItem('Coins') then
         Exit(EAlcherState.WITHDRAW_MONEY)
       else
         Exit(EAlcherState.CLOSE_INTERFACE);
@@ -378,7 +346,7 @@ begin
     if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
 
     case State of
-      EAlcherState.WALK_ALCH: RSW.ActionWebWalk(ERSAction.ALCH, RSW.GetClosestTile(ScriptBank^.TileArray), 10, 0.2);
+      EAlcherState.WALK_ALCH: RSW.WebWalk(ScriptBank^.TileArray, 10, 0.2);
 
       EAlcherState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EAlcherState.WITHDRAW_NATS: Self.Withdraw('Nature rune');
