@@ -686,9 +686,10 @@ begin
   if not UseShadowVeil or not Magic.Open then
     Exit;
   if not Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
-    Result := UseShadowVeil := False
-  else if Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL) then
-    ShadowVeilTimer.Restart(Random(-5000, 5000));
+    Result := UseShadowVeil := Exit(False);
+
+  Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL);
+  ShadowVeilTimer.Restart(Random(-5000, 5000));
 end;
 
 function TThiever.PickNPC: Boolean;
