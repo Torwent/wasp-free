@@ -51,17 +51,34 @@ type
     Material: TRSBankWithdrawItem;
   end;
 
-function TRSXPBar.FindXPDrop: Boolean; override;
+function TRSXPDrop._Find: Boolean; override;
 var
-  TPA: TPointArray;
-  Box: TBox;
+  B: TBox := Self.Bounds;
+  i, ColorCount: Int32;
 begin
-  Box := [Self.X2 - 20, Self.Y2 + 100, Self.X2, Self.Y2 + 155];
-  Result := FindColors(TPA, 16777215, Box);
+  B.Y1 := B.Y2 - 55;
 
-  if Result then
-    WL.Activity.Restart;
+  if Color = 0 then
+  begin
+    for i := 0 to High(XP_COLORS) do
+    begin
+      ColorCount := SRL.CountColor(XP_COLORS[i], B);
+      if (ColorCount > 0) and (ColorCount < 150) then
+      begin
+        Color := XP_Colors[i];
+        Exit(True);
+      end
+      else if i = High(XP_COLORS) then
+        Color := 0; //not found, reset!
+    end;
+  end
+  else
+  begin
+    ColorCount := SRL.CountColor(Color, B);
+    Exit((ColorCount > 0) and (ColorCount < 150));
+  end;
 end;
+
 
 procedure TAntiban.Setup; override;
 begin
@@ -93,7 +110,7 @@ end;
 procedure TLogBurner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Firemaker';
-  Version := 'v2.1.8';
+  Version := 'v2.1.9';
 
   inherited;
 
@@ -184,10 +201,10 @@ end;
 function TLogBurner.BurnLogs: Boolean;
 begin
   if Inventory.Use(Tool.Item, Material.Item) then
-    Result := WaitUntil(XPBar.FindXPDrop, 100, 20000);
+    Result := XPDrop.WaitDrop(5000);
 
   if Result then
-    WaitUntil(not XPBar.FindXPDrop, 100, 3000);
+    WaitUntil(not XPDrop.FindDrop, 100, 3000);
 end;
 
 

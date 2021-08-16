@@ -99,6 +99,34 @@ type
     HitSplatTimer: TCountDown;
   end;
 
+function TRSXPDrop._Find: Boolean; override;
+var
+  B: TBox := Self.Bounds;
+  i, ColorCount: Int32;
+begin
+  B.Y1 := B.Y2 - 55;
+
+  if Color = 0 then
+  begin
+    for i := 0 to High(XP_COLORS) do
+    begin
+      ColorCount := SRL.CountColor(XP_COLORS[i], B);
+      if (ColorCount > 0) and (ColorCount < 150) then
+      begin
+        Color := XP_Colors[i];
+        Exit(True);
+      end
+      else if i = High(XP_COLORS) then
+        Color := 0; //not found, reset!
+    end;
+  end
+  else
+  begin
+    ColorCount := SRL.CountColor(Color, B);
+    Exit((ColorCount > 0) and (ColorCount < 150));
+  end;
+end;
+
 procedure TAntiban.Setup; override;
 begin
   inherited;
@@ -303,7 +331,7 @@ end;
 procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v2.1.4';
+  Version := 'v2.1.5';
 
   inherited;
 
@@ -548,8 +576,16 @@ begin
 end;
 
 function TNMZFighter.GetAbsorptionPoints: Int32;
+var
+  B: TBox;
 begin
-  Result := OCR.RecognizeNumber([10,41, 63,76], TOCRShadowRule.Create(30), RS_FONT_QUILL);
+  case RSClient.Mode of
+    ERSClientMode.FIXED: B := [10, 57, 63, 76];
+    ERSClientMode.RESIZABLE_CLASSIC,
+    ERSClientMode.RESIZABLE_MODERN: B := [10, 53, 63, 72];
+  end;
+
+  Result := OCR.RecognizeNumber(B, TOCRShadowRule.Create(20), RS_FONT_QUILL);
 end;
 
 function TNMZFighter.NeedAbsorption: Boolean;
@@ -931,7 +967,7 @@ begin
 
       WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
       ATTACK_NPC: Self.AttackNPC;
-      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPBar.WaitXPDrop(1200);
+      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPDrop.WaitDrop(1200);
 
       USE_POWER: Self.GetPowerUp;
       USE_SPEC: Self.DoSpec;

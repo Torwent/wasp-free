@@ -58,11 +58,6 @@ type
   end;
 
 
-function TRSXPBar.FindXPDrop: Boolean; override;
-begin
-  if Result := inherited then WL.Activity.Restart;
-end;
-
 procedure TAntiban.Setup; override;
 begin
   inherited;
@@ -131,7 +126,7 @@ end;
 procedure TBlower.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Glassblower';
-  Version := 'v2.0.5';
+  Version := 'v2.0.6';
 
   inherited;
 
@@ -288,9 +283,9 @@ end;
 function TBlower.WaitBlowing: Boolean;
 begin
   if Blowing then
-    Result := Blowing := Inventory.FindItem(Material.Item) and XPBar.WaitXPDrop(2000)
+    Result := Blowing := Inventory.FindItem(Material.Item) and XPDrop.WaitDrop(2000)
   else
-    Result := Blowing := XPBar.WaitXPDrop(2000);
+    Result := Blowing := XPDrop.WaitDrop(2000);
 end;
 
 
@@ -302,7 +297,7 @@ begin
   else if ChooseOption.IsOpen then
     Exit(EBlowerState.CLOSE_CONTEXT)
 
-  else if XPBar.FindXPDrop then
+  else if XPDrop.FindDrop then
     Exit(EBlowerState.WAIT_GLASS)
 
   else if Chat.LeveledUp then

@@ -90,7 +90,7 @@ end;
 procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO StallRobber';
-  Version := 'v2.0.2';
+  Version := 'v2.0.3';
 
   inherited;
 
@@ -111,7 +111,7 @@ end;
 
 function TStallRobber.RobStall: Boolean;
 begin
-  if Stall^.WalkClick and XPBar.WaitXPDrop(2000) then
+  if Stall^.WalkClick and XPDrop.WaitDrop(2000) then
   begin
     StallCooldown.Restart(Random(-200, 200));
     WL.Activity.Restart;

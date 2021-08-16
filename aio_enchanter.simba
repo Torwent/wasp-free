@@ -52,11 +52,6 @@ type
     Enchanting: Boolean;
   end;
 
-function TRSXPBar.FindXPDrop: Boolean; override;
-begin
-  if Result := inherited then WL.Activity.Restart;
-end;
-
 procedure TAntiban.Setup; override;
 begin
   inherited;
@@ -218,7 +213,7 @@ end;
 procedure TEnchanter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Enchanter';
-  Version := 'v2.0.2';
+  Version := 'v2.0.4';
 
   inherited;
 
@@ -264,9 +259,9 @@ end;
 function TEnchanter.WaitEnchanting: Boolean;
 begin
   if Enchanting then
-    Result := Enchanting := Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel) and XPBar.WaitXPDrop(2000)
+    Result := Enchanting := Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel) and XPDrop.WaitDrop(2000)
   else
-    Result := Enchanting := XPBar.WaitXPDrop(2000);
+    Result := Enchanting := XPDrop.WaitDrop(2000);
 end;
 
 function TEnchanter.DeselectSpell: Boolean;
@@ -443,7 +438,7 @@ begin
       EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox;
       EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface;
 
-      EEnchanterState.WAIT_ENCHANT: Enchanting := XPBar.WaitXPDrop(2000);
+      EEnchanterState.WAIT_ENCHANT: Enchanting := XPDrop.WaitDrop(2000);
       EEnchanterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(75));
 
       EEnchanterState.OPEN_MAGIC: Magic.Open;

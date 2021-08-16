@@ -319,7 +319,7 @@ end;
 procedure TMiner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Miner';
-  Version := 'v2.0.2';
+  Version := 'v2.0.3';
 
   inherited;
 
@@ -354,12 +354,6 @@ begin
     DebugObjectArray += ScriptBank;
     DebugObjectArray += RSRock;
   end;
-end;
-
-
-function TRSXPBar.FindXPDrop: Boolean; override;
-begin
-  if Result := inherited then WL.Activity.Restart;
 end;
 
 function TMiner.GetToolShift: Int32;
@@ -413,7 +407,7 @@ end;
 
 
 
-function TSRL.GetColorPixelShift(Color: TCTS2Color; Area: TBox; WaitTime: UInt32; out XPDrop: Boolean): Int32; overload;
+function TSRL.GetColorPixelShift(Color: TCTS2Color; Area: TBox; WaitTime: UInt32; out Drop: Boolean): Int32; overload;
 var
   Before, After: Int32;
   TPA: TPointArray;
@@ -422,9 +416,9 @@ var
 begin
   MaxTime := GetTickCount + WaitTime;
 
-  if WaitUntil((SRL.FindColors(TPA, Color, Area) > 0) or (XPDrop := XPBar.FindXPDrop), 100, WaitTime) then
+  if WaitUntil((SRL.FindColors(TPA, Color, Area) > 0) or (Drop := XPDrop.FindDrop), 100, WaitTime) then
   begin
-    if XPDrop then
+    if Drop then
       Exit;
 
     ATPA := TPA.Cluster(2);
@@ -446,14 +440,14 @@ end;
 function TSRL.IsColorAnimating(Color: TCTS2Color; Area:TBox; Shift, WaitTime:UInt32; Iter:UInt32 = 1): Boolean; override;
 var
   i: Int32;
-  XPDrop: Boolean;
+  Drop: Boolean;
 begin
   for i := 1 to Iter do
   begin
-    if Inventory.IsFull or XPDrop then
+    if Inventory.IsFull or Drop then
       Exit(False)
 
-    else if Self.GetColorPixelShift(Color, Area, WaitTime, XPDrop) > Shift then
+    else if Self.GetColorPixelShift(Color, Area, WaitTime, Drop) > Shift then
       Exit(True);
   end;
 end;

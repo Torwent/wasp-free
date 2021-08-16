@@ -301,7 +301,7 @@ end;
 procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Woodcutter';
-  Version := 'v2.0.8';
+  Version := 'v2.0.9';
 
   inherited;
 
@@ -329,13 +329,6 @@ begin
     DebugNPCArray += @RSNPCs.SawmillOperator;
   end;
 end;
-
-
-function TRSXPBar.FindXPDrop: Boolean; override;
-begin
-  if Result := inherited then WL.Activity.Restart;
-end;
-
 
 function TWoodcutter.GetToolShift: Int32;
 begin
@@ -440,7 +433,7 @@ begin
   for i:=1 to Iter do
   begin
     if Inventory.IsFull then Exit(False)
-    else if (Self.GetColorPixelShift(Color, Area, WaitTime) > shift) or XPBar.FindXPDrop then
+    else if (Self.GetColorPixelShift(Color, Area, WaitTime) > shift) or XPDrop.FindDrop then
       Exit(True);
   end;
 end;
@@ -463,7 +456,7 @@ end;
 
 function TWoodcutter.GetState: EWoodcutterState;
 begin
-  if XPBar.FindXPDrop then
+  if XPDrop.FindDrop then
     Exit(EWoodcutterState.WAIT_STATE)
 
   else if WL.Activity.IsFinished then

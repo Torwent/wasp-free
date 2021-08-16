@@ -69,11 +69,6 @@ begin
     Result := Self.SelectHelper(Buttons[Index], Quantity, UseKeyboard);
 end;
 
-function TRSXPBar.FindXPDrop: Boolean; override;
-begin
-  if Result := inherited then WL.Activity.Restart;
-end;
-
 
 
 procedure TAntiban.Setup; override;
@@ -87,7 +82,7 @@ end;
 procedure TCooker.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Cooker';
-  Version := 'v2.0.1';
+  Version := 'v2.0.2';
 
   inherited;
 
@@ -208,9 +203,9 @@ end;
 function TCooker.WaitCooking: Boolean;
 begin
   if Cooking then
-    Result := Cooking := Self.HasIngredient and XPBar.WaitXPDrop(2500)
+    Result := Cooking := Self.HasIngredient and XPDrop.WaitDrop(2500)
   else
-    Result := Cooking := XPBar.WaitXPDrop(2500);
+    Result := Cooking := XPDrop.WaitDrop(2500);
 end;
 
 
@@ -222,7 +217,7 @@ begin
   else if ChooseOption.IsOpen then
     Exit(ECookerState.CLOSE_CONTEXT)
 
-  else if XPBar.FindXPDrop then
+  else if XPDrop.FindDrop then
     Exit(ECookerState.WAIT_COOKING)
 
   else if Chat.LeveledUp then

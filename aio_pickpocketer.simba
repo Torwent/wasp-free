@@ -80,9 +80,10 @@ type
 
     NeckTimer: TCountDown;
     ShadowVeilTimer: TCountDown;
+    LasPickPosition: TPoint;
 
     //run variables (to be used while the script is running)
-    Died: Boolean;
+    RenderDisabled: Boolean;
     HasNeck: Boolean;
     FreshNeck: Boolean;
     RedemptionEnabled: Boolean;
@@ -93,13 +94,34 @@ type
   end;
 
 
-function TRSXPBar.FindXPDrop: Boolean; override;
+function TRSXPDrop._Find: Boolean; override;
 var
-  TPA: TPointArray;
+  B: TBox := Self.Bounds;
+  i, ColorCount: Int32;
 begin
-  Result := FindColors(TPA, 16777215, [Self.X2 - 20, Self.Y2 + 70, Self.X2, Self.Y2 + 105]);
-  if Result then WL.Activity.Restart;
+  B.Y1 := B.Y2 - 55;
+
+  if Color = 0 then
+  begin
+    for i := 0 to High(XP_COLORS) do
+    begin
+      ColorCount := SRL.CountColor(XP_COLORS[i], B);
+      if (ColorCount > 0) and (ColorCount < 150) then
+      begin
+        Color := XP_Colors[i];
+        Exit(True);
+      end
+      else if i = High(XP_COLORS) then
+        Color := 0; //not found, reset!
+    end;
+  end
+  else
+  begin
+    ColorCount := SRL.CountColor(Color, B);
+    Exit((ColorCount > 0) and (ColorCount < 150));
+  end;
 end;
+
 
 function TRSChooseOption.Select(Text: TStringArray; MouseAction: Int32 = MOUSE_LEFT; CaseSensitive: Boolean = True; CloseIfNotFound: Boolean = True): Boolean; override;
 var
@@ -463,7 +485,7 @@ end;
 procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name    := 'AIO Pickpocketer';
-  Version := 'v2.0.8';
+  Version := 'v2.1.1';
 
   inherited;
 
@@ -596,8 +618,6 @@ begin
     NextHeal := Round(Antiban.GetUniqueNumber(NPCMaxHit * 8));
 
   Result := (CurrentHP <= NextHeal) or (CurrentHP <= NPCMaxHit);
-
-  Died := CurrentHP < 1;
 end;
 
 function TThiever.IsPouchFull: Boolean;
@@ -610,14 +630,24 @@ end;
 
 function TThiever.CheckFailed(StartingHP: Int32): Boolean;
 var
+  HasHitSplat: Boolean;
   CurrentHP: Int32 := Minimap.GetHPLevel;
 begin
-  Result := CurrentHP < StartingHP;
+  HasHitSplat := not RenderDisabled and
+                (MainScreen.FindHitsplats(MainScreen.GetPlayerBox) <> []);
 
-  Died := (CurrentHP < 1) or ((StartingHP <= 5) and (CurrentHP >= 10));
+  Result := (CurrentHP < StartingHP) or HasHitSplat;
 
-  if Result and not Died then
-    Self.OpenCoinPouch;
+  if Result then
+  begin
+    if HasHitSplat then
+    begin
+      Options.RenderSelf;
+      RenderDisabled := True;
+    end
+    else
+      Self.OpenCoinPouch;
+  end;
 end;
 
 function TThiever.NecklaceExpired: Boolean;
@@ -636,7 +666,7 @@ function TThiever.OpenCoinPouch: Boolean;
 var
   PouchCount: Int32;
 begin
-  WaitUntil(not XPBar.FindXPDrop, 100, 2000);
+  WaitUntil(not XPDrop.FindDrop, 100, 2000);
 
   PouchCount := Inventory.CountItemStack(CoinPouch);
   if Inventory.ClickItem(CoinPouch) then
@@ -685,8 +715,12 @@ function TThiever.CastShadowVeil: Boolean;
 begin
   if not UseShadowVeil or not Magic.Open then
     Exit;
+
   if not Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
-    Result := UseShadowVeil := Exit(False);
+  begin
+    Result := UseShadowVeil := False;
+    Exit(False);
+  end;
 
   Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL);
   ShadowVeilTimer.Restart(Random(-5000, 5000));
@@ -695,16 +729,19 @@ end;
 function TThiever.PickNPC: Boolean;
 var
   CurrentHP: Int32 := Minimap.GetHPLevel;
-  Position: TPoint;
 begin
   if Result := CurrentNPC^.SelectOption(['Pick', 'pocket']) then
   begin
-    Minimap.WaitPlayerMoving(300, 8000);
-    Position := RSW.GetMyPos; //Get our position right after picking in case ocr is too slow at detecting death.
-    if not Self.NecklaceExpired then FreshNeck := False;
+    Minimap.WaitPlayerMoving(300, 10000);
+
+    RSObjects.Gravestone.TileArray.Insert(RSW.GetMyPos, 0);
+    if Length(RSObjects.Gravestone.TileArray) > 4 then
+      RSObjects.Gravestone.TileArray.Pop;
+
+    if not Self.NecklaceExpired then
+      FreshNeck := False;
 
     Self.CheckFailed(CurrentHP);
-    if Died then RSObjects.Gravestone.TileArray := PopulateTile(Position, 2);
     WL.Activity.Restart;
   end;
 end;
@@ -729,10 +766,6 @@ var
   QuantityNeeded: Int32 := Quantity - ItemCount;
   InvCount: Int32;
 begin
-  Writeln(BankTab);
-  if BankTab = -1 then
-    BankTab := Bank.FindItemTab(Item);
-
   InvCount := Inventory.Count;
   if Result := Bank.WithdrawItem(BankTab, [Item, QuantityNeeded, False], False) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
@@ -752,7 +785,6 @@ var
   QuantityNeeded: Int32 := Quantity - ItemCount;
   InvCount: Int32;
 begin
-  Writeln(Items);
   for Item in Items do
   begin
     if BankTab = -1 then
@@ -771,14 +803,18 @@ end;
 
 
 function TThiever.LootGrave: Boolean;
-var
-  InvCount: Int32 := Inventory.Count;
 begin
-  if Result := RSObjects.Gravestone.WalkSelectOption(['Loot']) then
+  HasNeck := False;
+  FreshNeck := False;
+  RedemptionEnabled := False;
+
+  if RSObjects.Gravestone.WalkSelectOption(['Loot']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
-    Died := not WaitUntil(Inventory.Count <> InvCount, 100, 10000);
+    Result := WaitUntil(not MainScreen.HasGrave, 100, 10000);
   end;
+
+  if Result then RSObjects.Gravestone.TileArray := [];
 end;
 
 function TThiever.EnableRedemption: Boolean;
@@ -792,8 +828,11 @@ begin
   if WL.Activity.IsFinished then
     Exit(END_SCRIPT)
 
-  if ChooseOption.IsOpen then
+  else if ChooseOption.IsOpen then
     Exit(CLOSE_CONTEXT)
+
+  else if MainScreen.HasGrave then
+    Exit(LOOT_GRAVE)
 
   else if MainScreen.HasInterface then
   begin
@@ -836,14 +875,6 @@ begin
   else if NeckTimer.IsFinished then
     Exit(CHECK_NECKLACE)
 
-  if Died then
-  begin
-    HasNeck := False;
-    FreshNeck := False;
-    RedemptionEnabled := False;
-    Exit(LOOT_GRAVE);
-  end
-
   else if not FreshNeck and (not HasNeck or Self.NecklaceExpired) and (NeckQuantity > 0) then
   begin
     if Inventory.FindItem(Necklace) then
@@ -857,9 +888,6 @@ begin
 
   else if Self.HasRogue then
     Exit(EQUIP_ROGUE)
-
-  else if UseShadowVeil and not Inventory.FindItem('Cosmic rune') then
-    Died := True
 
   else if Self.IsLowHP then
   begin
@@ -893,12 +921,13 @@ begin
     Action := ToStr(State);
     ExtraInfo := ' FreshNeck: ' + ToStr(FreshNeck) +
                  ',   HasNeck: ' + ToStr(HasNeck) +
-                    ',   Died: ' + ToStr(Died) + STR_NEW_LINE +
-                    ' UseRedemption: ' + ToStr(UseRedemption) +
-                    ',   RedemptionEnabled: ' + ToStr(RedemptionEnabled) +
-                    ',   NextHeal: ' + ToStr(NextHeal) + STR_NEW_LINE +
-                    ' SuicideMode: ' + ToStr(SuicideMode) +
-                    ',   UseShadowVeil: ' + ToStr(UseShadowVeil);
+                 STR_NEW_LINE +
+                  ' UseRedemption: ' + ToStr(UseRedemption) +
+                  ',   RedemptionEnabled: ' + ToStr(RedemptionEnabled) +
+                  ',   NextHeal: ' + ToStr(NextHeal) +
+                  STR_NEW_LINE +
+                  ' SuicideMode: ' + ToStr(SuicideMode) +
+                  ',   UseShadowVeil: ' + ToStr(UseShadowVeil);
     Self.ProcessWhileWaiting;
 
     if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
