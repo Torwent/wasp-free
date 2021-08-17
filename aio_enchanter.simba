@@ -426,8 +426,6 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       EEnchanterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EEnchanterState.WITHDRAW_TOOL: Self.Withdraw(CosmicRune);

@@ -146,8 +146,6 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       DROP_LOOT: Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
       FIND_STALL, ROB_STALL: Self.RobStall;

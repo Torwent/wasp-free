@@ -293,8 +293,6 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       ECookerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       ECookerState.WITHDRAW_ITEMS: Self.Withdraw;

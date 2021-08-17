@@ -525,8 +525,6 @@ begin
                  ' Plank: ' + ToStr(Plank);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);

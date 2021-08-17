@@ -133,6 +133,8 @@ begin
   RSW.Setup('x7789y2306');
   ScriptBank := @RSObjects.GEBank;
 
+  if ScriptDebugEnabled then DebugObjectArray += ScriptBank;
+
   UseBestItem := CurrentGlass = ERSGlassItem.Best;
   ItemChanged := True;
 
@@ -140,7 +142,6 @@ begin
 
   CurrentLevel := Stats.GetCurrentLevel(ERSSkill.CRAFTING);
 
-  if ScriptDebugEnabled then DebugObjectArray += ScriptBank;
 end;
 
 

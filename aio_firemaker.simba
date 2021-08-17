@@ -272,8 +272,6 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       EBurnerState.WAIT_STATE: Wait(800, 850);
       EBurnerState.BURN_LOG: Self.BurnLogs;

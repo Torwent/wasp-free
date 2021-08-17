@@ -930,8 +930,6 @@ begin
                   ',   UseShadowVeil: ' + ToStr(UseShadowVeil);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       OPEN_BANK: Bank.WalkOpen(ScriptBank);
       DEPOSIT_LOOT: Self.Deposit;

@@ -527,8 +527,6 @@ begin
     ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' ToolType: ' + ToStr(ToolType);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EMinerState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);

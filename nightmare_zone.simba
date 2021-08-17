@@ -933,8 +933,6 @@ begin
                  ' SpecWeapon: ' + ToStr(SpecWeapon);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       END_SCRIPT: Break;
 

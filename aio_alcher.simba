@@ -343,8 +343,6 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       EAlcherState.WALK_ALCH: RSW.WebWalk(ScriptBank^.TileArray, 10, 0.2);
 

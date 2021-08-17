@@ -187,8 +187,6 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       EState.LEVEL_UP: Chat.HandleLevelUp(True);
       EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat;
