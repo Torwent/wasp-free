@@ -69,7 +69,7 @@ procedure TRemainOfferer.SetupSpell;
 begin
   WrathRune := 'Wrath rune';
 
-  SpellCooldown.Setup(4500);
+  SpellCooldown.Setup(4800);
 
   case CurrentRemains of
     ERSRemains.FIENDISH_ASHES..ERSRemains.INFERNAL_ASHES:
@@ -146,7 +146,9 @@ begin
     SpellCooldown.Restart(Random(-100,500));
     RemainsLeft -= 3;
     TotalActions += 1;
-  end;
+  end
+  else if Inventory.Open then
+    RemainsLeft := Inventory.CountItem(Remains);
 end;
 
 function TRemainOfferer.Withdraw(Item: TRSItem): Boolean;
