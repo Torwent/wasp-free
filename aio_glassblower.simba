@@ -168,9 +168,6 @@ var
   UseQuantityButton: Boolean := Item.Quantity <> 1;
   InvCount: Int32 := Inventory.Count;
 begin
-  if BankTab = -1 then
-    BankTab := Bank.FindItemTab(Item.Item);
-
   if Result := Bank.WithdrawItem(BankTab, Item, UseQuantityButton) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
@@ -379,8 +376,6 @@ begin
     State := GetState;
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
-
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
 
     case State of
       EBlowerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
