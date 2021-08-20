@@ -1,19 +1,18 @@
-{$IFNDEF SCRIPT_CHAIN}
-  {$DEFINE SRL_USE_REMOTEINPUT}
-  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-  {$I SRL/osr.simba}
-  {$I WaspLib/osr.simba}
+{$DEFINE SRL_USE_REMOTEINPUT}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$I SRL/osr.simba}
+{$I WaspLib/osr.simba}
 
-  begin
-    Login.PlayerIndex     := 0;
-    AntibanEnabled        := True; //Enables Most Antiban
-    BreaksEnabled         := True; //Enables Short Breaks
-    SleepEnabled          := True; //Enables Sleep Breaks
-    RemoteInputEnabled    := True; //Enables Remote Input
-    ProgressReportEnabled := True; //Enables Graphical Progress Report
-    ScriptDebugEnabled    := False; //Enables Script Debugging
-  end;
-{$ENDIF}
+begin
+  Login.PlayerIndex     := 0;
+  AntibanEnabled        := True; //Enables Most Antiban
+  BreaksEnabled         := True; //Enables Short Breaks
+  SleepEnabled          := True; //Enables Sleep Breaks
+  RemoteInputEnabled    := True; //Enables Remote Input
+  ProgressReportEnabled := True; //Enables Graphical Progress Report
+  ScriptDebugEnabled    := False; //Enables Script Debugging
+end;
+
 
 type
   ERSLogs = (REGULAR_LOGS, ACHEY_LOGS, OAK_LOGS, WILLOW_LOGS, TEAK_LOGS,
@@ -110,7 +109,7 @@ end;
 procedure TLogBurner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Firemaker';
-  Version := 'v2.1.9';
+  Version := 'v2.2.0';
 
   inherited;
 
@@ -121,7 +120,7 @@ begin
   Tool := ['Tinderbox', 1, False];
   Material := [Logs, BANK_WITHDRAW_ALL, False];
 
-  StartingPoints := [[4658, 2732], [4658, 2736]];
+  StartingPoints := [[8241, 2732], [8241, 2736]];
   NextStartingPoint := StartingPoints[0];
 
   Fire := @RSObjects.BurningFire;
@@ -349,11 +348,9 @@ end;
 var
   BurnerConfig: TBurnerConfig;
 
-{$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BurnerConfig.Run);
   {$ENDIF}
   LogBurner.Run(MaxActions, MaxTime);
 end.
-{$ENDIF}
