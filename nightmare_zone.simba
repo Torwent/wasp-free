@@ -643,9 +643,7 @@ end;
 function TNMZFighter.DrinkPotion(PotionArray: TRSItemArray): Boolean;
 var
   DoseCount: Int32 := Self.CountDoses(PotionArray);
-  i: Int32;
-  Slot: Int32;
-  CurrentHP: Int32;
+  i, Slot, CurrentHP: Int32;
   PotStr: String := ToStr(PotionArray[0]);
 begin
   if not Inventory.Open then Exit;
@@ -657,11 +655,17 @@ begin
   end;
 
   if PotStr.Contains('Overload') then
+  begin
     CurrentHP := Minimap.GetHPLevel;
+    if not WaitUntil(Minimap.GetHPLevel < CurrentHP, 100, 4000) then
+      Exit;
+  end
+  else if (PotionArray = BoostPotion) then
+    Wait(1200, 1600);
 
   if Inventory.ClickSlot(Slot) then
     Result := WaitUntil(
-              Self.CountDoses(PotionArray) < DoseCount, 100, 2000);
+                Self.CountDoses(PotionArray) < DoseCount, 100, 2000);
 
   if Result then
   begin
@@ -671,9 +675,7 @@ begin
       begin
         if not WaitUntil(Minimap.GetHPLevel <= CurrentHP - 45, 100, 12000) then
           Exit(False);
-      end
-      else
-        Wait(800, 1200);
+      end;
 
       Boosted := True;
       BoostTimer.Restart(Random(1000, 15000));
