@@ -558,7 +558,7 @@ end;
 
 function TNMZFighter.NeedBoost: Boolean;
 var
-  Str: String;
+  PotStr: String := ToStr(BoostPotion[0]);
 begin
   if not Self.HasBoostPot then
     Exit;
@@ -566,13 +566,10 @@ begin
   if BoostTimer.IsFinished then
     Boosted := False;
 
-  Str := ToStr(BoostPotion[0]);
-  if not Str.Contains('Overload') and not Boosted then
-    Result := True
-  else if (Minimap.GetHPLevel > 50) then
-    Result := True
+  if PotStr.Contains('Overload') then
+    Result := not Boosted or (Minimap.GetHPLevel > 50)
   else
-    Result := False;
+    Result := not Boosted;
 end;
 
 function TNMZFighter.GetAbsorptionPoints: Int32;
@@ -606,8 +603,6 @@ begin
     Result := Boosted or (HPLevel < 45)
   else
     Result := True;
-
-  ExtraInfo := ' Boosted: ' + ToStr(Boosted) + ' and Result: ' + ToStr(Result);
 end;
 
 
@@ -655,27 +650,27 @@ begin
   end;
 
   if PotStr.Contains('Overload') then
-  begin
     CurrentHP := Minimap.GetHPLevel;
-    if not WaitUntil(Minimap.GetHPLevel < CurrentHP, 100, 4000) then
-      Exit;
-  end
-  else if (PotionArray = BoostPotion) then
-    Wait(1200, 1600);
 
   if Inventory.ClickSlot(Slot) then
     Result := WaitUntil(
                 Self.CountDoses(PotionArray) < DoseCount, 100, 2000);
+
+  if (PotionArray = BoostPotion) then
+  begin
+    if PotStr.Contains('Overload') then
+      Result := WaitUntil(Minimap.GetHPLevel < CurrentHP, 100, 4000)
+    else
+      Wait(1200, 1600);
+  end;
 
   if Result then
   begin
     if (PotionArray = BoostPotion) then
     begin
       if PotStr.Contains('Overload') then
-      begin
         if not WaitUntil(Minimap.GetHPLevel <= CurrentHP - 45, 100, 12000) then
           Exit(False);
-      end;
 
       Boosted := True;
       BoostTimer.Restart(Random(1000, 15000));
@@ -929,7 +924,7 @@ begin
                  ' BoostTimer: ' + ToStr(BoostTimer.TimeRemaining) +
                  STR_NEW_LINE +
                  ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished) +
-                 ' NeedBoost: ' + ToSTR(Self.NeedBoost) +
+                 ' NeedBoost: ' + ToSTR(Self.NeedBoost) + ' Boosted: ' + ToStr(Boosted) +
                  STR_NEW_LINE +
                  ' Weapon: ' + ToStr(Weapon) + ' Shield: ' + ToStr(Shield) +
                  ' SpecWeapon: ' + ToStr(SpecWeapon);
@@ -1027,9 +1022,7 @@ begin
 
     SetCaption('Should work with most setups.' +
                 STR_NEW_LINE +
-               'Start with Main Weapon and Shield equipped and' +
-               STR_NEW_LINE +
-               'Spec Weapon in the inventory.');
+               'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
 
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(PotionSelector.Combobox.GetTop + PotionSelector.Combobox.getHeight + 2);
