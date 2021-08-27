@@ -567,7 +567,7 @@ begin
     Boosted := False;
 
   if PotStr.Contains('Overload') then
-    Result := not Boosted or (Minimap.GetHPLevel > 50)
+    Result := (Minimap.GetHPLevel > 50)
   else
     Result := not Boosted;
 end;
