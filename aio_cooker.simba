@@ -1,22 +1,22 @@
 {$IFNDEF SCRIPT_CHAIN}
   {$DEFINE SRL_USE_REMOTEINPUT}
-  {$IFDEF WINDOWS}{.$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL/osr.simba}
   {$I WaspLib/osr.simba}
-  {$I diagnostics.simba}
+
   begin
-    Login.PlayerIndex     := 1;
+    Login.PlayerIndex     := 0;
     AntibanEnabled        := True; //Enables Most Antiban
     BreaksEnabled         := True; //Enables Short Breaks
-    SleepEnabled          := False; //Enables Sleep Breaks
+    SleepEnabled          := True; //Enables Sleep Breaks
     RemoteInputEnabled    := True; //Enables Remote Input
-    ProgressReportEnabled := False; //Enables Graphical Progress Report
+    ProgressReportEnabled := True; //Enables Graphical Progress Report
     ScriptDebugEnabled    := False; //Enables Script Debugging
   end;
 {$ENDIF}
 
 var
-  Food: TRSItem = 'karambwan';
+  Food: TRSItem = 'Lobster'; 
 
 type
   ECookerState = (
