@@ -1,22 +1,22 @@
 {$IFNDEF SCRIPT_CHAIN}
   {$DEFINE SRL_USE_REMOTEINPUT}
-  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$IFDEF WINDOWS}{.$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL/osr.simba}
   {$I WaspLib/osr.simba}
-
+  {$I diagnostics.simba}
   begin
-    Login.PlayerIndex     := 0;
+    Login.PlayerIndex     := 1;
     AntibanEnabled        := True; //Enables Most Antiban
     BreaksEnabled         := True; //Enables Short Breaks
-    SleepEnabled          := True; //Enables Sleep Breaks
+    SleepEnabled          := False; //Enables Sleep Breaks
     RemoteInputEnabled    := True; //Enables Remote Input
-    ProgressReportEnabled := True; //Enables Graphical Progress Report
+    ProgressReportEnabled := False; //Enables Graphical Progress Report
     ScriptDebugEnabled    := False; //Enables Script Debugging
   end;
 {$ENDIF}
 
 var
-  Food: TRSItem = 'Lobster';
+  Food: TRSItem = 'karambwan';
 
 type
   ECookerState = (
@@ -80,6 +80,8 @@ begin
 end;
 
 procedure TCooker.Init(MaxActions: Int32; MaxTime: Int64); override;
+var
+CookedPrefix: TStringArray;
 begin
   Name := 'AIO Cooker';
   Version := 'v2.0.2';
@@ -91,10 +93,19 @@ begin
 
   Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];
 
+  CookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat', 'karambwan', 'chompy', 'fishcake', 'jubbly', 'sweetcorn'];
+
+  if CookedPrefix.Find(LowerCase(Food)) then
+  Products := [
+    ['Cooked ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL],
+    ['burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
+  ]
+  else
   Products := [
     [Food, BANK_DEPOSIT_ALL],
     ['burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
   ];
+
 
   ActionProfit := (
     ItemInfo.GetAveragePrice(Products[0].Item) -
@@ -196,16 +207,18 @@ function TCooker.HandleMake: Boolean;
 begin
   if not Make.IsOpen then
     Exit;
-
+  if 'karambwan' in Food then
+  Cooking := Result := Make.Select(1, MAKE_QUANTITY_ALL, SRL.Dice(98.5))
+    else
   Cooking := Result := Make.Select(0, MAKE_QUANTITY_ALL, SRL.Dice(98.5));
 end;
 
 function TCooker.WaitCooking: Boolean;
 begin
   if Cooking then
-    Result := Cooking := Self.HasIngredient and XPDrop.WaitDrop(2500)
+    Result := Cooking := Self.HasIngredient and XPDrop.WaitDrop(15500)
   else
-    Result := Cooking := XPDrop.WaitDrop(2500);
+    Result := Cooking := XPDrop.WaitDrop(15500);
 end;
 
 
