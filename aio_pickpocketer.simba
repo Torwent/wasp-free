@@ -485,7 +485,7 @@ end;
 procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name    := 'AIO Pickpocketer';
-  Version := 'v2.1.1';
+  Version := 'v2.1.2';
 
   inherited;
 
@@ -728,8 +728,11 @@ end;
 
 function TThiever.PickNPC: Boolean;
 var
+  Slot: Int32 := Inventory.GetSelectedSlot;
   CurrentHP: Int32 := Minimap.GetHPLevel;
 begin
+  if Slot > -1 then Inventory.ClickSlot(Slot);
+
   if Result := CurrentNPC^.SelectOption(['Pick', 'pocket']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
@@ -844,11 +847,9 @@ begin
         Exit(WITHDRAW_NECKLACES)
       else if (Inventory.CountItems(FoodArray) < FoodQuantity) then
         Exit(WITHDRAW_FOOD)
-      else
-        Exit(CLOSE_INTERFACE);
-    end
-    else
-      Exit(CLOSE_INTERFACE);
+    end;
+
+    Exit(CLOSE_INTERFACE);
   end
 
   else if Self.IsPouchFull then
@@ -862,8 +863,8 @@ begin
       Exit(EQUIP_ROGUE)
     else if Inventory.FindItems(FoodArray) then
       Exit(EAT_FOOD)
-    else
-      Exit(OPEN_BANK);
+
+    Exit(OPEN_BANK);
   end
 
   else if ChatButtons.GetState(ERSChatButton.GAME_CHAT) <> ERSChatButtonState.ENABLED then
@@ -879,12 +880,9 @@ begin
   begin
     if Inventory.FindItem(Necklace) then
       Exit(EQUIP_NECKLACE)
-    else
-      Exit(OPEN_BANK);
-  end
 
-  else if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
-    Exit(WALK_TO_NPC)
+    Exit(OPEN_BANK);
+  end
 
   else if Self.HasRogue then
     Exit(EQUIP_ROGUE)
@@ -895,19 +893,23 @@ begin
       Exit(EAT_FOOD)
     else if not SuicideMode then
       Exit(OPEN_BANK)
+    else if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
+      Exit(WALK_TO_NPC)
     else if UseRedemption and not RedemptionEnabled then
       Exit(ENABLE_REDEMPTION)
     else if UseShadowVeil and ShadowVeilTimer.IsFinished then
       Exit(CAST_SHADOW_VEIL)
-    else
-      Exit(PICKPOCKET);
+
+    Exit(PICKPOCKET);
   end
+
+  else if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
+    Exit(WALK_TO_NPC)
 
   else if UseShadowVeil and ShadowVeilTimer.IsFinished then
     Exit(CAST_SHADOW_VEIL)
 
-  else
-    Exit(PICKPOCKET);
+  Exit(PICKPOCKET);
 end;
 
 procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
