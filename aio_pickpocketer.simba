@@ -862,7 +862,7 @@ begin
     else if Self.HasRogue then
       Exit(EQUIP_ROGUE)
     else if Inventory.FindItems(FoodArray) then
-      Exit(EAT_FOOD)
+      Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
   end
@@ -879,7 +879,7 @@ begin
   else if not FreshNeck and (not HasNeck or Self.NecklaceExpired) and (NeckQuantity > 0) then
   begin
     if Inventory.FindItem(Necklace) then
-      Exit(EQUIP_NECKLACE)
+      Exit(EQUIP_NECKLACE);
 
     Exit(OPEN_BANK);
   end
@@ -898,7 +898,7 @@ begin
     else if UseRedemption and not RedemptionEnabled then
       Exit(ENABLE_REDEMPTION)
     else if UseShadowVeil and ShadowVeilTimer.IsFinished then
-      Exit(CAST_SHADOW_VEIL)
+      Exit(CAST_SHADOW_VEIL);
 
     Exit(PICKPOCKET);
   end
@@ -907,7 +907,7 @@ begin
     Exit(WALK_TO_NPC)
 
   else if UseShadowVeil and ShadowVeilTimer.IsFinished then
-    Exit(CAST_SHADOW_VEIL)
+    Exit(CAST_SHADOW_VEIL);
 
   Exit(PICKPOCKET);
 end;
