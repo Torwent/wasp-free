@@ -795,6 +795,9 @@ begin
     else if PrayFlickTimer.IsFinished then
       Exit(ENMZState.FLICK_PRAYER)
 
+    else if HitSplatTimer.IsFinished then
+      Exit(ENMZState.ATTACK_NPC)
+
     else if Self.CanSpec then
       Exit(ENMZState.USE_SPEC)
 
@@ -809,21 +812,14 @@ begin
       if Self.PowerUpAvailable then
         Exit(ENMZState.USE_POWER)
       else if MainScreen.FindHitsplats then
-      begin
         HitSplatTimer.Restart;
-        Exit(ENMZState.WAIT_STATE2);
-      end
-      else if HitSplatTimer.IsFinished then
-        Exit(ENMZState.ATTACK_NPC)
-      else
-        Exit(ENMZState.WAIT_STATE2);
+      Exit(ENMZState.WAIT_STATE2);
     end
 
     else if WalkMiddleTimer.IsFinished then
-      Exit(ENMZState.WALK_MIDDLE)
+      Exit(ENMZState.WALK_MIDDLE);
 
-    else
-      Exit(ENMZState.WAIT_STATE3);
+    Exit(ENMZState.WAIT_STATE3);
   end
 
   else
@@ -842,23 +838,20 @@ begin
       if not Self.HasEnoughBoost then
       begin
         if Potion.Lower in Query then
-          Exit(ENMZState.ANSWER_BOOST)
-        else
-          Exit(ENMZState.WITHDRAW_BOOST);
+          Exit(ENMZState.ANSWER_BOOST);
+        Exit(ENMZState.WITHDRAW_BOOST);
       end
 
       else if not Self.HasEnoughAbs then
       begin
         if 'absorption' in Query then
-          Exit(ENMZState.ANSWER_ABSORPTION)
-        else
-          Exit(ENMZState.WITHDRAW_ABSORPTION);
+          Exit(ENMZState.ANSWER_ABSORPTION);
+        Exit(ENMZState.WITHDRAW_ABSORPTION);
       end
 
       else if DreamSetup then
-        Exit(ENMZState.OPEN_NMZSETUP)
-      else
-        Exit(ENMZState.TALK_DOMINIC);
+        Exit(ENMZState.OPEN_NMZSETUP);
+      Exit(ENMZState.TALK_DOMINIC);
     end
 
 
@@ -867,19 +860,15 @@ begin
       if Inventory.CountItem(BoostPotion[3]) > BoostAmount then
       begin
         if Potion.Lower in Title then
-          Exit(ENMZState.HANDLE_DEPOSIT)
-        else
-          Exit(ENMZState.DEPOSIT_BOOST)
+          Exit(ENMZState.HANDLE_DEPOSIT);
+        Exit(ENMZState.DEPOSIT_BOOST)
       end
       else if Inventory.CountItem(BoostPotion[3]) < BoostAmount then
         Exit(ENMZState.WITHDRAW_BOOST);
     end
 
     else if not Self.HasEnoughAbs then
-    begin
-      if Inventory.CountItem(AbsPotion[3]) < AbsAmount then
-        Exit(ENMZState.WITHDRAW_ABSORPTION);
-    end
+      Exit(ENMZState.WITHDRAW_ABSORPTION)
 
     else if DreamSetup then
     begin
@@ -890,8 +879,7 @@ begin
         DreamSetup := False;
         Exit(ENMZState.TALK_DOMINIC);
       end
-      else
-        Exit(ENMZState.OPEN_NMZSETUP);
+      Exit(ENMZState.OPEN_NMZSETUP);
     end
     else
     begin
@@ -903,9 +891,8 @@ begin
           Exit(ENMZState.HANDLE_DOMINIC);
       end
       else if 'Agree' in Title then
-        Exit(ENMZState.PAY_DOMINIC)
-      else
-        Exit(ENMZState.TALK_DOMINIC);
+        Exit(ENMZState.PAY_DOMINIC);
+      Exit(ENMZState.TALK_DOMINIC);
     end;
   end;
 end;
