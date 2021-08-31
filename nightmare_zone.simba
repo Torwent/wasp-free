@@ -770,7 +770,13 @@ end;
 
 function TNMZFighter.AttackNPC: Boolean;
 begin
-  Result := EnemyNPC.Click;
+  if EnemyNPC.Click then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(MainScreen.FindHitsplats, 100, 10000);
+  end;
+
+  if Result then HitSplatTimer.Restart;
 end;
 
 
