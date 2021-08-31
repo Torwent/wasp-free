@@ -600,7 +600,7 @@ begin
 
   Str := ToStr(BoostPotion[0]);
   if (Str.Contains('Overload') and Self.HasBoostPot) then
-    Result := Boosted or (HPLevel < 45) or (HPLevel > 61)
+    Result := Boosted or (HPLevel < 51)
   else
     Result := True;
 end;
