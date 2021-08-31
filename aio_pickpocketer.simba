@@ -280,6 +280,7 @@ begin
 
     KNIGHT_OF_ARDOUGNE:
       begin
+        Login.Players[Login.PlayerIndex].Worlds:= []; 
         RSW.Setup('x5723y3038');
         CurrentNPC := @RSNPCs.KnightOfArdougne;
         ScriptBank := @RSObjects.ArdougneSouthBank;
