@@ -773,7 +773,7 @@ begin
   if EnemyNPC.Click then
   begin
     Minimap.WaitMoving;
-    Result := WaitUntil(MainScreen.FindHitsplats, 100, 10000);
+    Result := WaitUntil(Length(MainScreen.FindHitsplats) > 0, 100, 10000);
   end;
 
   if Result then HitSplatTimer.Restart;
