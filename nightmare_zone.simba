@@ -70,6 +70,7 @@ type
     InsideDream: Boolean;
     DreamSetup: Boolean;
     Boosted: Boolean;
+    PrayFlick: Boolean;
 
     DreamMiddle: TPoint;
 
@@ -181,7 +182,8 @@ procedure TNMZFighter.SetupTimers;
 begin
   DreamMiddle := [5456, 453];
 
-  PrayFlickTimer.Init(60000);
+  if PrayFlick then
+    PrayFlickTimer.Init(60000);
   WalkMiddleTimer.Init(190000 - Round(20000 * BioHash));
   WalkMiddleTimer.Timeout := GetTickCount;
   HitSplatTimer.Init(25000 - Round(15000 * BioHash));
@@ -341,7 +343,7 @@ begin
   Self.SetupPotions;
   Self.SetupBarrels;
   Self.SetupPowerUps;
-  Self.SetupTimers;
+
 
   EnemyNPC.SetupCommon;
   EnemyNPC.UpText := ['Attack'];
@@ -353,6 +355,9 @@ begin
 
   Self.SetupWeapons;
   Self.SetupDamageItem;
+
+  PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
+  Self.SetupTimers;
 
   if ScriptDebugEnabled then
   begin
@@ -410,7 +415,8 @@ begin
   if Result then
   begin
     BoostTimer.Resume;
-    PrayFlickTimer.Resume;
+    if PrayFlick then
+      PrayFlickTimer.Resume;
     PowerSurgeTimer.Resume;
     ZapperTimer.Resume;
     WL.Activity.Restart;
@@ -420,7 +426,8 @@ begin
     Boosted := False;
 
     BoostTimer.Timeout := GetTickCount;
-    PrayFlickTimer.Timeout := GetTickCount;
+    if PrayFlick then
+      PrayFlickTimer.Timeout := GetTickCount;
     PowerSurgeTimer.Timeout := GetTickCount;
     ZapperTimer.Timeout := GetTickCount;
   end;
@@ -690,7 +697,7 @@ begin
     Result := Minimap.DisablePrayer;
   end;
 
-  if Result then
+  if Result and PrayFlick then
     PrayFlickTimer.Restart(Random(-20000, 20000));
 end;
 
@@ -798,7 +805,7 @@ begin
     else if Self.NeedLowerHP then
       Exit(ENMZState.LOWER_HEALTH)
 
-    else if PrayFlickTimer.IsFinished then
+    else if PrayFlick and PrayFlickTimer.IsFinished then
       Exit(ENMZState.FLICK_PRAYER)
 
     else if HitSplatTimer.IsFinished then
