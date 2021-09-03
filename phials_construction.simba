@@ -31,8 +31,8 @@ type
     State: EState;
     POH: TRSWalker;
 
-    BuiltLarder: TRSObject;
-    LarderSpace: TRSObject;
+    BuiltLarder: PRSObject;
+    LarderSpace: PRSObject;
     LarderIsBuilt: Boolean;
   end;
 
@@ -55,30 +55,13 @@ begin
   RSW.Setup('x6953y3166');
   POH.Setup('poh');
 
-  BuiltLarder.SetupCommon;
-  BuiltLarder.UpText := ['Larder'];
-  BuiltLarder.Finder.ColorClusters += [CTS2(6916239, 10, 0.33, 1.18), CTS2(4154749, 9, 0.13, 0.65), 150];
-  BuiltLarder.SetupCommon(@RSW, 7, [[3504, 3286], [3504, 3286], [3507, 3290], [3507, 3290]]);
+  RSObjects.OakLarderBuilt.SetupCommon(@RSW, 2, 7, [[110, 86]]);
+  RSObjects.OakLarderSpace.SetupCommon(@RSW, 2, 7, [[110, 86]]);
 
-  LarderSpace.SetupCommon;
-  LarderSpace.UpText := ['2 more'];
-  LarderSpace.Finder.ColorClusters += [CTS2(10529472, 16, 0.25, 0.95), CTS2(8884636, 16, 0.16, 0.18), 80];
-  LarderSpace.SetupCommon(@RSW, 7, [[3504, 3286], [3504, 3286], [3507, 3290], [3507, 3290]]);
+  BuiltLarder := @RSObjects.OakLarderBuilt;
+  LarderSpace := @RSObjects.OakLarderSpace;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
-end;
-
-
-function TBuilder.InPOH: Boolean;
-var
-  B: TBox := Minimap.Bounds;
-begin
-  B.X1 += 25;
-  B.Y1 += 25;
-  B.X2 -= 25;
-  B.Y2 -= 25;
-  Result := (SRL.CountColor(CTS0(4286836, 15), B) > 1000) or (SRL.CountColor(CTS0(3625827, 15), B) > 1000);
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
 end;
 
 
@@ -87,24 +70,24 @@ begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
   begin
     Minimap.WaitPlayerMoving(300, 8000);
-    Result := WaitUntil(Self.InPOH, 200, 5000);
+    Result := MainScreen.WaitLoadingPOH(10000);
   end;
 end;
 
 function TBuilder.BuildLarder: Boolean;
 begin
-  if LarderSpace.SelectOption(['Build']) then
+  if LarderSpace^.SelectOption(['Build']) then
   begin
-    Minimap.WaitPlayerMoving(300, 5000);
+    Minimap.WaitMoving;
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 3000);
   end;
 end;
 
 function TBuilder.DestroyLarder: Boolean;
 begin
-  if BuiltLarder.SelectOption(['Remove']) then
+  if BuiltLarder^.SelectOption(['Remove']) then
   begin
-    Minimap.WaitPlayerMoving(300, 5000);
+    Minimap.WaitMoving;
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
   end;
 end;
@@ -151,7 +134,7 @@ begin
   else if MainScreen.IsClassicOpen then
     Exit(EState.HANDLE_FURNITURE_UI)
 
-  else if not Self.InPOH then
+  else if not Minimap.InPOH then
   begin
     if Inventory.IsFull then
       Exit(EState.ENTER_HOUSE)
