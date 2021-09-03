@@ -203,8 +203,8 @@ begin
 
         ScriptBank := @RSObjects.AlKharidBank;
 
-        NeckQuantity := Round(Antiban.GetUniqueNumber(2, 1));;
-        FoodQuantity := Round(Antiban.GetUniqueNumber(5, 13));
+        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
+        FoodQuantity := Round(Antiban.GetUniqueNumber(8, 12));
 
         ActionProfit := 18;
       end;
@@ -256,8 +256,8 @@ begin
 
         if SuicideMode then SuicideMode := False;
 
-        NeckQuantity := Round(Antiban.GetUniqueNumber(2, 1));;
-        FoodQuantity := Round(Antiban.GetUniqueNumber(5, 6));
+        NeckQuantity := Round(Antiban.GetUniqueNumber(2, 2));
+        FoodQuantity := Round(Antiban.GetUniqueNumber(5, 12));
       end;
 
     GUARD:
@@ -274,8 +274,8 @@ begin
         ActionProfit := 30;
 
         ScriptBank := @RSObjects.FaladorWestBank;
-        NeckQuantity := Round(Antiban.GetUniqueNumber(2, 1));;
-        FoodQuantity := Round(Antiban.GetUniqueNumber(5, 10));
+        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
+        FoodQuantity := Round(Antiban.GetUniqueNumber(5, 15));
       end;
 
     KNIGHT_OF_ARDOUGNE:
@@ -296,8 +296,8 @@ begin
 
         ActionProfit := 100;
 
-        NeckQuantity := Round(Antiban.GetUniqueNumber(2, 2));;
-        FoodQuantity := Round(Antiban.GetUniqueNumber(5, 12));
+        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
+        FoodQuantity := Round(Antiban.GetUniqueNumber(5, 15));
 
         if SuicideMode then SuicideMode := False;
       end;
@@ -328,12 +328,12 @@ begin
 
         if SuicideMode then
         begin
-          NeckQuantity := Round(Antiban.GetUniqueNumber(2, 1));;
-          FoodQuantity := Round(Antiban.GetUniqueNumber(2, 4));
+          NeckQuantity := Round(Antiban.GetUniqueNumber(2, 3));
+          FoodQuantity := Round(Antiban.GetUniqueNumber(2, 5));
         end
         else
         begin
-          NeckQuantity := Round(Antiban.GetUniqueNumber(1, 2));;
+          NeckQuantity := Round(Antiban.GetUniqueNumber(3, 2));
           FoodQuantity := Round(Antiban.GetUniqueNumber(13, 5));
         end;
       end;
@@ -355,8 +355,8 @@ begin
 
         if SuicideMode then SuicideMode := False;
 
-        NeckQuantity := Round(Antiban.GetUniqueNumber(1, 2));;
-        FoodQuantity := Round(Antiban.GetUniqueNumber(10, 8));
+        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
+        FoodQuantity := Round(Antiban.GetUniqueNumber(12, 8));
       end;
   end;
 
@@ -789,6 +789,9 @@ var
   QuantityNeeded: Int32 := Quantity - ItemCount;
   InvCount: Int32;
 begin
+  for Item in Items do
+    if Bank.FindItem(Item) then Exit(Self.Withdraw(Item, Quantity));
+
   for Item in Items do
   begin
     if BankTab = -1 then
