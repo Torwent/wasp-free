@@ -55,13 +55,30 @@ begin
   RSW.Setup('x6953y3166');
   POH.Setup('poh');
 
-  RSObjects.OakLarderBuilt.SetupCommon(@RSW, 2, 7, [[110, 86]]);
-  RSObjects.OakLarderSpace.SetupCommon(@RSW, 2, 7, [[110, 86]]);
+  RSObjects.OakLarderBuilt.SetupCommon(@POH, 2, 7, [[110, 86]]);
+  RSObjects.OakLarderSpace.SetupCommon(@POH, 2, 7, [[110, 86]]);
+  RSObjects.OakLarderBuilt.Filter.Finder := False;
+  RSObjects.OakLarderSpace.Filter.Finder := False;
 
   BuiltLarder := @RSObjects.OakLarderBuilt;
   LarderSpace := @RSObjects.OakLarderSpace;
 
+
+  RSObjects.POHPortal.SetupCommon(@RSW,
+        [MakeShape([2, 4, 7], [[7198, 3552], [2351, 2376], [6414, 3733], [2349, 2377]])]);
+
+
+  RSNPCs.Phials.SetupCommon(@RSW, 4, 6, [[7190, 3604]]);
+
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugObjectArray += BuiltLarder;
+    DebugObjectArray += LarderSpace;
+    DebugObjectArray += @RSObjects.POHPortal;
+    DebugNPCArray += @RSNPCs.Phials;
+  end;
 end;
 
 
@@ -69,7 +86,7 @@ function TBuilder.EnterHouse: Boolean;
 begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
   begin
-    Minimap.WaitPlayerMoving(300, 8000);
+    Minimap.WaitMoving;
     Result := MainScreen.WaitLoadingPOH(10000);
   end;
 end;
@@ -79,7 +96,7 @@ begin
   if LarderSpace^.SelectOption(['Build']) then
   begin
     Minimap.WaitMoving;
-    Result := WaitUntil(MainScreen.IsClassicOpen, 200, 3000);
+    Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
   end;
 end;
 
@@ -98,8 +115,9 @@ function TBuilder.GetPlanks: Boolean;
 begin
   if Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click then
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000)
-  else if RSW.WebWalk(RSNPCs.Phials.TileArray, 8, 0.3) and
-          (Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click) then
+  else if not RSW.AtTile(RSNPCs.Phials.TileArray, 8) and
+              RSW.WebWalk(RSNPCs.Phials.TileArray, 8, 0.3) and
+              (Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click) then
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
 end;
 
