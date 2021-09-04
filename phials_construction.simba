@@ -70,6 +70,8 @@ begin
 
   RSNPCs.Phials.SetupCommon(@RSW, 4, 6, [[7190, 3604]]);
 
+  ActionProfit -= ItemInfo.GetAveragePrice('Oak plank') * 8 + 40;
+
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
   if ScriptDebugEnabled then
@@ -132,7 +134,10 @@ function TBuilder.HandleFurniture: Boolean;
 begin
   Keyboard.PressKey(VK_2);
   Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
-  if not Result then
+
+  if Result then
+    TotalActions += 1
+  else
     MainScreen.CloseInterface;
 end;
 
@@ -215,6 +220,8 @@ var
 type
   TBuilderConfig = record(TScriptConfig)
     BuilderInfo: TLabel;
+    ImagePanel: TPanel;
+    LayoutBMP: Integer;
   end;
 
 procedure TBuilderConfig.StartScript(Sender: TObject);
@@ -239,6 +246,12 @@ begin
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
   end;
+
+  with ImagePanel do
+  begin
+
+  end;
+
 
   StartButton.setOnClick(@Self.StartScript);
 end;
