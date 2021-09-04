@@ -48,7 +48,7 @@ end;
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Phials construction';
-  Version := 'v2.0.2';
+  Version := 'v2.0.5';
 
   inherited;
 
@@ -65,13 +65,10 @@ begin
   LarderSpace := @RSObjects.OakLarderSpace;
 
 
-  RSObjects.POHPortal.SetupCommon(@RSW,
-        [MakeShape([2, 4, 7], [[7198, 3552], [2351, 2376], [6414, 3733], [2349, 2377]])]);
+  RSObjects.POHPortal.Walker := @RSW;
+  RSNPCs.Phials.Walker := @RSW;
 
-
-  RSNPCs.Phials.SetupCommon(@RSW, 4, 6, [[7190, 3604]]);
-
-  ActionProfit -= ItemInfo.GetAveragePrice('Oak plank') * 8 + 40;
+  ActionProfit -= (ItemInfo.GetAveragePrice('Oak plank') * 8 + 40);
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
