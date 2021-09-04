@@ -59,6 +59,7 @@ begin
   RSObjects.OakLarderSpace.SetupCommon(@POH, 2, 7, [[110, 86]]);
   RSObjects.OakLarderBuilt.Filter.Finder := False;
   RSObjects.OakLarderSpace.Filter.Finder := False;
+  RSObjects.OakLarderSpace.Filter.UpText := False;
 
   BuiltLarder := @RSObjects.OakLarderBuilt;
   LarderSpace := @RSObjects.OakLarderSpace;
@@ -95,7 +96,7 @@ end;
 
 function TBuilder.BuildLarder: Boolean;
 begin
-  if LarderSpace^.SelectOption(['Build']) then
+  if LarderSpace^.SelectOption(['Build La']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
