@@ -692,6 +692,8 @@ procedure TCutterConfig.Setup; override;
 begin
   inherited;
 
+  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 30);
+
   with TreeSelector do
   begin
     Init(ScriptSettingsPanel);
@@ -728,8 +730,8 @@ begin
   begin
     Init(ScriptSettingsPanel);
     SetCaption('Sawmill:');
-    SetLeft(RemoteInputState.getLeft + RemoteInputState.GetWidth + 5);
-    SetTop(RemoteInputState.getTop);
+    SetLeft(TreeSelector.getLeft + TreeSelector.GetWidth + 25);
+    SetTop(TreeSelector.getTop + 20);
     Checkbox.setEnabled(False);
   end;
 
