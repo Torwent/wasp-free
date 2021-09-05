@@ -1057,8 +1057,8 @@ begin
   begin
     Init(ScriptSettingsPanel);
     SetCaption('Suicide mode:');
-    SetLeft(RemoteInputState.getLeft + RemoteInputState.GetWidth + 5);
-    SetTop(ScriptSettingsPanel.getHeight - 35);
+    SetLeft(NPCSelector.getLeft + NPCSelector.GetWidth + 25);
+    SetTop(NPCSelector.getHeight - 20);
     SetWidth(50);
     SetHeight(10);
     SetEnabled(True);
