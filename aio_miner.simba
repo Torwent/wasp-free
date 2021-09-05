@@ -229,6 +229,9 @@ begin
 
     POWER_MINE: UseBank := False;
   end;
+
+  if UseBank then
+    RSW.ScreenWalk := True;
 end;
 
 
@@ -629,6 +632,8 @@ end;
 procedure TMinerConfig.Setup; override;
 begin
   inherited;
+
+  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 30);
 
   with RockSelector do
   begin
