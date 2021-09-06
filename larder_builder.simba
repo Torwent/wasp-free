@@ -11,20 +11,35 @@ begin
   RemoteInputEnabled    := True; //Enables Remote Input
   ProgressReportEnabled := True; //Enables Graphical Progress Report
   ScriptDebugEnabled    := False; //Enables Script Debugging
+  BioHash
 end;
 
 type
+  ERSNPC = (PHIALS, SERVANT);
+
+var
+  CurrentNPC: ERSNPC := ERSNPC.PHIALS;
+
+type
   EState = (
+    LEVEL_UP,
     WAIT_STATE,
-    GET_PLANKS,
+
     EXIT_HOUSE,
     ENTER_HOUSE,
+
     BUILD_LARDER,
     HANDLE_FURNITURE_UI,
     DESTROY_LARDER,
-    LEVEL_UP,
+    HANDLE_LARDER_CHAT,
+
+    GET_PLANKS,
     HANDLE_PHIALS_CHAT,
-    HANDLE_LARDER_CHAT
+    CALL_SERVANT,
+    TALK_SERVANT,
+    HANDLE_SERVANT,
+
+    END_SCRIPT
   );
 
   TBuilder = record(TBaseWalkerScript)
@@ -33,8 +48,48 @@ type
 
     BuiltLarder: PRSObject;
     LarderSpace: PRSObject;
+    ServantNPC: TRSNPC;
+
     LarderIsBuilt: Boolean;
+    UsePhials: Boolean;
+    WaitingServant: Boolean;
   end;
+
+
+procedure TBuilder.SetupNPC;
+begin
+  case CurrentNPC of
+    PHIALS:
+      begin
+        UsePhials := True;
+        RSNPCs.Phials.Walker := @RSW;
+      end;
+
+    SERVANT:
+      begin
+        UsePhials := False;
+
+        ServantNPC.SetupCommon;
+        ServantNPC.UpText := ['Talk-to'];
+        ServantNPC.Filter.Finder := False;
+        ServantNPC.Filter.MinimapDot := True;
+      end;
+  end;
+end;
+
+procedure TBuilder.SetupObjects;
+begin
+  RSObjects.OakLarderBuilt.SetupCommon(@POH, 1.5, 7, [[110, 86]]);
+  RSObjects.OakLarderSpace.SetupCommon(@POH, 1.5, 7, [[110, 86]]);
+  RSObjects.OakLarderBuilt.Filter.Finder := False;
+  RSObjects.OakLarderSpace.Filter.Finder := False;
+  RSObjects.OakLarderSpace.Filter.UpText := False;
+
+  BuiltLarder := @RSObjects.OakLarderBuilt;
+  LarderSpace := @RSObjects.OakLarderSpace;
+
+  RSObjects.POHPortal.Walker := @RSW;
+end;
 
 procedure TAntiban.Setup; override;
 begin
@@ -55,18 +110,8 @@ begin
   RSW.Setup('x6953y3166');
   POH.Setup('poh');
 
-  RSObjects.OakLarderBuilt.SetupCommon(@POH, 2, 7, [[110, 86]]);
-  RSObjects.OakLarderSpace.SetupCommon(@POH, 2, 7, [[110, 86]]);
-  RSObjects.OakLarderBuilt.Filter.Finder := False;
-  RSObjects.OakLarderSpace.Filter.Finder := False;
-  RSObjects.OakLarderSpace.Filter.UpText := False;
-
-  BuiltLarder := @RSObjects.OakLarderBuilt;
-  LarderSpace := @RSObjects.OakLarderSpace;
-
-
-  RSObjects.POHPortal.Walker := @RSW;
-  RSNPCs.Phials.Walker := @RSW;
+  Self.SetupNPC;
+  Self.SetupObjects;
 
   ActionProfit -= (ItemInfo.GetAveragePrice('Oak plank') * 8 + 40);
 
@@ -78,6 +123,7 @@ begin
     DebugObjectArray += LarderSpace;
     DebugObjectArray += @RSObjects.POHPortal;
     DebugNPCArray += @RSNPCs.Phials;
+    DebugNPCArray += @ServantNPC;
   end;
 end;
 
@@ -93,7 +139,7 @@ end;
 
 function TBuilder.BuildLarder: Boolean;
 begin
-  if LarderSpace^.SelectOption(['Build La']) then
+  if LarderSpace^.WalkSelectOption(['Build La']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
@@ -102,7 +148,7 @@ end;
 
 function TBuilder.DestroyLarder: Boolean;
 begin
-  if BuiltLarder^.SelectOption(['Remove']) then
+  if BuiltLarder^.WalkSelectOption(['Remove']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
@@ -110,6 +156,17 @@ begin
 end;
 
 
+function TBuilder.CallServant: Boolean;
+begin
+  if ServantNPC.Click then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(Chat.GetChatTitle = 'Repeat last task?',
+                        SRL.TruncatedGauss(50, 1500), 5000);
+  end
+  else
+    Result := Options.CallServant;
+end;
 
 function TBuilder.GetPlanks: Boolean;
 begin
@@ -119,6 +176,25 @@ begin
               RSW.WebWalk(RSNPCs.Phials.TileArray, 8, 0.3) and
               (Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click) then
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
+end;
+
+function TBuilder.TalkServant: Boolean;
+begin
+  if ServantNPC.Click then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(Inventory.IsFull, 100, 5000);
+  end;
+
+  WaitingServant := not Result;
+end;
+
+
+function TBuilder.HandleServant: Boolean;
+begin
+  Result := Chat.ClickOption('Fetch', BioHash)
+  if Result then
+    WaitingServant := True;
 end;
 
 function TBuilder.HandleLarderChat: Boolean;
@@ -134,8 +210,10 @@ begin
   Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
 
   if Result then
-    TotalActions += 1
-  else
+  begin
+    TotalActions += 1;
+    WL.Activity.Restart;
+  end else
     MainScreen.CloseInterface;
 end;
 
@@ -143,7 +221,10 @@ function TBuilder.GetState: EState;
 var
   S: String := Chat.GetChatTitle;
 begin
-  if Chat.LeveledUp then
+  if WL.Activity.IsFinished then
+    Exit(END_SCRIPT)
+
+  else if Chat.LeveledUp then
     Exit(EState.LEVEL_UP)
 
   else if S.Contains('remove') then
@@ -152,32 +233,39 @@ begin
   else if S.Contains('Select') then
     Exit(EState.HANDLE_PHIALS_CHAT)
 
+  else if S.Contains('Repeat') then
+    Exit(EState.HANDLE_SERVANT)
+
   else if MainScreen.IsClassicOpen then
     Exit(EState.HANDLE_FURNITURE_UI)
 
   else if not Minimap.InPOH then
   begin
-    if Inventory.IsFull then
-      Exit(EState.ENTER_HOUSE)
-    else
-      Exit(EState.GET_PLANKS);
-  end
-
-  else if Inventory.Count > 4 then
-  begin
-    if LarderIsBuilt then
-      Exit(EState.DESTROY_LARDER)
-    else if not LarderIsBuilt then
-      Exit(EState.BUILD_LARDER)
-    else
-      Writeln('Stuck here?');
+    if not UsePhials or Inventory.IsFull then
+      Exit(EState.ENTER_HOUSE);
+    Exit(EState.GET_PLANKS);
   end
 
   else if LarderIsBuilt then
     Exit(EState.DESTROY_LARDER)
 
-  else
-    Exit(EState.EXIT_HOUSE);
+  else if Inventory.Count > 4 then
+  begin
+    WaitingServant := False;
+    Exit(EState.BUILD_LARDER);
+  end
+
+  else if UsePhials then
+    Exit(EState.EXIT_HOUSE)
+
+  else if WaitingServant then
+  begin
+    if ServantNPC.Find then
+      Exit(EState.TALK_SERVANT);
+    Exit(EState.WAIT_STATE);
+  end
+
+  Exit(EState.CALL_SERVANT);
 end;
 
 procedure TBuilder.Run(MaxActions: Int32; MaxTime: Int64);
@@ -193,10 +281,14 @@ begin
 
     case State of
       EState.LEVEL_UP: Chat.HandleLevelUp(True);
+
       EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat;
       EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
       EState.HANDLE_FURNITURE_UI: Self.HandleFurniture;
+      EState.HANDLE_SERVANT: Self.HandleServant;
 
+      EState.CALL_SERVANT: Self.CallServant;
+      EState.TALK_SERVANT: Self.TalkServant;
       EState.EXIT_HOUSE: Options.LeaveHouse;
       EState.GET_PLANKS: Self.GetPlanks;
 
@@ -204,7 +296,9 @@ begin
       EState.BUILD_LARDER: Self.BuildLarder;
       EState.DESTROY_LARDER: Self.DestroyLarder;
 
-      EState.WAIT_STATE: Wait(500, 800);
+      EState.WAIT_STATE: Wait(7000, 8000);
+
+      END_SCRIPT: Break;
     end;
 
     Self.DoAntiban;
@@ -217,37 +311,67 @@ var
 
 type
   TBuilderConfig = record(TScriptConfig)
+    NPCSelector: TLabeledCombobox;
     BuilderInfo: TLabel;
-    ImagePanel: TPanel;
-    LayoutBMP: Integer;
+    ImagePanel: TImage;
+    Pic: TPicture;
   end;
 
 procedure TBuilderConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
+  CurrentNPC := ERSNPC(NPCSelector.Combobox.getItemIndex);
 end;
 
 procedure TBuilderConfig.Setup; override;
 begin
   inherited;
 
+  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 250);
+
+  with NPCSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Method:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetWidth(200);
+    Combobox.setStyle(csDropDownList);
+    AddItem('Phials');
+    AddItem('Demon buttler');
+    Combobox.setItemIndex(Ord(CurrentNPC));
+  end;
+
   with BuilderInfo do
   begin
     Init(ScriptSettingsPanel);
     setParent(ScriptSettingsPanel);
 
-    SetCaption('There''s no settings for this script.' + STR_NEW_LINE +
-               'Only works with a very specific house layout atm.' +
-               STR_NEW_LINE + 'Check discord for more information');
+    SetCaption('For Phials method make sure you have noted planks with you.' +
+               STR_NEW_LINE +
+               'For Demon buttler make sure you previously asked him for 24 planks and' +
+               STR_NEW_LINE +
+               'you need to have money in the servant''s money bag.' +
+               STR_NEW_LINE +
+               'You need a decoration that has green grass and the following layout:');
 
     SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetTop(NPCSelector.getTop + NPCSelector.getHeight + 2);
   end;
+
+  Pic.Init();
+  Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\poh_layout.png');
 
   with ImagePanel do
   begin
-
+    Init(ScriptSettingsPanel);
+    SetParent(ScriptSettingsPanel);
+    SetTop(BuilderInfo.GetTop + 65);
+    SetLeft(BuilderInfo.getLeft + 80);
+    setWidth(195);
+    SetHeight(194);
+    setPicture(Pic);
   end;
 
 
