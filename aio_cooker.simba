@@ -16,7 +16,7 @@
 {$ENDIF}
 
 var
-  Food: TRSItem = 'Lobster';
+  Food: TRSItem = 'Karambwan';
 
 type
   ECookerState = (
@@ -46,20 +46,6 @@ type
     Cooking: Boolean;
   end;
 
-function TRSMake.SelectHelper(Button: TRSButton; Quantity: Int32; UseKeyboard: Boolean = True): Boolean; override;
-begin
-  Result := Self.SetQuantity(Quantity);
-
-  if Result then
-  begin
-    if UseKeyboard then
-    begin
-        Keyboard.PressKey(VK_SPACE)
-    end else
-      Mouse.Click(Button.Bounds, MOUSE_LEFT);
-  end;
-end;
-
 function TRSMake.Select(Index: Int32; Quantity: Int32; UseKeyboard: Boolean = True): Boolean; override;
 var
   Buttons: TRSButtonArray;
@@ -70,6 +56,32 @@ begin
 end;
 
 
+procedure TCooker.SetupItems;
+var
+  CookedPrefix: TStringArray;
+begin
+  CookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat',
+                   'karambwan', 'chompy', 'fishcake', 'jubbly', 'sweetcorn'];
+
+  Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];
+
+  if CookedPrefix.Find(LowerCase(Food)) then
+  Products := [
+    ['Cooked ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL],
+    ['burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
+  ]
+  else
+  Products := [
+    [Food, BANK_DEPOSIT_ALL],
+    ['burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
+  ];
+
+
+  ActionProfit := (
+    ItemInfo.GetAveragePrice(Products[0].Item) -
+    ItemInfo.GetAveragePrice(Ingredient.Item)
+  );
+end;
 
 procedure TAntiban.Setup; override;
 begin
@@ -82,24 +94,14 @@ end;
 procedure TCooker.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Cooker';
-  Version := 'v2.0.2';
+  Version := 'v2.0.3';
 
   inherited;
 
   RSW.Setup('x1916y1841');
   ScriptBank := @RSObjects.HosidiusKitchenBank;
 
-  Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];
-
-  Products := [
-    [Food, BANK_DEPOSIT_ALL],
-    ['burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
-  ];
-
-  ActionProfit := (
-    ItemInfo.GetAveragePrice(Products[0].Item) -
-    ItemInfo.GetAveragePrice(Ingredient.Item)
-  );
+  Self.SetupItems;
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
@@ -110,13 +112,6 @@ begin
   end;
 end;
 
-
-function TCooker.HasIngredient: Boolean;
-var
-  Slots: TIntegerArray;
-begin
-  Result := Inventory.FindItem(Ingredient.Item, Slots);
-end;
 
 function TCooker.HasProducts: Boolean; overload;
 var
@@ -193,19 +188,31 @@ begin
 end;
 
 function TCooker.HandleMake: Boolean;
+var
+  i: Int32 := 0;
 begin
   if not Make.IsOpen then
     Exit;
 
-  Cooking := Result := Make.Select(0, MAKE_QUANTITY_ALL, SRL.Dice(98.5));
+  if 'arambwan' in Food then
+    i := 1;
+
+  Result := Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice);
+end;
+
+function TCooker.IsCooking(WaitTime: Int32 = 2500): Boolean;
+var
+  ItemCount: Int32 := Inventory.CountItem(Ingredient.Item);
+begin
+  if ItemCount = 0 then Exit;
+
+  if Result := WaitUntil(ItemCount > Inventory.CountItem(Ingredient.Item), 100, WaitTime) then
+    WL.Activity.Restart;
 end;
 
 function TCooker.WaitCooking: Boolean;
 begin
-  if Cooking then
-    Result := Cooking := Self.HasIngredient and XPDrop.WaitDrop(2500)
-  else
-    Result := Cooking := XPDrop.WaitDrop(2500);
+  Result := Cooking := Self.IsCooking
 end;
 
 
@@ -235,7 +242,7 @@ begin
     begin
       if Self.HasProducts then
         Exit(ECookerState.DEPOSIT_ITEMS)
-      else if BankEmpty or Self.HasIngredient then
+      else if BankEmpty or Inventory.FindItem(Ingredient.Item) then
         Exit(ECookerState.CLOSE_INTERFACE)
       else
         Exit(ECookerState.WITHDRAW_ITEMS);
@@ -243,7 +250,7 @@ begin
 
     else if CollectBox.IsOpen then
     begin
-      if CollectEmpty or Self.HasIngredient then
+      if CollectEmpty or Inventory.FindItem(Ingredient.Item) then
         Exit(ECookerState.CLOSE_INTERFACE)
       else
         Exit(ECookerState.HANDLE_COLLECT)
@@ -254,7 +261,7 @@ begin
 
   end
 
-  else if Self.HasIngredient then
+  else if Inventory.FindItem(Ingredient.Item) then
   begin
     if Cooking then
       Exit(ECookerState.WAIT_COOKING)
