@@ -65,15 +65,15 @@ begin
 
   Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];
 
-  if CookedPrefix.Find(LowerCase(Food)) then
+  if (CookedPrefix.Find(LowerCase(Food)) > -1) then
   Products := [
     ['Cooked ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL],
-    ['burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
+    ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
   ]
   else
   Products := [
     [Food, BANK_DEPOSIT_ALL],
-    ['burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
+    ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
   ];
 
 
