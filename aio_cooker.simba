@@ -76,7 +76,6 @@ begin
     ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
   ];
 
-
   ActionProfit := (
     ItemInfo.GetAveragePrice(Products[0].Item) -
     ItemInfo.GetAveragePrice(Ingredient.Item)
