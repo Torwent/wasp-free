@@ -53,6 +53,8 @@ type
     LarderIsBuilt: Boolean;
     UsePhials: Boolean;
     WaitingServant: Boolean;
+
+    NotedPlanksSlot: Int32;
   end;
 
 
@@ -103,7 +105,7 @@ end;
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Phials construction';
-  Version := 'v2.0.5';
+  Version := 'v2.0.6';
 
   inherited;
 
@@ -117,6 +119,9 @@ begin
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
+  if CurrentNPC = PHIALS then
+    Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
+
   if ScriptDebugEnabled then
   begin
     DebugObjectArray += BuiltLarder;
@@ -126,7 +131,6 @@ begin
     DebugNPCArray += @ServantNPC;
   end;
 end;
-
 
 function TBuilder.EnterHouse: Boolean;
 begin
@@ -168,14 +172,16 @@ begin
     Result := Options.CallServant;
 end;
 
-function TBuilder.GetPlanks: Boolean;
+function TBuilder.PhialsGetPlanks: Boolean;
 begin
-  if Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click then
-    Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000)
-  else if not RSW.AtTile(RSNPCs.Phials.TileArray, 8) and
-              RSW.WebWalk(RSNPCs.Phials.TileArray, 8, 0.3) and
-              (Inventory.SetSelectedSlot(0) and RSNPCs.Phials.Click) then
+  if not RSNPCs.Phials.Find and not RSW.AtTile(RSNPCs.Phials.TileArray, 8) then
+    RSW.WebWalk(RSNPCs.Phials.TileArray, 15, 0.2);
+
+  if (Inventory.SetSelectedSlot(NotedPlanksSlot) and RSNPCs.Phials.Click) then
+  begin
+    Minimap.WaitFlag;
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
+  end;
 end;
 
 function TBuilder.TalkServant: Boolean;
@@ -290,7 +296,7 @@ begin
       EState.CALL_SERVANT: Self.CallServant;
       EState.TALK_SERVANT: Self.TalkServant;
       EState.EXIT_HOUSE: Options.LeaveHouse;
-      EState.GET_PLANKS: Self.GetPlanks;
+      EState.GET_PLANKS: Self.PhialsGetPlanks;
 
       EState.ENTER_HOUSE: Self.EnterHouse;
       EState.BUILD_LARDER: Self.BuildLarder;
@@ -308,6 +314,18 @@ end;
 
 var
   Builder: TBuilder;
+
+function TRSOptions.LeaveHouse: Boolean; override;
+begin
+  if not Self.OpenHouseOptions then
+    Exit;
+
+  Self.GetHouseOptionsButton(ERSHouseOptionsButton.LEAVE).Click;
+  Inventory.SetSelectedSlot(Builder.NotedPlanksSlot);
+
+  Result := WaitUntil(not Self.IsHouseOptionsOpen, SRL.TruncatedGauss(50, 1500), 5000);
+end;
+
 
 type
   TBuilderConfig = record(TScriptConfig)
