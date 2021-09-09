@@ -315,18 +315,6 @@ end;
 var
   Builder: TBuilder;
 
-function TRSOptions.LeaveHouse: Boolean; override;
-begin
-  if not Self.OpenHouseOptions then
-    Exit;
-
-  Self.GetHouseOptionsButton(ERSHouseOptionsButton.LEAVE).Click;
-  Inventory.SetSelectedSlot(Builder.NotedPlanksSlot);
-
-  Result := WaitUntil(not Self.IsHouseOptionsOpen, SRL.TruncatedGauss(50, 1500), 5000);
-end;
-
-
 type
   TBuilderConfig = record(TScriptConfig)
     NPCSelector: TLabeledCombobox;
