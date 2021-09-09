@@ -112,12 +112,10 @@ end;
 procedure TRemainOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Remain Offerer';
-  Version := 'v1.0.0';
+  Version := 'v1.1.0';
 
   inherited;
-
-  RSW.Setup('x7789y2306');
-  ScriptBank := @RSObjects.GEBank;
+  Self.SetupWLBanks;
 
   if ScriptDebugEnabled then
     DebugObjectArray += ScriptBank;
@@ -313,7 +311,7 @@ end;
 var RemainOfferer: TRemainOfferer;
 
 type
-  TRemainOffererConfig = record(TScriptConfig)
+  TRemainOffererConfig = record(TBankConfig)
     RemainSelector: TLabeledCombobox;
   end;
 
@@ -327,7 +325,7 @@ begin
   MaxTime    := StrToInt64(Self.TimeLimit.GetText);
 end;
 
-procedure TRemainOffererConfig.Setup; override;
+procedure TRemainOffererConfig.Setup(Strs: TStringArray); override;
 begin
   inherited;
 
@@ -336,7 +334,7 @@ begin
     Init(ScriptSettingsPanel);
     SetCaption('Task:');
     SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
 
@@ -363,7 +361,7 @@ end;
 
 procedure TRemainOffererConfig.Run; override;
 begin
-  Self.Setup;
+  Self.Setup(BankLocationStrings);
 
   inherited;
 end;
