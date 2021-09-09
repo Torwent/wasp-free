@@ -15,8 +15,12 @@
   end;
 {$ENDIF}
 
+type
+  ERSLocation = (HOSIDIUS, ROGUES_DEN);
+
 var
-  Food: TRSItem = 'Karambwan';
+  CurrentFood: TRSItem   := 'Anglerfish';
+  CurrentLocation := ERSLocation.HOSIDIUS;
 
 type
   ECookerState = (
@@ -41,9 +45,14 @@ type
   TCooker = record(TBaseBankScript)
     State: ECookerState;
 
+    Food: TRSItem;
     Ingredient: TRSBankWithdrawItem;
     Products: array of TRSBankDepositItem;
+
+    CookingObj: PRSObject;
+
     Cooking: Boolean;
+    UsingFire: Boolean;
   end;
 
 function TRSMake.Select(Index: Int32; Quantity: Int32; UseKeyboard: Boolean = True): Boolean; override;
@@ -60,6 +69,8 @@ procedure TCooker.SetupItems;
 var
   CookedPrefix: TStringArray;
 begin
+  Food := CurrentFood;
+
   CookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat',
                    'karambwan', 'chompy', 'fishcake', 'jubbly', 'sweetcorn'];
 
@@ -82,6 +93,29 @@ begin
   );
 end;
 
+procedure TCooker.SetupLocation;
+begin
+  case CurrentLocation of
+    ERSLocation.HOSIDIUS:
+      begin
+        RSW.Setup('x1916y1841');
+        ScriptBank := @RSObjects.HosidiusKitchenBank;
+        CookingObj := @RSObjects.HosidiusKitchenOven;
+      end;
+
+    ERSLocation.ROGUES_DEN:
+      begin
+        RSW.Setup('x9921y310');
+        RSNPCs.EmeraldBenedict.Filter.Finder := False;
+        ScriptBanker := @RSNPCs.EmeraldBenedict;
+
+        RSObjects.EternalFire.Filter.Finder := False;
+        RSObjects.EternalFire.Filter.UpText := False;
+        CookingObj := @RSObjects.EternalFire;
+      end;
+  end;
+end;
+
 procedure TAntiban.Setup; override;
 begin
   inherited;
@@ -93,21 +127,22 @@ end;
 procedure TCooker.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Cooker';
-  Version := 'v2.0.3';
+  Version := 'v2.1.3';
 
   inherited;
 
-  RSW.Setup('x1916y1841');
-  ScriptBank := @RSObjects.HosidiusKitchenBank;
-
   Self.SetupItems;
+  Self.SetupLocation;
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
   if ScriptDebugEnabled then
   begin
-    DebugObjectArray += ScriptBank;
-    DebugObjectArray += @RSObjects.HosidiusKitchenOven;
+    case CurrentLocation of
+      ERSLocation.HOSIDIUS:   DebugObjectArray += ScriptBank;
+      ERSLocation.ROGUES_DEN: DebugNPCArray += ScriptBanker;
+    end;
+    DebugObjectArray += CookingObj;
   end;
 end;
 
@@ -124,6 +159,13 @@ begin
   Result := True;
 end;
 
+function TCooker.OpenBank: Boolean;
+begin
+  case CurrentLocation of
+    ERSLocation.HOSIDIUS:   Result := Bank.WalkOpen(ScriptBank);
+    ERSLocation.ROGUES_DEN: Result := Bank.WalkOpen(ScriptBanker);
+  end;
+end;
 
 function TCooker.Withdraw: Boolean;
 var
@@ -179,7 +221,10 @@ end;
 
 function TCooker.DoCooking: Boolean;
 begin
-  if RSObjects.HosidiusKitchenOven.WalkClick then
+  if CurrentLocation = ERSLocation.ROGUES_DEN then
+    Inventory.SetSelectedItem(Food);
+
+  if CookingObj^.WalkClick then
   begin
     Minimap.WaitPlayerMoving(300, 3000);
     Result := Make.IsOpen(4000);
@@ -300,7 +345,7 @@ begin
     Self.ProcessWhileWaiting;
 
     case State of
-      ECookerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      ECookerState.OPEN_BANK: Self.OpenBank;
       ECookerState.WITHDRAW_ITEMS: Self.Withdraw;
       ECookerState.DEPOSIT_ITEMS: Self.Deposit;
 
@@ -330,6 +375,7 @@ var
 
 type
   TCookerConfig = record(TScriptConfig)
+    LocSelector: TLabeledCombobox;
     FoodSelector: TLabeledEdit;
   end;
 
@@ -337,21 +383,35 @@ procedure TCookerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  Food := FoodSelector.Edit.getText;
+  CurrentLocation := ERSLocation(LocSelector.Combobox.getItemIndex);
+  CurrentFood := FoodSelector.Edit.getText;
 end;
 
 procedure TCookerConfig.Setup; override;
 begin
   inherited;
 
+  with LocSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Location:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetWidth(200);
+    Combobox.setStyle(csDropDownList);
+    Combobox.getItems.Add('Hosidius kitchen');
+    Combobox.getItems.Add('Rogues den');
+    Combobox.setItemIndex(Ord(CurrentLocation));
+  end;
+
   with FoodSelector do
   begin
     Init(ScriptSettingsPanel);
     SetCaption('Food name (must be the exact name):');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(LocSelector.getLeft + LocSelector.GetWidth + 20);
+    SetTop(LocSelector.getTop);
     SetWidth(200);
-    SetText(Food);
+    SetText(CurrentFood);
   end;
 
   StartButton.setOnClick(@Self.StartScript);
