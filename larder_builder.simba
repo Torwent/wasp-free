@@ -82,8 +82,9 @@ end;
 procedure TBuilder.SetupObjects;
 begin
   RSObjects.OakLarderBuilt.SetupCommon(@POH, 1.5, 7, [[110, 86]]);
-  RSObjects.OakLarderSpace.SetupCommon(@POH, 1.5, 7, [[110, 86]]);
   RSObjects.OakLarderBuilt.Filter.Finder := False;
+  RSObjects.OakLarderBuilt.Filter.UpText := False;
+  RSObjects.OakLarderSpace.SetupCommon(@POH, 1.5, 7, [[110, 86]]);
   RSObjects.OakLarderSpace.Filter.Finder := False;
   RSObjects.OakLarderSpace.Filter.UpText := False;
 
@@ -132,6 +133,25 @@ begin
   end;
 end;
 
+
+function TWaspObject._SelectHelper(Action: TStringArray): Boolean; override;
+begin
+  if ChooseOption.IsOpen and ChooseOption.Select(Action) then
+    Exit(True);
+
+  if MainScreen.IsUpText(Action) then
+  begin
+    Mouse.Click(MOUSE_LEFT);
+    Result := MainScreen.DidRedClick;
+  end
+  else
+      Result := ChooseOption.Select(
+                  Action, MOUSE_LEFT, True,
+                  (False)
+                );
+end;
+
+
 function TBuilder.EnterHouse: Boolean;
 begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
@@ -147,6 +167,11 @@ begin
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
+  end
+  else if ChooseOption.HasOption('Remove') then
+  begin
+    ChooseOption.Close;
+    LarderIsBuilt := True;
   end;
 end;
 
@@ -156,6 +181,11 @@ begin
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
+  end
+  else if ChooseOption.HasOption('Build La') then
+  begin
+    ChooseOption.Close;
+    LarderIsBuilt := False;
   end;
 end;
 
@@ -208,17 +238,18 @@ begin
   Keyboard.PressKey(VK_1);
   Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
   LarderIsBuilt := not Result;
+  Wait(100, 150);
 end;
 
 function TBuilder.HandleFurniture: Boolean;
 begin
   Keyboard.PressKey(VK_2);
   Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
-
   if Result then
   begin
     TotalActions += 1;
     WL.Activity.Restart;
+    Wait(250, 300);
   end else
     MainScreen.CloseInterface;
 end;
