@@ -16,7 +16,7 @@ end;
 type
   ENPC = (
     MAN, KHARID_WARRIOR, MASTER_FARMER,
-    GUARD, KNIGHT_OF_ARDOUGNE, ELF, TZHAAR
+    GUARD, KNIGHT_OF_ARDOUGNE, ELF, TZHAAR_CITY
   );
 
 var
@@ -338,7 +338,7 @@ begin
         end;
       end;
 
-    TZHAAR:
+    TZHAAR_CITY:
       begin
         RSW.Setup('x4333y310');
         CurrentNPC := @RSNPCs.TzhaarHur;
@@ -1014,7 +1014,7 @@ begin
         SuicideState.Checkbox.setEnabled(False);
       end;
 
-    TZHAAR:
+    TZHAAR_CITY:
       begin
         SuicideState.Checkbox.setState(cbUnchecked);
         SuicideState.Checkbox.setEnabled(False);
