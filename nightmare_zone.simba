@@ -428,8 +428,8 @@ begin
     BoostTimer.Timeout := GetTickCount;
     if PrayFlick then
       PrayFlickTimer.Timeout := GetTickCount;
-    CombatTimer := GetTickCount;
-    WalkMiddleTimer := GetTickCount;
+    CombatTimer.Timeout := GetTickCount;
+    WalkMiddleTimer.Timeout := GetTickCount;
     PowerSurgeTimer.Timeout := GetTickCount;
     ZapperTimer.Timeout := GetTickCount;
   end;
