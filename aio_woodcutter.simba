@@ -15,8 +15,8 @@ end;
 
 type
   ERSBank = (
-    POWER_WC, GE, VARROCK_EAST, VARROCK_WEST,
-    EDGEVILLE, SEERS, DRAYNOR, WC_GUILD, PRIFDDINAS
+    POWER_WC, GE, VARROCK_E, VARROCK_W,
+    EDGE, SEERS_VILLAGE, DRAYNOR_VILLAGE, WC_GUILD, PRIFDDINAS
   );
 
   ERSTree = (
@@ -173,21 +173,21 @@ begin
         UseBank := True;
       end;
 
-    VARROCK_EAST:
+    VARROCK_E:
       begin
         RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.VarrockEastBank;
         UseBank := True;
       end;
 
-    VARROCK_WEST:
+    VARROCK_W:
       begin
         RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.VarrockWestBank;
         UseBank := True;
       end;
 
-    EDGEVILLE:
+    EDGE:
       begin
         RSW.Setup('x7536y2363');
         ScriptBank := @RSObjects.EdgevilleBank;
@@ -201,7 +201,7 @@ begin
         UseBank := True;
       end;
 
-    DRAYNOR:
+    DRAYNOR_VILLAGE:
       begin
         RSW.Setup('x7617y3214');
         ScriptBank := @RSObjects.DraynorBank;
@@ -566,11 +566,11 @@ begin
   case BankSelector.Combobox.getText of
     'Power WC (cut and drop)': BankLocation := ERSBank.POWER_WC;
     'Grand Exchange':          BankLocation := ERSBank.GE;
-    'Varrock east':            BankLocation := ERSBank.VARROCK_EAST;
-    'Varrock west':            BankLocation := ERSBank.VARROCK_WEST;
-    'Draynor':                 BankLocation := ERSBank.DRAYNOR;
-    'Seers'' village':         BankLocation := ERSBank.SEERS;
-    'Edgeville':               BankLocation := ERSBank.EDGEVILLE;
+    'Varrock east':            BankLocation := ERSBank.VARROCK_E;
+    'Varrock west':            BankLocation := ERSBank.VARROCK_W;
+    'Draynor':                 BankLocation := ERSBank.DRAYNOR_VILLAGE;
+    'Seers'' village':         BankLocation := ERSBank.SEERS_VILLAGE;
+    'Edgeville':               BankLocation := ERSBank.EDGE;
     'Woodcutting guild':       BankLocation := ERSBank.WC_GUILD;
     'Prifddinas':              BankLocation := ERSBank.PRIFDDINAS;
   end;
