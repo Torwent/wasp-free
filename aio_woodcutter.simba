@@ -169,7 +169,7 @@ begin
     GE:
       begin
         RSW.Setup('x7536y2363');
-        ScriptBank := @RSObjects.VarrockEastBank;
+        ScriptBank := @RSObjects.GEBank;
         UseBank := True;
       end;
 
