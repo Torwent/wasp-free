@@ -406,6 +406,7 @@ begin
   Result := Inventory.ShiftDrop(DropList, Inventory.RandomPattern);
 
   TotalActions += (InvCount - Inventory.Count);
+  if Result then WL.Activity.Restart;
 end;
 
 
@@ -532,7 +533,7 @@ begin
 
     case State of
       EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      EMinerState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
+      EMinerState.DEPOSIT_ITEMS: if Bank.DepositItemArray(BankTab, BankList, True) then WL.Activity.Restart;
       EMinerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
       EMinerState.WALK_SPOT: RSW.WebWalk(RSRock^.TileArray, 5, 0.2);
       EMinerState.WAIT_STATE: Self.WaitMining;
