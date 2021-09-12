@@ -168,7 +168,7 @@ begin
     Minimap.WaitMoving;
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
   end
-  else if ChooseOption.HasOption('Remove') then
+  else if ChooseOption.HasOption('Remove L') then
   begin
     ChooseOption.Close;
     LarderIsBuilt := True;
@@ -177,7 +177,7 @@ end;
 
 function TBuilder.DestroyLarder: Boolean;
 begin
-  if BuiltLarder^.WalkSelectOption(['Remove']) then
+  if BuiltLarder^.WalkSelectOption(['Remove L']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
