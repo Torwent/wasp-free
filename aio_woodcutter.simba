@@ -341,9 +341,11 @@ end;
 
 function TWoodcutter.CutTree: Boolean;
 begin
-  Result := Woodcutting := RSTree^.Click;
-  if Result then
-    Wait(800, 1200);
+  if UseBank and RSTree^.WalkClick) or RSTree^.Click then
+  begin
+    Minimap.WaitMoving;
+    Result := Woodcutting := True;
+  end;
 end;
 
 function TWoodcutter.HasGear: Boolean;
