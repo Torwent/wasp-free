@@ -15,7 +15,7 @@ end;
 
 type
   ENPC = (
-    MAN, KHARID_WARRIOR, MASTER_FARMER,
+    MAN, MASTER_FARMER,
     GUARD, KNIGHT_OF_ARDOUGNE, ELF, TZHAAR_CITY
   );
 
@@ -185,28 +185,6 @@ begin
         FoodQuantity := 0;
 
         ActionProfit := 3;
-      end;
-
-    KHARID_WARRIOR:
-      begin
-        RSW.Setup('x8351y3606');
-        CurrentNPC := @RSNPCs.KharidWarrior;
-
-        LootArray += CoinPouch;
-        LootArray += 'Coins';
-
-        StackableArray := LootArray;
-
-        NPCMaxHit := 2;
-
-        if SuicideMode then SuicideMode := False;
-
-        ScriptBank := @RSObjects.AlKharidBank;
-
-        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodQuantity := Round(Antiban.GetUniqueNumber(8, 12));
-
-        ActionProfit := 18;
       end;
 
     MASTER_FARMER:
@@ -774,12 +752,8 @@ begin
   if Result := Bank.WithdrawItem(BankTab, [Item, QuantityNeeded, False], False) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
-  if not Result and (Item = Necklace) then
-  begin
-    if (PickedNPC = GUARD) or
-       (PickedNPC = KHARID_WARRIOR) then
-      NeckQuantity := 0;
-  end;
+  if not Result and (Item = Necklace) and (PickedNPC = GUARD) then
+    NeckQuantity := 0;
 end;
 
 function TThiever.WithdrawAny(Items: TRSItemArray; Quantity: Int32): Boolean;
@@ -996,12 +970,6 @@ begin
         SuicideState.Checkbox.setEnabled(False);
       end;
 
-    KHARID_WARRIOR:
-      begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
-      end;
-
     MASTER_FARMER:
       begin
         SuicideState.Checkbox.setState(cbUnchecked);
@@ -1042,7 +1010,6 @@ begin
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('Men and women (Lumbridge only)');
-    Combobox.getItems.Add('Al Kharid warriors');
     Combobox.getItems.Add('Master farmers (Draynor only)');
     Combobox.getItems.Add('Guards (Falador only)');
     Combobox.getItems.Add('Knights of Ardougne');
