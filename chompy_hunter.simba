@@ -1,0 +1,199 @@
+{$DEFINE SRL_USE_REMOTEINPUT}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$I SRL/osr.simba}
+{$I WaspLib/osr.simba}
+
+begin
+  Login.PlayerIndex     := 0;
+  AntibanEnabled        := True; //Enables Most Antiban
+  BreaksEnabled         := True; //Enables Short Breaks
+  SleepEnabled          := True; //Enables Sleep Breaks
+  RemoteInputEnabled    := True; //Enables Remote Input
+  ProgressReportEnabled := True; //Enables Graphical Progress Report
+  ScriptDebugEnabled    := False; //Enables Script Debugging
+end;
+
+type
+  EState = (
+    WAIT_STATE,
+    FILL_TOAD,
+    FILL_BELLOWS,
+    PLACE_TOAD,
+    CLICK_CHOMPY
+  );
+
+  TScript = record(TBaseWalkerScript)
+    State: EState;
+    Chompy: PRSNPC;
+    Toad: PRSNPC;
+    OgreBellows: TRSItemArray;
+    FillingBellows: Boolean;
+  end;
+
+procedure TAntiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.TOTAL];
+  Antiban.MinZoom := 15;
+  Antiban.MaxZoom := 40;
+end;
+
+procedure TScript.Init(MaxActions: Int32; MaxTime: Int64); override;
+begin
+  Name := 'Chompy Hunter';
+  Version := 'v1.0.0';
+
+  inherited;
+
+  RSW.Setup('x4595y3834');
+
+  Chompy := @RSNPCs.Chompy;
+  Toad := @RSNPCs.SwampToad;
+
+  OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
+
+  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+end;
+
+function TScript.PlaceToad: Boolean;
+begin
+  if Inventory.ClickItem('Bloated toad') then
+  begin
+    Wait(1400, 1800);
+    Result := WaitUntil(not Inventory.FindItem('Bloated toad'), 100, 5000);
+  end;
+end;
+
+
+function TScript.FillToad: Boolean;
+var
+  InvCount := Inventory.Count;
+begin
+  if Toad^.Click(True, 10) then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(InvCount < Inventory.Count, 100, 5000);
+  end;
+
+  if Result then
+    Self.PlaceToad;
+end;
+
+
+function TScript.ClickedChompy(FeatherCount: Int32): Boolean;
+begin
+  Result := MainScreen.InCombat or (FeatherCount < Inventory.CountItemStack('Feather'));
+end;
+
+function TScript.ClickChompy: Boolean;
+var
+  FeatherCount: Int32;
+begin
+  if Chompy^.Click then
+  begin
+    FeatherCount := Inventory.CountItemStack('Feather');
+    Minimap.WaitMoving;
+    Result := WaitUntil(Self.ClickedChompy(FeatherCount), 100, 5000);
+  end;
+
+  if Result then TotalActions += 1;
+end;
+
+
+
+function TScript.GetState: EState;
+begin
+  if FillingBellows then
+  begin
+    if FillingBellows := Inventory.FindItem('Ogre bellows') then
+      Exit(WAIT_STATE);
+    Exit;
+  end
+
+  else if Inventory.FindItem('Bloated toad') then
+    Exit(PLACE_TOAD)
+
+  else if Chompy^.Find then
+    Exit(CLICK_CHOMPY)
+
+  else if Inventory.FindItems(OgreBellows) then
+    Exit(FILL_TOAD);
+
+  Exit(FILL_BELLOWS);
+end;
+
+procedure TScript.Run(MaxActions: Int32; MaxTime: Int64);
+begin
+  ClearDebug;
+  Self.Init(MaxActions, MaxTime);
+
+  while not Self.ShouldStop do
+  begin
+    State := Self.GetState;
+    Action := ToStr(State);
+    Self.ProcessWhileWaiting;
+
+    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
+
+    case State of
+      WAIT_STATE: Wait(800, 1200);
+      FILL_TOAD: Self.FillToad;
+      FILL_BELLOWS: RSObjects.SwampBubbles.WalkClick;
+      PLACE_TOAD: Self.PlaceToad;
+      CLICK_CHOMPY: Self.ClickChompy;
+    end;
+
+    Self.DoAntiban;
+    if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  end;
+end;
+
+var Script: TScript;
+
+type
+  TConfig = record(TScriptConfig)
+    Selector: TLabeledCombobox;
+  end;
+
+procedure TConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+  MaxActions := StrToInt(Self.ActionLimit.GetText);
+  MaxTime    := StrToInt64(Self.TimeLimit.GetText);
+end;
+
+procedure TConfig.Setup; override;
+begin
+  inherited;
+
+  with Selector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Task:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetWidth(200);
+    Combobox.setStyle(csDropDownList);
+    Combobox.getItems.Add('Task to do');
+  end;
+
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var Config: TConfig;
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  Sync(@Config.Run);
+  {$ENDIF}
+  Script.Run(MaxActions, MaxTime);
+end.
