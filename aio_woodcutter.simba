@@ -341,7 +341,7 @@ end;
 
 function TWoodcutter.CutTree: Boolean;
 begin
-  if UseBank and RSTree^.WalkClick) or RSTree^.Click then
+  if (UseBank and RSTree^.WalkClick) or RSTree^.Click then
   begin
     Minimap.WaitMoving;
     Result := Woodcutting := True;
