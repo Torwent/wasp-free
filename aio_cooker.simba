@@ -68,24 +68,29 @@ end;
 procedure TCooker.SetupItems;
 var
   CookedPrefix: TStringArray;
+  BurntFish: TStringArray;
 begin
   Food := CurrentFood;
 
   CookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat',
                    'karambwan', 'chompy', 'fishcake', 'jubbly', 'sweetcorn'];
 
+  BurntFish := ['herring', 'sardine', 'anchovies', 'trout', 'tuna'];
+
   Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];
 
   if (CookedPrefix.Find(LowerCase(Food)) > -1) then
-  Products := [
-    ['Cooked ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL],
-    ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
-  ]
+    Products := [
+      ['Cooked ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL],
+      ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]]
+  else if (BurntFish.Find(LowerCase(Food)) > -1) then
+    Products := [
+      ['Cooked ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL],
+      ['Burnt fish', BANK_DEPOSIT_ALL]]
   else
-  Products := [
-    [Food, BANK_DEPOSIT_ALL],
-    ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]
-  ];
+    Products := [
+      [Food, BANK_DEPOSIT_ALL],
+      ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]];
 
   ActionProfit := (
     ItemInfo.GetAveragePrice(Products[0].Item) -
