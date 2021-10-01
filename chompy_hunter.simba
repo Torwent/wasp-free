@@ -22,9 +22,8 @@ type
     CLICK_CHOMPY
   );
 
-  TScript = record(TBaseWalkerScript)
+  TChompyHunter = record(TBaseWalkerScript)
     State: EState;
-    Chompy: PRSNPC;
     Toad: PRSNPC;
     OgreBellows: TRSItemArray;
     FillingBellows: Boolean;
@@ -39,24 +38,30 @@ begin
   Antiban.MaxZoom := 40;
 end;
 
-procedure TScript.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TChompyHunter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Chompy Hunter';
-  Version := 'v1.0.0';
+  Version := 'v2.0.0';
 
   inherited;
 
   RSW.Setup('x4595y3834');
 
-  Chompy := @RSNPCs.Chompy;
+  CombatHandler.Setup(@RSNPCs.Chompy, 2000);
   Toad := @RSNPCs.SwampToad;
 
   OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugNPCArray += CombatHandler.EnemyNPC;
+    DebugNPCArray += Toad;
+  end;
 end;
 
-function TScript.PlaceToad: Boolean;
+function TChompyHunter.PlaceToad: Boolean;
 begin
   if Inventory.ClickItem('Bloated toad') then
   begin
@@ -66,7 +71,7 @@ begin
 end;
 
 
-function TScript.FillToad: Boolean;
+function TChompyHunter.FillToad: Boolean;
 var
   InvCount := Inventory.Count;
 begin
@@ -81,20 +86,20 @@ begin
 end;
 
 
-function TScript.ClickedChompy(FeatherCount: Int32): Boolean;
+function TChompyHunter.ClickedChompy(FeatherCount: Int32): Boolean;
 begin
   Result := MainScreen.InCombat or (FeatherCount < Inventory.CountItemStack('Feather'));
 end;
 
-function TScript.ClickChompy: Boolean;
+function TChompyHunter.ClickChompy: Boolean;
 var
   FeatherCount: Int32;
 begin
-  if Chompy^.Click then
+  if CombatHandler.EnemyNPC^.Click then
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving;
-    Result := WaitUntil(Self.ClickedChompy(FeatherCount), 100, 5000);
+    Result := WaitUntil(Self.ClickedChompy(FeatherCount) or MainScreen.InCombat, 100, 5000);
   end;
 
   if Result then TotalActions += 1;
@@ -102,7 +107,7 @@ end;
 
 
 
-function TScript.GetState: EState;
+function TChompyHunter.GetState: EState;
 begin
   if FillingBellows then
   begin
@@ -114,7 +119,10 @@ begin
   else if Inventory.FindItem('Bloated toad') then
     Exit(PLACE_TOAD)
 
-  else if Chompy^.Find then
+  else if MainScreen.InCombat then
+    Exit(WAIT_STATE)
+
+  else if CombatHandler.EnemyNPC^.Find then
     Exit(CLICK_CHOMPY)
 
   else if Inventory.FindItems(OgreBellows) then
@@ -123,7 +131,7 @@ begin
   Exit(FILL_BELLOWS);
 end;
 
-procedure TScript.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TChompyHunter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
@@ -149,51 +157,55 @@ begin
   end;
 end;
 
-var Script: TScript;
+var ChompyHunter: TChompyHunter;
 
 type
-  TConfig = record(TScriptConfig)
-    Selector: TLabeledCombobox;
+  TChompyHunterConfig = record(TScriptConfig)
+    ChompyHunterInfo: TLabel;
   end;
 
-procedure TConfig.StartScript(Sender: TObject);
+procedure TChompyHunterConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
-
-  MaxActions := StrToInt(Self.ActionLimit.GetText);
-  MaxTime    := StrToInt64(Self.TimeLimit.GetText);
 end;
 
-procedure TConfig.Setup; override;
+procedure TChompyHunterConfig.Setup; override;
 begin
   inherited;
 
-  with Selector do
+  with ChompyHunterInfo do
   begin
     Init(ScriptSettingsPanel);
-    SetCaption('Task:');
+    setParent(ScriptSettingsPanel);
+
+    SetCaption('This script is in BETA!' +
+               STR_NEW_LINE +
+               'Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
+               STR_NEW_LINE +
+               'It''s probably a good idea to BABY SIT!');
+
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
-    SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    Combobox.getItems.Add('Task to do');
   end;
 
   StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TConfig.Run; override;
+procedure TChompyHunterConfig.Run; override;
 begin
   Self.Setup;
 
   inherited;
 end;
 
-var Config: TConfig;
+var
+  ChompyHunterConfig: TChompyHunterConfig;
 
+{$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@Config.Run);
+  Sync(@ChompyHunterConfig.Run);
   {$ENDIF}
-  Script.Run(MaxActions, MaxTime);
+  ChompyHunter.Run(MaxActions, MaxTime);
 end.
+{$ENDIF}

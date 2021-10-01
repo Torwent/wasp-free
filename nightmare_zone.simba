@@ -80,24 +80,18 @@ type
 
     BoostBarrel: PRSObject;
     AbsBarrel: PRSObject;
-    EnemyNPC: TRSNPC;
 
     BoostAmount: Int32;
     AbsAmount: Int32;
     MinAbsPoints: Int32;
-    MinSpec: Int32;
 
     DamageItem: TRSItem;
-    Weapon: TRSItem;
-    Shield: TRSItem;
-    SpecWeapon: TRSItem;
 
     PowerSurgeTimer: TCountDown;
     ZapperTimer: TCountDown;
     BoostTimer: TCountDown;
     PrayFlickTimer: TCountDown;
     WalkMiddleTimer: TCountDown;
-    CombatTimer: TCountDown;
   end;
 
 function TRSXPDrop._Find: Boolean; override;
@@ -185,7 +179,6 @@ begin
   if PrayFlick then
     PrayFlickTimer.Setup(60000);
   WalkMiddleTimer.Setup(190000 - Round(20000 * BioHash));
-  CombatTimer.Setup(25000 - Round(15000 * BioHash));
 end;
 
 
@@ -210,128 +203,10 @@ begin
   Writeln('Damage item is: ' + ToStr(DamageItem));
 end;
 
-procedure TNMZFighter.SetupWeapons;
-var
-  Weapons: TRSItemArray;
-  Shields: TRSItemArray;
-  SpecWeapons: TRSItemArray;
-begin
-  Weapons := ['Ghrazi rapier', 'Blade of saeldor (c)', 'Inquisitor''s mace',
-              'Toktz-xil-ak', 'Abyssal whip', 'Abyssal bludgeon',
-              'Abyssal dagger', 'Abyssal dagger (p++)', 'Saradomin sword',
-              'Dragon scimitar', 'Dragon sword', 'Dragon longsword',
-              'Dharok''s greataxe', 'Bow of faerdhinen (c)',
-              'Toxic blowpipe', 'Magic shortbow (i)', 'Armadyl crossbow',
-              'Dragon hunter crossbow', 'Dragon crossbow', 'Rune crossbow',
-              'Adamant dart', 'Mithril dart', ''];
-
-  Shields := ['Avernic defender', 'Dragon defender', 'Rune defender',
-              'Adamant defender', 'Mithril defender', 'Black defender',
-              'Steel defender', 'Iron defender', 'Bronze defender',
-              'Dragonfire shield', 'Toktz-ket-xil', 'Twisted buckler',
-              'Dragonfire ward', 'Odium ward', 'Book of law',
-              'Book of darkness', 'Unholy book', 'Book of war', ''];
-
-  SpecWeapons := ['Dragon claws', 'Granite maul', 'Abyssal dagger',
-                  'Abyssal dagger (p++)', 'Dragon dagger', 'Dragon dagger(p++)',
-                  'Dragon sword', 'Dragon longsword',
-                  'Magic shortbow (i)', 'Dragon crossbow', ''];
-
-  for Weapon in Weapons do
-    if (Weapon = '') or Equipment.FindItem(Weapon) then Break;
-
-  for Shield in Shields do
-    if (Shield = '') or Equipment.FindItem(Shield) then Break;
-
-  for SpecWeapon in SpecWeapons do
-    if (SpecWeapon = '') or Inventory.FindItem(SpecWeapon) then Break;
-
-  case SpecWeapon of
-    'Dragon claws':         MinSpec := 50;
-    'Granite maul':                MinSpec := 50;
-    'Abyssal dagger':       MinSpec := 50;
-    'Abyssal dagger (p++)': MinSpec := 50;
-    'Dragon dagger':        MinSpec := 25;
-    'Dragon dagger(p++)':   MinSpec := 25;
-    'Magic shortbow (i)':   MinSpec := 50;
-    'Dragon crossbow':      MinSpec := 60;
-    'Dragon sword':         MinSpec := 40;
-    'Dragon longsword':     MinSpec := 25;
-    else
-    begin
-      case Weapon of
-        'Abyssal bludgeon':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 50;
-          end;
-
-        'Abyssal dagger':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 50;
-          end;
-
-        'Abyssal dagger (p++)':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 50;
-          end;
-
-        'Saradomin sword':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 100;
-          end;
-
-        'Dragon scimitar':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 55;
-          end;
-
-        'Magic shortbow (i)':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 50;
-          end;
-
-        'Armadyl crossbow':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 50;
-          end;
-
-        'Dragon crossbow':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 60;
-          end;
-
-        'Dragon sword':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 40;
-          end;
-
-        'Dragon longsword':
-          begin
-            SpecWeapon := Weapon;
-            MinSpec := 25;
-          end;
-
-        else
-          MinSpec := 200; //never spec
-      end;
-    end;
-  end;
-end;
-
-
 procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v2.1.5';
+  Version := 'v3.0.0';
 
   inherited;
 
@@ -342,16 +217,14 @@ begin
   Self.SetupBarrels;
   Self.SetupPowerUps;
 
-
-  EnemyNPC.SetupCommon;
-  EnemyNPC.UpText := ['Attack'];
-  EnemyNPC.Filter.Finder := False;
-
+  RSNPCS.AnyNPC.UpText := ['Attack'];
   MinAbsPoints := 250;
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
-  Self.SetupWeapons;
+  CombatHandler.Setup(True, @RSNPCS.AnyNPC, 25000 - Round(15000 * BioHash));
+  Combat.SetAutoRetaliate(True);
+
   Self.SetupDamageItem;
 
   PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
@@ -405,6 +278,19 @@ begin
   end;
 end;
 
+function TCombatHandler.NeedRegear: Boolean; override;
+begin
+  if not ManageWeapons or not WeaponIsSetup then
+    Exit;
+
+  if not NMZFighter.PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= WeaponSpec) then
+    Exit;
+
+  Result := ((Weapon <> 'Null') and Inventory.FindItem(Weapon)) or
+            ((Shield <> 'Null') and Inventory.FindItem(Shield));
+end;
+
+
 
 function TNMZFighter.InDream: Boolean;
 begin
@@ -415,7 +301,7 @@ begin
     BoostTimer.Resume;
     if PrayFlick then
       PrayFlickTimer.Resume;
-    CombatTimer.Resume;
+    CombatHandler.InCombatTimer.Resume;
     WalkMiddleTimer.Resume;
     PowerSurgeTimer.Resume;
     ZapperTimer.Resume;
@@ -428,7 +314,7 @@ begin
     BoostTimer.Timeout := GetTickCount;
     if PrayFlick then
       PrayFlickTimer.Timeout := GetTickCount;
-    CombatTimer.Timeout := GetTickCount;
+    CombatHandler.InCombatTimer.Timeout := GetTickCount;
     WalkMiddleTimer.Timeout := GetTickCount;
     PowerSurgeTimer.Timeout := GetTickCount;
     ZapperTimer.Timeout := GetTickCount;
@@ -579,6 +465,9 @@ begin
     Result := (Minimap.GetHPLevel > 50)
   else
     Result := not Boosted;
+
+  if PotStr.Contains('Overload') and Result then
+    SaveScreenshot('C:\Simba\Screenshots\Ovl.png');
 end;
 
 function TNMZFighter.GetAbsorptionPoints: Int32;
@@ -732,62 +621,6 @@ begin
 end;
 
 
-function TNMZFighter.CanSpec: Boolean;
-begin
-  Result := (Minimap.GetSpecLevel >= MinSpec) and
-            ((SpecWeapon = Weapon) or Inventory.FindItem(Weapon) or
-            (Inventory.FindItem(SpecWeapon) and Inventory.HasSpace(1)));
-end;
-
-function TNMZFighter.DoSpec: Boolean;
-begin
-  if SpecWeapon <> Weapon then
-  begin
-    if Inventory.ClickItem(SpecWeapon) then
-      Result := WaitUntil(Inventory.FindItem(Weapon), 100, 2000);
-  end;
-
-  Result := Minimap.EnableSpec(MinSpec);
-  if (SpecWeapon = 'Granite maul') then Result := True;
-
-  if Result and (SpecWeapon <> 'Granite maul') then
-    Wait(200, 300)
-  else
-    Wait(15, 50);
-end;
-
-
-function TNMZFighter.NeedRegear: Boolean;
-begin
-  if not PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= MinSpec) then
-    Exit;
-  Result := ((Weapon <> '') and Inventory.FindItem(Weapon)) or
-            ((Shield <> '') and Inventory.FindItem(Shield));
-end;
-
-function TNMZFighter.ReGear: Boolean;
-begin
-  if (Weapon <> '') then
-    Inventory.ClickItem(Weapon);
-  if (Shield <> '') then
-    Inventory.ClickItem(Shield);
-
-  Wait(600, 800);
-  Result := not Self.NeedRegear;
-end;
-
-
-function TNMZFighter.AttackNPC: Boolean;
-begin
-  if EnemyNPC.Click then
-  begin
-    Minimap.WaitMoving;
-    Result := MainScreen.WaitInCombat(10000);
-  end;
-
-  if Result then CombatTimer.Restart;
-end;
-
 
 function TNMZFighter.GetState: ENMZState;
 var
@@ -810,24 +643,25 @@ begin
     else if PrayFlick and PrayFlickTimer.IsFinished then
       Exit(ENMZState.FLICK_PRAYER)
 
-    else if CombatTimer.IsFinished then
+    else if not MainScreen.InCombat then
       Exit(ENMZState.ATTACK_NPC)
 
-    else if Self.CanSpec then
+    else if CombatHandler.CanSpec then
       Exit(ENMZState.USE_SPEC)
 
     else if Minimap.IsSpecEnabled then
       Exit(ENMZState.WAIT_STATE1)
 
-    else if Self.NeedRegear then
+    else if CombatHandler.NeedRegear then
       Exit(ENMZState.REEQUIP_GEAR)
 
     else if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished then
     begin
       if Self.PowerUpAvailable then
         Exit(ENMZState.USE_POWER)
-      else if MainScreen.InCombat then
-        CombatTimer.Restart;
+      else if not MainScreen.InCombat then
+        Exit(ENMZState.ATTACK_NPC);
+
       Exit(ENMZState.WAIT_STATE2);
     end
 
@@ -845,7 +679,7 @@ begin
     Query := Chat.GetQuery;
     Title := Chat.GetChatTitle;
 
-    if Self.NeedRegear then
+    if CombatHandler.NeedRegear then
       Exit(ENMZState.REEQUIP_GEAR)
 
     else if 'How many doses' in Query then
@@ -928,8 +762,8 @@ begin
                  ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished) +
                  ' NeedBoost: ' + ToSTR(Self.NeedBoost) + ' Boosted: ' + ToStr(Boosted) +
                  STR_NEW_LINE +
-                 ' Weapon: ' + ToStr(Weapon) + ' Shield: ' + ToStr(Shield) +
-                 ' SpecWeapon: ' + ToStr(SpecWeapon);
+                 ' Weapon: ' + ToStr(CombatHandler.Weapon) + ' Shield: ' + ToStr(CombatHandler.Shield) +
+                 ' SpecWeapon: ' + ToStr(CombatHandler.SpecWeapon);
     Self.ProcessWhileWaiting;
 
     case State of
@@ -963,12 +797,12 @@ begin
       DRINK_ABSORPTION: Self.DrinkPotion(AbsPotion);
 
       WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
-      ATTACK_NPC: Self.AttackNPC;
+      ATTACK_NPC: CombatHandler.AttackNPC;
       WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPDrop.WaitDrop(1200);
 
       USE_POWER: Self.GetPowerUp;
-      USE_SPEC: Self.DoSpec;
-      REEQUIP_GEAR: Self.ReGear;
+      USE_SPEC: CombatHandler.DoSpec;
+      REEQUIP_GEAR: CombatHandler.ReGear;
 
       LOWER_HEALTH: Self.LowerHealth;
       FLICK_PRAYER: Self.FlickPrayer;
