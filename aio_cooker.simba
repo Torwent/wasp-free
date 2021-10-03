@@ -72,6 +72,9 @@ var
 begin
   Food := CurrentFood;
 
+  if ToStr(Food).Lower = 'shark' then
+    ItemFinder.Similarity := 0.9999;
+
   CookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat',
                    'karambwan', 'chompy', 'fishcake', 'jubbly', 'sweetcorn'];
 
@@ -303,19 +306,17 @@ begin
         Exit(ECookerState.CLOSE_INTERFACE)
       else
         Exit(ECookerState.HANDLE_COLLECT)
-    end
+    end;
 
-    else
-      Exit(ECookerState.CLOSE_INTERFACE);
-
+    Exit(ECookerState.CLOSE_INTERFACE);
   end
 
   else if Inventory.FindItem(Ingredient.Item) then
   begin
     if Cooking then
-      Exit(ECookerState.WAIT_COOKING)
-    else
-      Exit(ECookerState.DO_COOKING);
+      Exit(ECookerState.WAIT_COOKING);
+
+    Exit(ECookerState.DO_COOKING);
   end
 
   else
@@ -323,9 +324,9 @@ begin
     if BankEmpty and CollectEmpty then
       Exit(ECookerState.END_SCRIPT)
     else if BankEmpty then
-      Exit(ECookerState.OPEN_COLLECT)
-    else
-      Exit(ECookerState.OPEN_BANK);
+      Exit(ECookerState.OPEN_COLLECT);
+
+    Exit(ECookerState.OPEN_BANK);
   end;
 end;
 
