@@ -525,7 +525,10 @@ begin
   begin
     State := Self.GetState;
     Action := ToStr(State);
-    ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' ToolType: ' + ToStr(ToolType);
+
+    if ScriptDebugEnabled then
+      ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' ToolType: ' + ToStr(ToolType);
+
     Self.ProcessWhileWaiting;
 
     case State of
