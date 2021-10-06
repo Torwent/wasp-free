@@ -399,6 +399,7 @@ begin
   Result := not Self.HasGear;
 end;
 
+
 function TMiner.DropItems: Boolean;
 var
   InvCount: Int32 := 28;
@@ -406,10 +407,17 @@ begin
   Result := Inventory.ShiftDrop(DropList, Inventory.RandomPattern);
 
   TotalActions += (InvCount - Inventory.Count);
-  if Result then WL.Activity.Restart;
+
+  if Result then
+    WL.Activity.Restart;
 end;
 
-
+function TMiner.Deposit: Boolean;
+begin
+  Result := Bank.DepositItemArray(BankTab, BankList, True);
+  if Result then
+    WL.Activity.Restart;
+end;
 
 function TSRL.GetColorPixelShift(Color: TCTS2Color; Area: TBox; WaitTime: UInt32; out Drop: Boolean): Int32; overload;
 var
@@ -423,7 +431,10 @@ begin
   if WaitUntil((SRL.FindColors(TPA, Color, Area) > 0) or (Drop := XPDrop.FindDrop), 100, WaitTime) then
   begin
     if Drop then
+    begin
+      WL.Activity.Restart;
       Exit;
+    end;
 
     ATPA := TPA.Cluster(2);
     TPA := ATPA.Biggest;
@@ -449,7 +460,10 @@ begin
   for i := 1 to Iter do
   begin
     if Inventory.IsFull or Drop then
-      Exit(False)
+    begin
+      WL.Activity.Restart;
+      Exit(False);
+    end
 
     else if Self.GetColorPixelShift(Color, Area, WaitTime, Drop) > Shift then
       Exit(True);
@@ -527,13 +541,13 @@ begin
     Action := ToStr(State);
 
     if ScriptDebugEnabled then
-      ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' ToolType: ' + ToStr(ToolType);
+      ExtraInfo := ' ActivityTimer: ' + ToStr(WL.Activity.TimeRemaining) + ' Bank: ' + ToStr(UseBank) + ' ToolType: ' + ToStr(ToolType);
 
     Self.ProcessWhileWaiting;
 
     case State of
       EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      EMinerState.DEPOSIT_ITEMS: if Bank.DepositItemArray(BankTab, BankList, True) then WL.Activity.Restart;
+      EMinerState.DEPOSIT_ITEMS: Self.Deposit;
       EMinerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
       EMinerState.WALK_SPOT: RSW.WebWalk(RSRock^.TileArray, 5, 0.2);
       EMinerState.WAIT_STATE: Self.WaitMining;
