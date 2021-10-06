@@ -62,6 +62,8 @@ type
 
     Mining: Boolean;
     UseBank: Boolean;
+    InvCount: Int32;
+    PrevInvCount: Int32;
   end;
 
 procedure TAntiban.Setup; override;
@@ -545,6 +547,11 @@ begin
 
     Self.ProcessWhileWaiting;
 
+    InvCount := Inventory.Count;
+
+    if InvCount <> PrevInvCount then
+      WL.Activity.Restart;
+
     case State of
       EMinerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EMinerState.DEPOSIT_ITEMS: Self.Deposit;
@@ -558,6 +565,8 @@ begin
       EMinerState.DROP_ITEMS: Self.DropItems;
       EMinerState.END_SCRIPT: Break;
     end;
+
+    PrevInvCount := InvCount;
 
     Self.DoAntiban;
     if not RSClient.IsLoggedIn then Login.LoginPlayer;
