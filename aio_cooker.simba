@@ -122,6 +122,7 @@ begin
         CookingObj := @RSObjects.EternalFire;
       end;
   end;
+
 end;
 
 procedure TAntiban.Setup; override;
