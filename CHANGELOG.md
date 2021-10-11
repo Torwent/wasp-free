@@ -1,3 +1,12 @@
+## [0.1.2](https://github.com/Torwent/FreeWaspBots/compare/v0.1.1...v0.1.2) (2021-10-11)
+
+
+### Bug Fixes
+
+* **AIO Cooker:** Fixed some fishes ([3e66d52](https://github.com/Torwent/FreeWaspBots/commit/3e66d52bfb89de75de2fa7bbcf081b1fc41762b2))
+
+
+
 ## [0.1.1](https://github.com/Torwent/FreeWaspBots/compare/v0.1.0...v0.1.1) (2021-10-06)
 
 
