@@ -1,3 +1,12 @@
+## [0.1.3](https://github.com/Torwent/FreeWaspBots/compare/v0.1.2...v0.1.3) (2021-10-13)
+
+
+### Bug Fixes
+
+* **AIO Cooker:** Fixed rogues den for most food. ([e3a6189](https://github.com/Torwent/FreeWaspBots/commit/e3a6189964f138334c32d3cc3143a5e606f9e2a1))
+
+
+
 ## [0.1.2](https://github.com/Torwent/FreeWaspBots/compare/v0.1.1...v0.1.2) (2021-10-11)
 
 
