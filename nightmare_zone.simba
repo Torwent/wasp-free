@@ -219,7 +219,10 @@ begin
   RSNPCS.AnyNPC.UpText := ['Attack'];
   MinAbsPoints := 250;
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
+
+  Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
   CombatHandler.Setup(True, @RSNPCS.AnyNPC, 25000 - Round(15000 * BioHash));
   Combat.SetAutoRetaliate(True);

@@ -482,6 +482,11 @@ begin
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
 
+  if Antiban.BioDice then
+    Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
+  else
+    Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
+
   Self.CheckRogueEquipment;
   HasNeck := Equipment.FindItem(Necklace);
   if Magic.CanActivate(ERSSpell.SHADOW_VEIL) then

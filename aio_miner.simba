@@ -351,6 +351,11 @@ begin
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
+  if Antiban.BioDice then
+    Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
+  else
+    Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
+
   Self.SetupTool;
 
   if ScriptDebugEnabled then

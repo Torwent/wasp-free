@@ -53,6 +53,8 @@ begin
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
+  Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
+
   if ScriptDebugEnabled then
   begin
     DebugNPCArray += CombatHandler.EnemyNPC;
@@ -94,7 +96,7 @@ function TChompyHunter.ClickChompy: Boolean;
 var
   FeatherCount: Int32;
 begin
-  if CombatHandler.EnemyNPC^.Click then
+  if CombatHandler.EnemyNPC^.SelectOption('Attack') then
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving;

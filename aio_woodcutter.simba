@@ -319,6 +319,11 @@ begin
 
   Options.SetZoomLevel(SRL.TruncatedGauss(35, 75));
 
+  if Antiban.BioDice then
+    Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
+  else
+    Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
+
   Self.SetupTool;
 
   if ScriptDebugEnabled then
