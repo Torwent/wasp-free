@@ -85,14 +85,14 @@ end;
 procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Alcher';
-  Version := 'v2.1.4';
 
   inherited;
 
   RSW.Setup('x7789y2306');
   ScriptBank := @RSObjects.GEBank;
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 end;
 
 

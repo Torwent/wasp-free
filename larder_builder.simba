@@ -106,7 +106,6 @@ end;
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Phials construction';
-  Version := 'v2.0.6';
 
   inherited;
 
@@ -118,7 +117,8 @@ begin
 
   ActionProfit -= (ItemInfo.GetAveragePrice('Oak plank') * 8 + 40);
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 
   if CurrentNPC = PHIALS then
     Inventory.FindItem('noted Oak plank', NotedPlanksSlot);

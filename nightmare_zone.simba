@@ -206,7 +206,6 @@ end;
 procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Nightmare Zone';
-  Version := 'v3.0.0';
 
   inherited;
 

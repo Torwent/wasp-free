@@ -464,7 +464,6 @@ end;
 procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name    := 'AIO Pickpocketer';
-  Version := 'v2.1.2';
 
   inherited;
 

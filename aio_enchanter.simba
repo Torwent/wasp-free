@@ -213,7 +213,6 @@ end;
 procedure TEnchanter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Enchanter';
-  Version := 'v2.1.4';
 
   inherited;
   Self.SetupWLBanks;
@@ -229,9 +228,11 @@ begin
     ItemInfo.GetAveragePrice(CosmicRune) + ItemInfo.GetAveragePrice(RegularJewel)
   );
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 
-  if ScriptDebugEnabled then DebugObjectArray += ScriptBank;
+  if ScriptDebugEnabled then
+    DebugObjectArray += ScriptBank;
 end;
 
 

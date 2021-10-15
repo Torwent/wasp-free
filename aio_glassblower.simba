@@ -126,7 +126,6 @@ end;
 procedure TBlower.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Glassblower';
-  Version := 'v2.1.0';
 
   inherited;
   Self.SetupWLBanks;
@@ -136,10 +135,10 @@ begin
   UseBestItem := CurrentGlass = ERSGlassItem.Best;
   ItemChanged := True;
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 
   CurrentLevel := Stats.GetCurrentLevel(ERSSkill.CRAFTING);
-
 end;
 
 

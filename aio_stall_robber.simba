@@ -90,13 +90,13 @@ end;
 procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO StallRobber';
-  Version := 'v2.0.3';
 
   inherited;
 
   Self.SetupStall;
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 
   if ScriptDebugEnabled then DebugObjectArray += Stall;
 end;

@@ -112,7 +112,6 @@ end;
 procedure TRemainOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Remain Offerer';
-  Version := 'v1.1.0';
 
   inherited;
   Self.SetupWLBanks;
@@ -123,7 +122,8 @@ begin
   Self.SetupSpell;
   Self.SetupRemains;
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 end;
 
 

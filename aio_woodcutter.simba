@@ -301,7 +301,6 @@ end;
 procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Woodcutter';
-  Version := 'v2.0.9';
 
   inherited;
 

@@ -13,7 +13,6 @@ begin
   ScriptDebugEnabled    := False; //Enables Script Debugging
 end;
 
-
 type
   ERSLogs = (REGULAR_LOGS, ACHEY_LOGS, OAK_LOGS, WILLOW_LOGS, TEAK_LOGS,
              ARCTIC_LOGS, MAPLE_LOGS, MAHOGANY_LOGS, YEW_LOGS, BLISTER_LOGS,
@@ -109,7 +108,6 @@ end;
 procedure TLogBurner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Firemaker';
-  Version := 'v2.2.0';
 
   inherited;
 
@@ -127,7 +125,8 @@ begin
 
   RSW.ScreenWalk := True;
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 
   if ScriptDebugEnabled then
   begin

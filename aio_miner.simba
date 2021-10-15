@@ -324,7 +324,6 @@ end;
 procedure TMiner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Miner';
-  Version := 'v2.0.3';
 
   inherited;
 

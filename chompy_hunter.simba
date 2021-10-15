@@ -41,7 +41,6 @@ end;
 procedure TChompyHunter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'Chompy Hunter';
-  Version := 'v2.0.0';
 
   inherited;
 
