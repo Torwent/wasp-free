@@ -1,3 +1,17 @@
+# [0.3.0](https://github.com/Torwent/FreeWaspBots/compare/v0.2.0...v0.3.0) (2021-10-15)
+
+
+### Bug Fixes
+
+* All scripts now use WaspLib version by default. ([32e4cd9](https://github.com/Torwent/FreeWaspBots/commit/32e4cd98d8bf12b3e52fec1db544142a48edb577))
+
+
+### Features
+
+* Scripts that might attack NPCs accidently or actually need to attack them now set the appropriate attack options on startup. ([b100fb8](https://github.com/Torwent/FreeWaspBots/commit/b100fb8229f65f7bb4b702305d56c994c1ebdf33))
+
+
+
 # [0.2.0](https://github.com/Torwent/FreeWaspBots/compare/v0.1.3...v0.2.0) (2021-10-15)
 
 
@@ -36,15 +50,6 @@
 ### Bug Fixes
 
 * **AIO Miner:** Fixed the activity timer not being reset. ([32dfe66](https://github.com/Torwent/FreeWaspBots/commit/32dfe66b61eea1fe7f02e156183187c77cb5aa0e))
-
-
-
-# [0.1.0](https://github.com/Torwent/FreeWaspBots/compare/f3aefe5b7c29d35177405d20f56bc60d78f97342...v0.1.0) (2021-10-06)
-
-
-### Bug Fixes
-
-* **AIO Miner:** Fixed the activity timer not being reset ([f3aefe5](https://github.com/Torwent/FreeWaspBots/commit/f3aefe5b7c29d35177405d20f56bc60d78f97342))
 
 
 
