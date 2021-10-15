@@ -1,5 +1,5 @@
 # Free WaspBots
- Free WaspBots Scripts.
+ Free WaspBot Scripts.
 
- Join https://discord.gg/Duv2Mhzn9X for more info and guides!
+ Join https://discord.gg/YMYUahmww9 for more info and guides!
  
