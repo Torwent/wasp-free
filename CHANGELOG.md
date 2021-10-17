@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/Torwent/FreeWaspBots/compare/v0.3.1...v0.4.0) (2021-10-17)
+
+
+### Features
+
+* **NMZ Fighter:** Now warns if rock cake or locator orb is missing. ([31756c9](https://github.com/Torwent/FreeWaspBots/commit/31756c9afb5502ea51ed4cca84ee7149179f8ef6))
+
+
+
 ## [0.3.1](https://github.com/Torwent/FreeWaspBots/compare/v0.3.0...v0.3.1) (2021-10-17)
 
 
@@ -41,15 +50,6 @@
 ### Bug Fixes
 
 * **AIO Cooker:** Fixed rogues den for most food. ([e3a6189](https://github.com/Torwent/FreeWaspBots/commit/e3a6189964f138334c32d3cc3143a5e606f9e2a1))
-
-
-
-## [0.1.2](https://github.com/Torwent/FreeWaspBots/compare/v0.1.1...v0.1.2) (2021-10-11)
-
-
-### Bug Fixes
-
-* **AIO Cooker:** Fixed some fishes ([3e66d52](https://github.com/Torwent/FreeWaspBots/commit/3e66d52bfb89de75de2fa7bbcf081b1fc41762b2))
 
 
 
