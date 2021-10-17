@@ -200,6 +200,9 @@ begin
   else if Inventory.FindItem(7510) then  //7510 is rock cake ID
     DamageItem := 7510;
 
+  if ToStr(DamageItem) = '' then
+    TerminateScript('You need either a Locator orb or a Dwarven rock cake to run this script.');
+
   Writeln('Damage item is: ' + ToStr(DamageItem));
 end;
 
