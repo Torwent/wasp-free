@@ -96,7 +96,7 @@ function TChompyHunter.ClickChompy: Boolean;
 var
   FeatherCount: Int32;
 begin
-  if CombatHandler.EnemyNPC^.SelectOption('Attack') then
+  if CombatHandler.EnemyNPC^.SelectOption(['Attack']) then
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving;
