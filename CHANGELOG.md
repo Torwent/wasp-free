@@ -1,3 +1,12 @@
+## [0.4.1](https://github.com/Torwent/FreeWaspBots/compare/v0.4.0...v0.4.1) (2021-10-19)
+
+
+### Bug Fixes
+
+* **AIO Miner:** Fix attempt at miner not depositing items. ([ba27806](https://github.com/Torwent/FreeWaspBots/commit/ba27806ce80c7ed448d402cf688ac249618f6ee1))
+
+
+
 # [0.4.0](https://github.com/Torwent/FreeWaspBots/compare/v0.3.1...v0.4.0) (2021-10-17)
 
 
@@ -41,15 +50,6 @@
 ### Features
 
 * Now the CHANGELOG.md is sent to Discord. ([04d69eb](https://github.com/Torwent/FreeWaspBots/commit/04d69ebde67c9e8bc7adc27e0e7021c53f7d0513))
-
-
-
-## [0.1.3](https://github.com/Torwent/FreeWaspBots/compare/v0.1.2...v0.1.3) (2021-10-13)
-
-
-### Bug Fixes
-
-* **AIO Cooker:** Fixed rogues den for most food. ([e3a6189](https://github.com/Torwent/FreeWaspBots/commit/e3a6189964f138334c32d3cc3143a5e606f9e2a1))
 
 
 
