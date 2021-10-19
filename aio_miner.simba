@@ -349,7 +349,8 @@ begin
     'Celestial signet'
   ];
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 
   if Antiban.BioDice then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
@@ -578,6 +579,24 @@ begin
 end;
 
 var Miner: TMiner;
+
+
+function TRSBank.DepositItemArray(Tab: Int32; ItemArray: TRSItemArray; UseQuantityButtons: Boolean): Boolean; override;
+var
+  Item: TRSItem;
+  ItemList: TRSItemArray;
+begin
+  for Item in ItemArray do
+    if Inventory.FindItem(Item) then
+      ItemList += Item;
+
+  for Item in ItemList do
+    Self.DepositItem(Tab, Item, UseQuantityButtons);
+
+  Result := not Inventory.FindItems(ItemList);
+end;
+
+
 
 type
   TMinerConfig = record(TScriptConfig)
