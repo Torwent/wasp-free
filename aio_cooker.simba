@@ -251,6 +251,7 @@ begin
     i := 1;
 
   Result := Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice);
+  WaitEx(250,100);   
 end;
 
 function TCooker.IsCooking(WaitTime: Int32 = 2500): Boolean;
