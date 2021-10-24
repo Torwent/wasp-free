@@ -244,13 +244,16 @@ function TCooker.HandleMake: Boolean;
 var
   i: Int32 := 0;
 begin
-  if not Make.IsOpen then
-    Exit;
+  if not Make.IsOpen then //not sure if I can remove this.
+    Exit;                 //it's probably not needed.
 
   if 'arambwan' in Food then
     i := 1;
 
   Result := Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice);
+  
+  if Result then
+    WaitUntil(not Make.IsOpen, 100, 4000);  
 end;
 
 function TCooker.IsCooking(WaitTime: Int32 = 2500): Boolean;
