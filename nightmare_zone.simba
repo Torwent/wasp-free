@@ -470,9 +470,6 @@ begin
     Result := (Minimap.GetHPLevel > 50)
   else
     Result := not Boosted;
-
-  if PotStr.Contains('Overload') and Result then
-    SaveScreenshot('C:\Simba\Screenshots\Ovl.png');
 end;
 
 function TNMZFighter.GetAbsorptionPoints: Int32;
