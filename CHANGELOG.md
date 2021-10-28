@@ -1,3 +1,12 @@
+## [0.4.3](https://github.com/Torwent/FreeWaspBots/compare/v0.4.2...v0.4.3) (2021-10-28)
+
+
+### Bug Fixes
+
+* **NMZ Fighter:** Remove debug stuff. ([7aa7434](https://github.com/Torwent/FreeWaspBots/commit/7aa7434c26a512a88e7669053aa0e4a5780e76ab))
+
+
+
 ## [0.4.2](https://github.com/Torwent/FreeWaspBots/compare/v0.4.1...v0.4.2) (2021-10-24)
 
 
@@ -31,20 +40,6 @@
 ### Bug Fixes
 
 * **Chompy Hunter:** Fix typo. ([9390693](https://github.com/Torwent/FreeWaspBots/commit/939069383294a250eb3817c52c725fdd9cfb0ea0))
-
-
-
-# [0.3.0](https://github.com/Torwent/FreeWaspBots/compare/v0.2.0...v0.3.0) (2021-10-15)
-
-
-### Bug Fixes
-
-* All scripts now use WaspLib version by default. ([32e4cd9](https://github.com/Torwent/FreeWaspBots/commit/32e4cd98d8bf12b3e52fec1db544142a48edb577))
-
-
-### Features
-
-* Scripts that might attack NPCs accidently or actually need to attack them now set the appropriate attack options on startup. ([b100fb8](https://github.com/Torwent/FreeWaspBots/commit/b100fb8229f65f7bb4b702305d56c994c1ebdf33))
 
 
 
