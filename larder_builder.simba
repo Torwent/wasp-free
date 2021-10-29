@@ -20,7 +20,7 @@ type
 
 var
   CurrentNPC: ERSNPC := PHIALS;
-  CurrentLarder: ERSLarder := OAK_LARDER
+  CurrentLarder: ERSLarder := OAK_LARDER;
 
 type
   EState = (
@@ -356,6 +356,7 @@ var
 type
   TBuilderConfig = record(TScriptConfig)
     NPCSelector: TLabeledCombobox;
+    LarderSelector: TLabeledCombobox;
     BuilderInfo: TLabel;
     ImagePanel: TImage;
     Pic: TPicture;
@@ -366,6 +367,7 @@ begin
   Self.Init(Sender);
 
   CurrentNPC := ERSNPC(NPCSelector.Combobox.getItemIndex);
+  CurrentLarder := ERSLarder(LarderSelector.Combobox.getItemIndex);
 end;
 
 procedure TBuilderConfig.Setup; override;
@@ -387,6 +389,19 @@ begin
     Combobox.setItemIndex(Ord(CurrentNPC));
   end;
 
+  with LarderSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Larder:');
+    SetLeft(NPCSelector.getLeft + NPCSelector.GetWidth + 10);
+    SetTop(NPCSelector.getTop);
+    SetWidth(200);
+    Combobox.setStyle(csDropDownList);
+    AddItem('Regular');
+    AddItem('Oak');
+    Combobox.setItemIndex(Ord(CurrentLarder));
+  end;
+
   with BuilderInfo do
   begin
     Init(ScriptSettingsPanel);
@@ -404,7 +419,7 @@ begin
     SetTop(NPCSelector.getTop + NPCSelector.getHeight + 2);
   end;
 
-  Pic.Init();
+  Pic.Init;
   Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\poh_layout.png');
 
   with ImagePanel do
