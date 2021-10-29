@@ -1,3 +1,12 @@
+# [0.5.0](https://github.com/Torwent/FreeWaspBots/compare/v0.4.3...v0.5.0) (2021-10-29)
+
+
+### Features
+
+* **Larder Builder:** Now supports regular larders. ([e708b16](https://github.com/Torwent/FreeWaspBots/commit/e708b163774ebc9cb4f530c8097162aac45b551c))
+
+
+
 ## [0.4.3](https://github.com/Torwent/FreeWaspBots/compare/v0.4.2...v0.4.3) (2021-10-28)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **NMZ Fighter:** Now warns if rock cake or locator orb is missing. ([31756c9](https://github.com/Torwent/FreeWaspBots/commit/31756c9afb5502ea51ed4cca84ee7149179f8ef6))
-
-
-
-## [0.3.1](https://github.com/Torwent/FreeWaspBots/compare/v0.3.0...v0.3.1) (2021-10-17)
-
-
-### Bug Fixes
-
-* **Chompy Hunter:** Fix typo. ([9390693](https://github.com/Torwent/FreeWaspBots/commit/939069383294a250eb3817c52c725fdd9cfb0ea0))
 
 
 
