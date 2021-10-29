@@ -1,3 +1,12 @@
+# [0.6.0](https://github.com/Torwent/FreeWaspBots/compare/v0.5.0...v0.6.0) (2021-10-29)
+
+
+### Features
+
+* **Larder Builder:** Added the larder selector to the GUI. ([1382df3](https://github.com/Torwent/FreeWaspBots/commit/1382df3303e36b195ffd89283dccaa880e2ac0cb))
+
+
+
 # [0.5.0](https://github.com/Torwent/FreeWaspBots/compare/v0.4.3...v0.5.0) (2021-10-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **AIO Miner:** Fix attempt at miner not depositing items. ([ba27806](https://github.com/Torwent/FreeWaspBots/commit/ba27806ce80c7ed448d402cf688ac249618f6ee1))
-
-
-
-# [0.4.0](https://github.com/Torwent/FreeWaspBots/compare/v0.3.1...v0.4.0) (2021-10-17)
-
-
-### Features
-
-* **NMZ Fighter:** Now warns if rock cake or locator orb is missing. ([31756c9](https://github.com/Torwent/FreeWaspBots/commit/31756c9afb5502ea51ed4cca84ee7149179f8ef6))
 
 
 
