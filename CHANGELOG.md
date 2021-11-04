@@ -1,3 +1,12 @@
+## [0.6.1](https://github.com/Torwent/FreeWaspBots/compare/v0.6.0...v0.6.1) (2021-11-04)
+
+
+### Bug Fixes
+
+* **miner:** attempt to fix animation detection ([1c9c2f6](https://github.com/Torwent/FreeWaspBots/commit/1c9c2f6c8cd48604c014f8d83cc22bcbebb43288))
+
+
+
 # [0.6.0](https://github.com/Torwent/FreeWaspBots/compare/v0.5.0...v0.6.0) (2021-10-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **aio cooker:** Made it wait only using the make interface is gone. ([168f9c5](https://github.com/Torwent/FreeWaspBots/commit/168f9c57b955c1b30d285d553e56972b24e7152e))
-
-
-
-## [0.4.1](https://github.com/Torwent/FreeWaspBots/compare/v0.4.0...v0.4.1) (2021-10-19)
-
-
-### Bug Fixes
-
-* **AIO Miner:** Fix attempt at miner not depositing items. ([ba27806](https://github.com/Torwent/FreeWaspBots/commit/ba27806ce80c7ed448d402cf688ac249618f6ee1))
 
 
 
