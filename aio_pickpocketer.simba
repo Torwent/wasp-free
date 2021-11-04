@@ -277,7 +277,7 @@ begin
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
         FoodQuantity := Round(Antiban.GetUniqueNumber(5, 15));
 
-        if SuicideMode then SuicideMode := False;
+        SuicideMode := False;
       end;
 
     ELF:
