@@ -51,10 +51,6 @@ type
     State: EMinerState;
 
     RSRock: PRSObject;
-    RockTimerMultiplier: Int32;
-
-    ToolType: TCTS2Color;
-    ToolShift: Int32;
 
     ProspectorOutfit: TRSItemArray;
     BankList: TRSItemArray;
@@ -71,15 +67,13 @@ begin
   inherited;
 
   Antiban.Skills := [ERSSkill.MINING, ERSSkill.TOTAL];
-  Antiban.MinZoom := 10;
-  Antiban.MaxZoom := 75;
+  Antiban.MinZoom := 40;
+  Antiban.MaxZoom := 40;
 end;
 
 
 procedure TMiner.SetupRock;
 begin
-  RockTimerMultiplier := 1;
-
   case CurrentRock of
     ERSRock.CLAY:
       begin
@@ -149,21 +143,6 @@ begin
   end;
 
   RSRock^.Filter.UpText := False;
-
-  if Ord(CurrentRock) >= Ord(ERSRock.SILVER) then
-    RockTimerMultiplier += 1;
-
-  if Ord(CurrentRock) >= Ord(ERSRock.COAL) then
-    RockTimerMultiplier += 2;
-
-  if Ord(CurrentRock) >= Ord(ERSRock.MITHRIL) then
-    RockTimerMultiplier += 2;
-
-  if Ord(CurrentRock) >= Ord(ERSRock.ADAMANTITE) then
-    RockTimerMultiplier += 2;
-
-  if Ord(CurrentRock) >= Ord(ERSRock.RUNITE) then
-    RockTimerMultiplier += 2;
 
   DropList := [
     'Clay', 'Tin ore', 'Copper ore',
@@ -236,91 +215,6 @@ begin
     RSW.ScreenWalk := True;
 end;
 
-
-procedure TMiner.SetupTool;
-begin
-  ToolShift := 30;
-  if Equipment.Open then
-  begin
-    if Equipment.FindItem('Crystal pickaxe') or  Equipment.FindItem('Crystal axe (inactive)') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
-    end
-    else if Equipment.FindItem('Infernal pickaxe') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
-    end
-    else if Equipment.FindItem('3rd age pickaxe') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
-    end
-    if Equipment.FindItem('Dragon pickaxe') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
-    end
-    else if Equipment.FindItem('Gilded pickaxe') then
-      ToolType := CTS2(1019842, 14, 0.02, 0.63)
-    else if Equipment.FindItem('Rune pickaxe') then
-      ToolType := CTS2(6050622, 12, 0.10, 0.11)
-    else if Equipment.FindItem('Adamant pickaxe') then
-      ToolType := CTS2(3951419, 11, 0.13, 0.16)
-    else if Equipment.FindItem('Mithril pickaxe') then
-      ToolType := CTS2(4534853, 17, 1.11, 0.34)
-    else if Equipment.FindItem('Black pickaxe') then
-      ToolType := CTS2(1118485, 1, 0.01, 0.01)
-    else if Equipment.FindItem('Steel pickaxe') then
-      ToolType := CTS2(6711151, 17, 0.11, 0.07)
-    else if Equipment.FindItem('Iron pickaxe') then
-      ToolType := CTS2(4671309, 11, 0.28, 0.09)
-    else if Equipment.FindItem('Bronze pickaxe') then
-      ToolType := CTS2(1979716, 9, 0.10, 0.24);
-  end;
-
-  if (ToolType = []) and Inventory.Open then
-  begin
-    if Inventory.FindItem('Crystal pickaxe') or  Inventory.FindItem('Crystal axe (inactive)') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
-    end
-    else if Inventory.FindItem('Infernal pickaxe') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
-    end
-    else if Inventory.FindItem('3rd age pickaxe') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
-    end
-    if Inventory.FindItem('Dragon pickaxe') then
-    begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
-    end
-    else if Inventory.FindItem('Gilded pickaxe') then
-      ToolType := CTS2(1019842, 14, 0.02, 0.63)
-    else if Inventory.FindItem('Rune pickaxe') then
-      ToolType := CTS2(6050622, 12, 0.10, 0.11)
-    else if Inventory.FindItem('Adamant pickaxe') then
-      ToolType := CTS2(3951419, 11, 0.13, 0.16)
-    else if Inventory.FindItem('Mithril pickaxe') then
-      ToolType := CTS2(4534853, 17, 1.11, 0.34)
-    else if Inventory.FindItem('Black pickaxe') then
-      ToolType := CTS2(1118485, 1, 0.01, 0.01)
-    else if Inventory.FindItem('Steel pickaxe') then
-      ToolType := CTS2(6711151, 17, 0.11, 0.07)
-    else if Inventory.FindItem('Iron pickaxe') then
-      ToolType := CTS2(4671309, 11, 0.28, 0.09)
-    else if Inventory.FindItem('Bronze pickaxe') then
-      ToolType := CTS2(1979716, 9, 0.10, 0.24);
-  end;
-end;
-
 procedure TMiner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   Name := 'AIO Miner';
@@ -352,12 +246,12 @@ begin
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
 
+  Options.SetZoomLevel(40);
+
   if Antiban.BioDice then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
-
-  Self.SetupTool;
 
   if ScriptDebugEnabled then
   begin
@@ -366,13 +260,6 @@ begin
   end;
 end;
 
-function TMiner.GetToolShift: Int32;
-begin
-  if MM2MS.ZoomLevel > -1 then
-    Result := Round(ToolShift * MM2MS.ZoomLevel / 50)
-  else
-    Result := ToolShift;
-end;
 
 function TMiner.MineRock: Boolean;
 begin
@@ -426,72 +313,20 @@ begin
     WL.Activity.Restart;
 end;
 
-function TSRL.GetColorPixelShift(Color: TCTS2Color; Area: TBox; WaitTime: UInt32; out Drop: Boolean): Int32; overload;
-var
-  Before, After: Int32;
-  TPA: TPointArray;
-  ATPA: T2DPointArray;
-  MaxTime: UInt64;
-begin
-  MaxTime := GetTickCount + WaitTime;
-
-  if WaitUntil((SRL.FindColors(TPA, Color, Area) > 0) or (Drop := XPDrop.FindDrop), 100, WaitTime) then
-  begin
-    if Drop then
-    begin
-      WL.Activity.Restart;
-      Exit;
-    end;
-
-    ATPA := TPA.Cluster(2);
-    TPA := ATPA.Biggest;
-    Area := TPA.Bounds;
-  end
-  else
-    Exit;
-
-  Before := BitmapFromClient(Area);
-  Wait(MaxTime - GetTickCount);
-  After := BitmapFromClient(Area);
-  Result := CalculatePixelShift(Before, After, [0, 0, (Area.X2 - Area.X1), (Area.Y2 - Area.Y1)]);
-  FreeBitmap(Before);
-  FreeBitmap(After);
-end;
-
-
-function TSRL.IsColorAnimating(Color: TCTS2Color; Area:TBox; Shift, WaitTime:UInt32; Iter:UInt32 = 1): Boolean; override;
-var
-  i: Int32;
-  Drop: Boolean;
-begin
-  for i := 1 to Iter do
-  begin
-    if Inventory.IsFull or Drop then
-    begin
-      WL.Activity.Restart;
-      Exit(False);
-    end
-
-    else if Self.GetColorPixelShift(Color, Area, WaitTime, Drop) > Shift then
-      Exit(True);
-  end;
-end;
 
 function TMiner.IsMining: Boolean;
-var
-  B: TBox := MainScreen.GetPlayerBox;
 begin
-  B.X1 -= 40;
-  B.Y1 -= 30;
-  B.X2 += 40;
-  B.Y2 += 15;
-  Result := Mining := SRL.IsColorAnimating(ToolType, B, Self.GetToolShift, 350, 3 * RockTimerMultiplier)
+  Result := SRL.IsAnimating(MainScreen.GetPlayerBox, 130, 350, 5);
 end;
 
-function TMiner.WaitMining: Boolean;
+function TMiner.WaitMining(t: UInt32 = 5000): Boolean;
+var
+  Drop: Boolean;
 begin
-  Result := Self.IsMining;
+  Result := WaitUntil(Self.IsMining or (Drop := XPDrop.FindDrop), 100, t);
+  if Drop then Result := False;
 end;
+
 
 function TMiner.GetState: EMinerState;
 begin
@@ -546,9 +381,7 @@ begin
   begin
     State := Self.GetState;
     Action := ToStr(State);
-
-    if ScriptDebugEnabled then
-      ExtraInfo := ' ActivityTimer: ' + ToStr(WL.Activity.TimeRemaining) + ' Bank: ' + ToStr(UseBank) + ' ToolType: ' + ToStr(ToolType);
+    ExtraInfo := ' Bank: ' + ToStr(UseBank);
 
     Self.ProcessWhileWaiting;
 
