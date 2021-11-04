@@ -323,8 +323,14 @@ function TMiner.WaitMining(t: UInt32 = 5000): Boolean;
 var
   Drop: Boolean;
 begin
-  Result := WaitUntil(Self.IsMining or (Drop := XPDrop.FindDrop), 100, t);
-  if Drop then Result := False;
+  if Inventory.Count <> PrevInvCount then
+  begin
+    Mining := False;
+    Exit(False);
+  end;
+
+  Result := WaitUntil((Mining := Self.IsMining) or (Drop := XPDrop.FindDrop), 100, t);
+  if Drop then Result := Mining := False;
 end;
 
 
@@ -381,7 +387,9 @@ begin
   begin
     State := Self.GetState;
     Action := ToStr(State);
-    ExtraInfo := ' Bank: ' + ToStr(UseBank);
+    ExtraInfo := ' Bank: ' + ToStr(UseBank) +
+                  STR_NEW_LINE +
+                 ' Mining: ' + ToStr(Mining);
 
     Self.ProcessWhileWaiting;
 
