@@ -78,7 +78,8 @@ begin
   CookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat',
                    'karambwan', 'chompy', 'fishcake', 'jubbly', 'sweetcorn'];
 
-  BurntFish := ['herring', 'sardine', 'anchovies', 'trout', 'tuna'];
+  BurntFish := ['herring', 'mackerel', 'sardine', 'anchovies',
+                'giant carp', 'trout', 'cod', 'pike', 'salmon', 'tuna', 'bass'];
 
   Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];
 
