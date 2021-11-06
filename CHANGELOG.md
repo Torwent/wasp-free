@@ -1,3 +1,12 @@
+## [0.6.3](https://github.com/Torwent/FreeWaspBots/compare/v0.6.2...v0.6.3) (2021-11-06)
+
+
+### Bug Fixes
+
+* **larder builder:** fix regular larders and some other minor improvements. ([b4e8424](https://github.com/Torwent/FreeWaspBots/commit/b4e8424e6974997b5edd8c24c4ead4ac80fbaf1f))
+
+
+
 ## [0.6.2](https://github.com/Torwent/FreeWaspBots/compare/v0.6.1...v0.6.2) (2021-11-06)
 
 
@@ -32,15 +41,6 @@
 ### Features
 
 * **Larder Builder:** Now supports regular larders. ([e708b16](https://github.com/Torwent/FreeWaspBots/commit/e708b163774ebc9cb4f530c8097162aac45b551c))
-
-
-
-## [0.4.3](https://github.com/Torwent/FreeWaspBots/compare/v0.4.2...v0.4.3) (2021-10-28)
-
-
-### Bug Fixes
-
-* **NMZ Fighter:** Remove debug stuff. ([7aa7434](https://github.com/Torwent/FreeWaspBots/commit/7aa7434c26a512a88e7669053aa0e4a5780e76ab))
 
 
 
