@@ -56,7 +56,9 @@ type
     UsePhials: Boolean;
     WaitingServant: Boolean;
 
+    Plank: TRSItem;
     NotedPlanksSlot: Int32;
+    MinInvCount: Int32;
   end;
 
 
@@ -77,6 +79,23 @@ begin
         ServantNPC.UpText := ['Talk-to'];
         ServantNPC.Filter.Finder := False;
         ServantNPC.Filter.MinimapDot := True;
+      end;
+  end;
+end;
+
+procedure TBuilder.SetupPlank;
+begin
+  case CurrentLarder of
+    REGULAR_LARDER:
+      begin
+        Plank := 'Plank';
+        MinInvCount := 12;
+      end;
+
+    OAK_LARDER:
+      begin
+        Plank := 'Oak plank';
+        MinInvCount := 11;
       end;
   end;
 end;
@@ -116,8 +135,9 @@ begin
 
   Self.SetupNPC;
   Self.SetupObjects;
+  Self.SetupPlank;
 
-  ActionProfit -= (ItemInfo.GetAveragePrice('Oak plank') * 8 + 40);
+  ActionProfit -= (ItemInfo.GetAveragePrice(Plank) * 8 + 40);
 
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
@@ -293,7 +313,7 @@ begin
   else if LarderIsBuilt then
     Exit(EState.DESTROY_LARDER)
 
-  else if Inventory.Count > 4 then
+  else if Inventory.Count > MinInvCount then
   begin
     WaitingServant := False;
     Exit(EState.BUILD_LARDER);
