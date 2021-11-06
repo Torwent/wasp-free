@@ -1,3 +1,13 @@
+## [0.6.2](https://github.com/Torwent/FreeWaspBots/compare/v0.6.1...v0.6.2) (2021-11-06)
+
+
+### Bug Fixes
+
+* **cooker:** Fix burnt foods ([702977a](https://github.com/Torwent/FreeWaspBots/commit/702977af4587dcc69cf64ba60059438ea1df8232))
+* **miner:** fix stuck on wait ([5b2dc10](https://github.com/Torwent/FreeWaspBots/commit/5b2dc10d947a6eea1ab372bf327784b51a663d8b))
+
+
+
 ## [0.6.1](https://github.com/Torwent/FreeWaspBots/compare/v0.6.0...v0.6.1) (2021-11-04)
 
 
@@ -31,15 +41,6 @@
 ### Bug Fixes
 
 * **NMZ Fighter:** Remove debug stuff. ([7aa7434](https://github.com/Torwent/FreeWaspBots/commit/7aa7434c26a512a88e7669053aa0e4a5780e76ab))
-
-
-
-## [0.4.2](https://github.com/Torwent/FreeWaspBots/compare/v0.4.1...v0.4.2) (2021-10-24)
-
-
-### Bug Fixes
-
-* **aio cooker:** Made it wait only using the make interface is gone. ([168f9c5](https://github.com/Torwent/FreeWaspBots/commit/168f9c57b955c1b30d285d553e56972b24e7152e))
 
 
 
