@@ -1,3 +1,12 @@
+## [0.6.5](https://github.com/Torwent/FreeWaspBots/compare/v0.6.4...v0.6.5) (2021-11-08)
+
+
+### Bug Fixes
+
+* **nmz:** bank pin ([f2815bf](https://github.com/Torwent/FreeWaspBots/commit/f2815bf0e6edf7b331696eff7e1917dee8f732f3))
+
+
+
 ## [0.6.4](https://github.com/Torwent/FreeWaspBots/compare/v0.6.3...v0.6.4) (2021-11-08)
 
 
@@ -32,15 +41,6 @@
 ### Bug Fixes
 
 * **miner:** attempt to fix animation detection ([1c9c2f6](https://github.com/Torwent/FreeWaspBots/commit/1c9c2f6c8cd48604c014f8d83cc22bcbebb43288))
-
-
-
-# [0.6.0](https://github.com/Torwent/FreeWaspBots/compare/v0.5.0...v0.6.0) (2021-10-29)
-
-
-### Features
-
-* **Larder Builder:** Added the larder selector to the GUI. ([1382df3](https://github.com/Torwent/FreeWaspBots/commit/1382df3303e36b195ffd89283dccaa880e2ac0cb))
 
 
 
