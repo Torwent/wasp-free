@@ -1,3 +1,12 @@
+## [0.6.6](https://github.com/Torwent/FreeWaspBots/compare/v0.6.5...v0.6.6) (2021-11-08)
+
+
+### Bug Fixes
+
+* **nmz:** Bank pin ([e18e8bd](https://github.com/Torwent/FreeWaspBots/commit/e18e8bd29b094e9b54e959cedd1e2da62ab62cbe))
+
+
+
 ## [0.6.5](https://github.com/Torwent/FreeWaspBots/compare/v0.6.4...v0.6.5) (2021-11-08)
 
 
@@ -32,15 +41,6 @@
 
 * **cooker:** Fix burnt foods ([702977a](https://github.com/Torwent/FreeWaspBots/commit/702977af4587dcc69cf64ba60059438ea1df8232))
 * **miner:** fix stuck on wait ([5b2dc10](https://github.com/Torwent/FreeWaspBots/commit/5b2dc10d947a6eea1ab372bf327784b51a663d8b))
-
-
-
-## [0.6.1](https://github.com/Torwent/FreeWaspBots/compare/v0.6.0...v0.6.1) (2021-11-04)
-
-
-### Bug Fixes
-
-* **miner:** attempt to fix animation detection ([1c9c2f6](https://github.com/Torwent/FreeWaspBots/commit/1c9c2f6c8cd48604c014f8d83cc22bcbebb43288))
 
 
 
