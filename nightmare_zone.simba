@@ -820,6 +820,41 @@ end;
 var
   NMZFighter: TNMZFighter;
 
+function TRSBankPin.Enter(Pin: String): Boolean; override;
+
+  function GetDigitToEnter: Char;
+  begin
+    if OCR.LocateText(Self.Bounds, 'FIRST',  RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[1]);
+    if OCR.LocateText(Self.Bounds, 'SECOND', RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[2]);
+    if OCR.LocateText(Self.Bounds, 'THIRD',  RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[3]);
+    if OCR.LocateText(Self.Bounds, 'FOURTH', RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[4]);
+  end;
+
+var
+  I: Int32;
+  Digit: Char;
+begin
+  for 1 to 3 do // 3 Attempts
+  begin
+    for I := 1 to 4 do
+    begin
+      Digit := GetDigitToEnter;
+      if Digit = '' then
+        Break;
+
+      if not Self.ClickDigit(Digit) then
+        Break;
+
+      Wait(1000, 2000, wdLeft);
+    end;
+
+    if WaitUntil(not BankPin.IsOpen, 100, 3000) then
+      Exit(True);
+  end;
+
+  Result := WaitUntil(not BankPin.IsOpen, 100, 3000); // wait 3 extra seconds before failing.
+end;
+
 function TRSLogin.LoginPlayer: Boolean; override;
 begin
   Result := inherited;
