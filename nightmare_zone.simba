@@ -416,7 +416,7 @@ begin
   if RSObjects.NMZCoffer.WalkClick then
   begin
     Minimap.WaitMoving;
-    Result := BankPin.IsOpen(10000);
+    Result := CofferLocked := BankPin.IsOpen(10000);
   end;
 end;
 
@@ -849,10 +849,14 @@ begin
     end;
 
     if WaitUntil(not BankPin.IsOpen, 100, 3000) then
+    begin
+      NMZFighter.CofferLocked := False;
       Exit(True);
+    end;
   end;
 
   Result := WaitUntil(not BankPin.IsOpen, 100, 3000); // wait 3 extra seconds before failing.
+  NMZFighter.CofferLocked := not Result;
 end;
 
 function TRSLogin.LoginPlayer: Boolean; override;
