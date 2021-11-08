@@ -1,3 +1,12 @@
+## [0.6.4](https://github.com/Torwent/FreeWaspBots/compare/v0.6.3...v0.6.4) (2021-11-08)
+
+
+### Bug Fixes
+
+* **nmz:** coffer stuff ([c998bf7](https://github.com/Torwent/FreeWaspBots/commit/c998bf72b4db1aaf41ad0bae16fd416a5a90bd0d))
+
+
+
 ## [0.6.3](https://github.com/Torwent/FreeWaspBots/compare/v0.6.2...v0.6.3) (2021-11-06)
 
 
@@ -32,15 +41,6 @@
 ### Features
 
 * **Larder Builder:** Added the larder selector to the GUI. ([1382df3](https://github.com/Torwent/FreeWaspBots/commit/1382df3303e36b195ffd89283dccaa880e2ac0cb))
-
-
-
-# [0.5.0](https://github.com/Torwent/FreeWaspBots/compare/v0.4.3...v0.5.0) (2021-10-29)
-
-
-### Features
-
-* **Larder Builder:** Now supports regular larders. ([e708b16](https://github.com/Torwent/FreeWaspBots/commit/e708b163774ebc9cb4f530c8097162aac45b551c))
 
 
 
