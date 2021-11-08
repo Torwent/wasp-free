@@ -256,52 +256,6 @@ begin
   end;
 end;
 
-var
-  NMZFighter: TNMZFighter;
-
-//override to move the camera less.
-function TRSObject._HoverHelper(Attempts: Int32): Boolean; override;
-var
-  Attempt: Int32;
-  ATPA: T2DPointArray;
-  Points: TPointArray;
-begin
-  for Attempt := 0 to Attempts do
-  begin
-    if Filter.UpText and MainScreen.IsUpText(UpText) then
-      Exit(True);
-
-    if Self.Find(ATPA) then
-    begin
-      if Attempt < 2 then
-        Points := ATPA[0] // 0 for the closest one.
-      else
-        Points := ATPA[Random(0, High(ATPA))];
-
-      if Points <> [] then
-      begin
-        Mouse.Move(Points[Random(0, High(Points))]);
-        if not Filter.UpText then
-          Exit(True);
-      end;
-    end
-    else Exit(False);
-  end;
-end;
-
-function TCombatHandler.NeedRegear: Boolean; override;
-begin
-  if not ManageWeapons or not WeaponIsSetup then
-    Exit;
-
-  if not NMZFighter.PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= WeaponSpec) then
-    Exit;
-
-  Result := ((Weapon <> 'Null') and Inventory.FindItem(Weapon)) or
-            ((Shield <> 'Null') and Inventory.FindItem(Shield));
-end;
-
-
 
 function TNMZFighter.InDream: Boolean;
 begin
@@ -709,7 +663,7 @@ begin
     if CombatHandler.NeedRegear then
       Exit(REEQUIP_GEAR)
 
-    else if not CheckCoffer then
+    else if not CofferChecked then
       Exit(CHECK_COFFER)
 
     else if CofferLocked then
@@ -862,6 +816,59 @@ begin
     if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 end;
+
+var
+  NMZFighter: TNMZFighter;
+
+function TRSLogin.LoginPlayer: Boolean; override;
+begin
+  Result := inherited;
+
+  NMZFighter.CofferChecked := False;
+end;
+
+//override to move the camera less.
+function TRSObject._HoverHelper(Attempts: Int32): Boolean; override;
+var
+  Attempt: Int32;
+  ATPA: T2DPointArray;
+  Points: TPointArray;
+begin
+  for Attempt := 0 to Attempts do
+  begin
+    if Filter.UpText and MainScreen.IsUpText(UpText) then
+      Exit(True);
+
+    if Self.Find(ATPA) then
+    begin
+      if Attempt < 2 then
+        Points := ATPA[0] // 0 for the closest one.
+      else
+        Points := ATPA[Random(0, High(ATPA))];
+
+      if Points <> [] then
+      begin
+        Mouse.Move(Points[Random(0, High(Points))]);
+        if not Filter.UpText then
+          Exit(True);
+      end;
+    end
+    else Exit(False);
+  end;
+end;
+
+function TCombatHandler.NeedRegear: Boolean; override;
+begin
+  if not ManageWeapons or not WeaponIsSetup then
+    Exit;
+
+  if not NMZFighter.PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= WeaponSpec) then
+    Exit;
+
+  Result := ((Weapon <> 'Null') and Inventory.FindItem(Weapon)) or
+            ((Shield <> 'Null') and Inventory.FindItem(Shield));
+end;
+
 
 type
   TNMZConfig = record(TScriptConfig)
