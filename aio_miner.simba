@@ -316,10 +316,10 @@ end;
 
 function TMiner.IsMining: Boolean;
 begin
-  Result := SRL.IsAnimating(MainScreen.GetPlayerBox, 130, 350, 5);
+  Result := SRL.IsAnimating(MainScreen.GetPlayerBox, 130, 350, 3);
 end;
 
-function TMiner.WaitMining(t: UInt32 = 5000): Boolean;
+function TMiner.WaitMining(t: UInt32 = 3000): Boolean;
 var
   Drop: Boolean;
 begin
