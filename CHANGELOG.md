@@ -1,3 +1,17 @@
+# [0.7.0](https://github.com/Torwent/FreeWaspBots/compare/v0.6.6...v0.7.0) (2021-11-11)
+
+
+### Bug Fixes
+
+* **miner:** attempt to fix mining animation. ([199dcc1](https://github.com/Torwent/FreeWaspBots/commit/199dcc1598cfc3955841ec01d9fd77e46f368bcd))
+
+
+### Features
+
+* **pickpocketer:** Now uses the food handler. ([6e77af8](https://github.com/Torwent/FreeWaspBots/commit/6e77af829205c4db36e708cef06d9542bcad256b))
+
+
+
 ## [0.6.6](https://github.com/Torwent/FreeWaspBots/compare/v0.6.5...v0.6.6) (2021-11-08)
 
 
@@ -31,16 +45,6 @@
 ### Bug Fixes
 
 * **larder builder:** fix regular larders and some other minor improvements. ([b4e8424](https://github.com/Torwent/FreeWaspBots/commit/b4e8424e6974997b5edd8c24c4ead4ac80fbaf1f))
-
-
-
-## [0.6.2](https://github.com/Torwent/FreeWaspBots/compare/v0.6.1...v0.6.2) (2021-11-06)
-
-
-### Bug Fixes
-
-* **cooker:** Fix burnt foods ([702977a](https://github.com/Torwent/FreeWaspBots/commit/702977af4587dcc69cf64ba60059438ea1df8232))
-* **miner:** fix stuck on wait ([5b2dc10](https://github.com/Torwent/FreeWaspBots/commit/5b2dc10d947a6eea1ab372bf327784b51a663d8b))
 
 
 
