@@ -119,6 +119,16 @@ begin
 end;
 
 
+function TStallRobber.DropItems: Boolean;
+var
+  InvCount: Int32 := Inventory.Count;
+begin
+  Result := Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
+
+  TotalActions += (InvCount - Inventory.Count);
+end;
+
+
 function TStallRobber.GetState: EStallRobberState;
 begin
   if WL.Activity.IsFinished then
@@ -147,7 +157,7 @@ begin
     Self.ProcessWhileWaiting;
 
     case State of
-      DROP_LOOT: Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
+      DROP_LOOT: Self.DropItems;
       FIND_STALL, ROB_STALL: Self.RobStall;
       WAIT_STATE: Wait(100, 200);
       WALK_SPOT: RSW.WebWalk(SafeSpot, 3, 0.2);
