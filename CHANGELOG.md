@@ -1,3 +1,12 @@
+## [0.7.1](https://github.com/Torwent/FreeWaspBots/compare/v0.7.0...v0.7.1) (2021-11-15)
+
+
+### Bug Fixes
+
+* **stall robber:** now updates the proggie ([287794a](https://github.com/Torwent/FreeWaspBots/commit/287794a92f02fa2c4f1fc648ed8d851a4dbdc05a))
+
+
+
 # [0.7.0](https://github.com/Torwent/FreeWaspBots/compare/v0.6.6...v0.7.0) (2021-11-11)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * **nmz:** coffer stuff ([c998bf7](https://github.com/Torwent/FreeWaspBots/commit/c998bf72b4db1aaf41ad0bae16fd416a5a90bd0d))
-
-
-
-## [0.6.3](https://github.com/Torwent/FreeWaspBots/compare/v0.6.2...v0.6.3) (2021-11-06)
-
-
-### Bug Fixes
-
-* **larder builder:** fix regular larders and some other minor improvements. ([b4e8424](https://github.com/Torwent/FreeWaspBots/commit/b4e8424e6974997b5edd8c24c4ead4ac80fbaf1f))
 
 
 
