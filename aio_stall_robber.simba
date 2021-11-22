@@ -121,11 +121,13 @@ end;
 
 function TStallRobber.DropItems: Boolean;
 var
-  InvCount: Int32 := Inventory.Count;
+  Slots: TIntegerArray;
 begin
+  Inventory.FindItems(DropList, Slots);
   Result := Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
 
-  TotalActions += (InvCount - Inventory.Count);
+  if Result then
+    TotalActions += Length(Slots);
 end;
 
 

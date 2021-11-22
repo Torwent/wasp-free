@@ -180,7 +180,7 @@ begin
         if not SuicideMode then SuicideMode := True;
 
         NeckQuantity := 0;
-        FoodHandler.FoodAmount := 0;
+        FoodHandler.Amount := 0;
 
         ActionProfit := 3;
       end;
@@ -233,7 +233,7 @@ begin
         if SuicideMode then SuicideMode := False;
 
         NeckQuantity := Round(Antiban.GetUniqueNumber(2, 2));
-        FoodHandler.FoodAmount := Round(Antiban.GetUniqueNumber(5, 12));
+        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(5, 12));
       end;
 
     GUARD:
@@ -251,7 +251,7 @@ begin
 
         ScriptBank := @RSObjects.FaladorWestBank;
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodHandler.FoodAmount := Round(Antiban.GetUniqueNumber(5, 15));
+        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(5, 15));
       end;
 
     KNIGHT_OF_ARDOUGNE:
@@ -273,7 +273,7 @@ begin
         ActionProfit := 100;
 
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodHandler.FoodAmount := Round(Antiban.GetUniqueNumber(5, 15));
+        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(5, 15));
 
         SuicideMode := False;
       end;
@@ -305,12 +305,12 @@ begin
         if SuicideMode then
         begin
           NeckQuantity := Round(Antiban.GetUniqueNumber(2, 3));
-          FoodHandler.FoodAmount := Round(Antiban.GetUniqueNumber(2, 5));
+          FoodHandler.Amount := Round(Antiban.GetUniqueNumber(2, 5));
         end
         else
         begin
           NeckQuantity := Round(Antiban.GetUniqueNumber(3, 2));
-          FoodHandler.FoodAmount := Round(Antiban.GetUniqueNumber(13, 5));
+          FoodHandler.Amount := Round(Antiban.GetUniqueNumber(13, 5));
         end;
       end;
 
@@ -332,7 +332,7 @@ begin
         if SuicideMode then SuicideMode := False;
 
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodHandler.FoodAmount := Round(Antiban.GetUniqueNumber(12, 8));
+        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(12, 8));
       end;
   end;
 
@@ -489,15 +489,15 @@ begin
     ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetCurrentLevel(ERSSkill.MAGIC)));
   end;
 
-  if not SuicideMode and ((FoodHandler.FoodAmount + NeckQuantity + 2) >= 26) then
+  if not SuicideMode and ((FoodHandler.Amount + NeckQuantity + 2) >= 26) then
   begin
     if UseShadowVeil then
-      FoodHandler.FoodAmount := 26 - NeckQuantity - 1
+      FoodHandler.Amount := 26 - NeckQuantity - 1
     else
-      FoodHandler.FoodAmount := 26 - NeckQuantity;
+      FoodHandler.Amount := 26 - NeckQuantity;
   end
-  else if ((FoodHandler.FoodAmount + NeckQuantity + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
-    FoodHandler.FoodAmount := 28 - NeckQuantity - 2 - Length(StackableArray);
+  else if ((FoodHandler.Amount + NeckQuantity + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
+    FoodHandler.Amount := 28 - NeckQuantity - 2 - Length(StackableArray);
 
   if ScriptDebugEnabled then
   begin
@@ -672,7 +672,7 @@ end;
 function TThiever.Heal: Boolean;
 begin
   repeat
-    if not Inventory.EatFood then
+    if not Inventory.Consume(HEALTH_CONSUMABLE) then
       Exit;
 
     Wait(300, 500);
@@ -786,7 +786,7 @@ begin
     end;
   end;
 
-  FoodHandler.FoodAmount := 0;
+  FoodHandler.Amount := 0;
 end;
 
 
@@ -830,7 +830,7 @@ begin
         Exit(DEPOSIT_LOOT)
       else if Inventory.CountItem(Necklace) < NeckQuantity then
         Exit(WITHDRAW_NECKLACES)
-      else if not Inventory.HasEnoughFood then
+      else if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
     end;
 
@@ -846,7 +846,7 @@ begin
       Exit(DROP_ITEMS)
     else if Self.HasRogue then
       Exit(EQUIP_ROGUE)
-    else if Inventory.FindFood then
+    else if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
@@ -874,7 +874,7 @@ begin
 
   else if Self.IsLowHP then
   begin
-    if not RedemptionEnabled and Inventory.FindFood then
+    if not RedemptionEnabled and Inventory.FindConsumable(HEALTH_CONSUMABLE) then
       Exit(EAT_FOOD)
     else if not SuicideMode then
       Exit(OPEN_BANK)
@@ -920,7 +920,7 @@ begin
     case State of
       OPEN_BANK: Bank.WalkOpen(ScriptBank);
       DEPOSIT_LOOT: Self.Deposit;
-      WITHDRAW_FOOD: Bank.WithdrawFood;
+      WITHDRAW_FOOD: Bank.WithdrawConsumable(HEALTH_CONSUMABLE);
       WITHDRAW_NECKLACES: Self.Withdraw(Necklace, NeckQuantity);
       CLOSE_INTERFACE: MainScreen.CloseInterface;
 
@@ -952,22 +952,14 @@ end;
 var
   Thiever: TThiever;
 
-procedure TFoodHandler.SetupFoodAmount; override;
-var
-  Item: TRSItem;
+function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override;
 begin
-  for Item in Self.ItemArray do
-    Thiever.StackableArray += Item;
+  Result := Self.CountPoints(ConsumableType) >= FoodHandler.Amount;
 end;
 
-function TRSInventory.HasEnoughFood: Boolean; override;
+function TRSBank.WithdrawConsumableAmount(ConsumableType: ERSConsumable): Int32; override;
 begin
-  Result := Self.CountFood >= FoodHandler.FoodAmount;
-end;
-
-function TRSBank.WithdrawFoodAmount: Int32; override;
-begin
-  Result := FoodHandler.FoodAmount - Inventory.CountFood;
+  Result := FoodHandler.Amount - Inventory.CountConsumable(ConsumableType);
 end;
 
 type
