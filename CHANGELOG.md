@@ -1,3 +1,12 @@
+## [0.7.2](https://github.com/Torwent/FreeWaspBots/compare/v0.7.1...v0.7.2) (2021-11-22)
+
+
+### Bug Fixes
+
+* **pickpocketer:** now supports the latest consumable manager ([8a8e36c](https://github.com/Torwent/FreeWaspBots/commit/8a8e36c1e413896c44c47b577cf2726f4b97360d))
+
+
+
 ## [0.7.1](https://github.com/Torwent/FreeWaspBots/compare/v0.7.0...v0.7.1) (2021-11-15)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * **nmz:** bank pin ([f2815bf](https://github.com/Torwent/FreeWaspBots/commit/f2815bf0e6edf7b331696eff7e1917dee8f732f3))
-
-
-
-## [0.6.4](https://github.com/Torwent/FreeWaspBots/compare/v0.6.3...v0.6.4) (2021-11-08)
-
-
-### Bug Fixes
-
-* **nmz:** coffer stuff ([c998bf7](https://github.com/Torwent/FreeWaspBots/commit/c998bf72b4db1aaf41ad0bae16fd416a5a90bd0d))
 
 
 
