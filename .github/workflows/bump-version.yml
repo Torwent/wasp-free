@@ -29,7 +29,7 @@ jobs:
       shell: bash
       run: echo ${{ steps.changelog.outputs.tag }} > version.txt
       
-    - name: Update version file
+    - name: Update version.txt file
       uses: test-room-7/action-update-file@v1
       if: ${{ steps.changelog.outputs.skipped == 'false' }}
       with:
@@ -47,9 +47,9 @@ jobs:
         release_name: ${{ steps.changelog.outputs.tag }}
         body: ${{ steps.changelog.outputs.clean_changelog }}
 
-    - name: Send Changelog to Discord
-      uses: sinshutu/upload-to-discord@master
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_HOOK }}
+    - name: Update channel notification
+      uses: Sniddl/discord-commits@v1.3
       with:
-        args: CHANGELOG.md
+        webhook: ${{ secrets.UPDATES_WEBHOOK }}
+        embed: '{ "title": "Free Scripts: {{ commit.title }}", "description": "{{ commit.description }}"}'
+        last-commit-only: false
