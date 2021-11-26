@@ -1,3 +1,12 @@
+# [0.8.0](https://github.com/Torwent/FreeWaspBots/compare/v0.7.2...v0.8.0) (2021-11-26)
+
+
+### Features
+
+* **Kraken:** New Kraken script. ([7fa1bde](https://github.com/Torwent/FreeWaspBots/commit/7fa1bde2bb2f0e108bad544dbf0a235c0f495e25))
+
+
+
 ## [0.7.2](https://github.com/Torwent/FreeWaspBots/compare/v0.7.1...v0.7.2) (2021-11-22)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * **nmz:** Bank pin ([e18e8bd](https://github.com/Torwent/FreeWaspBots/commit/e18e8bd29b094e9b54e959cedd1e2da62ab62cbe))
-
-
-
-## [0.6.5](https://github.com/Torwent/FreeWaspBots/compare/v0.6.4...v0.6.5) (2021-11-08)
-
-
-### Bug Fixes
-
-* **nmz:** bank pin ([f2815bf](https://github.com/Torwent/FreeWaspBots/commit/f2815bf0e6edf7b331696eff7e1917dee8f732f3))
 
 
 
