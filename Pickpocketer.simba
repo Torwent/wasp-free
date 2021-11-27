@@ -180,7 +180,7 @@ begin
         if not SuicideMode then SuicideMode := True;
 
         NeckQuantity := 0;
-        FoodHandler.Amount := 0;
+        FoodManager.Amount := 0;
 
         ActionProfit := 3;
       end;
@@ -233,7 +233,7 @@ begin
         if SuicideMode then SuicideMode := False;
 
         NeckQuantity := Round(Antiban.GetUniqueNumber(2, 2));
-        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(5, 12));
+        FoodManager.Amount := Round(Antiban.GetUniqueNumber(5, 12));
       end;
 
     GUARD:
@@ -251,7 +251,7 @@ begin
 
         ScriptBank := @RSObjects.FaladorWestBank;
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(5, 15));
+        FoodManager.Amount := Round(Antiban.GetUniqueNumber(5, 15));
       end;
 
     KNIGHT_OF_ARDOUGNE:
@@ -273,7 +273,7 @@ begin
         ActionProfit := 100;
 
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(5, 15));
+        FoodManager.Amount := Round(Antiban.GetUniqueNumber(5, 15));
 
         SuicideMode := False;
       end;
@@ -305,12 +305,12 @@ begin
         if SuicideMode then
         begin
           NeckQuantity := Round(Antiban.GetUniqueNumber(2, 3));
-          FoodHandler.Amount := Round(Antiban.GetUniqueNumber(2, 5));
+          FoodManager.Amount := Round(Antiban.GetUniqueNumber(2, 5));
         end
         else
         begin
           NeckQuantity := Round(Antiban.GetUniqueNumber(3, 2));
-          FoodHandler.Amount := Round(Antiban.GetUniqueNumber(13, 5));
+          FoodManager.Amount := Round(Antiban.GetUniqueNumber(13, 5));
         end;
       end;
 
@@ -332,7 +332,7 @@ begin
         if SuicideMode then SuicideMode := False;
 
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodHandler.Amount := Round(Antiban.GetUniqueNumber(12, 8));
+        FoodManager.Amount := Round(Antiban.GetUniqueNumber(12, 8));
       end;
   end;
 
@@ -489,15 +489,15 @@ begin
     ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetCurrentLevel(ERSSkill.MAGIC)));
   end;
 
-  if not SuicideMode and ((FoodHandler.Amount + NeckQuantity + 2) >= 26) then
+  if not SuicideMode and ((FoodManager.Amount + NeckQuantity + 2) >= 26) then
   begin
     if UseShadowVeil then
-      FoodHandler.Amount := 26 - NeckQuantity - 1
+      FoodManager.Amount := 26 - NeckQuantity - 1
     else
-      FoodHandler.Amount := 26 - NeckQuantity;
+      FoodManager.Amount := 26 - NeckQuantity;
   end
-  else if ((FoodHandler.Amount + NeckQuantity + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
-    FoodHandler.Amount := 28 - NeckQuantity - 2 - Length(StackableArray);
+  else if ((FoodManager.Amount + NeckQuantity + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
+    FoodManager.Amount := 28 - NeckQuantity - 2 - Length(StackableArray);
 
   if ScriptDebugEnabled then
   begin
@@ -786,7 +786,7 @@ begin
     end;
   end;
 
-  FoodHandler.Amount := 0;
+  FoodManager.Amount := 0;
 end;
 
 
@@ -954,12 +954,12 @@ var
 
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override;
 begin
-  Result := Self.CountPoints(ConsumableType) >= FoodHandler.Amount;
+  Result := Self.CountPoints(ConsumableType) >= FoodManager.Amount;
 end;
 
-function TRSBank.WithdrawConsumableAmount(ConsumableType: ERSConsumable): Int32; override;
+function TRSBank.WithdrawConsumableAmount(ConsumableType: ERSConsumable; Idx: Int32): Int32; override;
 begin
-  Result := FoodHandler.Amount - Inventory.CountConsumable(ConsumableType);
+  Result := FoodManager.Amount - Inventory.CountConsumable(ConsumableType);
 end;
 
 type
