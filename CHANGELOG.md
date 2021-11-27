@@ -1,3 +1,12 @@
+## [0.8.1](https://github.com/Torwent/FreeWaspBots/compare/v0.8.0...v0.8.1) (2021-11-27)
+
+
+### Bug Fixes
+
+* **pickpocketer:** renamed FoodHandler to FoodManager ([331506e](https://github.com/Torwent/FreeWaspBots/commit/331506e540f4968fc9deb552da9d8d3c968ad114))
+
+
+
 # [0.8.0](https://github.com/Torwent/FreeWaspBots/compare/v0.7.2...v0.8.0) (2021-11-26)
 
 
@@ -36,15 +45,6 @@
 ### Features
 
 * **pickpocketer:** Now uses the food handler. ([6e77af8](https://github.com/Torwent/FreeWaspBots/commit/6e77af829205c4db36e708cef06d9542bcad256b))
-
-
-
-## [0.6.6](https://github.com/Torwent/FreeWaspBots/compare/v0.6.5...v0.6.6) (2021-11-08)
-
-
-### Bug Fixes
-
-* **nmz:** Bank pin ([e18e8bd](https://github.com/Torwent/FreeWaspBots/commit/e18e8bd29b094e9b54e959cedd1e2da62ab62cbe))
 
 
 
