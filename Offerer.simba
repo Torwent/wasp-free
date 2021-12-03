@@ -104,9 +104,9 @@ begin
     ERSRemains.SUPERIOR_BONES:  Remains := 'Superior dragon bones';
   end;
 
-  //ActionProfit -= ((ItemInfo.GetAveragePrice(Remains) * 3) +
-  //                  ItemInfo.GetAveragePrice(WrathRune) +
-  //                  ItemInfo.GetAveragePrice(AltRune));
+  ActionProfit -= ((ItemData.GetAverage(Remains) * 3) -
+                    ItemData.GetAverage(WrathRune) -
+                    ItemData.GetAverage(AltRune));
 end;
 
 procedure TRemainOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;

@@ -137,7 +137,7 @@ begin
   Self.SetupObjects;
   Self.SetupPlank;
 
-  ActionProfit -= (ItemInfo.GetAveragePrice(Plank) * 8 + 40);
+  ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
 
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;

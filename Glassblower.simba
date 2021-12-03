@@ -113,10 +113,10 @@ begin
   end;
 
   ExtraInfo := 'Blowing item: ' + Product.Item + '.';
-  ProductCost := ItemInfo.GetAveragePrice(Material.Item);
+  ProductCost := ItemData.GetAverage(Material.Item);
 
   ActionProfit := (
-    ItemInfo.GetAveragePrice(Product.Item) -
+    ItemData.GetAverage(Product.Item) -
     ProductCost
   );
 

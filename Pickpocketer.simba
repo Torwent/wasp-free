@@ -161,8 +161,6 @@ begin
 end;
 
 procedure TThiever.SetupNPC;
-var
-  Item: TRSItem;
 begin
   case PickedNPC of
     MAN:
@@ -292,7 +290,7 @@ begin
 
         ActionProfit := 560;
         ValuableItem := 'Enhanced crystal teleport seed';
-        ValuableItemValue := ItemInfo.GetAveragePrice(ValuableItem);
+        ValuableItemValue := ItemData.GetAverage(ValuableItem);
 
 
         DropArray := ['Gold ore'];
@@ -789,7 +787,7 @@ begin
   FoodManager.Amount := 0;
 end;
 
-
+(*
 function TThiever.LootGrave: Boolean;
 begin
   HasNeck := False;
@@ -799,8 +797,45 @@ begin
   if RSObjects.Gravestone.WalkSelectOption(['Loot']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
-    Result := WaitUntil(not MainScreen.HasGrave, 100, 10000);
+    Result := WaitUntil(not MainScreen.FindGrave, 100, 10000);
   end;
+
+  if Result then RSObjects.Gravestone.TileArray := [];
+end;
+ *)
+function TThiever.LootGrave: Boolean;
+var
+  TPA, GraveTPA: TPointArray;
+  P: TPoint;
+  UpTextFound: Boolean;
+begin
+  HasNeck := False;
+  FreshNeck := False;
+  RedemptionEnabled := False;
+
+  if not Minimap.WaitArrow(TPA, 3000) then
+    Exit;
+
+  while not MainScreen.WaitArrow(GraveTPA, 3000) do
+  begin
+    Mouse.Click(TPA.Grow(6).RandomPoint, MOUSE_LEFT);
+    Minimap.WaitMoving;
+  end;
+
+  if not MainScreen.WaitArrow(GraveTPA, 3000) then
+    Exit;
+
+  repeat
+    GraveTPA.SortByY(False);
+    P := GraveTPA[0];
+    P.Y += 5;
+    Mouse.Move(P);
+    UpTextFound := MainScreen.IsUpText('Grave');
+    if not UpTextFound then
+      MainScreen.WaitArrow(GraveTPA, 3000);
+  until UpTextFound;
+
+  Result := ChooseOption.Select('Loot');
 
   if Result then RSObjects.Gravestone.TileArray := [];
 end;
@@ -819,7 +854,7 @@ begin
   else if ChooseOption.IsOpen then
     Exit(CLOSE_CONTEXT)
 
-  else if MainScreen.HasGrave then
+  else if MainScreen.FindGrave then
     Exit(LOOT_GRAVE)
 
   else if MainScreen.HasInterface then
@@ -952,14 +987,49 @@ end;
 var
   Thiever: TThiever;
 
+procedure TConsumableManager.Setup(ConsumableType: ERSConsumable); override;
+var
+  Item: TRSItem;
+begin
+  inherited;
+
+  if ConsumableType = HEALTH_CONSUMABLE then
+    for Item in Self.ItemArray do
+      if Thiever.StackableArray.Find(Item) < 0 then
+        Thiever.StackableArray += Item;
+end;
+
+procedure TConsumableManager.SetupNew(ConsumableType: ERSConsumable); override;
+var
+  Item: TRSItem;
+begin
+  inherited;
+
+  if ConsumableType = HEALTH_CONSUMABLE then
+    for Item in Self.ItemArray do
+      if Thiever.StackableArray.Find(Item) < 0 then
+        Thiever.StackableArray += Item;
+end;
+
+
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override;
 begin
   Result := Self.CountPoints(ConsumableType) >= FoodManager.Amount;
 end;
 
 function TRSBank.WithdrawConsumableAmount(ConsumableType: ERSConsumable; Idx: Int32): Int32; override;
+var
+  HandlerManager: ^TConsumableManager := GetHandler(ConsumableType);
 begin
-  Result := FoodManager.Amount - Inventory.CountConsumable(ConsumableType);
+  if ConsumableType = HEALTH_CONSUMABLE then
+    Exit(FoodManager.Amount - Inventory.CountConsumable(HEALTH_CONSUMABLE));
+
+  case HandlerManager^.Handlers[Idx].Amount of
+    BANK_WITHDRAW_ALL: Result := BANK_WITHDRAW_ALL;
+    BANK_WITHDRAW_ALL_BUT_ONE: Result := BANK_WITHDRAW_ALL_BUT_ONE;
+    else
+      Result := Ceil((HandlerManager^.MinInvPoints - Inventory.CountPoints(ConsumableType)) / HandlerManager^.Handlers[Idx].GetPoints);
+  end;
 end;
 
 type

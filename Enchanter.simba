@@ -224,8 +224,8 @@ begin
   Self.SetEnchantedJewel;
 
   ActionProfit := (
-    ItemInfo.GetAveragePrice(EnchantedJewel) -
-    ItemInfo.GetAveragePrice(CosmicRune) + ItemInfo.GetAveragePrice(RegularJewel)
+    ItemData.GetAverage(EnchantedJewel) -
+    ItemData.GetAverage(CosmicRune) + ItemData.GetAverage(RegularJewel)
   );
 
   if not RSClient.IsLoggedIn then

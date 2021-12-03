@@ -78,67 +78,67 @@ begin
     ERSRock.CLAY:
       begin
         RSRock := @RSObjects.ClayRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Clay');
+        ActionProfit := ItemData.GetAverage('Clay');
       end;
 
     ERSRock.TIN:
     begin
       RSRock := @RSObjects.TinRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Tin ore');
+        ActionProfit := ItemData.GetAverage('Tin ore');
       end;
 
     ERSRock.COPPER:
       begin
         RSRock := @RSObjects.CopperRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Copper ore');
+        ActionProfit := ItemData.GetAverage('Copper ore');
       end;
 
     ERSRock.IRON:
       begin
         RSRock := @RSObjects.IronRock; 
-        ActionProfit := ItemInfo.GetAveragePrice('Iron ore');
+        ActionProfit := ItemData.GetAverage('Iron ore');
       end;
 
     ERSRock.SILVER:
       begin
         RSRock := @RSObjects.SilverRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Silver ore');
+        ActionProfit := ItemData.GetAverage('Silver ore');
       end;
 
     ERSRock.COAL:
       begin
         RSRock := @RSObjects.CoalRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Coal');
+        ActionProfit := ItemData.GetAverage('Coal');
       end;
 
     ERSRock.GOLD:
       begin
         RSRock := @RSObjects.GoldRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Gold ore');
+        ActionProfit := ItemData.GetAverage('Gold ore');
       end;
 
     ERSRock.MITHRIL:
       begin
         RSRock := @RSObjects.MithrilRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Mithril ore');
+        ActionProfit := ItemData.GetAverage('Mithril ore');
       end;
 
     ERSRock.ADAMANTITE:
       begin
         RSRock := @RSObjects.AdamantiteRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Adamantite ore');
+        ActionProfit := ItemData.GetAverage('Adamantite ore');
       end;
 
     ERSRock.RUNITE:
       begin
         RSRock := @RSObjects.RuniteRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Runite ore');
+        ActionProfit := ItemData.GetAverage('Runite ore');
       end;
 
     ERSRock.AMETHYST:
       begin
         RSRock := @RSObjects.AmethystRock;
-        ActionProfit := ItemInfo.GetAveragePrice('Amethyst');
+        ActionProfit := ItemData.GetAverage('Amethyst');
       end;
   end;
 
