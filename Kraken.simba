@@ -45,8 +45,8 @@ begin
   inherited;
 
   Antiban.Skills := [ERSSkill.TOTAL];
-  Antiban.MinZoom := 15;
-  Antiban.MaxZoom := 40;
+  Antiban.MinZoom := 5;
+  Antiban.MaxZoom := 60;
 end;
 
 procedure TScript.Init(MaxActions: Int32; MaxTime: Int64); override;
@@ -63,6 +63,9 @@ begin
   KrakenFinder.Grow := 4;
   KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
   KrakenFinder.MinShortSide := 70;
+
+  ValueThreshold := 5000;
+  RSMonsters.Kraken.SetupDrops;
 
   ImbuedHeart.Setup(7000);
 
@@ -117,6 +120,9 @@ begin
     if MainScreen.DidRedClick then
       Result := IsAttacking := WaitUntil(Self.FindRagingKraken, 100, 7000);
   end;
+
+  if Result then
+    WL.Activity.Restart;
 end;
 
 function TScript.AttackKraken: Boolean;
@@ -151,20 +157,26 @@ begin
 end;
 
 
+function TRSMainScreen.GetPlayerFloorBox: TBox;
+var
+  A: Double := Minimap.GetCompassAngle(False);
+  Center: TPoint := Minimap.Center;
+  TPA: TPointArray;
+begin
+  TPA := [Minimap.VecToMS(Vec3(Center.X - 1, Center.Y, 3), A),
+          Minimap.VecToMS(Vec3(Center.X + 1, Center.Y, -3), A)];
+
+  Result := TPA.Bounds;
+end;
+
 function TScript.CheckLoot: Boolean;
 var
-  B: TBox := MainScreen.GetPlayerBox;
+  B: TBox := MainScreen.GetPlayerFloorBox;
 begin
   Result := CheckedLoot := True;
-  B.Y1 := B.Y2 - 10;
-  B.X1 += 5;
-  B.X2 -= 5;
-  Mouse.Move(B);
-
-  if MainScreen.IsUpText('Take') then
-  begin
-
-  end;
+  WriteLn RSMonsters.Kraken.GoodDrops;
+  while RSMonsters.Kraken.CheckLoot(B) and Inventory.HasSpace(1) do
+    Wait(200, 400);
 end;
 
 
