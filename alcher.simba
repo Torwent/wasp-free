@@ -16,6 +16,7 @@
 {$ENDIF}
 
 var
+  CustomItem: TRSItem := 'noted Rune 2h sword';
   AlchSpell: ERSSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
   LossProtection: Boolean := True;
 
@@ -68,6 +69,8 @@ begin
   RSW.Setup('x7789y2306');
   ScriptBank := @RSObjects.GEBank;
 
+  RSAction.AlchItemArray += CustomItem;
+
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
 end;
@@ -93,7 +96,7 @@ begin
       if ItemString.Contains('noted ') then
         ItemString := ItemString.After('noted ');
 
-      ActionProfit := ItemInfo.GetHighAlchemyProfit(ItemString);
+      ActionProfit := ItemData.GetHighAlchProfit(ItemString);
       Writeln('Profit per alch: ', ActionProfit, '.');
 
       if not LossProtection or (ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
@@ -354,6 +357,7 @@ type
   TAlcherConfig = record(TScriptConfig)
     AlchSelector: TLabeledCombobox;
     IgnoreProfit: TLabeledCheckbox;
+    CustomItemSelector: TLabeledEdit;
   end;
 
 procedure TAlcherConfig.StartScript(Sender: TObject);
@@ -366,11 +370,14 @@ begin
   end;
 
   LossProtection := IgnoreProfit.Checkbox.getState = cbChecked;
+  CustomItem := CustomItemSelector.GetText;
 end;
 
 procedure TAlcherConfig.Setup; override;
 begin
   inherited;
+
+  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 50);
 
   with AlchSelector do
   begin
@@ -385,7 +392,6 @@ begin
     Combobox.setItemIndex(0);
   end;
 
-
   with IgnoreProfit do
   begin
     Init(ScriptSettingsPanel);
@@ -393,6 +399,16 @@ begin
     SetLeft(AlchSelector.getLeft + AlchSelector.GetWidth + 20);
     SetTop(AlchSelector.getTop + 20);
     SetEnabled(True);
+  end;
+
+  with CustomItemSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Custom item to alch:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(AlchSelector.getTop + AlchSelector.GetHeight);
+    SetWidth(200);
+    SetText(ToStr(CustomItem));
   end;
 
   StartButton.setOnClick(@Self.StartScript);
