@@ -327,7 +327,7 @@ end;
 
 function TNMZFighter.HasEnoughAbs: Boolean;
 begin
-  Result := Inventory.CountItem(AbsPotion[3]) >= AbsAmount;
+  Result := Inventory.IsFull or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount);
 end;
 
 
@@ -479,7 +479,11 @@ begin
 
   Str := ToStr(BoostPotion[0]);
   if (Str.Contains('Overload') and Self.HasBoostPot) then
-    Result := Boosted or (HPLevel < 51)
+  begin
+    Result := (Boosted or (HPLevel < 51));
+    if Boosted and not Result then
+      SaveScreenshot;
+  end
   else
     Result := True;
 end;
@@ -751,12 +755,9 @@ begin
     ExtraInfo := ' InDream: ' + ToStr(InDream) +
                  ' DreamSetup: ' + ToStr(DreamSetup) +
                  ' BoostTimer: ' + ToStr(BoostTimer.TimeRemaining) +
-                 STR_NEW_LINE +
+                   STR_NEW_LINE +
                  ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished) +
-                 ' NeedBoost: ' + ToSTR(Self.NeedBoost) + ' Boosted: ' + ToStr(Boosted) +
-                 STR_NEW_LINE +
-                 ' Weapon: ' + ToStr(CombatHandler.Weapon) + ' Shield: ' + ToStr(CombatHandler.Shield) +
-                 ' SpecWeapon: ' + ToStr(CombatHandler.SpecWeapon);
+                 ' NeedBoost: ' + ToSTR(Self.NeedBoost) + ' Boosted: ' + ToStr(Boosted);
     Self.ProcessWhileWaiting;
 
     case State of
@@ -812,8 +813,6 @@ begin
     end
     else
       Self.DoAntiban;
-
-    if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 end;
 

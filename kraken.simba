@@ -40,13 +40,23 @@ type
     ImbuedHeart: TCountDown;
   end;
 
+
+procedure TAntiban.SetupBreaks; override;
+begin
+  if Self.Breaks <> [] then
+    Exit;
+
+  Self.AddBreak(30 * ONE_MINUTE, 2 * ONE_MINUTE, 0.33, 0.01);
+  Self.AddBreak(45 * ONE_MINUTE, 4 * ONE_MINUTE, 0.33, 0.15);
+end;
+
 procedure TAntiban.Setup; override;
 begin
   inherited;
 
   Antiban.Skills := [ERSSkill.TOTAL];
-  Antiban.MinZoom := 5;
-  Antiban.MaxZoom := 60;
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 40;
 end;
 
 procedure TScript.Init(MaxActions: Int32; MaxTime: Int64); override;
@@ -74,6 +84,11 @@ begin
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
+
+  if not Equipment.FindItem('Sanguinesti staff') then
+  begin
+    RSMonsters.Kraken.LootGItem.UpText += 'Shark';
+  end;
 end;
 
 
@@ -127,7 +142,7 @@ end;
 
 function TScript.AttackKraken: Boolean;
 begin
-  Mouse.Move(KrakenTPA);
+  Mouse.Move(KrakenTPA.Mean);
   if MainScreen.IsUpText('Attack K') then
   begin
     Mouse.Click(MOUSE_LEFT);
@@ -148,12 +163,7 @@ begin
 
   Inventory.ClickSlot(Slot);
   ImbuedHeart.Restart(Random(3000, 35000));
-end;
-
-function TScript.DrinkPrayer: Boolean;
-begin
-  if Inventory.Consume(PRAYER_CONSUMABLE) then
-    Result := WaitUntil(Minimap.GetPrayerLevel > 30, 100, 3000);
+  IsAttacking := False
 end;
 
 
@@ -173,8 +183,11 @@ function TScript.CheckLoot: Boolean;
 var
   B: TBox := MainScreen.GetPlayerFloorBox;
 begin
+  while Inventory.IsFull and Inventory.FindConsumable(HEALTH_CONSUMABLE) do
+    Inventory.Consume(HEALTH_CONSUMABLE);
+
   Result := CheckedLoot := True;
-  WriteLn RSMonsters.Kraken.GoodDrops;
+
   while RSMonsters.Kraken.CheckLoot(B) and Inventory.HasSpace(1) do
     Wait(200, 400);
 end;
@@ -186,10 +199,17 @@ begin
   if WL.Activity.IsFinished and not MainScreen.InCombat then
     Exit(END_SCRIPT);
 
-  if Minimap.GetHPLevel <= 40 then
-    Exit(EAT_FOOD);
+  if (Minimap.GetHPLevel <= 40) then
+  begin
+    if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+      Exit(EAT_FOOD)
+    else if Self.FindRagingKraken then
+      Exit(ATTACK_KRAKEN)
+    else if (Minimap.GetHPLevel <= 25) then
+      TerminateScript('OUT OF FOOD AND HEALTH');
+  end;
 
-  if Minimap.GetPrayerLevel <= 30 then
+  if (Minimap.GetPrayerLevel <= 30) and Inventory.FindConsumable(PRAYER_CONSUMABLE) then
     Exit(DRINK_PRAYER);
 
   if ImbuedHeart.IsFinished then
@@ -233,23 +253,30 @@ begin
       CHECK_LOOT: Self.CheckLoot;
       WAKE_KRAKEN: Self.WakeKraken;
       ATTACK_KRAKEN: IsAttacking := Self.AttackKraken;
-      BOOST: if Self.BoostMagic then IsAttacking := False;
-      EAT_FOOD: if Inventory.Consume(HEALTH_CONSUMABLE) then IsAttacking := False;
-      DRINK_PRAYER: Self.DrinkPrayer;
+      BOOST: Self.BoostMagic;
+      EAT_FOOD: Inventory.Consume(HEALTH_CONSUMABLE);
+      DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
       ENABLE_QPRAY: Minimap.EnablePrayer;
       ALCH_DROP: if RSAction.AlchItems(RSAction.AlchItemArray) then Wait(600, 800);
       END_SCRIPT: Break;
     end;
 
     Self.DoAntiban(True, False);
-    if not RSClient.IsLoggedIn then
-      Login.LoginPlayer;
   end;
 end;
 
 
 
-var Script: TScript;
+var
+  Script: TScript;
+
+function TRSInventory.Consume(ConsumableType: ERSConsumable; out Slots: TIntegerArray): Boolean; override;
+begin
+  Result := inherited(ConsumableType);
+
+  if Result then
+    Script.IsAttacking := False;
+end;
 
 type
   TConfig = record(TScriptConfig)

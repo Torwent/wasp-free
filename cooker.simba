@@ -374,7 +374,6 @@ begin
     end;
 
     Self.DoAntiban;
-    if not RSClient.IsLoggedIn then Login.LoginPlayer;
   end;
 
   if not Self.Terminate then
