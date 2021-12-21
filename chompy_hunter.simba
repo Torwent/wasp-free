@@ -166,7 +166,7 @@ begin
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving;
-    Result := WaitUntil(Self.ClickedChompy(FeatherCount) or MainScreen.InCombat, 100, 4000);
+    Result := WaitUntil(Self.ClickedChompy(FeatherCount) or MainScreen.InCombat, 100, 3000);
   end;
 
   if Result then
@@ -225,6 +225,15 @@ end;
 
 var
   ChompyHunter: TChompyHunter;
+
+function TRSMainScreen.InCombat: Boolean; override;
+begin
+  if Self.FindDepletedHPBar then
+    Exit(False);
+
+  Result := (CombatHandler.IsSetup and not CombatHandler.InCombatTimer.IsFinished)
+            or XPDrop.FindDrop or (Self.FindHitsplats <> []);
+end;
 
 type
   TChompyHunterConfig = record(TScriptConfig)
