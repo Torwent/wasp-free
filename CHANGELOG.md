@@ -1,3 +1,12 @@
+## [0.9.1](https://github.com/Torwent/FreeWaspBots/compare/v0.9.0...v0.9.1) (2021-12-21)
+
+
+### Bug Fixes
+
+* **chompy hunter:** bug fixes. ([b5c44ff](https://github.com/Torwent/FreeWaspBots/commit/b5c44ff0872e452e2c023381ae7065ea000eb9be))
+
+
+
 # [0.9.0](https://github.com/Torwent/FreeWaspBots/compare/v0.8.1...v0.9.0) (2021-12-03)
 
 
@@ -42,15 +51,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** now supports the latest consumable manager ([8a8e36c](https://github.com/Torwent/FreeWaspBots/commit/8a8e36c1e413896c44c47b577cf2726f4b97360d))
-
-
-
-## [0.7.1](https://github.com/Torwent/FreeWaspBots/compare/v0.7.0...v0.7.1) (2021-11-15)
-
-
-### Bug Fixes
-
-* **stall robber:** now updates the proggie ([287794a](https://github.com/Torwent/FreeWaspBots/commit/287794a92f02fa2c4f1fc648ed8d851a4dbdc05a))
 
 
 
