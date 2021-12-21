@@ -34,8 +34,8 @@ begin
   inherited;
 
   Antiban.Skills := [ERSSkill.TOTAL];
-  Antiban.MinZoom := 15;
-  Antiban.MaxZoom := 40;
+  Antiban.MinZoom := 5;
+  Antiban.MaxZoom := 35;
 end;
 
 procedure TChompyHunter.Init(MaxActions: Int32; MaxTime: Int64); override;
@@ -44,6 +44,7 @@ begin
 
   inherited;
 
+  ItemFinder.Similarity := 0.9999;
   RSW.Setup('x4595y3834');
 
   CombatHandler.Setup(@RSNPCs.Chompy, 2000);
@@ -51,7 +52,8 @@ begin
 
   OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
@@ -62,15 +64,79 @@ begin
   end;
 end;
 
+
+
+
+
+function TChompyHunter.CountBellows: Int32;
+begin
+  Result := Inventory.CountItem('Ogre bellows (3)') +
+            Inventory.CountItem('Ogre bellows (2)') +
+            Inventory.CountItem('Ogre bellows (1)');
+end;
+
+function TChompyHunter.FillBellows: Boolean;
+var
+  InvCount: Int32 := Self.CountBellows;
+  TempCount: Int32;
+begin
+  if RSObjects.SwampBubbles.WalkClick then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000);
+  end;
+
+
+  if Result then
+    while Inventory.FindItem('Ogre bellows') do
+    begin
+      InvCount := TempCount;
+      if not WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000) then
+        Break;
+    end;
+end;
+
+
+function TChompyHunter.MoveAround: Boolean;
+var
+  MinimapTPA: TPointArray;
+  SwampTPA: TPointArray;
+  P: TPoint;
+  FinalTPA: TPointArray;
+  MMDots: TPointArray;
+begin
+  MinimapTPA := Minimap.GetPolygon.Connect;
+  MinimapTPA.Fill;
+  MinimapTPA := MinimapTPA.Erode(3);
+
+  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds);
+
+  MMDots := Minimap.GetDots(ERSMinimapDot.NPC).Offset(2, 2);
+  MMDots := MMDots.Grow(2);
+
+  SwampTPA := SwampTPA + MMDots;
+
+  for P in MinimapTPA do
+    if SwampTPA.Find(P) = -1 then
+      FinalTPA += P;
+
+  Mouse.Click(FinalTPA.RandomPoint, MOUSE_LEFT);
+
+  Minimap.WaitMoving;
+  Result := not Minimap.HasDotUnder;
+end;
+
 function TChompyHunter.PlaceToad: Boolean;
 begin
+  if Minimap.HasDotUnder then
+    Self.MoveAround;
+
   if Inventory.ClickItem('Bloated toad') then
   begin
     Wait(1400, 1800);
     Result := WaitUntil(not Inventory.FindItem('Bloated toad'), 100, 5000);
   end;
 end;
-
 
 function TChompyHunter.FillToad: Boolean;
 var
@@ -96,14 +162,15 @@ function TChompyHunter.ClickChompy: Boolean;
 var
   FeatherCount: Int32;
 begin
-  if CombatHandler.EnemyNPC^.SelectOption(['Attack']) then
+  if CombatHandler.EnemyNPC^.SelectOption(['Attack', 'Pluck']) then
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving;
-    Result := WaitUntil(Self.ClickedChompy(FeatherCount) or MainScreen.InCombat, 100, 5000);
+    Result := WaitUntil(Self.ClickedChompy(FeatherCount) or MainScreen.InCombat, 100, 4000);
   end;
 
-  if Result then TotalActions += 1;
+  if Result then
+    TotalActions += 1;
 end;
 
 
@@ -143,12 +210,10 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       WAIT_STATE: Wait(800, 1200);
       FILL_TOAD: Self.FillToad;
-      FILL_BELLOWS: RSObjects.SwampBubbles.WalkClick;
+      FILL_BELLOWS: Self.FillBellows;
       PLACE_TOAD: Self.PlaceToad;
       CLICK_CHOMPY: Self.ClickChompy;
     end;
@@ -157,7 +222,9 @@ begin
   end;
 end;
 
-var ChompyHunter: TChompyHunter;
+
+var
+  ChompyHunter: TChompyHunter;
 
 type
   TChompyHunterConfig = record(TScriptConfig)
