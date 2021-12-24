@@ -252,7 +252,10 @@ function TBuilder.HandleServant: Boolean;
 begin
   Result := Chat.ClickOption('Fetch', BioHash)
   if Result then
+  begin
     WaitingServant := True;
+    WaitUntil(Chat.GetChatTitle <> 'Repeat last task?', 200, 3000)
+  end;
 end;
 
 function TBuilder.HandleLarderChat: Boolean;
