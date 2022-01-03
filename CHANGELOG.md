@@ -1,3 +1,12 @@
+## [0.9.3](https://github.com/Torwent/FreeWaspBots/compare/v0.9.2...v0.9.3) (2022-01-03)
+
+
+### Bug Fixes
+
+* **kraken:** fix imbued heart timer and added slayer bracelets support via wasplib ([f55794e](https://github.com/Torwent/FreeWaspBots/commit/f55794e01e0e0a57afcf8fa8ce7f6d6d465a0651))
+
+
+
 ## [0.9.2](https://github.com/Torwent/FreeWaspBots/compare/v0.9.1...v0.9.2) (2021-12-21)
 
 
@@ -42,15 +51,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** renamed FoodHandler to FoodManager ([331506e](https://github.com/Torwent/FreeWaspBots/commit/331506e540f4968fc9deb552da9d8d3c968ad114))
-
-
-
-# [0.8.0](https://github.com/Torwent/FreeWaspBots/compare/v0.7.2...v0.8.0) (2021-11-26)
-
-
-### Features
-
-* **Kraken:** New Kraken script. ([7fa1bde](https://github.com/Torwent/FreeWaspBots/commit/7fa1bde2bb2f0e108bad544dbf0a235c0f495e25))
 
 
 
