@@ -904,7 +904,8 @@ begin
     Exit;
 
   Result := ((Weapon <> 'Null') and Inventory.FindItem(Weapon)) or
-            ((Shield <> 'Null') and Inventory.FindItem(Shield));
+            ((Shield <> 'Null') and Inventory.FindItem(Shield)) or
+            Self.NeedBracelet;
 end;
 
 
