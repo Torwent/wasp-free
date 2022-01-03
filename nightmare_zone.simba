@@ -209,7 +209,7 @@ begin
   if ToStr(DamageItem) = '' then
     TerminateScript('You need either a Locator orb or a Dwarven rock cake to run this script.');
 
-  Writeln('Damage item is: ' + ToStr(DamageItem));
+  DebugLn('Damage item is: ' + ToStr(DamageItem));
 end;
 
 procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
@@ -897,7 +897,7 @@ end;
 
 function TCombatHandler.NeedRegear: Boolean; override;
 begin
-  if not ManageWeapons or not WeaponIsSetup then
+  if not ManageGear or not GearIsSetup then
     Exit;
 
   if not NMZFighter.PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= WeaponSpec) then
