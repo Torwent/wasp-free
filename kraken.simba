@@ -24,6 +24,7 @@ type
     DRINK_PRAYER,
     ENABLE_QPRAY,
     ALCH_DROP,
+    EQUIP_BRACELET,
     END_SCRIPT
   );
 
@@ -77,13 +78,16 @@ begin
   ValueThreshold := 5000;
   RSMonsters.Kraken.SetupDrops;
 
-  ImbuedHeart.Setup(7000);
+  ImbuedHeart.Setup(420000);
 
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
+  CombatHandler.Setup(4000);
+  CombatHandler.ManageGear := True;
+  CombatHandler.SetupGear;
 
   if not Equipment.FindItem('Sanguinesti staff') then
   begin
@@ -212,6 +216,9 @@ begin
   if (Minimap.GetPrayerLevel <= 30) and Inventory.FindConsumable(PRAYER_CONSUMABLE) then
     Exit(DRINK_PRAYER);
 
+  if CombatHandler.NeedBracelet then
+    Exit(EQUIP_BRACELET);
+
   if ImbuedHeart.IsFinished then
     Exit(BOOST);
 
@@ -246,8 +253,6 @@ begin
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
-    if ScriptDebugEnabled then SRL.Debug(RSClient.Image);
-
     case State of
       WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
       CHECK_LOOT: Self.CheckLoot;
@@ -258,6 +263,7 @@ begin
       DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
       ENABLE_QPRAY: Minimap.EnablePrayer;
       ALCH_DROP: if RSAction.AlchItems(RSAction.AlchItemArray) then Wait(600, 800);
+      EQUIP_BRACELET: CombatHandler.EquipBracelet;
       END_SCRIPT: Break;
     end;
 
