@@ -1,3 +1,12 @@
+## [0.9.4](https://github.com/Torwent/FreeWaspBots/compare/v0.9.3...v0.9.4) (2022-01-03)
+
+
+### Bug Fixes
+
+* changed the discord link in the readme file ([fcee664](https://github.com/Torwent/FreeWaspBots/commit/fcee664be3e8eb54fd7497dab8bc11474a6aca21))
+
+
+
 ## [0.9.3](https://github.com/Torwent/FreeWaspBots/compare/v0.9.2...v0.9.3) (2022-01-03)
 
 
@@ -42,15 +51,6 @@
 ### Reverts
 
 * rename files to lower case with underscores ([93ff252](https://github.com/Torwent/FreeWaspBots/commit/93ff25216a06b0d666880c0728a61d7dff6ff8b4))
-
-
-
-## [0.8.1](https://github.com/Torwent/FreeWaspBots/compare/v0.8.0...v0.8.1) (2021-11-27)
-
-
-### Bug Fixes
-
-* **pickpocketer:** renamed FoodHandler to FoodManager ([331506e](https://github.com/Torwent/FreeWaspBots/commit/331506e540f4968fc9deb552da9d8d3c968ad114))
 
 
 
