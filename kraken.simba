@@ -1,5 +1,5 @@
 {$DEFINE SRL_USE_REMOTEINPUT}
-{$IFDEF WINDOWS}{.$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -9,13 +9,20 @@ begin
   BreaksEnabled         := True; //Enables Short Breaks
   SleepEnabled          := True; //Enables Sleep Breaks
   RemoteInputEnabled    := True; //Enables Remote Input
-  ProgressReportEnabled := True; //Enables Graphical Progress Report
+  ProgressReportEnabled := False; //Enables Graphical Progress Report
   ScriptDebugEnabled    := False; //Enables Script Debugging
 end;
 
 type
   EState = (
     WAIT_STATE,
+
+    //Outside
+    ENTER_CREVICE,
+    HANDLE_CHAT,
+
+    //Inside
+    WALK_BRIDGE,
     CHECK_LOOT,
     WAKE_KRAKEN,
     ATTACK_KRAKEN,
@@ -30,6 +37,10 @@ type
 
   TScript = record(TBaseScript)
     State: EState;
+
+    RSW: TRSWalker;
+    Bridge: TPoint;
+    BossRoomTPA: TPointArray;
 
     KrakenFinder: TRSObjectFinder;
     SleepyKraken: TPointArray;
@@ -66,6 +77,15 @@ begin
 
   inherited;
 
+  RSW.Setup('x10158y1010');
+  Bridge := [10391, 1145];
+  BossRoomTPA := [
+    [10369, 1085], [10420, 1086], [10440, 1107],
+    [10440, 1149], [10415, 1155], [10411, 1187],
+    [10373, 1187], [10367, 1156], [10345, 1148],
+    [10345, 1105]
+  ];
+
   FoodManager.MinInvPoints := 10;
   PrayerManager.MinInvPoints := 90;
 
@@ -93,7 +113,32 @@ begin
   begin
     RSMonsters.Kraken.LootGItem.UpText += 'Shark';
   end;
+  RSMonsters.Kraken.LootGItem.UpText += 'Clue';
 end;
+
+
+function TScript.InsideBossRoom: Boolean;
+begin
+  Result := MainScreen.InMultiCombat;
+end;
+
+function TScript.EnterCrevice: Boolean;
+begin
+  if RSObjects.KrakenEntrance.WalkSelectOption(['Private']) then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil('Pay' in Chat.GetChatTitle, 100, 5000);
+  end;
+end;
+
+function TScript.HandlePayment: Boolean;
+begin
+  Chat.ClickOption('Yes', BioHash);
+  Result := WaitUntil(Self.InsideBossRoom, 100, 8000);
+end;
+
+
+
 
 
 function TScript.FindSleepyKraken: Boolean;
@@ -128,6 +173,14 @@ begin
 end;
 
 
+function TScript.FinishedSlayerTask: Boolean;
+begin
+  Result := ('Lieve' in Chat.GetChat) or ('Lieve' in Chat.GetMessage(7));
+  if Result then
+    TerminateScript('FINISHED SLAYER TASK');
+end;
+
+
 function TScript.WakeKraken: Boolean;
 begin
   if not Inventory.SetSelectedItem('Fishing explosive') then
@@ -137,7 +190,7 @@ begin
   begin
     Mouse.Click(MOUSE_LEFT);
     if MainScreen.DidRedClick then
-      Result := IsAttacking := WaitUntil(Self.FindRagingKraken, 100, 7000);
+      Result := IsAttacking := WaitUntil(Self.FindRagingKraken or Self.FinishedSlayerTask, 100, 7000);
   end;
 
   if Result then
@@ -193,7 +246,7 @@ begin
   Result := CheckedLoot := True;
 
   while RSMonsters.Kraken.CheckLoot(B) and Inventory.HasSpace(1) do
-    Wait(200, 400);
+    Wait(400, 600);
 end;
 
 
@@ -202,6 +255,13 @@ function TScript.GetState: EState;
 begin
   if WL.Activity.IsFinished and not MainScreen.InCombat then
     Exit(END_SCRIPT);
+
+  if not Self.InsideBossRoom then
+  begin
+    if 'Pay' in Chat.GetChatTitle then
+      Exit(HANDLE_CHAT);
+    Exit(ENTER_CREVICE);
+  end;
 
   if (Minimap.GetHPLevel <= 40) then
   begin
@@ -222,8 +282,11 @@ begin
   if ImbuedHeart.IsFinished then
     Exit(BOOST);
 
-  if not Minimap.IsPrayerEnabled then
+  if not Minimap.IsPrayerEnabled and (Minimap.GetPrayerLevel > 0) then
     Exit(ENABLE_QPRAY);
+
+  if not RSW.AtTile(Bridge, 5) then
+    Exit(WALK_BRIDGE);
 
   if Self.FindRagingKraken then
   begin
@@ -247,13 +310,18 @@ begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
     case State of
+      //Outside
+      ENTER_CREVICE: Self.EnterCrevice;
+      HANDLE_CHAT: Self.HandlePayment;
+
+      //Inside
+      WALK_BRIDGE: RSW.WebWalk(Bridge, 5, 0.2);
       WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
       CHECK_LOOT: Self.CheckLoot;
       WAKE_KRAKEN: Self.WakeKraken;
@@ -268,9 +336,8 @@ begin
     end;
 
     Self.DoAntiban(True, False);
-  end;
+  until Self.ShouldStop;
 end;
-
 
 
 var
@@ -286,7 +353,7 @@ end;
 
 type
   TConfig = record(TScriptConfig)
-    Selector: TLabeledCombobox;
+    InfoText: TLabel;
   end;
 
 procedure TConfig.StartScript(Sender: TObject);
@@ -301,16 +368,26 @@ procedure TConfig.Setup; override;
 begin
   inherited;
 
-  with Selector do
+  Self.UpdateFormSize(Form.getWidth + 30, Form.getHeight + 40);
+
+  with InfoText do
   begin
     Init(ScriptSettingsPanel);
-    SetCaption('Task:');
+    setParent(ScriptSettingsPanel);
+    SetCaption(
+      'Keep in mind this script was only tested with Sang Staff.'
+      + STR_NEW_LINE +
+      'If you have issues staying alive consider using magic and defense boosting prayers.'
+      + STR_NEW_LINE +
+      'Overhead prayers have no effect on kraken.'
+      + STR_NEW_LINE + STR_NEW_LINE +
+      'Also keep in mind this won''t stop when you have your inventory full of loot.'
+      + STR_NEW_LINE +
+      'I recommend you check it every 40 mins or so to see if it needs banking.'
+    );
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
     SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    Combobox.getItems.Add('Task to do');
-    //Combobox.setItemIndex(Ord(CurrentTask));
   end;
 
   StartButton.setOnClick(@Self.StartScript);
@@ -319,11 +396,11 @@ end;
 procedure TConfig.Run; override;
 begin
   Self.Setup;
-
   inherited;
 end;
 
-var Config: TConfig;
+var
+  Config: TConfig;
 
 begin
   {$IFDEF SCRIPT_GUI}
