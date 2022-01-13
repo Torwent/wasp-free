@@ -47,6 +47,7 @@ type
 
     //Inside Dream.
     DRINK_BOOST,
+    DRINK_ANTIPOISON,
     DRINK_ABSORPTION,
 
     WALK_MIDDLE,
@@ -469,21 +470,22 @@ begin
   Result := (Self.GetAbsorptionPoints < MinAbsPoints) and Inventory.FindItems(AbsPotion);
 end;
 
-function TNMZFighter.NeedLowerHP: Boolean;
+function TNMZFighter.NeedLowerHP(HPLevel: Int32 = -1): Boolean;
 var
   Str: String;
-  HPLevel: Int32 := Minimap.GetHPLevel;
 begin
+  if not Self.InDream then
+    Exit;
+
+  if HPLevel = -1 then
+    HPLevel := Minimap.GetHPLevel; //if we don't pass a value in, set it.
+
   if HPLevel = 1 then
     Exit(False);
 
   Str := ToStr(BoostPotion[0]);
   if (Str.Contains('Overload') and Self.HasBoostPot) then
-  begin
-    Result := (Boosted or (HPLevel < 51));
-    if Boosted and not Result then
-      SaveScreenshot;
-  end
+    Result := (Boosted or (HPLevel < 51))
   else
     Result := True;
 end;
@@ -493,29 +495,31 @@ end;
 function TNMZFighter.LowerHealth: Boolean;
 var
   Slot: Int32;
-  CurrentHP: Int32;
+  SlotOption: String;
+  CurrentHP, NewHP: Int32;
 begin
-  if not Inventory.Open then Exit;
+  if not Inventory.Open then
+    Exit;
+
+  if ToStr(DamageItem) <> 'Locator orb' then
+    SlotOption := 'Guzzle';
 
   if Inventory.FindItem(DamageItem, Slot) then
-    repeat
-      if not Self.InDream then Exit;
-
-      CurrentHP := Minimap.GetHPLevel;
-      if CurrentHP = 1 then Exit(True);
-
-      if ToStr(DamageItem) = 'Locator orb' then
-        Inventory.ClickSlot(Slot)
-      else
-        Inventory.ClickSlot(Slot, 'Guzzle');
-
+  begin
+    CurrentHP := Minimap.GetHPLevel;
+    while Self.NeedLowerHP(CurrentHP) do
+    begin
+      Inventory.ClickSlot(Slot, SlotOption);
       Wait(150);
 
-      if not WaitUntil(CurrentHP > Minimap.GetHPLevel, 100, 1500) then
-        Mouse.Move(MainScreen.Bounds);
+      if not WaitUntil(CurrentHP > (NewHP := Minimap.GetHPLevel), 100, 1500) then
+        Antiban.SmallRandomMouse;
 
-    until Minimap.GetHPLevel = 1;
-    Result := True;
+      CurrentHP := NewHP;
+    end;
+  end;
+
+  Result := CurrentHP = 1;
 end;
 
 function TNMZFighter.DrinkPotion(PotionArray: TRSItemArray): Boolean;
@@ -552,7 +556,7 @@ begin
     if (PotionArray = BoostPotion) then
     begin
       if PotStr.Contains('Overload') then
-        if not WaitUntil(Minimap.GetHPLevel <= CurrentHP - 45, 100, 12000) then
+        if not WaitUntil(Minimap.GetHPLevel <= (CurrentHP - 45), 100, 12000) then
           Exit(False);
 
       Boosted := True;
@@ -616,7 +620,10 @@ begin
   begin
     DreamSetup := False;
 
-    if Self.NeedAbsorption then
+    if CombatHandler.NeedAntiPoison then
+      Exit(DRINK_ANTIPOISON)
+
+    else if Self.NeedAbsorption then
       Exit(DRINK_ABSORPTION)
 
     else if Self.NeedBoost then
@@ -748,8 +755,7 @@ begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
     ExtraInfo := ' InDream: ' + ToStr(InDream) +
@@ -793,6 +799,7 @@ begin
       //Inside Dream.
       DRINK_BOOST: Self.DrinkPotion(BoostPotion);
       DRINK_ABSORPTION: Self.DrinkPotion(AbsPotion);
+      DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON_CONSUMABLE);
 
       WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
       ATTACK_NPC: CombatHandler.AttackNPC;
@@ -813,7 +820,7 @@ begin
     end
     else
       Self.DoAntiban;
-  end;
+  until Self.ShouldStop;
 end;
 
 var
@@ -904,8 +911,7 @@ begin
     Exit;
 
   Result := ((Weapon <> 'Null') and Inventory.FindItem(Weapon)) or
-            ((Shield <> 'Null') and Inventory.FindItem(Shield)) or
-            Self.NeedBracelet;
+            ((Shield <> 'Null') and Inventory.FindItem(Shield));
 end;
 
 
