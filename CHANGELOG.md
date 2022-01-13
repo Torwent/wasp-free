@@ -1,3 +1,12 @@
+# [0.10.0](https://github.com/Torwent/FreeWaspBots/compare/v0.9.5...v0.10.0) (2022-01-13)
+
+
+### Features
+
+* **kraken:** activated the GUI and added a bunch of new things. ([64b671f](https://github.com/Torwent/FreeWaspBots/commit/64b671fc3b16e4ed7f89045b40549e7f1aff5867))
+
+
+
 ## [0.9.5](https://github.com/Torwent/FreeWaspBots/compare/v0.9.4...v0.9.5) (2022-01-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **chompy hunter:** better in combat check ([b533c18](https://github.com/Torwent/FreeWaspBots/commit/b533c18e08cdf6d832aeb2c829c8e6ed4536533e))
-
-
-
-## [0.9.1](https://github.com/Torwent/FreeWaspBots/compare/v0.9.0...v0.9.1) (2021-12-21)
-
-
-### Bug Fixes
-
-* **chompy hunter:** bug fixes. ([b5c44ff](https://github.com/Torwent/FreeWaspBots/commit/b5c44ff0872e452e2c023381ae7065ea000eb9be))
 
 
 
