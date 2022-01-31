@@ -42,14 +42,21 @@ type
 
     CLOSE_CONTEXT,
 
-    END_SCRIPT
+    END_SCRIPT1,
+    END_SCRIPT2
   );
 
   TAlcher = record(TBaseBankScript)
     State: EAlcherState;
-
     AlchItem: TRSItem;
+    InVarrock: Boolean;
+    InGE: Boolean;
   end;
+
+const
+  VARROCK_BOUNDS: TPointArray = [
+    [7941, 2831], [7941, 2363], [8337, 2370], [8341, 2837]
+  ];
 
 procedure Antiban.Setup; override;
 begin
@@ -73,6 +80,11 @@ begin
 
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
+
+  if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
+    Self.Fatal('Not on Standard Spell Book');
+
+  InVarrock := RSW.InPoly(VARROCK_BOUNDS);
 end;
 
 
@@ -166,44 +178,40 @@ var
   Slot: Int32;
   Slots: TIntegerArray;
 begin
-    if not Inventory.IsOpen then
-      Exit;
+  if ToStr(AlchItem) = '' then
+    Self.SetupAlchItems;
 
-    if ToStr(AlchItem) = '' then
-      Self.SetupAlchItems;
-
-    if Inventory.FindItem(AlchItem, Slot) then
+  if Inventory.FindItem(AlchItem, Slot) then
+  begin
+    if (Slot <> 11) and Inventory.ItemIsStackable(AlchItem) then
     begin
-      if Inventory.ItemIsStackable(AlchItem) and (Slot <> 11) then
+      if ChooseOption.Open then
+        ChooseOption.Select('Cancel');
+      Self.MoveItem;
+      Exit(False);
+    end;
+
+    if SRL.Dice(99.95) and Inventory.ClickSlot(Slot) then
+    begin
+      if WaitUntil(Magic.IsOpen, 50, SRL.TruncatedGauss(1200, 2000)) then
       begin
-        if ChooseOption.Open then
-          ChooseOption.Select('Cancel');
-        Self.MoveItem;
-        Exit(False);
+        WL.Activity.Restart;
+        TotalActions += 1;
+        TotalProfit += ActionProfit;
+
+        Wait(2800, 3000);
+        Exit(True);
       end;
 
-      if SRL.Dice(99.95) and Inventory.ClickSlot(Slot) then
-      begin
-        if WaitUntil(Magic.IsOpen, 50, SRL.TruncatedGauss(1200, 2000)) then
-        begin
-          TotalActions += 1;
-          TotalProfit += ActionProfit;
-
-          Wait(2800, 3000);
-          Exit(True);
-        end
-        else
-          Wait(600, 800);
-      end
-      else
-      begin
-        Slots := Inventory.GetEmptySlots;
-        Inventory.MouseSlot(Inventory.RandomSlotNearby(Slot, Slots), MOUSE_LEFT);
-        Exit(False);
-      end;
+      Wait(600, 800);
     end
     else
-      Self.SetupAlchItems;
+    begin
+      Slots := Inventory.GetEmptySlots;
+      Inventory.MouseSlot(Inventory.RandomSlotNearby(Slot, Slots), MOUSE_LEFT);
+      Exit(False);
+    end;
+  end;
 end;
 
 function TAlcher.HandleWarning: Boolean;
@@ -238,74 +246,74 @@ end;
 
 function TAlcher.GetState: EAlcherState;
 begin
+  if WL.Activity.IsFinished then
+    Exit(EAlcherState.END_SCRIPT1);
   if ChooseOption.IsOpen then
-    Exit(EAlcherState.CLOSE_CONTEXT)
+    Exit(EAlcherState.CLOSE_CONTEXT);
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
       if not Inventory.FindItem('Nature rune') then
-        Exit(EAlcherState.WITHDRAW_NATS)
-      else if not Inventory.FindItem('Coins') then
-        Exit(EAlcherState.WITHDRAW_MONEY)
-      else
-        Exit(EAlcherState.CLOSE_INTERFACE);
-    end
+        Exit(EAlcherState.WITHDRAW_NATS);
 
-    else if CollectBox.IsOpen then
+      if not Inventory.FindItem('Coins') then
+        Exit(EAlcherState.WITHDRAW_MONEY);
+
+      Exit(EAlcherState.CLOSE_INTERFACE);
+    end;
+
+    if CollectBox.IsOpen then
     begin
       if CollectEmpty then
-        Exit(EAlcherState.CLOSE_INTERFACE)
-      else
-        Exit(EAlcherState.HANDLE_COLLECT);
-    end
+        Exit(EAlcherState.CLOSE_INTERFACE);
+      Exit(EAlcherState.HANDLE_COLLECT);
+    end;
 
-    else
-      Exit(EAlcherState.CLOSE_INTERFACE);
-  end
+    Exit(EAlcherState.CLOSE_INTERFACE);
+  end;
 
-  else if Chat.HasContinue then
-    Exit(EAlcherState.HANDLE_WARNING)
-
-  else if not RSW.AtTile(ScriptBank^.TileArray, 30) and
-          RSW.AtTile(ScriptBank^.TileArray, 800) then
-    Exit(EAlcherState.WALK_ALCH)
-
-  else if Magic.IsOpen then
+  if InVarrock and not InGE then
   begin
-    if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
-      TerminateScript('Not on Standard Spell Book')
-    else if Magic.IsSpellSelected(AlchSpell) then
-      Exit(EAlcherState.OPEN_INV_TAB)
-    else if not Magic.CanActivate(AlchSpell) and not Inventory.FindItem('Nature rune') then
+    InGE := RSW.AtTile(ScriptBank^.TileArray, 30);
+    if not InGE then
+      Exit(EAlcherState.WALK_ALCH);
+  end;
+
+  if Chat.HasContinue then
+    Exit(EAlcherState.HANDLE_WARNING);
+
+  if Magic.IsOpen then
+  begin
+    if Magic.IsSpellSelected(AlchSpell) then
+      Exit(EAlcherState.OPEN_INV_TAB);
+
+    if not Magic.CanActivate(AlchSpell) and
+       not Inventory.FindItem('Nature rune') then
     begin
       if BankEmpty and CollectEmpty then
-        Exit(EAlcherState.END_SCRIPT)
-      else if BankEmpty then
-        Exit(EAlcherState.OPEN_COLLECT)
-      else
-        Exit(EAlcherState.OPEN_BANK);
-    end
-    else
-      Exit(EAlcherState.CHOOSE_SPELL);
-  end
+        Exit(EAlcherState.END_SCRIPT2);
 
-  else if Inventory.IsOpen then
-  begin
-    if MainScreen.IsUpText('Cast') and MainScreen.IsUpText('>') then
-      Exit(EAlcherState.CHOOSE_ITEM)
-    else
-    begin
-      if Inventory.GetSelectedSlot <> -1 then
-        Exit(EAlcherState.DESELECT_ITEM)
-      else
-        Exit(EAlcherState.OPEN_MAGIC_TAB);
+      if BankEmpty then
+        Exit(EAlcherState.OPEN_COLLECT);
+
+      Exit(EAlcherState.OPEN_BANK);
     end;
-  end
 
-  else
-    Exit(EAlcherState.OPEN_MAGIC_TAB);
+    Exit(EAlcherState.CHOOSE_SPELL);
+  end;
+
+  if Inventory.IsOpen then
+  begin
+    if MainScreen.IsUpText('Alchemy ->') then
+      Exit(EAlcherState.CHOOSE_ITEM);
+
+    if Inventory.GetSelectedSlot > -1 then
+      Exit(EAlcherState.DESELECT_ITEM);
+  end;
+
+  Exit(EAlcherState.OPEN_MAGIC_TAB);
 end;
 
 
@@ -314,14 +322,13 @@ begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
 
     case State of
-      EAlcherState.WALK_ALCH: RSW.WebWalk(ScriptBank^.TileArray, 10, 0.2);
+      EAlcherState.WALK_ALCH: InGe := RSW.WebWalk(ScriptBank^.TileArray, 10, 0.2);
 
       EAlcherState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EAlcherState.WITHDRAW_NATS: Self.Withdraw('Nature rune');
@@ -339,14 +346,15 @@ begin
       EAlcherState.DESELECT_ITEM: Inventory.MouseSlot(Inventory.GetSelectedSlot, MOUSE_LEFT);
       EAlcherState.CLOSE_CONTEXT: ChooseOption.Close;
 
-      EAlcherState.END_SCRIPT: Break;
+      EAlcherState.END_SCRIPT1, EAlcherState.END_SCRIPT2:
+        Break;
     end;
 
     Self.DoAntiban;
-  end;
+  until Self.ShouldStop;
 
   if not Self.Terminate then
-    TerminateScript(Name + ' didn''t terminate properly. Stopping execution.');
+    Self.Fatal('Didn''t terminate properly. Stopping execution.');
 end;
 
 var
