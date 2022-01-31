@@ -234,7 +234,7 @@ begin
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
-  CombatHandler.Setup(True, @RSNPCS.AnyNPC, 25000 - Round(15000 * BioHash));
+  CombatHandler.Setup(True, @RSMonsters.AnyMonster, 25000 - Round(15000 * BioHash));
   Combat.SetAutoRetaliate(True);
 
   Self.SetupDamageItem;
@@ -802,7 +802,7 @@ begin
       DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON_CONSUMABLE);
 
       WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
-      ATTACK_NPC: CombatHandler.AttackNPC;
+      ATTACK_NPC: CombatHandler.AttackMonster;
       WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPDrop.WaitDrop(1200);
 
       USE_POWER: Self.GetPowerUp;

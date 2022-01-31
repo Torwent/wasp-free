@@ -47,7 +47,7 @@ begin
   ItemFinder.Similarity := 0.9999;
   RSW.Setup('x4595y3834');
 
-  CombatHandler.Setup(@RSNPCs.Chompy, 2000);
+  CombatHandler.Setup(@RSMonsters.Chompy, 2000);
   Toad := @RSNPCs.SwampToad;
 
   OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
@@ -58,10 +58,7 @@ begin
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
   if ScriptDebugEnabled then
-  begin
-    DebugNPCArray += CombatHandler.EnemyNPC;
     DebugNPCArray += Toad;
-  end;
 end;
 
 
@@ -162,7 +159,7 @@ function TChompyHunter.ClickChompy: Boolean;
 var
   FeatherCount: Int32;
 begin
-  if CombatHandler.EnemyNPC^.SelectOption(['Attack', 'Pluck']) then
+  if CombatHandler.Monster^.SelectOption(['Attack', 'Pluck']) then
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving;
@@ -190,7 +187,7 @@ begin
   else if MainScreen.InCombat then
     Exit(WAIT_STATE)
 
-  else if CombatHandler.EnemyNPC^.Find then
+  else if CombatHandler.Monster^.Find then
     Exit(CLICK_CHOMPY)
 
   else if Inventory.FindItems(OgreBellows) then

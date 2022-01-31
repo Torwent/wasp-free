@@ -95,10 +95,7 @@ begin
   KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
   KrakenFinder.MinShortSide := 70;
 
-  ValueThreshold := 5000;
-  RSMonsters.Kraken.SetupDrops;
-
-  ImbuedHeart.Setup(420000);
+  ImbuedHeart.Setup(7 * ONE_MINUTE);
 
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
@@ -107,13 +104,16 @@ begin
   Combat.SetAutoRetaliate(False);
   CombatHandler.Setup(4000);
   CombatHandler.ManageGear := True;
-  CombatHandler.SetupGear;
+  CombatHandler._SetupGear;
+
+  CombatHandler.LootHandler.Setup(@RSMonsters.Kraken, 5000);
+
 
   if not Equipment.FindItem('Sanguinesti staff') then
   begin
-    RSMonsters.Kraken.LootGItem.UpText += 'Shark';
+    CombatHandler.LootHandler.Loot.UpText += 'Shark';
+    CombatHandler.LootHandler.Drops += ['Shark', '', False, False, 5];
   end;
-  RSMonsters.Kraken.LootGItem.UpText += 'Clue';
 end;
 
 
@@ -245,7 +245,7 @@ begin
 
   Result := CheckedLoot := True;
 
-  while RSMonsters.Kraken.CheckLoot(B) and Inventory.HasSpace(1) do
+  while CombatHandler.LootHandler.CheckLoot(B) and Inventory.HasSpace(1) do
     Wait(400, 600);
 end;
 
