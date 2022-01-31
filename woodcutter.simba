@@ -218,7 +218,7 @@ begin
   if Equipment.Open then
   begin
     ToolShift := 30;
-    if Equipment.FindItem('Crystal axe') or  Equipment.FindItem('Crystal axe (inactive)') then
+    if Equipment.FindItem('Crystal axe') or Equipment.FindItem('Crystal axe (inactive)') then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
@@ -259,7 +259,7 @@ begin
   if (ToolType = []) and Inventory.Open then
   begin
     ToolShift := 30;
-    if Inventory.FindItem('Crystal axe') or  Inventory.FindItem('Crystal axe (inactive)') then
+    if Inventory.FindItem('Crystal axe') or Inventory.FindItem('Crystal axe (inactive)') then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
@@ -463,59 +463,56 @@ end;
 function TWoodcutter.GetState: EWoodcutterState;
 begin
   if XPDrop.FindDrop then
-    Exit(EWoodcutterState.WAIT_STATE)
+    Exit(EWoodcutterState.WAIT_STATE);
 
-  else if WL.Activity.IsFinished then
-    Exit(EWoodcutterState.END_SCRIPT)
+  if WL.Activity.IsFinished then
+    Exit(EWoodcutterState.END_SCRIPT);
 
-  else if Chat.LeveledUp then
+  if Chat.LeveledUp then
   begin
     Woodcutting := False;
     Exit(EWoodcutterState.LEVEL_UP);
-  end
+  end;
 
-  else if Make.IsOpen then
-    Exit(EWoodcutterState.HANDLE_MAKE)
+  if UseSawmill and Make.IsOpen then
+    Exit(EWoodcutterState.HANDLE_MAKE);
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen and Inventory.FindItems(BankList) then
-      Exit(EWoodcutterState.DEPOSIT_ITEMS)
-    else
-      Exit(EWoodcutterState.CLOSE_INTERFACE);
-  end
+      Exit(EWoodcutterState.DEPOSIT_ITEMS);
+    Exit(EWoodcutterState.CLOSE_INTERFACE);
+  end;
 
-  else if Self.HasGear then
-    Exit(EWoodcutterState.EQUIP_GEAR)
+  if Self.HasGear then
+    Exit(EWoodcutterState.EQUIP_GEAR);
 
-  else if Inventory.IsFull then
+  if Inventory.IsFull then
   begin
     Woodcutting := False;
 
     if not UseBank then
-      Exit(EWoodcutterState.DROP_ITEMS)
+      Exit(EWoodcutterState.DROP_ITEMS);
 
-    else if UseSawmill and not Inventory.FindItem(Plank) and Self.HasEnoughMoney then
-      Exit(EWoodcutterState.OPEN_SAWMILL)
+    if UseSawmill and not Inventory.FindItem(Plank) and Self.HasEnoughMoney then
+      Exit(EWoodcutterState.OPEN_SAWMILL);
 
-    else
-      Exit(EWoodcutterState.OPEN_BANK);
-  end
+    Exit(EWoodcutterState.OPEN_BANK);
+  end;
 
-  else if Woodcutting then
-    Exit(EWoodcutterState.WAIT_STATE)
+  if Woodcutting then
+    Exit(EWoodcutterState.WAIT_STATE);
 
-  else if UseBank and not RSW.AtTile(RSTree^.TileArray, 15) then
-    Exit(EWoodcutterState.WALK_SPOT)
+  if UseBank and not RSW.AtTile(RSTree^.TileArray, 15) then
+    Exit(EWoodcutterState.WALK_SPOT);
 
-  else if Self.CheckNest then
-    Exit(EWoodcutterState.PICKUP_NEST)
+  if Self.CheckNest then
+    Exit(EWoodcutterState.PICKUP_NEST);
 
-  else if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
-    Exit(EWoodcutterState.USE_SPEC)
+  if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
+    Exit(EWoodcutterState.USE_SPEC);
 
-  else
-    Exit(EWoodcutterState.CUT_TREE);
+  Exit(EWoodcutterState.CUT_TREE);
 end;
 
 procedure TWoodcutter.Run(MaxActions: Int32; MaxTime: Int64);
@@ -523,8 +520,7 @@ begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
     ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' Sawmill: ' + ToStr(UseSawmill)  +
@@ -549,7 +545,7 @@ begin
     end;
 
     Self.DoAntiban;
-  end;
+  until Self.ShouldStop;
 end;
 
 var
@@ -706,7 +702,7 @@ begin
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
     SetWidth(200);
-    Combobox.setStyle(csDropDownList);
+    SetStyle(csDropDownList);
     AddItem('Regular tree');
     AddItem('Oak tree');
     AddItem('Willow tree');
@@ -716,7 +712,7 @@ begin
     AddItem('Yew tree');
     AddItem('Blisterwood tree');
     AddItem('Magic tree');
-    Combobox.setItemIndex(Ord(CurrentTree));
+    SetItemIndex(Ord(CurrentTree));
     Combobox.SetOnChange(@Self.TreeSelectorOnChange);
   end;
 
@@ -727,7 +723,7 @@ begin
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 45);
     SetWidth(TreeSelector.GetWidth);
-    Combobox.setStyle(csDropDownList);
+    SetStyle(csDropDownList);
     Combobox.SetOnChange(@Self.BankSelectorOnChange);
   end;
 

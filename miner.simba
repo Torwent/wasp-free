@@ -383,8 +383,7 @@ begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
     ExtraInfo := ' Bank: ' + ToStr(UseBank) +
@@ -415,7 +414,7 @@ begin
     PrevInvCount := InvCount;
 
     Self.DoAntiban;
-  end;
+  until Self.ShouldStop;
 end;
 
 var Miner: TMiner;

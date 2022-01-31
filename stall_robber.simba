@@ -111,7 +111,7 @@ end;
 
 function TStallRobber.RobStall: Boolean;
 begin
-  if Stall^.WalkClick and XPDrop.WaitDrop(2000) then
+  if Stall^.WalkClick and (Result := XPDrop.WaitDrop(2000)) then
   begin
     StallCooldown.Restart(Random(-200, 200));
     WL.Activity.Restart;

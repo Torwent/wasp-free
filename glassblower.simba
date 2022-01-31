@@ -287,68 +287,66 @@ end;
 function TBlower.GetState: EBlowerState;
 begin
   if WL.Activity.IsFinished then
-    Exit(EBlowerState.END_SCRIPT)
+    Exit(EBlowerState.END_SCRIPT);
 
-  else if ChooseOption.IsOpen then
-    Exit(EBlowerState.CLOSE_CONTEXT)
+  if XPDrop.FindDrop then
+    Exit(EBlowerState.WAIT_GLASS);
 
-  else if XPDrop.FindDrop then
-    Exit(EBlowerState.WAIT_GLASS)
-
-  else if Chat.LeveledUp then
+  if Chat.LeveledUp then
   begin
     Blowing := False;
     Exit(EBlowerState.LEVEL_UP);
-  end
+  end;
 
-  else if Make.IsOpen then
-    Exit(EBlowerState.HANDLE_MAKE)
+  if Make.IsOpen then
+    Exit(EBlowerState.HANDLE_MAKE);
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
       if Inventory.FindItem(Product.Item) then
-        Exit(EBlowerState.DEPOSIT_PRODUCT)
-      else if Self.HasRandomItem then
-        Exit(EBlowerState.DEPOSIT_RANDOM_ITEM)
-      else if BankEmpty or Inventory.FindAllItems([Tool.Item, Material.Item]) then
-        Exit(EBlowerState.CLOSE_INTERFACE)
-      else if not Inventory.FindItem(Tool.Item) then
-        Exit(EBlowerState.WITHDRAW_TOOL)
-      else if not Inventory.FindItem(Material.Item) then
-        Exit(EBlowerState.WITHDRAW_MATERIAL);
-    end
+        Exit(EBlowerState.DEPOSIT_PRODUCT);
 
-    else if CollectBox.IsOpen then
+      if Self.HasRandomItem then
+        Exit(EBlowerState.DEPOSIT_RANDOM_ITEM);
+
+      if BankEmpty or Inventory.FindAllItems([Tool.Item, Material.Item]) then
+        Exit(EBlowerState.CLOSE_INTERFACE);
+
+      if not Inventory.FindItem(Tool.Item) then
+        Exit(EBlowerState.WITHDRAW_TOOL);
+
+      if not Inventory.FindItem(Material.Item) then
+        Exit(EBlowerState.WITHDRAW_MATERIAL);
+    end;
+
+    if CollectBox.IsOpen then
     begin
       if CollectEmpty then
-        Exit(EBlowerState.CLOSE_INTERFACE)
-      else
-        Exit(EBlowerState.HANDLE_COLLECT);
-    end
+        Exit(EBlowerState.CLOSE_INTERFACE);
 
-    else
-      Exit(EBlowerState.CLOSE_INTERFACE);
-  end
+      Exit(EBlowerState.HANDLE_COLLECT);
+    end;
 
-  else if Inventory.FindAllItems([Tool.Item, Material.Item]) then
+    Exit(EBlowerState.CLOSE_INTERFACE);
+  end;
+
+  if Inventory.FindAllItems([Tool.Item, Material.Item]) then
   begin
     if Blowing then
-      Exit(EBlowerState.WAIT_GLASS)
-    else
-      Exit(EBlowerState.DO_GLASS);
-  end
+      Exit(EBlowerState.WAIT_GLASS);
 
-  else
-  begin
-    if BankEmpty and CollectEmpty then
-      Exit(EBlowerState.END_SCRIPT)
-    else if BankEmpty then
-      Exit(EBlowerState.OPEN_COLLECT)
-    else
-      Exit(EBlowerState.OPEN_BANK);
+    Exit(EBlowerState.DO_GLASS);
   end;
+
+  if BankEmpty and CollectEmpty then
+    Exit(EBlowerState.END_SCRIPT);
+
+  if BankEmpty then
+    Exit(EBlowerState.OPEN_COLLECT);
+
+  Exit(EBlowerState.OPEN_BANK);
 end;
 
 function TBlower.Terminate: Boolean; override;
@@ -405,7 +403,6 @@ end;
 
 var
   Blower: TBlower;
-
 
 function TRSChat.HandleLevelUp(Chance: Double = BioHash): Boolean; override;
 begin
