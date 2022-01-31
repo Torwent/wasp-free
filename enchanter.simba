@@ -15,6 +15,18 @@
   end;
 {$ENDIF}
 
+const
+  GEM_TYPE: TStringArray = [
+    'Opal', 'Jade', 'Red topaz',
+    'Sapphire', 'Emerald', 'Ruby',
+    'Diamond', 'Dragonstone', 'Onyx',
+    'Zenyte'
+  ];
+
+  JEWELRY_TYPE: TStringArray = [
+    'Ring', 'Necklace', 'Bracelet', 'Amulet'
+  ];
+
 var
   RegularJewel: TRSItem = 'Ruby necklace';
 
@@ -329,81 +341,72 @@ end;
 function TEnchanter.GetState: EEnchanterState;
 begin
   if WL.Activity.IsFinished then
-    Exit(EEnchanterState.END_SCRIPT)
+    Exit(EEnchanterState.END_SCRIPT);
 
-  else if ChooseOption.IsOpen then
-    Exit(EEnchanterState.CLOSE_CONTEXT)
-
-  else if Chat.LeveledUp then
+  if Chat.LeveledUp then
   begin
     Enchanting := False;
     Exit(EEnchanterState.LEVEL_UP);
-  end
+  end;
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
       if Self.HasProduct then
-        Exit(EEnchanterState.DEPOSIT_PRODUCT)
+        Exit(EEnchanterState.DEPOSIT_PRODUCT);
 
-      else if BankEmpty or (Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel)) then
-        Exit(EEnchanterState.CLOSE_INTERFACE)
+      if BankEmpty or (Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel)) then
+        Exit(EEnchanterState.CLOSE_INTERFACE);
 
-      else if not Inventory.FindItem(CosmicRune) then
-        Exit(EEnchanterState.WITHDRAW_TOOL)
+      if not Inventory.FindItem(CosmicRune) then
+        Exit(EEnchanterState.WITHDRAW_TOOL);
 
-      else if not Inventory.FindItem(RegularJewel) then
+      if not Inventory.FindItem(RegularJewel) then
         Exit(EEnchanterState.WITHDRAW_MATERIAL);
-    end
+    end;
 
-    else if CollectBox.IsOpen then
+    if CollectBox.IsOpen then
     begin
       if CollectEmpty or (Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel)) then
-        Exit(EEnchanterState.CLOSE_INTERFACE)
-      else
-        Exit(EEnchanterState.HANDLE_COLLECT);
-    end
+        Exit(EEnchanterState.CLOSE_INTERFACE);
+      Exit(EEnchanterState.HANDLE_COLLECT);
+    end;
 
-    else
-      Exit(EEnchanterState.CLOSE_INTERFACE);
-  end
+    Exit(EEnchanterState.CLOSE_INTERFACE);
+  end;
 
-  else if Inventory.IsOpen then
+  if Inventory.IsOpen then
   begin
     if Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel) then
     begin
       if MainScreen.IsUpText('>') then
-        Exit(EEnchanterState.ENCHANT_JEWEL)
-      else if Enchanting then
-        Exit(EEnchanterState.WAIT_ENCHANT)
-      else
-        Exit(EEnchanterState.OPEN_MAGIC);
-    end
+        Exit(EEnchanterState.ENCHANT_JEWEL);
+      if Enchanting then
+        Exit(EEnchanterState.WAIT_ENCHANT);
+      Exit(EEnchanterState.OPEN_MAGIC);
+    end;
 
-    else
-    begin
-      if MainScreen.IsUpText('>') then
-        Exit(EEnchanterState.CANCEL_SPELL)
-      if BankEmpty and CollectEmpty then
-        Exit(EEnchanterState.END_SCRIPT)
-      else if BankEmpty then
-        Exit(EEnchanterState.OPEN_COLLECT)
-      else
-        Exit(EEnchanterState.OPEN_BANK);
-    end
-  end
+    if MainScreen.IsUpText('>') then
+      Exit(EEnchanterState.CANCEL_SPELL);
 
-  else if Magic.IsOpen then
+    if BankEmpty and CollectEmpty then
+      Exit(EEnchanterState.END_SCRIPT);
+
+    if BankEmpty then
+      Exit(EEnchanterState.OPEN_COLLECT);
+
+    Exit(EEnchanterState.OPEN_BANK);
+  end;
+
+  if Magic.IsOpen then
   begin
     if Enchanting or Magic.IsSpellSelected(SPELL) then
-      Exit(OPEN_INVENTORY)
-    else
-      Exit(CAST_SPELL);
-  end
-  else
-    Exit(EEnchanterState.OPEN_MAGIC);
+      Exit(OPEN_INVENTORY);
+    Exit(CAST_SPELL);
+  end;
 
+  Exit(EEnchanterState.OPEN_MAGIC);
 end;
 
 function TEnchanter.Terminate: Boolean; override;
@@ -459,28 +462,47 @@ var
 
 type
   TEnchanterConfig = record(TBankConfig)
-    JewelSelector: TLabeledEdit;
+    GemSelector: TLabeledCombobox;
+    JewelSelector: TLabeledCombobox;
   end;
 
 procedure TEnchanterConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  RegularJewel := JewelSelector.Edit.getText;
+  RegularJewel := GemSelector.GetText + ' ' + JewelSelector.GetText.Lower;
 end;
 
 procedure TEnchanterConfig.Setup(Strs: TStringArray); override;
+var
+  Str: String
 begin
   inherited;
+
+  with GemSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Gem type:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
+    SetWidth(200);
+    SetStyle(csDropDownList);
+    for Str in GEM_TYPE do
+      AddItem(Str);
+    SetItemIndex(3);
+  end;
 
   with JewelSelector do
   begin
     Init(ScriptSettingsPanel);
-    SetCaption('Jewel name (must be the exact name):');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
+    SetCaption('Jewel type:');
+    SetLeft(GemSelector.GetLeft + GemSelector.GetWidth + 5);
+    SetTop(GemSelector.GetTop);
     SetWidth(200);
-    SetText(RegularJewel);
+    SetStyle(csDropDownList);
+    for Str in JEWELRY_TYPE do
+      AddItem(Str);
+    SetItemIndex(0);
   end;
 
   StartButton.setOnClick(@Self.StartScript);

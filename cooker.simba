@@ -18,6 +18,35 @@
 type
   ERSLocation = (HOSIDIUS, ROGUES_DEN);
 
+const
+  RawFood: TRSItemArray = [
+    'Custom',
+    'Meat',
+    'Shrimps',
+    'Chicken',
+    'Rabbit',
+    'Anchovies',
+    'Sardine',
+    'Herring',
+    'Mackerel',
+    'Trout',
+    'Cod',
+    'Pike',
+    'Salmon',
+    'Tuna',
+    'Karambwan',
+    'Rainbow fish',
+    'Lobster',
+    'Bass',
+    'Swordfish',
+    'Monkfish',
+    'Shark',
+    'Sea turtle',
+    'Anglerfish',
+    'Dark crab',
+    'Manta ray'
+  ];
+
 var
   CurrentFood: TRSItem   := 'Anglerfish';
   CurrentLocation := ERSLocation.HOSIDIUS;
@@ -386,7 +415,8 @@ var
 type
   TCookerConfig = record(TScriptConfig)
     LocSelector: TLabeledCombobox;
-    FoodSelector: TLabeledEdit;
+    CustomFoodName: TLabeledEdit;
+    FoodSelector: TLabeledCombobox;
   end;
 
 procedure TCookerConfig.StartScript(Sender: TObject);
@@ -394,12 +424,25 @@ begin
   Self.Init(Sender);
 
   CurrentLocation := ERSLocation(LocSelector.Combobox.getItemIndex);
-  CurrentFood := FoodSelector.Edit.getText;
+  if FoodSelector.GetText = 'Custom' then
+    CurrentFood := CustomFoodName.GetText
+  else
+    CurrentFood := FoodSelector.GetText;
+end;
+
+
+procedure TCookerConfig.FoodSelectorOnChange(Sender: TObject);
+begin
+  CustomFoodName.SetVisible(FoodSelector.GetText = 'Custom');
 end;
 
 procedure TCookerConfig.Setup; override;
+var
+  Str: String;
 begin
   inherited;
+
+  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 30);
 
   with LocSelector do
   begin
@@ -408,21 +451,39 @@ begin
     SetLeft(ScriptSettingsLabel.getLeft + 5);
     SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
     SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    Combobox.getItems.Add('Hosidius kitchen');
-    Combobox.getItems.Add('Rogues den');
-    Combobox.setItemIndex(Ord(CurrentLocation));
+    SetStyle(csDropDownList);
+    AddItem('Hosidius kitchen');
+    AddItem('Rogues den');
+    SetItemIndex(Ord(CurrentLocation));
   end;
 
   with FoodSelector do
   begin
     Init(ScriptSettingsPanel);
+    SetCaption('Food type:');
+    SetLeft(LocSelector.GetLeft + LocSelector.GetWidth + 20);
+    SetTop(LocSelector.GetTop);
+    SetWidth(200);
+    SetStyle(csDropDownList);
+
+    for Str in RawFood do
+      AddItem(Str);
+
+    SetItemIndex(0);
+    Combobox.setOnChange(@Self.FoodSelectorOnChange);
+  end;
+
+  with CustomFoodName do
+  begin
+    Init(ScriptSettingsPanel);
     SetCaption('Food name (must be the exact name):');
-    SetLeft(LocSelector.getLeft + LocSelector.GetWidth + 20);
-    SetTop(LocSelector.getTop);
+    SetLeft(FoodSelector.getLeft);
+    SetTop(LocSelector.getTop + LocSelector.GetHeight - 15);
     SetWidth(200);
     SetText(CurrentFood);
   end;
+
+  Self.FoodSelectorOnChange(FoodSelector.Combobox);
 
   StartButton.setOnClick(@Self.StartScript);
 end;
