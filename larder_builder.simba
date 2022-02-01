@@ -66,10 +66,7 @@ procedure TBuilder.SetupNPC;
 begin
   case CurrentNPC of
     PHIALS:
-      begin
-        UsePhials := True;
-        RSNPCs.Phials.Walker := @RSW;
-      end;
+      UsePhials := True;
 
     SERVANT:
       begin
@@ -102,17 +99,17 @@ end;
 
 procedure TBuilder.SetupObjects;
 begin
-  RSObjects.OakLarderBuilt.SetupCommon(@POH, 1.5, 7, [[110, 86]]);
+  RSObjects.OakLarderBuilt.SetupCommon(1.5, 7, [[110, 86]]);
+  RSObjects.OakLarderBuilt.WalkerIndex := 1;
   RSObjects.OakLarderBuilt.Filter.Finder := False;
   RSObjects.OakLarderBuilt.Filter.UpText := False;
-  RSObjects.OakLarderSpace.SetupCommon(@POH, 1.5, 7, [[110, 86]]);
+  RSObjects.OakLarderSpace.SetupCommon(1.5, 7, [[110, 86]]);
+  RSObjects.OakLarderSpace.WalkerIndex := 1;
   RSObjects.OakLarderSpace.Filter.Finder := False;
   RSObjects.OakLarderSpace.Filter.UpText := False;
 
   BuiltLarder := @RSObjects.OakLarderBuilt;
   LarderSpace := @RSObjects.OakLarderSpace;
-
-  RSObjects.POHPortal.Walker := @RSW;
 end;
 
 procedure TAntiban.Setup; override;
