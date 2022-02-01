@@ -1,3 +1,17 @@
+# [0.11.0](https://github.com/Torwent/FreeWaspBots/compare/v0.10.0...v0.11.0) (2022-01-31)
+
+
+### Bug Fixes
+
+* **alcher:** will not walk to GE anymore if we are not in varrock. ([032ecdc](https://github.com/Torwent/FreeWaspBots/commit/032ecdcfc965b5af2e1d5058105e08db28762d43))
+
+
+### Features
+
+* added dropdown menus ([36725a3](https://github.com/Torwent/FreeWaspBots/commit/36725a37646b1b40fc248070d8197c0416a2f9f4))
+
+
+
 # [0.10.0](https://github.com/Torwent/FreeWaspBots/compare/v0.9.5...v0.10.0) (2022-01-13)
 
 
@@ -31,15 +45,6 @@
 ### Bug Fixes
 
 * **kraken:** fix imbued heart timer and added slayer bracelets support via wasplib ([f55794e](https://github.com/Torwent/FreeWaspBots/commit/f55794e01e0e0a57afcf8fa8ce7f6d6d465a0651))
-
-
-
-## [0.9.2](https://github.com/Torwent/FreeWaspBots/compare/v0.9.1...v0.9.2) (2021-12-21)
-
-
-### Bug Fixes
-
-* **chompy hunter:** better in combat check ([b533c18](https://github.com/Torwent/FreeWaspBots/commit/b533c18e08cdf6d832aeb2c829c8e6ed4536533e))
 
 
 
