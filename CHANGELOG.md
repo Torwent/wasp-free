@@ -1,3 +1,12 @@
+## [0.11.1](https://github.com/Torwent/FreeWaspBots/compare/v0.11.0...v0.11.1) (2022-02-01)
+
+
+### Bug Fixes
+
+* **larder builder:** updated for compatibility ([98a0af4](https://github.com/Torwent/FreeWaspBots/commit/98a0af4b59d6c86c82e0de14a742a32505b790ff))
+
+
+
 # [0.11.0](https://github.com/Torwent/FreeWaspBots/compare/v0.10.0...v0.11.0) (2022-01-31)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * changed the discord link in the readme file ([fcee664](https://github.com/Torwent/FreeWaspBots/commit/fcee664be3e8eb54fd7497dab8bc11474a6aca21))
-
-
-
-## [0.9.3](https://github.com/Torwent/FreeWaspBots/compare/v0.9.2...v0.9.3) (2022-01-03)
-
-
-### Bug Fixes
-
-* **kraken:** fix imbued heart timer and added slayer bracelets support via wasplib ([f55794e](https://github.com/Torwent/FreeWaspBots/commit/f55794e01e0e0a57afcf8fa8ce7f6d6d465a0651))
 
 
 
