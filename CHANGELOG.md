@@ -1,3 +1,12 @@
+## [0.11.2](https://github.com/Torwent/FreeWaspBots/compare/v0.11.1...v0.11.2) (2022-02-04)
+
+
+### Bug Fixes
+
+* **NMZ:** fixed wrong walker indexes. ([6e63c8f](https://github.com/Torwent/FreeWaspBots/commit/6e63c8fdf6751f1dbb6f2a560f924004d8c19c29))
+
+
+
 ## [0.11.1](https://github.com/Torwent/FreeWaspBots/compare/v0.11.0...v0.11.1) (2022-02-01)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * **nmz:** fixed a minor issue where nmz would lower it's hp to 0 after leaving the dream and shutdown ([0c8b68d](https://github.com/Torwent/FreeWaspBots/commit/0c8b68d0e9ff7caa74be1524068a3697a25ebc2d))
-
-
-
-## [0.9.4](https://github.com/Torwent/FreeWaspBots/compare/v0.9.3...v0.9.4) (2022-01-03)
-
-
-### Bug Fixes
-
-* changed the discord link in the readme file ([fcee664](https://github.com/Torwent/FreeWaspBots/commit/fcee664be3e8eb54fd7497dab8bc11474a6aca21))
 
 
 
