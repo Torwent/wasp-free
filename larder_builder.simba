@@ -48,8 +48,8 @@ type
     State: EState;
     POH: TRSWalker;
 
-    BuiltLarder: PRSObject;
-    LarderSpace: PRSObject;
+    BuiltLarder: TRSObject;
+    LarderSpace: TRSObject;
     ServantNPC: TRSNPC;
 
     LarderIsBuilt: Boolean;
@@ -103,13 +103,14 @@ begin
   RSObjects.OakLarderBuilt.WalkerIndex := 1;
   RSObjects.OakLarderBuilt.Filter.Finder := False;
   RSObjects.OakLarderBuilt.Filter.UpText := False;
+
   RSObjects.OakLarderSpace.SetupCommon(1.5, 7, [[110, 86]]);
   RSObjects.OakLarderSpace.WalkerIndex := 1;
   RSObjects.OakLarderSpace.Filter.Finder := False;
   RSObjects.OakLarderSpace.Filter.UpText := False;
 
-  BuiltLarder := @RSObjects.OakLarderBuilt;
-  LarderSpace := @RSObjects.OakLarderSpace;
+  BuiltLarder := RSObjects.OakLarderBuilt;
+  LarderSpace := RSObjects.OakLarderSpace;
 end;
 
 procedure TAntiban.Setup; override;
@@ -147,8 +148,8 @@ begin
 
   if ScriptDebugEnabled then
   begin
-    DebugObjectArray += BuiltLarder;
-    DebugObjectArray += LarderSpace;
+    DebugObjectArray += @BuiltLarder;
+    DebugObjectArray += @LarderSpace;
     DebugObjectArray += @RSObjects.POHPortal;
     DebugNPCArray += @RSNPCs.Phials;
     DebugNPCArray += @ServantNPC;
@@ -182,7 +183,7 @@ end;
 
 function TBuilder.BuildLarder: Boolean;
 begin
-  if LarderSpace^.WalkSelectOption(['Build La']) then
+  if LarderSpace.WalkSelectOption(['Build La']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
@@ -196,7 +197,7 @@ end;
 
 function TBuilder.DestroyLarder: Boolean;
 begin
-  if BuiltLarder^.WalkSelectOption(['Remove L']) then
+  if BuiltLarder.WalkSelectOption(['Remove L']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
