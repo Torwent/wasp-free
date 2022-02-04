@@ -14,10 +14,14 @@ begin
 end;
 
 type
-  ERSNMZPotion = (OVERLOAD_POTION, SUPER_RANGING_POTION, SUPER_MAGIC_POTION);
+  ERSNMZPotion = (
+    OVERLOAD_POTION,
+    SUPER_RANGING_POTION,
+    SUPER_MAGIC_POTION
+  );
 
 var
-  CurrentPotion: ERSNMZPotion := ERSNMZPotion.OVERLOAD_POTION;
+  CurrentPotion := ERSNMZPotion.OVERLOAD_POTION;
 
 type
   ENMZState = (
@@ -82,8 +86,8 @@ type
     BoostPotion: TRSItemArray;
     AbsPotion: TRSItemArray;
 
-    BoostBarrel: PRSObject;
-    AbsBarrel: PRSObject;
+    BoostBarrel: TRSObject;
+    AbsBarrel: TRSObject;
 
     BoostAmount: Int32;
     AbsAmount: Int32;
@@ -169,14 +173,23 @@ end;
 
 procedure TNMZFighter.SetupBarrels;
 begin
-  if Potion.Contains('Overload') then
-    BoostBarrel := @RSObjects.NMZOverloadBarrel
-  else if Potion.Contains('magic') then
-    BoostBarrel := @RSObjects.NMZSuperMagicBarrel
-  else if Potion.Contains('ranging') then
-    BoostBarrel := @RSObjects.NMZSuperRangingBarrel;
+  RSObjects.NMZChest.WalkerIndex := 1;
+  RSObjects.NMZPotion.WalkerIndex := 1;
+  RSObjects.NMZCoffer.WalkerIndex := 1;
+  RSObjects.NMZOverloadBarrel.WalkerIndex := 1;
+  RSObjects.NMZSuperMagicBarrel.WalkerIndex := 1;
+  RSObjects.NMZSuperRangingBarrel.WalkerIndex := 1;
+  RSObjects.NMZAbsorptionBarrel.WalkerIndex := 1;
+  RSNPCs.DominicOnion.WalkerIndex := 1;
 
-  AbsBarrel := @RSObjects.NMZAbsorptionBarrel;
+  if Potion.Contains('Overload') then
+    BoostBarrel := RSObjects.NMZOverloadBarrel
+  else if Potion.Contains('magic') then
+    BoostBarrel := RSObjects.NMZSuperMagicBarrel
+  else if Potion.Contains('ranging') then
+    BoostBarrel := RSObjects.NMZSuperRangingBarrel;
+
+  AbsBarrel := RSObjects.NMZAbsorptionBarrel;
 end;
 
 procedure TNMZFighter.SetupTimers;
@@ -244,8 +257,8 @@ begin
 
   if ScriptDebugEnabled then
   begin
-    DebugObjectArray += BoostBarrel;
-    DebugObjectArray += AbsBarrel;
+    DebugObjectArray += @BoostBarrel;
+    DebugObjectArray += @AbsBarrel;
     DebugObjectArray += @RSObjects.NMZChest;
     DebugObjectArray += @RSObjects.NMZPotion;
 
@@ -332,7 +345,7 @@ begin
 end;
 
 
-function TNMZFighter.WithdrawPotion(Barrel: PRSObject): Boolean;
+function TNMZFighter.WithdrawPotion(Barrel: TRSObject): Boolean;
 var
   Str: String;
 begin
@@ -341,16 +354,16 @@ begin
     AbsBarrel:   Str := 'Take Absorption';
   end;
 
-  if Barrel^.WalkSelectOption([Str]) then
+  if Barrel.WalkSelectOption([Str]) then
   begin
     Minimap.WaitMoving;
     Result := Chat.FindQuery('How many doses', 5000, 100);
   end;
 end;
 
-function TNMZFighter.DepositPotion(Barrel: PRSObject): Boolean;
+function TNMZFighter.DepositPotion(Barrel: TRSObject): Boolean;
 begin
-  if Barrel^.WalkSelectOption(['Store']) then
+  if Barrel.WalkSelectOption(['Store']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
