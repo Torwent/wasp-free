@@ -91,36 +91,6 @@ type
     NextHeal: Int32;
   end;
 
-
-function TRSXPDrop._Find: Boolean; override;
-var
-  B: TBox := Self.Bounds;
-  i, ColorCount: Int32;
-begin
-  B.Y1 := B.Y2 - 55;
-
-  if Color = 0 then
-  begin
-    for i := 0 to High(XP_COLORS) do
-    begin
-      ColorCount := SRL.CountColor(XP_COLORS[i], B);
-      if (ColorCount > 0) and (ColorCount < 150) then
-      begin
-        Color := XP_Colors[i];
-        Exit(True);
-      end
-      else if i = High(XP_COLORS) then
-        Color := 0; //not found, reset!
-    end;
-  end
-  else
-  begin
-    ColorCount := SRL.CountColor(Color, B);
-    Exit((ColorCount > 0) and (ColorCount < 150));
-  end;
-end;
-
-
 function TRSChooseOption.Select(Text: TStringArray; MouseAction: Int32 = MOUSE_LEFT; CaseSensitive: Boolean = True; CloseIfNotFound: Boolean = True): Boolean; override;
 var
   Choices: TRSChooseOption_OptionArray;
@@ -650,13 +620,11 @@ function TThiever.OpenCoinPouch: Boolean;
 var
   PouchCount: Int32;
 begin
-  WaitUntil(not XPDrop.FindDrop, 100, 2000);
-
   PouchCount := Inventory.CountItemStack(CoinPouch);
   if Inventory.ClickItem(CoinPouch) then
   begin
     Wait(300);
-    Result := WaitUntil(not Inventory.FindItem(CoinPouch), 100, 2000);
+    Result := WaitUntil(not Inventory.FindItem(CoinPouch), 100, 1200);
   end;
 
   if Result then
@@ -665,6 +633,9 @@ begin
     TotalActions += PouchCount;
     WL.Activity.Restart;
   end;
+
+  if not Result then
+    Self.OpenCoinPouch;
 end;
 
 function TThiever.Heal: Boolean;
@@ -849,84 +820,84 @@ end;
 function TThiever.GetState: EThieverState;
 begin
   if WL.Activity.IsFinished then
-    Exit(END_SCRIPT)
+    Exit(END_SCRIPT);
 
-  else if ChooseOption.IsOpen then
-    Exit(CLOSE_CONTEXT)
+  if ChooseOption.IsOpen then
+    Exit(CLOSE_CONTEXT);
 
-  else if MainScreen.FindGrave then
-    Exit(LOOT_GRAVE)
+  if MainScreen.FindGrave then
+    Exit(LOOT_GRAVE);
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
       if Self.HasDepositItems then
-        Exit(DEPOSIT_LOOT)
-      else if Inventory.CountItem(Necklace) < NeckQuantity then
-        Exit(WITHDRAW_NECKLACES)
-      else if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
+        Exit(DEPOSIT_LOOT);
+      if Inventory.CountItem(Necklace) < NeckQuantity then
+        Exit(WITHDRAW_NECKLACES);
+      if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
     end;
 
     Exit(CLOSE_INTERFACE);
-  end
+  end;
 
-  else if Self.IsPouchFull then
-    Exit(OPEN_POUCH)
+  if Self.IsPouchFull then
+    Exit(OPEN_POUCH);
 
-  else if not Self.HasSpace then
+  if not Self.HasSpace then
   begin
     if Inventory.FindItems(DropArray) then
-      Exit(DROP_ITEMS)
-    else if Self.HasRogue then
-      Exit(EQUIP_ROGUE)
-    else if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+      Exit(DROP_ITEMS);
+    if Self.HasRogue then
+      Exit(EQUIP_ROGUE);
+    if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
-  end
+  end;
 
-  else if ChatButtons.GetState(ERSChatButton.GAME_CHAT) <> ERSChatButtonState.ENABLED then
-    Exit(CHANGE_CHAT_FILTER)
+  if ChatButtons.GetState(ERSChatButton.GAME_CHAT) <> ERSChatButtonState.ENABLED then
+    Exit(CHANGE_CHAT_FILTER);
 
-  else if not ChatButtons.IsActive(ERSChatButton.GAME_CHAT) then
-    Exit(OPEN_CHAT)
+  if not ChatButtons.IsActive(ERSChatButton.GAME_CHAT) then
+    Exit(OPEN_CHAT);
 
-  else if NeckTimer.IsFinished then
-    Exit(CHECK_NECKLACE)
+  if NeckTimer.IsFinished then
+    Exit(CHECK_NECKLACE);
 
-  else if not FreshNeck and (not HasNeck or Self.NecklaceExpired) and (NeckQuantity > 0) then
+  if not FreshNeck and (not HasNeck or Self.NecklaceExpired) and (NeckQuantity > 0) then
   begin
     if Inventory.FindItem(Necklace) then
       Exit(EQUIP_NECKLACE);
 
     Exit(OPEN_BANK);
-  end
+  end;
 
-  else if Self.HasRogue then
-    Exit(EQUIP_ROGUE)
+  if Self.HasRogue then
+    Exit(EQUIP_ROGUE);
 
-  else if Self.IsLowHP then
+  if Self.IsLowHP then
   begin
     if not RedemptionEnabled and Inventory.FindConsumable(HEALTH_CONSUMABLE) then
-      Exit(EAT_FOOD)
-    else if not SuicideMode then
-      Exit(OPEN_BANK)
-    else if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
-      Exit(WALK_TO_NPC)
-    else if UseRedemption and not RedemptionEnabled then
-      Exit(ENABLE_REDEMPTION)
-    else if UseShadowVeil and ShadowVeilTimer.IsFinished then
+      Exit(EAT_FOOD);
+    if not SuicideMode then
+      Exit(OPEN_BANK);
+    if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
+      Exit(WALK_TO_NPC);
+    if UseRedemption and not RedemptionEnabled then
+      Exit(ENABLE_REDEMPTION);
+    if UseShadowVeil and ShadowVeilTimer.IsFinished then
       Exit(CAST_SHADOW_VEIL);
 
     Exit(PICKPOCKET);
-  end
+  end;
 
-  else if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
-    Exit(WALK_TO_NPC)
+  if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
+    Exit(WALK_TO_NPC);
 
-  else if UseShadowVeil and ShadowVeilTimer.IsFinished then
+  if UseShadowVeil and ShadowVeilTimer.IsFinished then
     Exit(CAST_SHADOW_VEIL);
 
   Exit(PICKPOCKET);

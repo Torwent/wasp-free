@@ -105,34 +105,6 @@ type
     CofferChecked: Boolean;
   end;
 
-function TRSXPDrop._Find: Boolean; override;
-var
-  B: TBox := Self.Bounds;
-  i, ColorCount: Int32;
-begin
-  B.Y1 := B.Y2 - 55;
-
-  if Color = 0 then
-  begin
-    for i := 0 to High(XP_COLORS) do
-    begin
-      ColorCount := SRL.CountColor(XP_COLORS[i], B);
-      if (ColorCount > 0) and (ColorCount < 150) then
-      begin
-        Color := XP_Colors[i];
-        Exit(True);
-      end
-      else if i = High(XP_COLORS) then
-        Color := 0; //not found, reset!
-    end;
-  end
-  else
-  begin
-    ColorCount := SRL.CountColor(Color, B);
-    Exit((ColorCount > 0) and (ColorCount < 150));
-  end;
-end;
-
 procedure TAntiban.Setup; override;
 begin
   inherited;
@@ -634,133 +606,136 @@ begin
     DreamSetup := False;
 
     if CombatHandler.NeedAntiPoison then
-      Exit(DRINK_ANTIPOISON)
+      Exit(DRINK_ANTIPOISON);
 
-    else if Self.NeedAbsorption then
-      Exit(DRINK_ABSORPTION)
+    if Self.NeedAbsorption then
+      Exit(DRINK_ABSORPTION);
 
-    else if Self.NeedBoost then
-      Exit(DRINK_BOOST)
+    if Self.NeedBoost then
+      Exit(DRINK_BOOST);
 
-    else if Self.NeedLowerHP then
-      Exit(LOWER_HEALTH)
+    if Self.NeedLowerHP then
+      Exit(LOWER_HEALTH);
 
-    else if PrayFlick and PrayFlickTimer.IsFinished then
-      Exit(FLICK_PRAYER)
+    if PrayFlick and PrayFlickTimer.IsFinished then
+      Exit(FLICK_PRAYER);
 
-    else if not MainScreen.InCombat then
-      Exit(ATTACK_NPC)
+    if not MainScreen.InCombat then
+      Exit(ATTACK_NPC);
 
-    else if CombatHandler.CanSpec then
-      Exit(USE_SPEC)
+    if CombatHandler.CanSpec then
+      Exit(USE_SPEC);
 
-    else if Minimap.IsSpecEnabled then
-      Exit(WAIT_STATE1)
+    if Minimap.IsSpecEnabled then
+      Exit(WAIT_STATE1);
 
-    else if CombatHandler.NeedRegear then
-      Exit(REEQUIP_GEAR)
+    if CombatHandler.NeedRegear then
+      Exit(REEQUIP_GEAR);
 
-    else if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished then
+    if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished then
     begin
       if Self.PowerUpAvailable then
-        Exit(USE_POWER)
-      else if not MainScreen.InCombat then
+        Exit(USE_POWER);
+      if not MainScreen.InCombat then
         Exit(ATTACK_NPC);
 
       Exit(WAIT_STATE2);
-    end
+    end;
 
-    else if WalkMiddleTimer.IsFinished then
+    if WalkMiddleTimer.IsFinished then
       Exit(WALK_MIDDLE);
 
     Exit(WAIT_STATE3);
-  end
+  end;
 
-  else
+
+  //if not Self.InDream
+  if WL.Activity.IsFinished then
+    Exit(END_SCRIPT);
+
+  Query := Chat.GetQuery;
+  Title := Chat.GetChatTitle;
+
+  if CombatHandler.NeedRegear then
+    Exit(REEQUIP_GEAR);
+
+  if not CofferChecked then
+    Exit(CHECK_COFFER);
+
+  if CofferLocked then
+    Exit(OPEN_COFFER);
+
+  if MainScreen.IsClassicOpen then
   begin
-    if WL.Activity.IsFinished then
-      Exit(END_SCRIPT);
+    if BankPin.IsOpen then
+      Exit(UNLOCK_COFFER);
 
-    Query := Chat.GetQuery;
-    Title := Chat.GetChatTitle;
+    Exit(HANDLE_NMZSETUP);
+  end;
 
-    if CombatHandler.NeedRegear then
-      Exit(REEQUIP_GEAR)
-
-    else if not CofferChecked then
-      Exit(CHECK_COFFER)
-
-    else if CofferLocked then
-      Exit(OPEN_COFFER)
-
-    else if MainScreen.IsClassicOpen then
-    begin
-      if BankPin.IsOpen then
-        Exit(UNLOCK_COFFER);
-      Exit(HANDLE_NMZSETUP);
-    end
-
-    else if 'How many doses' in Query then
-    begin
-      if not Self.HasEnoughBoost then
-      begin
-        if Potion.Lower in Query then
-          Exit(ANSWER_BOOST);
-        Exit(WITHDRAW_BOOST);
-      end
-
-      else if not Self.HasEnoughAbs then
-      begin
-        if 'absorption' in Query then
-          Exit(ANSWER_ABSORPTION);
-        Exit(WITHDRAW_ABSORPTION);
-      end
-
-      else if DreamSetup then
-        Exit(OPEN_NMZSETUP);
-      Exit(TALK_DOMINIC);
-    end
-
-
+  if 'How many doses' in Query then
+  begin
     if not Self.HasEnoughBoost then
     begin
-      if Inventory.CountItem(BoostPotion[3]) > BoostAmount then
-      begin
-        if Potion.Lower in Title then
-          Exit(HANDLE_DEPOSIT);
-        Exit(DEPOSIT_BOOST)
-      end
-      else if Inventory.CountItem(BoostPotion[3]) < BoostAmount then
-        Exit(WITHDRAW_BOOST);
-    end
+      if Potion.Lower in Query then
+        Exit(ANSWER_BOOST);
 
-    else if not Self.HasEnoughAbs then
-      Exit(WITHDRAW_ABSORPTION)
+      Exit(WITHDRAW_BOOST);
+    end;
 
-    else if DreamSetup then
+    if not Self.HasEnoughAbs then
     begin
+      if 'absorption' in Query then
+        Exit(ANSWER_ABSORPTION);
 
-      if 'When you purchase' in Chat.GetChat then
-      begin
-        DreamSetup := False;
-        Exit(TALK_DOMINIC);
-      end;
+      Exit(WITHDRAW_ABSORPTION);
+    end;
+
+    if DreamSetup then
       Exit(OPEN_NMZSETUP);
-    end
-    else
+
+    Exit(TALK_DOMINIC);
+  end;
+
+
+  if not Self.HasEnoughBoost then
+  begin
+    if Inventory.CountItem(BoostPotion[3]) > BoostAmount then
     begin
-      if 'dream would' in Title then
-        Exit(CHOOSE_DREAM)
-      else if 'Dominic' in Title then
-      begin
-        if 'deduct the money' in Chat.GetChat then
-          Exit(HANDLE_DOMINIC);
-      end
-      else if 'Agree' in Title then
-        Exit(PAY_DOMINIC);
+      if Potion.Lower in Title then
+        Exit(HANDLE_DEPOSIT);
+
+      Exit(DEPOSIT_BOOST);
+    end;
+
+    if Inventory.CountItem(BoostPotion[3]) < BoostAmount then
+      Exit(WITHDRAW_BOOST);
+  end;
+
+  if not Self.HasEnoughAbs then
+    Exit(WITHDRAW_ABSORPTION);
+
+  if DreamSetup then
+  begin
+    if 'When you purchase' in Chat.GetChat then
+    begin
+      DreamSetup := False;
       Exit(TALK_DOMINIC);
     end;
+
+    Exit(OPEN_NMZSETUP);
   end;
+
+  if 'dream would' in Title then
+    Exit(CHOOSE_DREAM);
+
+  if ('Dominic' in Title) and ('deduct the money' in Chat.GetChat) then
+    Exit(HANDLE_DOMINIC);
+
+  if 'Agree' in Title then
+    Exit(PAY_DOMINIC);
+
+  Exit(TALK_DOMINIC);
 end;
 
 procedure TNMZFighter.Run(MaxActions: Int32; MaxTime: Int64);
@@ -816,7 +791,7 @@ begin
 
       WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
       ATTACK_NPC: CombatHandler.AttackMonster;
-      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPDrop.WaitDrop(1200);
+      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPBar.WaitXP(1200);
 
       USE_POWER: Self.GetPowerUp;
       USE_SPEC: CombatHandler.DoSpec;

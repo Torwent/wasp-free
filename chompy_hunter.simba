@@ -178,19 +178,20 @@ begin
   begin
     if FillingBellows := Inventory.FindItem('Ogre bellows') then
       Exit(WAIT_STATE);
+
     Exit;
-  end
+  end;
 
-  else if Inventory.FindItem('Bloated toad') then
-    Exit(PLACE_TOAD)
+  if Inventory.FindItem('Bloated toad') then
+    Exit(PLACE_TOAD);
 
-  else if MainScreen.InCombat then
-    Exit(WAIT_STATE)
+  if MainScreen.InCombat then
+    Exit(WAIT_STATE);
 
-  else if CombatHandler.Monster^.Find then
-    Exit(CLICK_CHOMPY)
+  if CombatHandler.Monster^.Find then
+    Exit(CLICK_CHOMPY);
 
-  else if Inventory.FindItems(OgreBellows) then
+  if Inventory.FindItems(OgreBellows) then
     Exit(FILL_TOAD);
 
   Exit(FILL_BELLOWS);
@@ -229,7 +230,7 @@ begin
     Exit(False);
 
   Result := (CombatHandler.IsSetup and not CombatHandler.InCombatTimer.IsFinished)
-            or XPDrop.FindDrop or (Self.FindHitsplats <> []);
+            or XPBar.EarnedXP or (Self.FindHitsplats <> []);
 end;
 
 type

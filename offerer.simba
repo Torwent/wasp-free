@@ -215,53 +215,52 @@ end;
 function TRemainOfferer.GetState: EOffererState;
 begin
   if WL.Activity.IsFinished then
-    Exit(EOffererState.END_SCRIPT)
+    Exit(EOffererState.END_SCRIPT);
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
       if not Inventory.FindItem(WrathRune) then
-        Exit(EOffererState.WITHDRAW_WRATH)
-      else if not Inventory.FindItem(AltRune) then
-        Exit(EOffererState.WITHDRAW_ALT)
-      else if (Inventory.CountItem(Remains) < 3) then
+        Exit(EOffererState.WITHDRAW_WRATH);
+      if not Inventory.FindItem(AltRune) then
+        Exit(EOffererState.WITHDRAW_ALT);
+      if (Inventory.CountItem(Remains) < 3) then
         Exit(EOffererState.WITHDRAW_REMAINS);
 
       RemainsLeft := Inventory.CountItem(Remains);
-    end
+    end;
 
-    else if CollectBox.IsOpen and not CollectEmpty then
+    if CollectBox.IsOpen and not CollectEmpty then
       Exit(EOffererState.HANDLE_COLLECT);
 
     Exit(EOffererState.CLOSE_INTERFACE);
-  end
+  end;
 
-  else if (RemainsLeft < 3) or not Self.CanCast then
+  if (RemainsLeft < 3) or not Self.CanCast then
   begin
     if not BankEmpty then
-      Exit(EOffererState.OPEN_BANK)
-    else if not CollectEmpty then
+      Exit(EOffererState.OPEN_BANK);
+    if not CollectEmpty then
       Exit(EOffererState.OPEN_COLLECT);
 
     Exit(EOffererState.END_SCRIPT);
-  end
+  end;
 
-  else if SpellCooldown.IsFinished then
+  if SpellCooldown.IsFinished then
   begin
     if Magic.IsOpen then
     begin
       if Magic.CanActivate(OfferSpell) then
         Exit(EOffererState.CAST_SPELL)
-      else
-      begin
-        if not BankEmpty then
-          Exit(EOffererState.OPEN_BANK)
-        else if not CollectEmpty then
-          Exit(EOffererState.OPEN_COLLECT);
 
-        Exit(EOffererState.END_SCRIPT);
-      end;
+      if not BankEmpty then
+        Exit(EOffererState.OPEN_BANK);
+
+      if not CollectEmpty then
+        Exit(EOffererState.OPEN_COLLECT);
+
+      Exit(EOffererState.END_SCRIPT);
     end;
 
     Exit(EOffererState.OPEN_MAGIC);
@@ -275,8 +274,7 @@ begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
     ExtraInfo := ' Spell: ' + ToStr(OfferSpell) +
@@ -304,7 +302,7 @@ begin
     end;
 
     Self.DoAntiban;
-  end;
+  until Self.ShouldStop;
 end;
 
 var RemainOfferer: TRemainOfferer;

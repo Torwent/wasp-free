@@ -305,63 +305,62 @@ end;
 function TCooker.GetState: ECookerState;
 begin
   if WL.Activity.IsFinished then
-    Exit(ECookerState.END_SCRIPT)
+    Exit(ECookerState.END_SCRIPT);
 
-  else if ChooseOption.IsOpen then
-    Exit(ECookerState.CLOSE_CONTEXT)
+  if ChooseOption.IsOpen then
+    Exit(ECookerState.CLOSE_CONTEXT);
 
-  else if XPDrop.FindDrop then
-    Exit(ECookerState.WAIT_COOKING)
+  if XPBar.EarnedXP then
+    Exit(ECookerState.WAIT_COOKING);
 
-  else if Chat.LeveledUp then
+  if Chat.LeveledUp then
   begin
     Cooking := False;
     Exit(ECookerState.LEVEL_UP);
-  end
+  end;
 
-  else if Make.IsOpen then
-    Exit(ECookerState.HANDLE_MAKE)
+  if Make.IsOpen then
+    Exit(ECookerState.HANDLE_MAKE);
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen then
     begin
       if Self.HasProducts then
-        Exit(ECookerState.DEPOSIT_ITEMS)
-      else if BankEmpty or Inventory.FindItem(Ingredient.Item) then
-        Exit(ECookerState.CLOSE_INTERFACE)
-      else
-        Exit(ECookerState.WITHDRAW_ITEMS);
-    end
+        Exit(ECookerState.DEPOSIT_ITEMS);
 
-    else if CollectBox.IsOpen then
+      if BankEmpty or Inventory.FindItem(Ingredient.Item) then
+        Exit(ECookerState.CLOSE_INTERFACE);
+
+      Exit(ECookerState.WITHDRAW_ITEMS);
+    end;
+
+    if CollectBox.IsOpen then
     begin
       if CollectEmpty or Inventory.FindItem(Ingredient.Item) then
-        Exit(ECookerState.CLOSE_INTERFACE)
-      else
-        Exit(ECookerState.HANDLE_COLLECT)
+        Exit(ECookerState.CLOSE_INTERFACE);
+
+      Exit(ECookerState.HANDLE_COLLECT);
     end;
 
     Exit(ECookerState.CLOSE_INTERFACE);
-  end
+  end;
 
-  else if Inventory.FindItem(Ingredient.Item) then
+  if Inventory.FindItem(Ingredient.Item) then
   begin
     if Cooking then
       Exit(ECookerState.WAIT_COOKING);
 
     Exit(ECookerState.DO_COOKING);
-  end
-
-  else
-  begin
-    if BankEmpty and CollectEmpty then
-      Exit(ECookerState.END_SCRIPT)
-    else if BankEmpty then
-      Exit(ECookerState.OPEN_COLLECT);
-
-    Exit(ECookerState.OPEN_BANK);
   end;
+
+  if BankEmpty and CollectEmpty then
+    Exit(ECookerState.END_SCRIPT);
+
+  if BankEmpty then
+    Exit(ECookerState.OPEN_COLLECT);
+
+  Exit(ECookerState.OPEN_BANK);
 end;
 
 function TCooker.Terminate: Boolean; override;
@@ -370,7 +369,6 @@ begin
     for 0 to 5 do
       if Result := Bank.WithdrawItem(BankTab, [Products[0].Item, BANK_WITHDRAW_ALL, True], True) then
         Break;
-
 end;
 
 procedure TCooker.Run(MaxActions: Int32; MaxTime: Int64);

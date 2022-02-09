@@ -287,48 +287,48 @@ var
   S: String := Chat.GetChatTitle;
 begin
   if WL.Activity.IsFinished then
-    Exit(END_SCRIPT)
+    Exit(END_SCRIPT);
 
-  else if Chat.LeveledUp then
-    Exit(EState.LEVEL_UP)
+  if Chat.LeveledUp then
+    Exit(EState.LEVEL_UP);
 
-  else if S.Contains('remove') then
-    Exit(EState.HANDLE_LARDER_CHAT)
+  if S.Contains('remove') then
+    Exit(EState.HANDLE_LARDER_CHAT);
 
-  else if S.Contains('Select') then
-    Exit(EState.HANDLE_PHIALS_CHAT)
+  if S.Contains('Select') then
+    Exit(EState.HANDLE_PHIALS_CHAT);
 
-  else if S.Contains('Repeat') then
-    Exit(EState.HANDLE_SERVANT)
+  if S.Contains('Repeat') then
+    Exit(EState.HANDLE_SERVANT);
 
-  else if MainScreen.IsClassicOpen then
-    Exit(EState.HANDLE_FURNITURE_UI)
+  if MainScreen.IsClassicOpen then
+    Exit(EState.HANDLE_FURNITURE_UI);
 
-  else if not Minimap.InPOH then
+  if not Minimap.InPOH then
   begin
     if not UsePhials or Inventory.IsFull then
       Exit(EState.ENTER_HOUSE);
     Exit(EState.GET_PLANKS);
-  end
+  end;
 
-  else if LarderIsBuilt then
-    Exit(EState.DESTROY_LARDER)
+  if LarderIsBuilt then
+    Exit(EState.DESTROY_LARDER);
 
-  else if Inventory.Count > MinInvCount then
+  if Inventory.Count > MinInvCount then
   begin
     WaitingServant := False;
     Exit(EState.BUILD_LARDER);
-  end
+  end;
 
-  else if UsePhials then
-    Exit(EState.EXIT_HOUSE)
+  if UsePhials then
+    Exit(EState.EXIT_HOUSE);
 
-  else if WaitingServant then
+  if WaitingServant then
   begin
     if ServantNPC.Find then
       Exit(EState.TALK_SERVANT);
     Exit(EState.WAIT_STATE);
-  end
+  end;
 
   Exit(EState.CALL_SERVANT);
 end;

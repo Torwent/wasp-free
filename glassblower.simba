@@ -278,9 +278,9 @@ end;
 function TBlower.WaitBlowing: Boolean;
 begin
   if Blowing then
-    Result := Blowing := Inventory.FindItem(Material.Item) and XPDrop.WaitDrop(2000)
+    Result := Blowing := Inventory.FindItem(Material.Item) and XPBar.WaitXP(2000)
   else
-    Result := Blowing := XPDrop.WaitDrop(2000);
+    Result := Blowing := XPBar.WaitXP(2000);
 end;
 
 
@@ -289,7 +289,7 @@ begin
   if WL.Activity.IsFinished then
     Exit(EBlowerState.END_SCRIPT);
 
-  if XPDrop.FindDrop then
+  if XPBar.EarnedXP then
     Exit(EBlowerState.WAIT_GLASS);
 
   if Chat.LeveledUp then

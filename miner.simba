@@ -321,7 +321,7 @@ end;
 
 function TMiner.WaitMining(t: UInt32 = 3000): Boolean;
 var
-  Drop: Boolean;
+  GotXP: Boolean;
 begin
   if Inventory.Count <> PrevInvCount then
   begin
@@ -329,34 +329,35 @@ begin
     Exit(False);
   end;
 
-  Result := WaitUntil((Mining := Self.IsMining) or (Drop := XPDrop.FindDrop), 100, t);
-  if Drop then Result := Mining := False;
+  Result := WaitUntil((Mining := Self.IsMining) or (GotXP := XPBar.EarnedXP), 100, t);
+  if GotXP then
+    Result := Mining := False;
 end;
 
 
 function TMiner.GetState: EMinerState;
 begin
   if WL.Activity.IsFinished then
-    Exit(EMinerState.END_SCRIPT)
+    Exit(EMinerState.END_SCRIPT);
 
-  else if Chat.LeveledUp then
+  if Chat.LeveledUp then
   begin
     Mining := False;
     Exit(EMinerState.LEVEL_UP);
-  end
+  end;
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
     if Bank.IsOpen and Inventory.FindItems(BankList) then
       Exit(EMinerState.DEPOSIT_ITEMS);
 
     Exit(EMinerState.CLOSE_INTERFACE);
-  end
+  end;
 
-  else if Self.HasGear then
-    Exit(EMinerState.EQUIP_GEAR)
+  if Self.HasGear then
+    Exit(EMinerState.EQUIP_GEAR);
 
-  else if Inventory.IsFull then
+  if Inventory.IsFull then
   begin
     Mining := False;
 
@@ -364,15 +365,15 @@ begin
       Exit(EMinerState.DROP_ITEMS);
 
     Exit(EMinerState.OPEN_BANK);
-  end
+  end;
 
-  else if Mining then
-    Exit(EMinerState.WAIT_STATE)
+  if Mining then
+    Exit(EMinerState.WAIT_STATE);
 
-  else if UseBank and not RSW.AtTile(RSRock^.TileArray, 15) then
-    Exit(EMinerState.WALK_SPOT)
+  if UseBank and not RSW.AtTile(RSRock^.TileArray, 15) then
+    Exit(EMinerState.WALK_SPOT);
 
-  else if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
+  if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
     Exit(EMinerState.USE_SPEC);
 
   Exit(EMinerState.MINE_ROCK);

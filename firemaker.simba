@@ -43,39 +43,11 @@ type
     NextStartingPoint: TPoint;
     StartingPoints: TPointArray;
 
-    Fire: PRSObject;
+    Fire: TRSObject;
     Logs: TRSItem;
     Tool: TRSBankWithdrawItem;
     Material: TRSBankWithdrawItem;
   end;
-
-function TRSXPDrop._Find: Boolean; override;
-var
-  B: TBox := Self.Bounds;
-  i, ColorCount: Int32;
-begin
-  B.Y1 := B.Y2 - 55;
-
-  if Color = 0 then
-  begin
-    for i := 0 to High(XP_COLORS) do
-    begin
-      ColorCount := SRL.CountColor(XP_COLORS[i], B);
-      if (ColorCount > 0) and (ColorCount < 150) then
-      begin
-        Color := XP_Colors[i];
-        Exit(True);
-      end
-      else if i = High(XP_COLORS) then
-        Color := 0; //not found, reset!
-    end;
-  end
-  else
-  begin
-    ColorCount := SRL.CountColor(Color, B);
-    Exit((ColorCount > 0) and (ColorCount < 150));
-  end;
-end;
 
 
 procedure TAntiban.Setup; override;
@@ -121,7 +93,7 @@ begin
   StartingPoints := [[8241, 2732], [8241, 2736]];
   NextStartingPoint := StartingPoints[0];
 
-  Fire := @RSObjects.BurningFire;
+  Fire := RSObjects.BurningFire;
 
   RSW.ScreenWalk := True;
 
@@ -131,7 +103,7 @@ begin
   if ScriptDebugEnabled then
   begin
     DebugObjectArray += ScriptBank;
-    DebugObjectArray += Fire;
+    DebugObjectArray += @Fire;
   end;
 end;
 
@@ -143,7 +115,7 @@ begin
   else
     NextStartingPoint := StartingPoints[0];
 
-  Fire^.TileArray := PopulateTile(NextStartingPoint, [0, 0, 5, 5]);
+  Fire.TileArray := PopulateTile(NextStartingPoint, [0, 0, 5, 5]);
 end;
 
 function TLogBurner.SmallStep: Boolean;
@@ -153,8 +125,8 @@ var
 begin
   for Tile in Tiles do
   begin
-    Fire^.TileArray := [Tile];
-    if Fire^.Find then
+    Fire.TileArray := [Tile];
+    if Fire.Find then
     begin
       RSW.WebWalk(Tile, 1, 0.2);
       Exit(True);
@@ -199,64 +171,60 @@ end;
 function TLogBurner.BurnLogs: Boolean;
 begin
   if Inventory.Use(Tool.Item, Material.Item) then
-    Result := XPDrop.WaitDrop(5000);
+    Result := XPBar.WaitXP(5000);
 
   if Result then
-    WaitUntil(not XPDrop.FindDrop, 100, 3000);
+    Wait(800, 1200);
 end;
 
 
 function TLogBurner.GetState: EBurnerState;
 begin
   if WL.Activity.IsFinished then
-    Exit(EBurnerState.END_SCRIPT)
+    Exit(EBurnerState.END_SCRIPT);
 
-  else if ChooseOption.IsOpen then
-    Exit(EBurnerState.CLOSE_CONTEXT)
+  if ChooseOption.IsOpen then
+    Exit(EBurnerState.CLOSE_CONTEXT);
 
-  else if Chat.LeveledUp then
-    Exit(EBurnerState.LEVEL_UP)
+  if Chat.LeveledUp then
+    Exit(EBurnerState.LEVEL_UP);
 
-  else if MainScreen.HasInterface then
+  if MainScreen.HasInterface then
   begin
-
     if Bank.IsOpen then
     begin
       if Inventory.FindItem(Tool.Item) and Inventory.FindItem(Material.Item) then
-        Exit(EBurnerState.CLOSE_INTERFACE)
-      else if not Inventory.FindItem(Tool.Item) then
-        Exit(EBurnerState.WITHDRAW_TOOL)
-      else if not Inventory.FindItem(Material.Item) then
+        Exit(EBurnerState.CLOSE_INTERFACE);
+      if not Inventory.FindItem(Tool.Item) then
+        Exit(EBurnerState.WITHDRAW_TOOL);
+      if not Inventory.FindItem(Material.Item) then
         Exit(EBurnerState.WITHDRAW_LOG);
-    end
+    end;
 
-    else
-      Exit(EBurnerState.CLOSE_INTERFACE);
-  end
+    Exit(EBurnerState.CLOSE_INTERFACE);
+  end;
 
   if Inventory.FindItem(Tool.Item) and Inventory.FindItem(Material.Item) then
   begin
     if RSW.AtTile(ScriptBank^.TileArray, 10) then
-      Exit(EBurnerState.TELEPORT)
-    else if Inventory.IsFull and not RSW.AtTile(NextStartingPoint, 4) then
+      Exit(EBurnerState.TELEPORT);
+
+    if Inventory.IsFull and not RSW.AtTile(NextStartingPoint, 4) then
     begin
-      if Fire^.Find then
-        Exit(EBurnerState.CHANGE_START)
-      else
-        Exit(EBurnerState.WALK_SPOT);
-    end
-    else
-    begin
-      Fire^.TileArray := [RSW.GetMyPos];
-      //if Fire^.Find <> [] then
+      if Fire.Find then
+        Exit(EBurnerState.CHANGE_START);
+
+      Exit(EBurnerState.WALK_SPOT);
+    end;
+
+    Fire.TileArray := [RSW.GetMyPos];
+    //if Fire^.Find <> [] then
       //  Exit(EBurnerState.SMALL_STEP)
       //else
-        Exit(EBurnerState.BURN_LOG);
-    end;
-  end
+    Exit(EBurnerState.BURN_LOG);
+  end;
 
-  else
-    Exit(EBurnerState.OPEN_BANK);
+  Exit(EBurnerState.OPEN_BANK);
 end;
 
 procedure TLogBurner.Run(MaxActions: Int32; MaxTime: Int64);
