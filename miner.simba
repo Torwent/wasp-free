@@ -67,8 +67,8 @@ begin
   inherited;
 
   Antiban.Skills := [ERSSkill.MINING, ERSSkill.TOTAL];
-  Antiban.MinZoom := 40;
-  Antiban.MaxZoom := 40;
+  Antiban.MinZoom := 30;
+  Antiban.MaxZoom := 60;
 end;
 
 
@@ -316,7 +316,7 @@ end;
 
 function TMiner.IsMining: Boolean;
 begin
-  Result := SRL.IsAnimating(MainScreen.GetPlayerBox, 130, 350, 3);
+  Result := SRL.IsAnimating(MainScreen.GetPlayerBox, MainScreen.ConvertDistance(450), 350, 3);
 end;
 
 function TMiner.WaitMining(t: UInt32 = 3000): Boolean;
@@ -418,7 +418,8 @@ begin
   until Self.ShouldStop;
 end;
 
-var Miner: TMiner;
+var
+  Miner: TMiner;
 
 
 function TRSBank.DepositItemArray(Tab: Int32; ItemArray: TRSItemArray; UseQuantityButtons: Boolean): Boolean; override;
