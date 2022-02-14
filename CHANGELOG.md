@@ -1,3 +1,18 @@
+# [0.12.0](https://github.com/Torwent/FreeWaspBots/compare/v0.11.2...v0.12.0) (2022-02-14)
+
+
+### Bug Fixes
+
+* **miner:** better animation detection ([c1189b4](https://github.com/Torwent/FreeWaspBots/commit/c1189b4dc6678c4d80d396e2f1ada3256921c8ec))
+* **wc:** better animation detection ([1fddd61](https://github.com/Torwent/FreeWaspBots/commit/1fddd6166161927c6f6a505e8b4c06aaabfe40dc))
+
+
+### Features
+
+* new xpdrops ([905fca8](https://github.com/Torwent/FreeWaspBots/commit/905fca8e23920249b3e722261bf5f672036179d9))
+
+
+
 ## [0.11.2](https://github.com/Torwent/FreeWaspBots/compare/v0.11.1...v0.11.2) (2022-02-04)
 
 
@@ -36,15 +51,6 @@
 ### Features
 
 * **kraken:** activated the GUI and added a bunch of new things. ([64b671f](https://github.com/Torwent/FreeWaspBots/commit/64b671fc3b16e4ed7f89045b40549e7f1aff5867))
-
-
-
-## [0.9.5](https://github.com/Torwent/FreeWaspBots/compare/v0.9.4...v0.9.5) (2022-01-13)
-
-
-### Bug Fixes
-
-* **nmz:** fixed a minor issue where nmz would lower it's hp to 0 after leaving the dream and shutdown ([0c8b68d](https://github.com/Torwent/FreeWaspBots/commit/0c8b68d0e9ff7caa74be1524068a3697a25ebc2d))
 
 
 
