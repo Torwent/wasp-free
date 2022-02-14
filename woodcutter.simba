@@ -79,7 +79,7 @@ begin
 
   Antiban.Skills := [ERSSkill.WOODCUTTING, ERSSkill.TOTAL];
   Antiban.MinZoom := 55;
-  Antiban.MaxZoom := 70;
+  Antiban.MaxZoom := 80;
 end;
 
 
@@ -225,8 +225,8 @@ begin
     end
     else if Equipment.FindItem('Infernal axe') then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+      ToolShift := 70;
+      ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
     end
     else if Equipment.FindItem('3rd age axe') then
     begin
@@ -266,8 +266,8 @@ begin
     end
     else if Inventory.FindItem('Infernal axe') then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+      ToolShift := 70;
+      ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
     end
     else if Inventory.FindItem('3rd age axe') then
     begin
@@ -317,8 +317,6 @@ begin
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
-  Options.SetZoomLevel(SRL.TruncatedGauss(35, 75));
-
   if Antiban.BioDice then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
@@ -332,14 +330,6 @@ begin
     DebugObjectArray += RSTree;
     DebugNPCArray += @RSNPCs.SawmillOperator;
   end;
-end;
-
-function TWoodcutter.GetToolShift: Int32;
-begin
-  if MM2MS.ZoomLevel > -1 then
-    Result := Round(ToolShift * MM2MS.ZoomLevel / 50)
-  else
-    Result := ToolShift;
 end;
 
 
@@ -432,27 +422,20 @@ begin
 end;
 
 
-function TSRL.IsColorAnimating(Color: TCTS2Color; Area:TBox; Shift, WaitTime:UInt32; Iter:UInt32=1): Boolean; override;
+function TSRL.IsAnimating(Area:TBox; Shift, WaitTime:UInt32; Iter:UInt32=1): Boolean; override;
 var
   i:Int32;
 begin
   for i:=1 to Iter do
-  begin
-    if Inventory.IsFull then Exit(False)
-    else if (Self.GetColorPixelShift(Color, Area, WaitTime) > shift) or XPBar.EarnedXP then
+    if (Self.GetPixelShift(Area, WaitTime) > shift) or XPBar.EarnedXP then
       Exit(True);
-  end;
 end;
 
 function TWoodcutter.IsCutting: Boolean;
 var
   B: TBox := MainScreen.GetPlayerBox;
 begin
-  B.X1 -= 40;
-  B.Y1 -= 30;
-  B.X2 += 40;
-  B.Y2 += 15;
-  Result := Woodcutting := SRL.IsColorAnimating(ToolType, B, Self.GetToolShift, 350, 10 * TreeTimerMultiplier)
+  Result := Woodcutting := SRL.IsAnimating(B, MainScreen.ConvertDistance(600), 350, 10 * TreeTimerMultiplier);
 end;
 
 function TWoodcutter.WaitCutting: Boolean;
