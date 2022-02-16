@@ -29,6 +29,7 @@ var
   CurrentTree: ERSTree := ERSTree.TEAK_TREE;
   BankLocation: ERSBank := ERSBank.POWER_WC;
   UseSawmill: Boolean := False;
+  PickNests: Boolean := True;
 
 type
   EWoodcutterState = (
@@ -300,7 +301,7 @@ end;
 
 procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'AIO Woodcutter';
+  Name := 'Woodcutter';
 
   inherited;
 
@@ -489,7 +490,7 @@ begin
   if UseBank and not RSW.AtTile(RSTree^.TileArray, 15) then
     Exit(EWoodcutterState.WALK_SPOT);
 
-  if Self.CheckNest then
+  if PickNests and Self.CheckNest then
     Exit(EWoodcutterState.PICKUP_NEST);
 
   if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
@@ -539,6 +540,7 @@ type
     TreeSelector: TLabeledCombobox;
     BankSelector: TLabeledCombobox;
     SawmillState: TLabeledCheckbox;
+    PickNestsState: TLabeledCheckbox;
   end;
 
 procedure TCutterConfig.StartScript(Sender: TObject);
@@ -559,7 +561,8 @@ begin
     'Prifddinas':              BankLocation := ERSBank.PRIFDDINAS;
   end;
 
-  UseSawmill := SawmillState.Checkbox.getState = cbChecked;
+  UseSawmill := SawmillState.IsChecked;
+  PickNests := PickNestsState.IsChecked;
 end;
 
 
@@ -717,6 +720,15 @@ begin
     SetLeft(TreeSelector.getLeft + TreeSelector.GetWidth + 25);
     SetTop(TreeSelector.getTop + 20);
     Checkbox.setEnabled(False);
+  end;
+
+  with PickNestsState do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Pick nests:');
+    SetLeft(SawmillState.getLeft);
+    SetTop(SawmillState.getTop + SawmillState.GetHeight + 20);
+    Checkbox.setState(cbChecked);
   end;
 
   Self.TreeSelectorOnChange(BankSelector.Combobox);
