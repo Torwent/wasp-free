@@ -1,3 +1,12 @@
+# [0.13.0](https://github.com/Torwent/FreeWaspBots/compare/v0.12.0...v0.13.0) (2022-02-16)
+
+
+### Features
+
+* **wc:** now picking up nests is optional ([e97f907](https://github.com/Torwent/FreeWaspBots/commit/e97f907907642a32997232aca42875beca167b1f))
+
+
+
 # [0.12.0](https://github.com/Torwent/FreeWaspBots/compare/v0.11.2...v0.12.0) (2022-02-14)
 
 
@@ -42,15 +51,6 @@
 ### Features
 
 * added dropdown menus ([36725a3](https://github.com/Torwent/FreeWaspBots/commit/36725a37646b1b40fc248070d8197c0416a2f9f4))
-
-
-
-# [0.10.0](https://github.com/Torwent/FreeWaspBots/compare/v0.9.5...v0.10.0) (2022-01-13)
-
-
-### Features
-
-* **kraken:** activated the GUI and added a bunch of new things. ([64b671f](https://github.com/Torwent/FreeWaspBots/commit/64b671fc3b16e4ed7f89045b40549e7f1aff5867))
 
 
 
