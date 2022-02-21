@@ -929,7 +929,7 @@ begin
       Wait(300, 400);
   end;
 
-  if Result and (Minimap.GetSpecLevel < WeaponSpec) and NMZFighter.PowerSurgeTimer.IsFinished then
+  if Result and NMZFighter.PowerSurgeTimer.IsFinished and (Minimap.GetSpecLevel < WeaponSpec) then
     Self.Regear;
 end;
 
