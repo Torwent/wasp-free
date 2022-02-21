@@ -902,6 +902,36 @@ begin
             ((Shield <> 'Null') and Inventory.FindItem(Shield));
 end;
 
+function TCombatHandler.DoSpec: Boolean; override;
+begin
+  if ManageGear and not GearIsSetup then
+  begin
+    Self._SetupGear;
+    ManageGear := GearIsSetup;
+    if not GearIsSetup then
+      Exit;
+  end;
+
+  if (SpecWeapon <> Weapon) and Inventory.ClickItem(SpecWeapon) then
+    if not WaitUntil(Inventory.FindItem(Weapon), 100, 4000) then
+      Exit;
+
+  InCombatTimer.Timeout := GetTickCount;
+  Result := DoingSpec := Minimap.EnableSpec(WeaponSpec);
+
+  case SpecWeapon of
+    'Granite maul', '4153', '12848':
+      begin
+        Result := DoingSpec := True;
+        Wait(50, 100);
+      end;
+    else
+      Wait(300, 400);
+  end;
+
+  if Result and NMZFighter.PowerSurgeTimer.IsFinished and (Minimap.GetSpecLevel < WeaponSpec) then
+    Self.Regear;
+end;
 
 type
   TNMZConfig = record(TScriptConfig)
