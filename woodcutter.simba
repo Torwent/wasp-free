@@ -392,7 +392,7 @@ end;
 
 function TWoodcutter.CheckNest: Boolean;
 begin
-  Result := RSGroundItems.BirdNest.Find;
+  Result := PickNests and RSGroundItems.BirdNest.Find;
 end;
 
 function TWoodcutter.PickNest: Boolean;
@@ -490,7 +490,7 @@ begin
   if UseBank and not RSW.AtTile(RSTree^.TileArray, 15) then
     Exit(EWoodcutterState.WALK_SPOT);
 
-  if PickNests and Self.CheckNest then
+  if Self.CheckNest then
     Exit(EWoodcutterState.PICKUP_NEST);
 
   if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
