@@ -9,7 +9,7 @@ begin
   BreaksEnabled         := True; //Enables Short Breaks
   SleepEnabled          := True; //Enables Sleep Breaks
   RemoteInputEnabled    := True; //Enables Remote Input
-  ProgressReportEnabled := False; //Enables Graphical Progress Report
+  ProgressReportEnabled := True; //Enables Graphical Progress Report
   ScriptDebugEnabled    := False; //Enables Script Debugging
 end;
 
