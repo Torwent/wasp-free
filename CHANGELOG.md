@@ -1,3 +1,12 @@
+## [0.13.1](https://github.com/Torwent/FreeWaspBots/compare/v0.13.0...v0.13.1) (2022-03-01)
+
+
+### Bug Fixes
+
+* fixed kraken paint and removed firemaker ([dabd788](https://github.com/Torwent/FreeWaspBots/commit/dabd78831bf447cb1565fdd978852b52a9b9870f))
+
+
+
 # [0.13.0](https://github.com/Torwent/FreeWaspBots/compare/v0.12.0...v0.13.0) (2022-02-16)
 
 
@@ -37,20 +46,6 @@
 ### Bug Fixes
 
 * **larder builder:** updated for compatibility ([98a0af4](https://github.com/Torwent/FreeWaspBots/commit/98a0af4b59d6c86c82e0de14a742a32505b790ff))
-
-
-
-# [0.11.0](https://github.com/Torwent/FreeWaspBots/compare/v0.10.0...v0.11.0) (2022-01-31)
-
-
-### Bug Fixes
-
-* **alcher:** will not walk to GE anymore if we are not in varrock. ([032ecdc](https://github.com/Torwent/FreeWaspBots/commit/032ecdcfc965b5af2e1d5058105e08db28762d43))
-
-
-### Features
-
-* added dropdown menus ([36725a3](https://github.com/Torwent/FreeWaspBots/commit/36725a37646b1b40fc248070d8197c0416a2f9f4))
 
 
 
