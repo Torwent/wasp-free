@@ -306,6 +306,12 @@ begin
 
   if Inventory.IsOpen then
   begin
+    if ToStr(AlchItem) = '' then
+      Self.SetupAlchItems;
+
+    if not Inventory.FindItem(AlchItem) then
+      Exit(EAlcherState.END_SCRIPT2);
+      
     if MainScreen.IsUpText('Alchemy ->') then
       Exit(EAlcherState.CHOOSE_ITEM);
 
