@@ -296,15 +296,8 @@ end;
 
 
 function TEnchanter.Withdraw(Item: TRSItem): Boolean;
-var
-  InvCount: Int32;
 begin
-  if BankTab = -1 then
-    BankTab := Bank.FindItemTab(Item);
-
-  InvCount := Inventory.Count;
-  if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
-     WaitUntil(Inventory.Count > InvCount, 100, 3000);
+  if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
 
   if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
