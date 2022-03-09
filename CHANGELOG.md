@@ -1,3 +1,12 @@
+## [0.13.2](https://github.com/Torwent/FreeWaspBots/compare/v0.13.1...v0.13.2) (2022-03-09)
+
+
+### Bug Fixes
+
+* **kraken:** make imbued heart optional ([a13adc7](https://github.com/Torwent/FreeWaspBots/commit/a13adc7b0a1f22ec29d52657679d488e01bc0c8f))
+
+
+
 ## [0.13.1](https://github.com/Torwent/FreeWaspBots/compare/v0.13.0...v0.13.1) (2022-03-01)
 
 
@@ -37,15 +46,6 @@
 ### Bug Fixes
 
 * **NMZ:** fixed wrong walker indexes. ([6e63c8f](https://github.com/Torwent/FreeWaspBots/commit/6e63c8fdf6751f1dbb6f2a560f924004d8c19c29))
-
-
-
-## [0.11.1](https://github.com/Torwent/FreeWaspBots/compare/v0.11.0...v0.11.1) (2022-02-01)
-
-
-### Bug Fixes
-
-* **larder builder:** updated for compatibility ([98a0af4](https://github.com/Torwent/FreeWaspBots/commit/98a0af4b59d6c86c82e0de14a742a32505b790ff))
 
 
 
