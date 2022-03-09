@@ -49,6 +49,7 @@ type
     KrakenTPA: TPointArray;
     IsAttacking: Boolean;
     CheckedLoot: Boolean;
+    UseImbuedHeart: Boolean;
     ImbuedHeart: TCountDown;
   end;
 
@@ -213,7 +214,7 @@ function TScript.BoostMagic: Boolean;
 var
   Slot: Int32;
 begin
-  Result := Inventory.FindItem('Imbued heart', Slot);
+  Result := UseImbuedHeart := Inventory.FindItem('Imbued heart', Slot);
 
   if not Result then
     Exit;
@@ -279,7 +280,7 @@ begin
   if CombatHandler.NeedBracelet then
     Exit(EQUIP_BRACELET);
 
-  if ImbuedHeart.IsFinished then
+  if UseImbuedHeart and ImbuedHeart.IsFinished then
     Exit(BOOST);
 
   if not Minimap.IsPrayerEnabled and (Minimap.GetPrayerLevel > 0) then
