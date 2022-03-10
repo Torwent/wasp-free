@@ -620,10 +620,7 @@ begin
     if PrayFlick and PrayFlickTimer.IsFinished then
       Exit(FLICK_PRAYER);
 
-    if PowerSurgeTimer.IsFinished and not MainScreen.InCombat then
-      Exit(ATTACK_NPC);
-
-    if not PowerSurgeTimer.IsFinished and not MainScreen.WaitInCombat(600) then
+    if not MainScreen.WaitInCombat(600) then
       Exit(ATTACK_NPC);
 
     if CombatHandler.CanSpec then
