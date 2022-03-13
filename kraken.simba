@@ -95,7 +95,8 @@ begin
   KrakenFinder.Grow := 4;
   KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
   KrakenFinder.MinShortSide := 70;
-
+  
+  UseImbuedHeart := True;
   ImbuedHeart.Setup(7 * ONE_MINUTE);
 
   if not RSClient.IsLoggedIn then
