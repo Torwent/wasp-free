@@ -1,3 +1,12 @@
+## [0.13.3](https://github.com/Torwent/FreeWaspBots/compare/v0.13.2...v0.13.3) (2022-03-13)
+
+
+### Bug Fixes
+
+* UseImbuedHeart now starts true ([c581258](https://github.com/Torwent/FreeWaspBots/commit/c5812584a1d975204e086248bf877e2135264eb6))
+
+
+
 ## [0.13.2](https://github.com/Torwent/FreeWaspBots/compare/v0.13.1...v0.13.2) (2022-03-09)
 
 
@@ -37,15 +46,6 @@
 ### Features
 
 * new xpdrops ([905fca8](https://github.com/Torwent/FreeWaspBots/commit/905fca8e23920249b3e722261bf5f672036179d9))
-
-
-
-## [0.11.2](https://github.com/Torwent/FreeWaspBots/compare/v0.11.1...v0.11.2) (2022-02-04)
-
-
-### Bug Fixes
-
-* **NMZ:** fixed wrong walker indexes. ([6e63c8f](https://github.com/Torwent/FreeWaspBots/commit/6e63c8fdf6751f1dbb6f2a560f924004d8c19c29))
 
 
 
