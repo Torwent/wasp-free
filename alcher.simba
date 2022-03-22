@@ -382,7 +382,7 @@ begin
     1: AlchSpell := ERSSpell.LOW_LEVEL_ALCHEMY;
   end;
 
-  LossProtection := IgnoreProfit.Checkbox.getState = cbChecked;
+  LossProtection := IgnoreProfit.IsChecked;
   CustomItem := CustomItemSelector.GetText;
 end;
 
@@ -411,7 +411,7 @@ begin
     SetCaption('Prevent loss:');
     SetLeft(AlchSelector.getLeft + AlchSelector.GetWidth + 20);
     SetTop(AlchSelector.getTop + 20);
-    SetEnabled(True);
+    SetEnabled(LossProtection);
   end;
 
   with CustomItemSelector do
