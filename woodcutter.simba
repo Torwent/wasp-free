@@ -16,7 +16,7 @@ end;
 type
   ERSBank = (
     POWER_WC, GE, VARROCK_E, VARROCK_W,
-    EDGE, SEERS_VILLAGE, DRAYNOR_VILLAGE, WC_GUILD, PRIFDDINAS
+    EDGE, SEERS_VILLAGE, DRAYNOR_VILLAGE, WOODCUT_GUILD, PRIFDDINAS
   );
 
   ERSTree = (
@@ -79,8 +79,8 @@ begin
   inherited;
 
   Antiban.Skills := [ERSSkill.WOODCUTTING, ERSSkill.TOTAL];
-  Antiban.MinZoom := 55;
-  Antiban.MaxZoom := 80;
+  Antiban.MinZoom := 30;
+  Antiban.MaxZoom := 60;
 end;
 
 
@@ -160,7 +160,7 @@ procedure TWoodcutter.SetupBank;
 begin
 
   case BankLocation of
-    WC_GUILD:
+    WOODCUT_GUILD:
       begin
         RSW.Setup('x1564y2293');
         ScriptBank := @RSObjects.WCGuildBank;
@@ -557,7 +557,7 @@ begin
     'Draynor':                 BankLocation := ERSBank.DRAYNOR_VILLAGE;
     'Seers'' village':         BankLocation := ERSBank.SEERS_VILLAGE;
     'Edgeville':               BankLocation := ERSBank.EDGE;
-    'Woodcutting guild':       BankLocation := ERSBank.WC_GUILD;
+    'Woodcutting guild':       BankLocation := ERSBank.WOODCUT_GUILD;
     'Prifddinas':              BankLocation := ERSBank.PRIFDDINAS;
   end;
 
