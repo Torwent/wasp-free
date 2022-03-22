@@ -1,3 +1,12 @@
+## [0.13.4](https://github.com/Torwent/FreeWaspBots/compare/v0.13.3...v0.13.4) (2022-03-22)
+
+
+### Bug Fixes
+
+* **alcher:** minor fix in the GUI ([a20e82b](https://github.com/Torwent/FreeWaspBots/commit/a20e82bac4afc1e1828e17ed79f92b767b623046))
+
+
+
 ## [0.13.3](https://github.com/Torwent/FreeWaspBots/compare/v0.13.2...v0.13.3) (2022-03-13)
 
 
@@ -31,21 +40,6 @@
 ### Features
 
 * **wc:** now picking up nests is optional ([e97f907](https://github.com/Torwent/FreeWaspBots/commit/e97f907907642a32997232aca42875beca167b1f))
-
-
-
-# [0.12.0](https://github.com/Torwent/FreeWaspBots/compare/v0.11.2...v0.12.0) (2022-02-14)
-
-
-### Bug Fixes
-
-* **miner:** better animation detection ([c1189b4](https://github.com/Torwent/FreeWaspBots/commit/c1189b4dc6678c4d80d396e2f1ada3256921c8ec))
-* **wc:** better animation detection ([1fddd61](https://github.com/Torwent/FreeWaspBots/commit/1fddd6166161927c6f6a505e8b4c06aaabfe40dc))
-
-
-### Features
-
-* new xpdrops ([905fca8](https://github.com/Torwent/FreeWaspBots/commit/905fca8e23920249b3e722261bf5f672036179d9))
 
 
 
