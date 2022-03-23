@@ -310,13 +310,15 @@ begin
       Self.SetupAlchItems;
 
     if not Inventory.FindItem(AlchItem) then
+    begin
+      if Inventory.GetSelectedSlot > -1 then
+        Exit(EAlcherState.DESELECT_ITEM);
+
       Exit(EAlcherState.END_SCRIPT2);
+    end;
       
     if MainScreen.IsUpText('Alchemy ->') then
       Exit(EAlcherState.CHOOSE_ITEM);
-
-    if Inventory.GetSelectedSlot > -1 then
-      Exit(EAlcherState.DESELECT_ITEM);
   end;
 
   Exit(EAlcherState.OPEN_MAGIC_TAB);
@@ -349,7 +351,7 @@ begin
       EAlcherState.OPEN_MAGIC_TAB: Magic.Open;
       EAlcherState.OPEN_INV_TAB: Inventory.Open;
       EAlcherState.HANDLE_WARNING: Self.HandleWarning;
-      EAlcherState.DESELECT_ITEM: Inventory.MouseSlot(Inventory.GetSelectedSlot, MOUSE_LEFT);
+      EAlcherState.DESELECT_ITEM: Inventory.SetSelectedSlot(-1);
       EAlcherState.CLOSE_CONTEXT: ChooseOption.Close;
 
       EAlcherState.END_SCRIPT1, EAlcherState.END_SCRIPT2:
