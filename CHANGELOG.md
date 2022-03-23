@@ -1,3 +1,12 @@
+## [0.13.5](https://github.com/Torwent/FreeWaspBots/compare/v0.13.4...v0.13.5) (2022-03-23)
+
+
+### Bug Fixes
+
+* **alcher:** should properly deselect items now ([05c12d0](https://github.com/Torwent/FreeWaspBots/commit/05c12d079be6ec3c2648d65959dfff5c8b53c49b))
+
+
+
 ## [0.13.4](https://github.com/Torwent/FreeWaspBots/compare/v0.13.3...v0.13.4) (2022-03-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * fixed kraken paint and removed firemaker ([dabd788](https://github.com/Torwent/FreeWaspBots/commit/dabd78831bf447cb1565fdd978852b52a9b9870f))
-
-
-
-# [0.13.0](https://github.com/Torwent/FreeWaspBots/compare/v0.12.0...v0.13.0) (2022-02-16)
-
-
-### Features
-
-* **wc:** now picking up nests is optional ([e97f907](https://github.com/Torwent/FreeWaspBots/commit/e97f907907642a32997232aca42875beca167b1f))
 
 
 
