@@ -1,3 +1,12 @@
+# [0.14.0](https://github.com/Torwent/FreeWaspBots/compare/v0.13.5...v0.14.0) (2022-03-24)
+
+
+### Features
+
+* GH Action to sanitize settings before releases ([2bc8e04](https://github.com/Torwent/FreeWaspBots/commit/2bc8e04d118e372fe03141dfaa49ad3f3c49c8c7))
+
+
+
 ## [0.13.5](https://github.com/Torwent/FreeWaspBots/compare/v0.13.4...v0.13.5) (2022-03-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **kraken:** make imbued heart optional ([a13adc7](https://github.com/Torwent/FreeWaspBots/commit/a13adc7b0a1f22ec29d52657679d488e01bc0c8f))
-
-
-
-## [0.13.1](https://github.com/Torwent/FreeWaspBots/compare/v0.13.0...v0.13.1) (2022-03-01)
-
-
-### Bug Fixes
-
-* fixed kraken paint and removed firemaker ([dabd788](https://github.com/Torwent/FreeWaspBots/commit/dabd78831bf447cb1565fdd978852b52a9b9870f))
 
 
 
