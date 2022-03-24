@@ -4,7 +4,7 @@
   {$I SRL/osr.simba}
   {$I WaspLib/osr.simba}
 
-  begin
+begin
   Login.PlayerIndex     := 0;
   AntibanEnabled        := True; //Enables Most Antiban
   BreaksEnabled         := True; //Enables Short Breaks
