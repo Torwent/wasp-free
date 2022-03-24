@@ -5,7 +5,7 @@
   {$I WaspLib/osr.simba}
 
   begin
-  Login.PlayerIndex     := 0;
+  Login.PlayerIndex     := 3;
   AntibanEnabled        := True; //Enables Most Antiban
   BreaksEnabled         := True; //Enables Short Breaks
   SleepEnabled          := True; //Enables Sleep Breaks
