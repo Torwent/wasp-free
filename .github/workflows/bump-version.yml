@@ -10,7 +10,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.2.0
-                    
+    
+    - name: Regex replace
+      id: regex
+      uses: jacobtomlinson/gha-find-replace@v2
+      with:
+        find:
+            begin\n.*Login.PlayerIndex.*:=.*((.+\n)+)end;\n
+        replace: |
+            begin
+              Login.PlayerIndex     := 0;
+              AntibanEnabled        := True; //Enables Most Antiban
+              BreaksEnabled         := True; //Enables Short Breaks
+              SleepEnabled          := True; //Enables Sleep Breaks
+              RemoteInputEnabled    := True; //Enables Remote Input
+              ProgressReportEnabled := True; //Enables Graphical Progress Report
+              ScriptDebugEnabled    := False; //Enables Script Debugging
+            end;
+        include: "**.simba"
+        regex: true
+    
+    - name: Commit files
+      if: ${{ steps.regex.outputs.modifiedFiles > 0 }}
+      run: |
+        git config --local user.email "41898282+wasp-regex-replacer[bot]@users.noreply.github.com"
+        git config --local user.name "wasp-regex-replacer[bot]"
+        git commit -m "Regex replaced script settings" -a
+    
+    - name: Push changes
+      if: ${{ steps.regex.outputs.modifiedFiles > 0 }}
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}     
+    
     - name: Conventional Changelog Action
       id: changelog
       uses: TriPSs/conventional-changelog-action@v3.8.0
