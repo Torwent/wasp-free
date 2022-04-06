@@ -1,3 +1,12 @@
+## [0.14.1](https://github.com/Torwent/FreeWaspBots/compare/v0.14.0...v0.14.1) (2022-04-06)
+
+
+### Bug Fixes
+
+* **enchanter:** typo ([2ddf575](https://github.com/Torwent/FreeWaspBots/commit/2ddf5750894967fe0cd5b1df65e068e6c183fa1e))
+
+
+
 # [0.14.0](https://github.com/Torwent/FreeWaspBots/compare/v0.13.5...v0.14.0) (2022-03-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * UseImbuedHeart now starts true ([c581258](https://github.com/Torwent/FreeWaspBots/commit/c5812584a1d975204e086248bf877e2135264eb6))
-
-
-
-## [0.13.2](https://github.com/Torwent/FreeWaspBots/compare/v0.13.1...v0.13.2) (2022-03-09)
-
-
-### Bug Fixes
-
-* **kraken:** make imbued heart optional ([a13adc7](https://github.com/Torwent/FreeWaspBots/commit/a13adc7b0a1f22ec29d52657679d488e01bc0c8f))
 
 
 
