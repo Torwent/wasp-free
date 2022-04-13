@@ -1,0 +1,481 @@
+{$IFNDEF SCRIPT_CHAIN}
+  {$DEFINE SRL_USE_REMOTEINPUT}
+  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$I SRL/osr.simba}
+  {$I WaspLib/osr.simba}
+
+begin
+  Login.PlayerIndex     := 0;
+  AntibanEnabled        := True; //Enables Most Antiban
+  BreaksEnabled         := True; //Enables Short Breaks
+  SleepEnabled          := True; //Enables Sleep Breaks
+  RemoteInputEnabled    := True; //Enables Remote Input
+  ProgressReportEnabled := True; //Enables Graphical Progress Report
+  ScriptDebugEnabled    := False; //Enables Script Debugging
+end;
+{$ENDIF}
+
+type
+  EBar = (
+    BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANT, RUNITE
+  );
+
+  EFurnace = (
+    EDGEVILLE_FURNACE, FALADOR_FURNACE
+  );
+
+var
+  CurrentBar = EBar.GOLD;
+  CurrentFurnace = EFurnace.EDGEVILLE_FURNACE;
+
+type
+  ESmelterState = (
+    HOVER_BANK,
+    OPEN_BANK,
+    WITHDRAW_MATERIALS,
+    DEPOSIT_BAR,
+    DEPOSIT_RANDOM_ITEM,
+
+    OPEN_COLLECT,
+    HANDLE_COLLECT,
+
+    OPEN_FURNACE,
+    SMELT_BAR,
+    WAIT_SMELT,
+
+    CLOSE_INTERFACE,
+
+    LEVEL_UP,
+    CLOSE_CONTEXT,
+
+    END_SCRIPT,
+    OUT_OF_SUPPLIES
+  );
+
+  TSmelter = record(TBaseBankScript)
+    State: ESmelterState;
+
+    Furnace: TRSObject;
+
+    Ore1: TRSBankWithdrawItem;
+    Ore2: TRSBankWithdrawItem;
+
+    Bar: TRSBankDepositItem;
+    Materials: TRSItemArray;
+    Smelting: Boolean;
+
+    BarAmount: Int32;
+    Multiplier: Int32;
+
+    UseOre2: Boolean;
+    UseRing: Boolean;
+  end;
+
+
+procedure TAntiban.Setup; override;
+begin
+  inherited;
+
+  Antiban.Skills := [ERSSkill.Smithing, ERSSkill.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 40;
+end;
+
+procedure TSmelter.SetupFurnaces;
+begin
+  case CurrentFurnace of
+    EFurnace.EDGEVILLE_FURNACE:
+      begin
+        RSW.Setup(GetMapBlock(EWaspMapBlock.VARROCK));
+        Furnace := RSObjects.EdgevilleFurnace;
+        ScriptBank := RSObjects.EdgevilleBank;
+      end;
+
+    EFurnace.FALADOR_FURNACE:
+      begin
+        RSW.Setup(GetMapBlock(EWaspMapBlock.FALADOR));
+        Furnace := RSObjects.FaladorFurnace;
+        ScriptBank := RSObjects.FaladorWestBank;
+      end;
+  end;
+end;
+
+procedure TSmelter.SetupItems;
+begin
+  Bar.Quantity := BANK_DEPOSIT_ALL;
+
+  case CurrentBar of
+    EBar.BRONZE:
+      begin
+        Bar.Item := 'Bronze bar';
+        Ore1 := ['Copper ore', 14, False];
+        Ore2 := ['Tin ore', 14, False];
+      end;
+
+    EBar.IRON:
+      begin
+        Bar.Item := 'Iron bar';
+        Ore1 := ['Iron ore', BANK_WITHDRAW_ALL, False];
+      end;
+
+    EBar.SILVER:
+      begin
+        Bar.Item := 'Silver bar';
+        Ore1 := ['Silver ore', BANK_WITHDRAW_ALL, False];
+      end;
+
+    EBar.STEEL:
+      begin
+        Bar.Item := 'Steel bar';
+        Ore1 := ['Iron ore', 9, False];
+        Ore2 := ['Coal', 18, False];
+      end;
+
+    EBar.GOLD:
+      begin
+        Bar.Item := 'Gold bar';
+        Ore1 := ['Gold ore', BANK_WITHDRAW_ALL, False];
+      end;
+
+    EBar.MITHRIL:
+      begin
+        Bar.Item := 'Mithril bar';
+        Ore1 := ['Mithril ore', 5, False];
+        Ore2 := ['Coal', 20, False];
+      end;
+
+    EBar.ADAMANT:
+      begin
+        Bar.Item := 'Adamantite bar';
+        Ore1 := ['Adamantite ore', 4, False];
+        Ore2 := ['Coal', 24, False];
+      end;
+
+    EBar.RUNITE:
+      begin
+        Bar.Item := 'Runite bar';
+        Ore1 := ['Runite ore', 3, False];
+        Ore2 := ['Coal', 27, False];
+      end;
+  end;
+
+  Materials += Ore1.Item;
+  ActionProfit := (ItemData.GetAverage(Bar.Item)) -
+                  (ItemData.GetAverage(Ore1.Item) * Ore1.Quantity);
+
+  if Ore2 <> [] then
+  begin
+    ActionProfit -= (ItemData.GetAverage(Ore2.Item) * Round(Ore2.Quantity / Ore1.Quantity));
+    Materials += Ore2.Item;
+  end;
+end;
+
+
+procedure TSmelter.Init(MaxActions: Int32; MaxTime: Int64); override;
+begin
+  Name := 'Smelter';
+
+  inherited;
+
+  Self.SetupFurnaces;
+  Self.SetupItems;
+
+  if not RSClient.IsLoggedIn then
+    Login.LoginPlayer;
+
+  if ScriptDebugEnabled then
+  begin
+    DebugObjectArray += @ScriptBank;
+    DebugObjectArray += @RSObjects.VarrockAnvil;
+  end;
+end;
+
+
+
+function TSmelter.Withdraw: Boolean;
+var
+  InvCount: Int32;
+  Item: TRSBankWithdrawItem;
+  Find1, Find2: Boolean;
+begin
+  Find1 := Inventory.FindItem(Ore1.Item);
+  Find2 := (Ore2 = []) or Inventory.FindItem(Ore2.Item);
+
+  if Find1 then
+  begin
+    if Find2 then
+      Exit;
+    Item := Ore2;
+    Item.Quantity := Ore1.Quantity;
+  end
+  else if Find2 or (Ore1.Quantity > Ore2.Quantity) or
+          ((Ore1.Quantity = Ore2.Quantity) and Antiban.BioDice) then
+  begin
+    Item := Ore1
+    if Ore2 <> [] then
+      Item.Quantity := Ore2.Quantity;
+  end
+  else
+    Item := Ore2;
+
+  InvCount := Inventory.Count;
+  if Result := Bank.WithdrawItem(BankTab, Item, True) then
+    WaitUntil(Inventory.Count > InvCount, 100, 3000);
+
+  if BankEmpty := ((not Result and Bank.IsOpen) and
+                    not Bank.FindItem(BankTab, Item)) then
+    if CollectEmpty and CollectTimer.IsFinished then
+      CollectEmpty := False;
+end;
+
+function TSmelter.Deposit: Boolean;
+var
+  ItemCount: Int32 := Inventory.Count;
+begin
+  if Result := Bank.DepositAll then
+    if WaitUntil(Inventory.Count = 0, 100, 3000) then
+      TotalActions += ItemCount;
+end;
+
+function TSmelter.HandleCollectBox: Boolean;
+begin
+  if not CollectBox.IsOpen then Exit;
+
+  if CollectBox.FindItems(Materials) then
+  begin
+    if Result := CollectEmpty := CollectBox.CollectToBank then
+      WaitUntil(not CollectBox.FindItems(Materials), 100, 3000);
+    BankEmpty := not CollectEmpty;
+  end
+  else CollectEmpty := True;
+
+  CollectTimer.Restart;
+end;
+
+
+function TSmelter.OpenFurnace: Boolean;
+begin
+  if Furnace.WalkSelectOption(['Smelt']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := Make.IsOpen(8000);
+  end;
+end;
+
+
+function TSmelter.SmeltBar: Boolean;
+begin
+  if not Inventory.FindAllItems(Materials) then
+    Exit;
+
+  if Result := Make.Select(ToStr(Bar.Item), MAKE_QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+    Smelting := XPBar.WaitXP(3500);
+end;
+
+function TSmelter.IsMakingItem(WaitTime: Int32 = 3200): Boolean;
+var
+  ItemCount: Int32 := Inventory.CountItem(Bar.Item);
+begin
+  if Result := WaitUntil(ItemCount < Inventory.CountItem(Bar.Item), 100, WaitTime) then
+    WL.Activity.Restart;
+end;
+
+function TSmelter.WaitSmelt: Boolean;
+begin
+  if Smelting then
+    Result := Smelting := (Inventory.FindAllItems(Materials) and Self.IsMakingItem)
+  else
+    Result := Smelting := Self.IsMakingItem;
+
+  if Result then
+    WL.Activity.Restart;
+end;
+
+
+function TSmelter.GetState: ESmelterState;
+begin
+  if WL.Activity.IsFinished then
+    Exit(ESmelterState.END_SCRIPT);
+
+  if Chat.LeveledUp then
+  begin
+    Smelting := False;
+    Exit(ESmelterState.LEVEL_UP);
+  end;
+
+  if MainScreen.HasInterface then
+  begin
+    HoveringBank := False;
+    if Bank.IsOpen then
+    begin
+      if Inventory.FindItem(Bar.Item) then
+        Exit(ESmelterState.DEPOSIT_BAR);
+
+      if Inventory.HasRandomItem(Materials) then
+        Exit(ESmelterState.DEPOSIT_RANDOM_ITEM);
+
+      if not BankEmpty and not Inventory.FindAllItems(Materials) then
+        Exit(ESmelterState.WITHDRAW_MATERIALS);
+    end;
+
+    if not CollectEmpty and CollectBox.IsOpen then
+      Exit(ESmelterState.HANDLE_COLLECT);
+
+    Exit(ESmelterState.CLOSE_INTERFACE);
+  end;
+
+  if Inventory.FindAllItems(Materials) then
+  begin
+    if Smelting then
+    begin
+      if not HoveringBank then
+      begin
+        Self.CountItemsLeft(Ore1.Item);
+
+        if Self.ShouldHover then
+          Exit(ESmelterState.HOVER_BANK);
+      end;
+
+      Exit(ESmelterState.WAIT_SMELT);
+    end;
+
+    if Make.IsOpen then
+      Exit(ESmelterState.SMELT_BAR);
+
+    Exit(ESmelterState.OPEN_FURNACE);
+  end;
+
+  if BankEmpty then
+  begin
+    if CollectEmpty then
+      Exit(ESmelterState.OUT_OF_SUPPLIES);
+
+    Exit(ESmelterState.OPEN_COLLECT);
+  end;
+
+  if BankEmpty then
+    Exit(ESmelterState.OPEN_COLLECT);
+
+  Exit(ESmelterState.OPEN_BANK);
+end;
+
+function TSmelter.Terminate: Boolean; override;
+begin
+  Result := inherited;
+  if Result then
+    for 0 to 5 do
+      if Result := Bank.WithdrawItem(BankTab, [Bar.Item, BANK_WITHDRAW_ALL, True], True) then
+        Break;
+end;
+
+procedure TSmelter.Run(MaxActions: Int32; MaxTime: Int64);
+begin
+  ClearDebug;
+  Self.Init(MaxActions, MaxTime);
+
+  repeat
+    State := Self.GetState;
+    Action := ToStr(State);
+    Self.ProcessWhileWaiting;
+
+    case State of
+      ESmelterState.HOVER_BANK: Self.Hover;
+      ESmelterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw;
+      ESmelterState.DEPOSIT_BAR: Self.Deposit;
+      ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositAllBut(BankTab, Materials);
+
+      ESmelterState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
+      ESmelterState.HANDLE_COLLECT: Self.HandleCollectBox;
+
+      ESmelterState.OPEN_FURNACE: Self.OpenFurnace;
+      ESmelterState.SMELT_BAR: Self.SmeltBar;
+      ESmelterState.WAIT_SMELT: Self.WaitSmelt;
+
+      ESmelterState.CLOSE_INTERFACE: MainScreen.CloseInterface;
+      ESmelterState.CLOSE_CONTEXT: ChooseOption.Close;
+      ESmelterState.LEVEL_UP: Chat.HandleLevelUp;
+
+      ESmelterState.END_SCRIPT, ESmelterState.OUT_OF_SUPPLIES: Break;
+    end;
+
+    Self.DoAntiban;
+  until Self.ShouldStop;
+
+  if not Self.Terminate then TerminateScript(Self.Name + ' didn''t terminate properly. Stopping execution.');
+end;
+
+var
+  Smither: TSmelter;
+
+type
+  TSmelterConfig = record(TScriptConfig)
+    BarTypeSelector: TLabeledCombobox;
+    FurnaceSelector: TLabeledCombobox;
+    MetalItemSelector: TLabeledEdit;
+  end;
+
+procedure TSmelterConfig.StartScript(Sender: TObject);
+begin
+  Self.Init(Sender);
+
+  CurrentBar := EBar(BarTypeSelector.GetItemIndex);
+  CurrentFurnace := EFurnace(FurnaceSelector.GetItemIndex);
+end;
+
+procedure TSmelterConfig.Setup; override;
+begin
+  inherited;
+
+  with BarTypeSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Bar type:');
+    SetLeft(ScriptSettingsLabel.getLeft + 5);
+    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetWidth(200);
+    SetStyle(csDropDownList);
+    AddItem('Bronze');
+    AddItem('Iron');
+    AddItem('Silver');
+    AddItem('Steel');
+    AddItem('Gold');
+    AddItem('Mithril');
+    AddItem('Adamantite');
+    AddItem('Runite');
+    SetItemIndex(Ord(CurrentBar));
+  end;
+
+  with FurnaceSelector do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Furnace:');
+    SetLeft(BarTypeSelector.GetLeft + BarTypeSelector.GetWidth + 5);
+    SetTop(BarTypeSelector.GetTop);
+    SetWidth(200);
+    SetStyle(csDropDownList);
+    AddItem('Edgeville');
+    AddItem('Falador');
+    SetItemIndex(Ord(CurrentFurnace));
+  end;
+
+  StartButton.setOnClick(@Self.StartScript);
+end;
+
+procedure TSmelterConfig.Run; override;
+begin
+  Self.Setup;
+
+  inherited;
+end;
+
+var SmitherConfig: TSmelterConfig;
+
+{$IFNDEF SCRIPT_CHAIN}
+begin
+  {$IFDEF SCRIPT_GUI}
+  Sync(@SmitherConfig.Run);
+  {$ENDIF}
+  Smither.Run(MaxActions, MaxTime);
+end.
+{$ENDIF}
