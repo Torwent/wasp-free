@@ -196,7 +196,7 @@ begin
 
         NPCMaxHit := 3;
 
-        ScriptBank := @RSObjects.DraynorBank;
+        ScriptBank := RSObjects.DraynorBank;
 
         if SuicideMode then SuicideMode := False;
 
@@ -217,7 +217,7 @@ begin
         NPCMaxHit := 2;
         ActionProfit := 30;
 
-        ScriptBank := @RSObjects.FaladorWestBank;
+        ScriptBank := RSObjects.FaladorWestBank;
         NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
         FoodManager.Amount := Round(Antiban.GetUniqueNumber(5, 15));
       end;
@@ -227,7 +227,7 @@ begin
         Login.Players[Login.PlayerIndex].Worlds:= []; 
         RSW.Setup('x5723y3038');
         CurrentNPC := @RSNPCs.KnightOfArdougne;
-        ScriptBank := @RSObjects.ArdougneSouthBank;
+        ScriptBank := RSObjects.ArdougneSouthBank;
 
         CurrentNPC^.Filter.MinimapDot := False;
 
@@ -250,7 +250,7 @@ begin
       begin
         RSW.Setup('x3583y1905');
         CurrentNPC := @RSNPCs.Elf;
-        ScriptBank := @RSObjects.PrifddinasBank;
+        ScriptBank := RSObjects.PrifddinasBank;
 
         LootArray := [
           CoinPouch, 'Coins', 'Death rune', 'Jug of wine', 'Nature rune',
@@ -295,7 +295,7 @@ begin
 
         NPCMaxHit := 4;
 
-        ScriptBank := @RSObjects.TzhaarBank;
+        ScriptBank := RSObjects.TzhaarBank;
 
         if SuicideMode then SuicideMode := False;
 
@@ -469,7 +469,7 @@ begin
 
   if ScriptDebugEnabled then
   begin
-    DebugObjectArray += ScriptBank;
+    DebugObjectArray += @ScriptBank;
     DebugNPCArray += CurrentNPC;
   end;
 end;

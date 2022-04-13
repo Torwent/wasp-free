@@ -78,7 +78,7 @@ type
     Ingredient: TRSBankWithdrawItem;
     Products: array of TRSBankDepositItem;
 
-    CookingObj: PRSObject;
+    CookingObj: TRSObject;
 
     Cooking: Boolean;
     UsingFire: Boolean;
@@ -137,19 +137,19 @@ begin
     ERSLocation.HOSIDIUS:
       begin
         RSW.Setup('x1916y1841');
-        ScriptBank := @RSObjects.HosidiusKitchenBank;
-        CookingObj := @RSObjects.HosidiusKitchenOven;
+        ScriptBank := RSObjects.HosidiusKitchenBank;
+        CookingObj := RSObjects.HosidiusKitchenOven;
       end;
 
     ERSLocation.ROGUES_DEN:
       begin
         RSW.Setup('x9921y310');
         RSNPCs.EmeraldBenedict.Filter.Finder := False;
-        ScriptBanker := @RSNPCs.EmeraldBenedict;
+        ScriptBanker := RSNPCs.EmeraldBenedict;
 
         RSObjects.EternalFire.Filter.Finder := False;
         RSObjects.EternalFire.Filter.UpText := False;
-        CookingObj := @RSObjects.EternalFire;
+        CookingObj := RSObjects.EternalFire;
       end;
   end;
 
@@ -177,10 +177,10 @@ begin
   if ScriptDebugEnabled then
   begin
     case CurrentLocation of
-      ERSLocation.HOSIDIUS:   DebugObjectArray += ScriptBank;
-      ERSLocation.ROGUES_DEN: DebugNPCArray += ScriptBanker;
+      ERSLocation.HOSIDIUS:   DebugObjectArray += @ScriptBank;
+      ERSLocation.ROGUES_DEN: DebugNPCArray += @ScriptBanker;
     end;
-    DebugObjectArray += CookingObj;
+    DebugObjectArray += @CookingObj;
   end;
 end;
 
@@ -263,7 +263,7 @@ begin
     if Inventory.GetSelectedSlot = -1 then
       Inventory.SetSelectedItem(Ingredient.Item);
 
-  if CookingObj^.WalkSelectOption(['Cook', 'Fire']) then
+  if CookingObj.WalkSelectOption(['Cook', 'Fire']) then
   begin
     Minimap.WaitPlayerMoving(300, 3000);
     Result := Make.IsOpen(4000);

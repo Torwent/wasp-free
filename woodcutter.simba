@@ -163,49 +163,49 @@ begin
     WOODCUT_GUILD:
       begin
         RSW.Setup('x1564y2293');
-        ScriptBank := @RSObjects.WCGuildBank;
+        ScriptBank := RSObjects.WCGuildBank;
         UseBank := True;
       end;
 
     GE:
       begin
         RSW.Setup('x7536y2363');
-        ScriptBank := @RSObjects.GEBank;
+        ScriptBank := RSObjects.GEBank;
         UseBank := True;
       end;
 
     VARROCK_E:
       begin
         RSW.Setup('x7536y2363');
-        ScriptBank := @RSObjects.VarrockEastBank;
+        ScriptBank := RSObjects.VarrockEastBank;
         UseBank := True;
       end;
 
     VARROCK_W:
       begin
         RSW.Setup('x7536y2363');
-        ScriptBank := @RSObjects.VarrockWestBank;
+        ScriptBank := RSObjects.VarrockWestBank;
         UseBank := True;
       end;
 
     EDGE:
       begin
         RSW.Setup('x7536y2363');
-        ScriptBank := @RSObjects.EdgevilleBank;
+        ScriptBank := RSObjects.EdgevilleBank;
         UseBank := True;
       end;
 
     PRIFDDINAS:
       begin
         RSW.Setup('x3583y1905');
-        ScriptBank := @RSObjects.PrifddinasBank;
+        ScriptBank := RSObjects.PrifddinasBank;
         UseBank := True;
       end;
 
     DRAYNOR_VILLAGE:
       begin
         RSW.Setup('x7617y3214');
-        ScriptBank := @RSObjects.DraynorBank;
+        ScriptBank := RSObjects.DraynorBank;
         UseBank := True;
       end;
 
@@ -327,7 +327,7 @@ begin
 
   if ScriptDebugEnabled then
   begin
-    DebugObjectArray += ScriptBank;
+    DebugObjectArray += @ScriptBank;
     DebugObjectArray += RSTree;
     DebugNPCArray += @RSNPCs.SawmillOperator;
   end;

@@ -244,7 +244,7 @@ begin
     Login.LoginPlayer;
 
   if ScriptDebugEnabled then
-    DebugObjectArray += ScriptBank;
+    DebugObjectArray += @ScriptBank;
 end;
 
 

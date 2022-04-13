@@ -117,7 +117,7 @@ begin
   Self.SetupWLBanks;
 
   if ScriptDebugEnabled then
-    DebugObjectArray += ScriptBank;
+    DebugObjectArray += @ScriptBank;
 
   Self.SetupSpell;
   Self.SetupRemains;

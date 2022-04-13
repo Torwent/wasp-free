@@ -183,28 +183,28 @@ begin
     MINE_GUILD:
       begin
         RSW.Setup('x6291y497');
-        ScriptBank := @RSObjects.MiningGuildBank;
+        ScriptBank := RSObjects.MiningGuildBank;
         UseBank := True;
       end;
 
     CRAFTING_GUILD:
       begin
         RSW.Setup('x6953y3166');
-        ScriptBank := @RSObjects.CraftGuildBank;
+        ScriptBank := RSObjects.CraftGuildBank;
         UseBank := True;
       end;
 
     VARROCK_E:
       begin
         RSW.Setup('x7536y2363');
-        ScriptBank := @RSObjects.VarrockEastBank;
+        ScriptBank := RSObjects.VarrockEastBank;
         UseBank := True;
       end;
 
     VARROCK_W:
       begin
         RSW.Setup('x7536y2363');
-        ScriptBank := @RSObjects.VarrockWestBank;
+        ScriptBank := RSObjects.VarrockWestBank;
         UseBank := True;
       end;
 
@@ -255,7 +255,7 @@ begin
 
   if ScriptDebugEnabled then
   begin
-    DebugObjectArray += ScriptBank;
+    DebugObjectArray += @ScriptBank;
     DebugObjectArray += RSRock;
   end;
 end;

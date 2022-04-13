@@ -125,12 +125,13 @@ end;
 
 procedure TBlower.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'AIO Glassblower';
+  Name := 'Glassblower';
 
   inherited;
   Self.SetupWLBanks;
 
-  if ScriptDebugEnabled then DebugObjectArray += ScriptBank;
+  if ScriptDebugEnabled then
+    DebugObjectArray += @ScriptBank;
 
   UseBestItem := CurrentGlass = ERSGlassItem.Best;
   ItemChanged := True;

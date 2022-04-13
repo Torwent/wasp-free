@@ -74,7 +74,7 @@ begin
   inherited;
 
   RSW.Setup('x7789y2306');
-  ScriptBank := @RSObjects.GEBank;
+  ScriptBank := RSObjects.GEBank;
 
   RSAction.AlchItemArray += CustomItem;
 
@@ -276,7 +276,7 @@ begin
 
   if InVarrock and not InGE then
   begin
-    InGE := RSW.AtTile(ScriptBank^.TileArray, 30);
+    InGE := RSW.AtTile(ScriptBank.TileArray, 30);
     if not InGE then
       Exit(EAlcherState.WALK_ALCH);
   end;
@@ -336,7 +336,7 @@ begin
     Self.ProcessWhileWaiting;
 
     case State of
-      EAlcherState.WALK_ALCH: InGe := RSW.WebWalk(ScriptBank^.TileArray, 10, 0.2);
+      EAlcherState.WALK_ALCH: InGe := RSW.WebWalk(ScriptBank.TileArray, 10, 0.2);
 
       EAlcherState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
       EAlcherState.WITHDRAW_NATS: Self.Withdraw('Nature rune');

@@ -24,7 +24,7 @@ type
 
   TChompyHunter = record(TBaseWalkerScript)
     State: EState;
-    Toad: PRSNPC;
+    Toad: TRSNPC;
     OgreBellows: TRSItemArray;
     FillingBellows: Boolean;
   end;
@@ -48,7 +48,7 @@ begin
   RSW.Setup('x4595y3834');
 
   CombatHandler.Setup(@RSMonsters.Chompy, 2000);
-  Toad := @RSNPCs.SwampToad;
+  Toad := RSNPCs.SwampToad;
 
   OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
 
@@ -58,7 +58,7 @@ begin
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
   if ScriptDebugEnabled then
-    DebugNPCArray += Toad;
+    DebugNPCArray += @Toad;
 end;
 
 
@@ -139,7 +139,7 @@ function TChompyHunter.FillToad: Boolean;
 var
   InvCount := Inventory.Count;
 begin
-  if Toad^.Click(True, 10) then
+  if Toad.Click(True, 10) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(InvCount < Inventory.Count, 100, 5000);
