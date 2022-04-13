@@ -1,3 +1,12 @@
+# [0.15.0](https://github.com/Torwent/FreeWaspBots/compare/v0.14.1...v0.15.0) (2022-04-13)
+
+
+### Features
+
+* new smelter script ([eb6841b](https://github.com/Torwent/FreeWaspBots/commit/eb6841b56cc305efb74dd7d8b4d17ce36bfb613a))
+
+
+
 ## [0.14.1](https://github.com/Torwent/FreeWaspBots/compare/v0.14.0...v0.14.1) (2022-04-06)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** minor fix in the GUI ([a20e82b](https://github.com/Torwent/FreeWaspBots/commit/a20e82bac4afc1e1828e17ed79f92b767b623046))
-
-
-
-## [0.13.3](https://github.com/Torwent/FreeWaspBots/compare/v0.13.2...v0.13.3) (2022-03-13)
-
-
-### Bug Fixes
-
-* UseImbuedHeart now starts true ([c581258](https://github.com/Torwent/FreeWaspBots/commit/c5812584a1d975204e086248bf877e2135264eb6))
 
 
 
