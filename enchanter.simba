@@ -299,6 +299,9 @@ function TEnchanter.Withdraw(Item: TRSItem): Boolean;
 begin
   Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
 
+  if Result then
+    WaitUntil(Inventory.FindItem(Item), 100, 3000);
+
   if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
