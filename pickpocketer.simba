@@ -1,4 +1,3 @@
-{$DEFINE SRL_USE_REMOTEINPUT}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
