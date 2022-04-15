@@ -1,3 +1,12 @@
+## [0.15.1](https://github.com/Torwent/FreeWaspBots/compare/v0.15.0...v0.15.1) (2022-04-15)
+
+
+### Bug Fixes
+
+* **enchanter:** attempt to fix  out of supplies issue ([1475d9e](https://github.com/Torwent/FreeWaspBots/commit/1475d9e1bd04e28219c853fb8e0bbf47a41fd44a))
+
+
+
 # [0.15.0](https://github.com/Torwent/FreeWaspBots/compare/v0.14.1...v0.15.0) (2022-04-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** should properly deselect items now ([05c12d0](https://github.com/Torwent/FreeWaspBots/commit/05c12d079be6ec3c2648d65959dfff5c8b53c49b))
-
-
-
-## [0.13.4](https://github.com/Torwent/FreeWaspBots/compare/v0.13.3...v0.13.4) (2022-03-22)
-
-
-### Bug Fixes
-
-* **alcher:** minor fix in the GUI ([a20e82b](https://github.com/Torwent/FreeWaspBots/commit/a20e82bac4afc1e1828e17ed79f92b767b623046))
 
 
 
