@@ -1,3 +1,12 @@
+## [0.15.2](https://github.com/Torwent/FreeWaspBots/compare/v0.15.1...v0.15.2) (2022-04-17)
+
+
+### Bug Fixes
+
+* **alcher:** attempt to fix alcher shut down ([4e0499b](https://github.com/Torwent/FreeWaspBots/commit/4e0499bb735a6c00f03e1d8ab4816c7258c1cb63))
+
+
+
 ## [0.15.1](https://github.com/Torwent/FreeWaspBots/compare/v0.15.0...v0.15.1) (2022-04-15)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * GH Action to sanitize settings before releases ([2bc8e04](https://github.com/Torwent/FreeWaspBots/commit/2bc8e04d118e372fe03141dfaa49ad3f3c49c8c7))
-
-
-
-## [0.13.5](https://github.com/Torwent/FreeWaspBots/compare/v0.13.4...v0.13.5) (2022-03-23)
-
-
-### Bug Fixes
-
-* **alcher:** should properly deselect items now ([05c12d0](https://github.com/Torwent/FreeWaspBots/commit/05c12d079be6ec3c2648d65959dfff5c8b53c49b))
 
 
 
