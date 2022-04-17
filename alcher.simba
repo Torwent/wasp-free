@@ -68,7 +68,7 @@ end;
 
 procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'AIO Alcher';
+  Name := 'Alcher';
 
   inherited;
 
@@ -93,7 +93,7 @@ var
   Slot: Int32;
   ItemString: String;
 begin
-  if not Inventory.Open then
+  if not Inventory.Open and not Inventory.SetSelectedItem(-1) then
     Exit;
 
   for Item in RSAction.AlchItemArray do
