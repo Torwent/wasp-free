@@ -1,3 +1,12 @@
+# [0.16.0](https://github.com/Torwent/FreeWaspBots/compare/v0.15.2...v0.16.0) (2022-04-26)
+
+
+### Features
+
+* **smelter:** now supports molten glass ([309338d](https://github.com/Torwent/FreeWaspBots/commit/309338dc73a36a67b263e947a929e4a46419649d))
+
+
+
 ## [0.15.2](https://github.com/Torwent/FreeWaspBots/compare/v0.15.1...v0.15.2) (2022-04-17)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** typo ([2ddf575](https://github.com/Torwent/FreeWaspBots/commit/2ddf5750894967fe0cd5b1df65e068e6c183fa1e))
-
-
-
-# [0.14.0](https://github.com/Torwent/FreeWaspBots/compare/v0.13.5...v0.14.0) (2022-03-24)
-
-
-### Features
-
-* GH Action to sanitize settings before releases ([2bc8e04](https://github.com/Torwent/FreeWaspBots/commit/2bc8e04d118e372fe03141dfaa49ad3f3c49c8c7))
 
 
 
