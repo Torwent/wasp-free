@@ -1,3 +1,12 @@
+## [0.16.1](https://github.com/Torwent/FreeWaspBots/compare/v0.16.0...v0.16.1) (2022-04-26)
+
+
+### Bug Fixes
+
+* refactor .RandomPoint ([3b3b51f](https://github.com/Torwent/FreeWaspBots/commit/3b3b51ff0f2f320a8ab571295beeb14efec0d2a2))
+
+
+
 # [0.16.0](https://github.com/Torwent/FreeWaspBots/compare/v0.15.2...v0.16.0) (2022-04-26)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * new smelter script ([eb6841b](https://github.com/Torwent/FreeWaspBots/commit/eb6841b56cc305efb74dd7d8b4d17ce36bfb613a))
-
-
-
-## [0.14.1](https://github.com/Torwent/FreeWaspBots/compare/v0.14.0...v0.14.1) (2022-04-06)
-
-
-### Bug Fixes
-
-* **enchanter:** typo ([2ddf575](https://github.com/Torwent/FreeWaspBots/commit/2ddf5750894967fe0cd5b1df65e068e6c183fa1e))
 
 
 
