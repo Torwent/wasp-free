@@ -16,7 +16,7 @@ end;
 
 type
   EBar = (
-    BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANT, RUNITE
+    BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANT, RUNITE, MOLTEN_GLASS
   );
 
   EFurnace = (
@@ -156,6 +156,14 @@ begin
         Ore1 := ['Runite ore', 3, False];
         Ore2 := ['Coal', 27, False];
       end;
+
+    EBar.MOLTEN_GLASS:
+      begin
+        Bar.Item := 'Molten glass';
+        Ore1 := ['Soda ash', 14, False];
+        Ore2 := ['Bucket of sand', 14, False];
+        Antiban.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
+      end;
   end;
 
   Materials += Ore1.Item;
@@ -185,7 +193,7 @@ begin
   if ScriptDebugEnabled then
   begin
     DebugObjectArray += @ScriptBank;
-    DebugObjectArray += @RSObjects.VarrockAnvil;
+    DebugObjectArray += @Furnace;
   end;
 end;
 
@@ -442,6 +450,7 @@ begin
     AddItem('Mithril');
     AddItem('Adamantite');
     AddItem('Runite');
+    AddItem('Molten glass');
     SetItemIndex(Ord(CurrentBar));
   end;
 
