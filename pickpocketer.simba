@@ -788,7 +788,7 @@ begin
 
   while not MainScreen.WaitArrow(GraveTPA, 3000) do
   begin
-    Mouse.Click(TPA.Grow(6).RandomPoint, MOUSE_LEFT);
+    Mouse.Click(TPA.Grow(6).Random, MOUSE_LEFT);
     Minimap.WaitMoving;
   end;
 
