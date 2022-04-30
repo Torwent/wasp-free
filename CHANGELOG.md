@@ -1,3 +1,12 @@
+# [0.17.0](https://github.com/Torwent/FreeWaspBots/compare/v0.16.1...v0.17.0) (2022-04-30)
+
+
+### Features
+
+* **pickpocketer:** food and neck amount is now customizable ([45e333a](https://github.com/Torwent/FreeWaspBots/commit/45e333a29facea666a911e91b42cd93385ea2298))
+
+
+
 ## [0.16.1](https://github.com/Torwent/FreeWaspBots/compare/v0.16.0...v0.16.1) (2022-04-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** attempt to fix  out of supplies issue ([1475d9e](https://github.com/Torwent/FreeWaspBots/commit/1475d9e1bd04e28219c853fb8e0bbf47a41fd44a))
-
-
-
-# [0.15.0](https://github.com/Torwent/FreeWaspBots/compare/v0.14.1...v0.15.0) (2022-04-13)
-
-
-### Features
-
-* new smelter script ([eb6841b](https://github.com/Torwent/FreeWaspBots/commit/eb6841b56cc305efb74dd7d8b4d17ce36bfb613a))
 
 
 
