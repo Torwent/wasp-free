@@ -23,6 +23,7 @@ var
   SuicideMode: Boolean := True;      //Pickpocket until death. Useful if you respawn nearby.
   FoodAmount: Int32 := 5;
   NeckAmount: Int32 := 2;
+  NextHeal: Int32;
 
 type
   EThieverState = (
@@ -88,7 +89,6 @@ type
 
     CoinPouchLimit: Int32;
     NPCMaxHit: Int32;
-    NextHeal: Int32;
   end;
 
 function TRSChooseOption.Select(Text: TStringArray; MouseAction: Int32 = MOUSE_LEFT; CaseSensitive: Boolean = True; CloseIfNotFound: Boolean = True): Boolean; override;
@@ -551,6 +551,8 @@ begin
   if NextHeal < 1 then
     NextHeal := Round(Antiban.GetUniqueNumber(NPCMaxHit * 8));
 
+  NextHeal += Random(-3, 3);
+
   Result := (CurrentHP <= NextHeal) or (CurrentHP <= NPCMaxHit);
 end;
 
@@ -987,6 +989,7 @@ type
     NPCSelector: TLabeledCombobox;
     FoodAmountEdit: TLabeledEdit;
     NeckAmountEdit: TLabeledEdit;
+    MinHealthEdit: TLabeledEdit;
     SuicideState: TLabeledCheckbox;
   end;
 
@@ -996,6 +999,10 @@ begin
 
   PickedNPC := ENPC(NPCSelector.Combobox.getItemIndex);
   SuicideMode := SuicideState.Checkbox.getState = cbChecked;
+
+  FoodAmount := StrToInt(FoodAmountEdit.GetText);
+  NeckAmount := StrToInt(NeckAmountEdit.GetText);
+  NextHeal := StrToInt(MinHealthEdit.GetText);
 end;
 
 procedure TThieverConfig.NPCSelectorOnChange(Sender: TObject);
@@ -1078,6 +1085,16 @@ begin
     SetTop(FoodAmountEdit.getTop);
     SetWidth(80);
     SetText(ToStr(NeckAmount));
+  end;
+
+  with MinHealthEdit do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Minimum health:');
+    SetLeft(NeckAmountEdit.getLeft + NeckAmountEdit.GetWidth + 35);
+    SetTop(FoodAmountEdit.getTop);
+    SetWidth(80);
+    SetText(ToStr(Round(Antiban.GetUniqueNumber(10 * 8))));
   end;
 
   with SuicideState do
