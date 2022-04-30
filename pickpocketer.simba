@@ -21,6 +21,8 @@ type
 var
   PickedNPC: ENPC := ENPC.ELF;       //Use one of the above NPCs.
   SuicideMode: Boolean := True;      //Pickpocket until death. Useful if you respawn nearby.
+  FoodAmount: Int32 := 5;
+  NeckAmount: Int32 := 2;
 
 type
   EThieverState = (
@@ -72,7 +74,6 @@ type
     RogueEquipment: TRSItemArray;
 
     GearAmount: Int32;
-    NeckQuantity: Int32;
     ValuableItemValue: Int32;
 
     NeckTimer: TCountDown;
@@ -131,6 +132,8 @@ end;
 
 procedure TThiever.SetupNPC;
 begin
+  FoodManager.Amount := FoodAmount;
+
   case PickedNPC of
     MAN:
       begin
@@ -144,10 +147,8 @@ begin
 
         NPCMaxHit := 1;
 
-        if not SuicideMode then SuicideMode := True;
-
-        NeckQuantity := 0;
-        FoodManager.Amount := 0;
+        if not SuicideMode then
+          SuicideMode := True;
 
         ActionProfit := 3;
       end;
@@ -197,10 +198,8 @@ begin
 
         ScriptBank := RSObjects.DraynorBank;
 
-        if SuicideMode then SuicideMode := False;
-
-        NeckQuantity := Round(Antiban.GetUniqueNumber(2, 2));
-        FoodManager.Amount := Round(Antiban.GetUniqueNumber(5, 12));
+        if SuicideMode then
+          SuicideMode := False;
       end;
 
     GUARD:
@@ -217,8 +216,6 @@ begin
         ActionProfit := 30;
 
         ScriptBank := RSObjects.FaladorWestBank;
-        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodManager.Amount := Round(Antiban.GetUniqueNumber(5, 15));
       end;
 
     KNIGHT_OF_ARDOUGNE:
@@ -238,9 +235,6 @@ begin
         NPCMaxHit := 3;
 
         ActionProfit := 100;
-
-        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodManager.Amount := Round(Antiban.GetUniqueNumber(5, 15));
 
         SuicideMode := False;
       end;
@@ -268,17 +262,6 @@ begin
                            'Crystal shards'];
 
         NPCMaxHit := 5;
-
-        if SuicideMode then
-        begin
-          NeckQuantity := Round(Antiban.GetUniqueNumber(2, 3));
-          FoodManager.Amount := Round(Antiban.GetUniqueNumber(2, 5));
-        end
-        else
-        begin
-          NeckQuantity := Round(Antiban.GetUniqueNumber(3, 2));
-          FoodManager.Amount := Round(Antiban.GetUniqueNumber(13, 5));
-        end;
       end;
 
     TZHAAR_CITY:
@@ -296,10 +279,8 @@ begin
 
         ScriptBank := RSObjects.TzhaarBank;
 
-        if SuicideMode then SuicideMode := False;
-
-        NeckQuantity := Round(Antiban.GetUniqueNumber(3, 3));
-        FoodManager.Amount := Round(Antiban.GetUniqueNumber(12, 8));
+        if SuicideMode then
+          SuicideMode := False;
       end;
   end;
 
@@ -456,15 +437,15 @@ begin
     ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetCurrentLevel(ERSSkill.MAGIC)));
   end;
 
-  if not SuicideMode and ((FoodManager.Amount + NeckQuantity + 2) >= 26) then
+  if not SuicideMode and ((FoodManager.Amount + NeckAmount + 2) >= 26) then
   begin
     if UseShadowVeil then
-      FoodManager.Amount := 26 - NeckQuantity - 1
+      FoodManager.Amount := 26 - NeckAmount - 1
     else
-      FoodManager.Amount := 26 - NeckQuantity;
+      FoodManager.Amount := 26 - NeckAmount;
   end
-  else if ((FoodManager.Amount + NeckQuantity + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
-    FoodManager.Amount := 28 - NeckQuantity - 2 - Length(StackableArray);
+  else if ((FoodManager.Amount + NeckAmount + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
+    FoodManager.Amount := 28 - NeckAmount - 2 - Length(StackableArray);
 
   if ScriptDebugEnabled then
   begin
@@ -728,7 +709,7 @@ begin
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
   if not Result and (Item = Necklace) and (PickedNPC = GUARD) then
-    NeckQuantity := 0;
+    NeckAmount := 0;
 end;
 
 function TThiever.WithdrawAny(Items: TRSItemArray; Quantity: Int32): Boolean;
@@ -833,7 +814,7 @@ begin
     begin
       if Self.HasDepositItems then
         Exit(DEPOSIT_LOOT);
-      if Inventory.CountItem(Necklace) < NeckQuantity then
+      if Inventory.CountItem(Necklace) < NeckAmount then
         Exit(WITHDRAW_NECKLACES);
       if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
@@ -866,7 +847,7 @@ begin
   if NeckTimer.IsFinished then
     Exit(CHECK_NECKLACE);
 
-  if not FreshNeck and (not HasNeck or Self.NecklaceExpired) and (NeckQuantity > 0) then
+  if not FreshNeck and (not HasNeck or Self.NecklaceExpired) and (NeckAmount > 0) then
   begin
     if Inventory.FindItem(Necklace) then
       Exit(EQUIP_NECKLACE);
@@ -926,7 +907,7 @@ begin
       OPEN_BANK: Bank.WalkOpen(ScriptBank);
       DEPOSIT_LOOT: Self.Deposit;
       WITHDRAW_FOOD: Bank.WithdrawConsumable(HEALTH_CONSUMABLE);
-      WITHDRAW_NECKLACES: Self.Withdraw(Necklace, NeckQuantity);
+      WITHDRAW_NECKLACES: Self.Withdraw(Necklace, NeckAmount);
       CLOSE_INTERFACE: MainScreen.CloseInterface;
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
@@ -1004,6 +985,8 @@ end;
 type
   TThieverConfig = record(TScriptConfig)
     NPCSelector: TLabeledCombobox;
+    FoodAmountEdit: TLabeledEdit;
+    NeckAmountEdit: TLabeledEdit;
     SuicideState: TLabeledCheckbox;
   end;
 
@@ -1057,6 +1040,8 @@ procedure TThieverConfig.Setup; override;
 begin
   inherited;
 
+  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 70);
+
   with NPCSelector do
   begin
     Init(ScriptSettingsPanel);
@@ -1075,13 +1060,32 @@ begin
     Combobox.setOnChange(@Self.NPCSelectorOnChange);
   end;
 
+  with FoodAmountEdit do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Food amount:');
+    SetLeft(NPCSelector.getLeft);
+    SetTop(NPCSelector.getTop + NPCSelector.GetHeight + 10);
+    SetWidth(80);
+    SetText(ToStr(FoodAmount));
+  end;
+
+  with NeckAmountEdit do
+  begin
+    Init(ScriptSettingsPanel);
+    SetCaption('Necklaces amount:');
+    SetLeft(FoodAmountEdit.getLeft + FoodAmountEdit.GetWidth + 30);
+    SetTop(FoodAmountEdit.getTop);
+    SetWidth(80);
+    SetText(ToStr(NeckAmount));
+  end;
 
   with SuicideState do
   begin
     Init(ScriptSettingsPanel);
     SetCaption('Suicide mode:');
     SetLeft(NPCSelector.getLeft + NPCSelector.GetWidth + 25);
-    SetTop(NPCSelector.getHeight - 20);
+    SetTop(NPCSelector.getHeight);
     SetWidth(50);
     SetHeight(10);
     SetEnabled(True);
