@@ -1,3 +1,12 @@
+## [0.17.1](https://github.com/Torwent/FreeWaspBots/compare/v0.17.0...v0.17.1) (2022-04-30)
+
+
+### Bug Fixes
+
+* **pickpocketer:** fix food and necks issues ([2156bbc](https://github.com/Torwent/FreeWaspBots/commit/2156bbc4a588d9eb99641d39718d64c47cb777c5))
+
+
+
 # [0.17.0](https://github.com/Torwent/FreeWaspBots/compare/v0.16.1...v0.17.0) (2022-04-30)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** attempt to fix alcher shut down ([4e0499b](https://github.com/Torwent/FreeWaspBots/commit/4e0499bb735a6c00f03e1d8ab4816c7258c1cb63))
-
-
-
-## [0.15.1](https://github.com/Torwent/FreeWaspBots/compare/v0.15.0...v0.15.1) (2022-04-15)
-
-
-### Bug Fixes
-
-* **enchanter:** attempt to fix  out of supplies issue ([1475d9e](https://github.com/Torwent/FreeWaspBots/commit/1475d9e1bd04e28219c853fb8e0bbf47a41fd44a))
 
 
 
