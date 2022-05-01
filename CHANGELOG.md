@@ -1,3 +1,12 @@
+# [0.18.0](https://github.com/Torwent/FreeWaspBots/compare/v0.17.1...v0.18.0) (2022-05-01)
+
+
+### Features
+
+* **ardy knights:** made a script specific for ardy knights ([1334823](https://github.com/Torwent/FreeWaspBots/commit/1334823409d47076281c55e64d6100f6f01591d4))
+
+
+
 ## [0.17.1](https://github.com/Torwent/FreeWaspBots/compare/v0.17.0...v0.17.1) (2022-04-30)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **smelter:** now supports molten glass ([309338d](https://github.com/Torwent/FreeWaspBots/commit/309338dc73a36a67b263e947a929e4a46419649d))
-
-
-
-## [0.15.2](https://github.com/Torwent/FreeWaspBots/compare/v0.15.1...v0.15.2) (2022-04-17)
-
-
-### Bug Fixes
-
-* **alcher:** attempt to fix alcher shut down ([4e0499b](https://github.com/Torwent/FreeWaspBots/commit/4e0499bb735a6c00f03e1d8ab4816c7258c1cb63))
 
 
 
