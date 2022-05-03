@@ -1,3 +1,12 @@
+# [0.19.0](https://github.com/Torwent/FreeWaspBots/compare/v0.18.0...v0.19.0) (2022-05-03)
+
+
+### Features
+
+* github action to upload files to supabase ([69c5a08](https://github.com/Torwent/FreeWaspBots/commit/69c5a081f31f8e489a2f68aa606ad41126d49df2))
+
+
+
 # [0.18.0](https://github.com/Torwent/FreeWaspBots/compare/v0.17.1...v0.18.0) (2022-05-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * refactor .RandomPoint ([3b3b51f](https://github.com/Torwent/FreeWaspBots/commit/3b3b51ff0f2f320a8ab571295beeb14efec0d2a2))
-
-
-
-# [0.16.0](https://github.com/Torwent/FreeWaspBots/compare/v0.15.2...v0.16.0) (2022-04-26)
-
-
-### Features
-
-* **smelter:** now supports molten glass ([309338d](https://github.com/Torwent/FreeWaspBots/commit/309338dc73a36a67b263e947a929e4a46419649d))
 
 
 
