@@ -1,3 +1,12 @@
+## [0.19.1](https://github.com/Torwent/FreeWaspBots/compare/v0.19.0...v0.19.1) (2022-05-07)
+
+
+### Bug Fixes
+
+* **miner:** fix duplicate declaration ([186e121](https://github.com/Torwent/FreeWaspBots/commit/186e121b2a745ec04ecb5a6469b4750aa1d4faed))
+
+
+
 # [0.19.0](https://github.com/Torwent/FreeWaspBots/compare/v0.18.0...v0.19.0) (2022-05-03)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **pickpocketer:** food and neck amount is now customizable ([45e333a](https://github.com/Torwent/FreeWaspBots/commit/45e333a29facea666a911e91b42cd93385ea2298))
-
-
-
-## [0.16.1](https://github.com/Torwent/FreeWaspBots/compare/v0.16.0...v0.16.1) (2022-04-26)
-
-
-### Bug Fixes
-
-* refactor .RandomPoint ([3b3b51f](https://github.com/Torwent/FreeWaspBots/commit/3b3b51ff0f2f320a8ab571295beeb14efec0d2a2))
 
 
 
