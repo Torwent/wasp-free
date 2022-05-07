@@ -15,7 +15,7 @@ end;
 type
   ERSBank = (
     POWER_MINE, VARROCK_E, VARROCK_W,
-    CRAFTING_GUILD, MINE_GUILD
+    CRAFTING_GUILD_MINE, MINE_GUILD
   );
 
   ERSRock = (
@@ -186,7 +186,7 @@ begin
         UseBank := True;
       end;
 
-    CRAFTING_GUILD:
+    CRAFTING_GUILD_MINE:
       begin
         RSW.Setup('x6953y3166');
         ScriptBank := RSObjects.CraftGuildBank;
@@ -453,7 +453,7 @@ begin
   case BankSelector.Combobox.getText of
     'Power mine (mine and drop)': BankLocation := ERSBank.POWER_MINE;
     'P2P Mining Guild':           BankLocation := ERSBank.MINE_GUILD;
-    'Crafting guild':             BankLocation := ERSBank.CRAFTING_GUILD;
+    'Crafting guild':             BankLocation := ERSBank.CRAFTING_GUILD_MINE;
     'Varrock west':               BankLocation := ERSBank.VARROCK_W;
     'Varrock east':               BankLocation := ERSBank.VARROCK_E;
   end;
