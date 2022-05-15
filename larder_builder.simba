@@ -32,6 +32,7 @@ type
     HANDLE_FURNITURE_UI,
     DESTROY_LARDER,
     HANDLE_LARDER_CHAT,
+    HANDLE_PIN,
 
     GET_PLANKS,
     HANDLE_PHIALS_CHAT,
@@ -300,7 +301,11 @@ begin
     Exit(EState.HANDLE_SERVANT);
 
   if MainScreen.IsClassicOpen then
+  begin
+    if BankPin.IsOpen then
+      Exit(EState.HANDLE_PIN);
     Exit(EState.HANDLE_FURNITURE_UI);
+  end;
 
   if not Minimap.InPOH then
   begin
@@ -336,8 +341,7 @@ begin
   ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
     Self.ProcessWhileWaiting;
@@ -349,6 +353,7 @@ begin
       EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
       EState.HANDLE_FURNITURE_UI: Self.HandleFurniture;
       EState.HANDLE_SERVANT: Self.HandleServant;
+      EState.HANDLE_PIN: if BankPin.Enter(Login.GetPlayerPin) then MainScreen.WaitLoadingPOH(10000);
 
       EState.CALL_SERVANT: Self.CallServant;
       EState.TALK_SERVANT: Self.TalkServant;
@@ -365,7 +370,7 @@ begin
     end;
 
     Self.DoAntiban;
-  end;
+  until Self.ShouldStop;
 end;
 
 var
