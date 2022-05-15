@@ -1,3 +1,12 @@
+## [0.19.2](https://github.com/Torwent/FreeWaspBots/compare/v0.19.1...v0.19.2) (2022-05-15)
+
+
+### Bug Fixes
+
+* **larder builder:** attempt.to fix bank pin issues ([51fe7b5](https://github.com/Torwent/FreeWaspBots/commit/51fe7b502a466d4cdabff8a6af72c7c4a9efd218))
+
+
+
 ## [0.19.1](https://github.com/Torwent/FreeWaspBots/compare/v0.19.0...v0.19.1) (2022-05-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** fix food and necks issues ([2156bbc](https://github.com/Torwent/FreeWaspBots/commit/2156bbc4a588d9eb99641d39718d64c47cb777c5))
-
-
-
-# [0.17.0](https://github.com/Torwent/FreeWaspBots/compare/v0.16.1...v0.17.0) (2022-04-30)
-
-
-### Features
-
-* **pickpocketer:** food and neck amount is now customizable ([45e333a](https://github.com/Torwent/FreeWaspBots/commit/45e333a29facea666a911e91b42cd93385ea2298))
 
 
 
