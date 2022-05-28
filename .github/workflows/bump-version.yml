@@ -89,7 +89,7 @@ jobs:
 
     - name: Zip files
       shell: bash
-      run: zip FreeWaspScripts.zip *.simba *.md LICENSE version.txt
+      run: zip wasp-free.zip *.simba *.md LICENSE version.txt
     
     - name: Set MY_DATE environment variable
       run: echo "MY_DATE=$(date +%Y_%m_%d_%H_%M)" >> $GITHUB_ENV
@@ -114,4 +114,4 @@ jobs:
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         BUCKET: "scripts"
         TARGET_PATH: "free/${{ env.MY_DATE }}/"
-        ORIGIN_PATH: "FreeWaspScripts.zip"
+        ORIGIN_PATH: "wasp-free.zip"
