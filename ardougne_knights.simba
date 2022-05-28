@@ -584,7 +584,7 @@ begin
     begin
       if Self.HasDepositItems then
         Exit(DEPOSIT_LOOT);
-      if Inventory.CountItem(Necklace) < NeckAmount then
+      if (NeckAmount > 0) and (Inventory.CountItem(Necklace) < NeckAmount) then
         Exit(WITHDRAW_NECKLACES);
       if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
