@@ -116,7 +116,7 @@ begin
     if SwampTPA.Find(P) = -1 then
       FinalTPA += P;
 
-  Mouse.Click(FinalTPA.RandomPoint, MOUSE_LEFT);
+  Mouse.Click(FinalTPA.Random, MOUSE_LEFT);
 
   Minimap.WaitMoving;
   Result := not Minimap.HasDotUnder;
