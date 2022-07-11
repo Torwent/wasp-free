@@ -1,3 +1,12 @@
+## [0.19.4](https://github.com/Torwent/wasp-free/compare/v0.19.3...v0.19.4) (2022-07-11)
+
+
+### Bug Fixes
+
+* **chompy hunter:** typo ([4394cf0](https://github.com/Torwent/wasp-free/commit/4394cf0d649fc8992cef85be3378ed9453ed8aa5))
+
+
+
 ## [0.19.3](https://github.com/Torwent/wasp-free/compare/v0.19.2...v0.19.3) (2022-05-28)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * github action to upload files to supabase ([69c5a08](https://github.com/Torwent/wasp-free/commit/69c5a081f31f8e489a2f68aa606ad41126d49df2))
-
-
-
-# [0.18.0](https://github.com/Torwent/wasp-free/compare/v0.17.1...v0.18.0) (2022-05-01)
-
-
-### Features
-
-* **ardy knights:** made a script specific for ardy knights ([1334823](https://github.com/Torwent/wasp-free/commit/1334823409d47076281c55e64d6100f6f01591d4))
 
 
 
