@@ -167,9 +167,9 @@ begin
   BankList += 'Clue geode (elite)';
 
   BankList += 'Clue scroll (beginner)';
-  BankList += 'Clue scroll (easy)';
-  BankList += 'Clue scroll (medium)';
-  BankList += 'Clue scroll (hard)';
+  //BankList += 'Clue scroll (easy)';
+  //BankList += 'Clue scroll (medium)';
+  //BankList += 'Clue scroll (hard)';
   BankList += 12073;
 end;
 
