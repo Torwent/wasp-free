@@ -1,3 +1,12 @@
+## [0.19.5](https://github.com/Torwent/wasp-free/compare/v0.19.4...v0.19.5) (2022-07-19)
+
+
+### Bug Fixes
+
+* **miner:** temp fix for banking issues ([15cb830](https://github.com/Torwent/wasp-free/commit/15cb83096cd921534026d5702255e0977cb49296))
+
+
+
 ## [0.19.4](https://github.com/Torwent/wasp-free/compare/v0.19.3...v0.19.4) (2022-07-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **miner:** fix duplicate declaration ([186e121](https://github.com/Torwent/wasp-free/commit/186e121b2a745ec04ecb5a6469b4750aa1d4faed))
-
-
-
-# [0.19.0](https://github.com/Torwent/wasp-free/compare/v0.18.0...v0.19.0) (2022-05-03)
-
-
-### Features
-
-* github action to upload files to supabase ([69c5a08](https://github.com/Torwent/wasp-free/commit/69c5a081f31f8e489a2f68aa606ad41126d49df2))
 
 
 
