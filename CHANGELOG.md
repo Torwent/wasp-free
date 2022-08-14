@@ -1,3 +1,12 @@
+# [0.20.0](https://github.com/Torwent/wasp-free/compare/v0.19.5...v0.20.0) (2022-08-14)
+
+
+### Features
+
+* **ardy knights:** the script was fully reworked. Runelite is no longer needed ([3fcf362](https://github.com/Torwent/wasp-free/commit/3fcf362351963adc7903b0096f0de19d0e550f03))
+
+
+
 ## [0.19.5](https://github.com/Torwent/wasp-free/compare/v0.19.4...v0.19.5) (2022-07-19)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** attempt.to fix bank pin issues ([51fe7b5](https://github.com/Torwent/wasp-free/commit/51fe7b502a466d4cdabff8a6af72c7c4a9efd218))
-
-
-
-## [0.19.1](https://github.com/Torwent/wasp-free/compare/v0.19.0...v0.19.1) (2022-05-07)
-
-
-### Bug Fixes
-
-* **miner:** fix duplicate declaration ([186e121](https://github.com/Torwent/wasp-free/commit/186e121b2a745ec04ecb5a6469b4750aa1d4faed))
 
 
 
