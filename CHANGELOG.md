@@ -1,3 +1,12 @@
+## [0.20.1](https://github.com/Torwent/wasp-free/compare/v0.20.0...v0.20.1) (2022-08-15)
+
+
+### Bug Fixes
+
+* **pickpocketer:** removed ardy knights ([11f0bc2](https://github.com/Torwent/wasp-free/commit/11f0bc24081c4768c12201533cd03385d03f64f5))
+
+
+
 # [0.20.0](https://github.com/Torwent/wasp-free/compare/v0.19.5...v0.20.0) (2022-08-14)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** minor logic fix doesn't really change anything ([6efdeeb](https://github.com/Torwent/wasp-free/commit/6efdeeb17524decb126919a1109e1dd1c95b8986))
-
-
-
-## [0.19.2](https://github.com/Torwent/wasp-free/compare/v0.19.1...v0.19.2) (2022-05-15)
-
-
-### Bug Fixes
-
-* **larder builder:** attempt.to fix bank pin issues ([51fe7b5](https://github.com/Torwent/wasp-free/commit/51fe7b502a466d4cdabff8a6af72c7c4a9efd218))
 
 
 
