@@ -15,7 +15,7 @@ end;
 type
   ENPC = (
     MAN, MASTER_FARMER,
-    GUARD, KNIGHT_OF_ARDOUGNE, ELF, TZHAAR_CITY
+    GUARD, ELF, TZHAAR_CITY
   );
 
 var
@@ -216,27 +216,6 @@ begin
         ActionProfit := 30;
 
         ScriptBank := RSObjects.FaladorWestBank;
-      end;
-
-    KNIGHT_OF_ARDOUGNE:
-      begin
-        Login.Players[Login.PlayerIndex].Worlds:= []; 
-        RSW.Setup('x5723y3038');
-        CurrentNPC := @RSNPCs.KnightOfArdougne;
-        ScriptBank := RSObjects.ArdougneSouthBank;
-
-        CurrentNPC^.Filter.MinimapDot := False;
-
-        LootArray += CoinPouch;
-        LootArray += 'Coins';
-
-        StackableArray := LootArray;
-
-        NPCMaxHit := 3;
-
-        ActionProfit := 100;
-
-        SuicideMode := False;
       end;
 
     ELF:
@@ -1006,12 +985,6 @@ begin
         SuicideState.Checkbox.setEnabled(False);
       end;
 
-    KNIGHT_OF_ARDOUGNE:
-      begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
-      end;
-
     TZHAAR_CITY:
       begin
         SuicideState.Checkbox.setState(cbUnchecked);
@@ -1044,7 +1017,6 @@ begin
     Combobox.getItems.Add('Men and women (Lumbridge only)');
     Combobox.getItems.Add('Master farmers (Draynor only)');
     Combobox.getItems.Add('Guards (Falador only)');
-    Combobox.getItems.Add('Knights of Ardougne');
     Combobox.getItems.Add('Elves (Prifddinas only)');
     Combobox.getItems.Add('Tzhaars');
     Combobox.setItemIndex(Ord(PickedNPC));
