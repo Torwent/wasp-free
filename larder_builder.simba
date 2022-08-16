@@ -71,7 +71,7 @@ begin
       begin
         UsePhials := False;
 
-        ServantNPC.SetupCommon;
+        ServantNPC.SetupCommon();
         ServantNPC.UpText := ['Talk-to'];
         ServantNPC.Filter.Finder := False;
         ServantNPC.Filter.MinimapDot := True;
@@ -112,7 +112,7 @@ begin
   LarderSpace := RSObjects.OakLarderSpace;
 end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -123,21 +123,21 @@ end;
 
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Larder Builder';
+  Self.Name := 'Larder Builder';
 
   inherited;
 
-  RSW.Setup('x6953y3166');
+  Self.RSW.Setup('x6953y3166');
   POH.Setup('poh');
 
   Self.SetupNPC;
   Self.SetupObjects;
   Self.SetupPlank;
 
-  ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
+  Self.ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   if CurrentNPC = PHIALS then
     case CurrentLarder of
@@ -149,7 +149,7 @@ begin
   begin
     DebugObjectArray += @BuiltLarder;
     DebugObjectArray += @LarderSpace;
-    DebugObjectArray += @RSObjects.POHPortal;
+    DebugObjectArray += RSObjects.POHPortal;
     DebugNPCArray += @RSNPCs.Phials;
     DebugNPCArray += @ServantNPC;
   end;
@@ -158,7 +158,7 @@ end;
 
 function TWaspObject._SelectHelper(Action: TStringArray): Boolean; override;
 begin
-  if ChooseOption.IsOpen and ChooseOption.Select(Action) then
+  if ChooseOption.IsOpen() and ChooseOption.Select(Action) then
     Exit(True);
 
   if MainScreen.IsUpText(Action) then
@@ -175,7 +175,7 @@ function TBuilder.EnterHouse: Boolean;
 begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := MainScreen.WaitLoadingPOH(10000);
   end;
 end;
@@ -184,12 +184,12 @@ function TBuilder.BuildLarder: Boolean;
 begin
   if LarderSpace.WalkSelectOption(['Build La']) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
   end
   else if ChooseOption.HasOption('Remove L') then
   begin
-    ChooseOption.Close;
+    ChooseOption.Close();
     LarderIsBuilt := True;
   end;
 end;
@@ -198,12 +198,12 @@ function TBuilder.DestroyLarder: Boolean;
 begin
   if BuiltLarder.WalkSelectOption(['Remove L']) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
   end
   else if ChooseOption.HasOption('Build La') then
   begin
-    ChooseOption.Close;
+    ChooseOption.Close();
     LarderIsBuilt := False;
   end;
 end;
@@ -213,7 +213,7 @@ function TBuilder.CallServant: Boolean;
 begin
   if ServantNPC.Click then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(Chat.GetChatTitle = 'Repeat last task?',
                         SRL.TruncatedGauss(50, 1500), 5000);
   end
@@ -223,8 +223,8 @@ end;
 
 function TBuilder.PhialsGetPlanks: Boolean;
 begin
-  if not RSNPCs.Phials.Find and not RSW.AtTile(RSNPCs.Phials.TileArray, 8) then
-    RSW.WebWalk(RSNPCs.Phials.TileArray, 15, 0.2);
+  if not RSNPCs.Phials.Find and not Self.RSW.AtTile(RSNPCs.Phials.TileArray, 8) then
+    Self.RSW.WebWalk(RSNPCs.Phials.TileArray, 15, 0.2);
 
   if (Inventory.SetSelectedSlot(NotedPlanksSlot) and RSNPCs.Phials.Click) then
   begin
@@ -237,8 +237,8 @@ function TBuilder.TalkServant: Boolean;
 begin
   if ServantNPC.Click then
   begin
-    Minimap.WaitMoving;
-    Result := WaitUntil(Inventory.IsFull, 100, 5000);
+    Minimap.WaitMoving();
+    Result := WaitUntil(Inventory.IsFull(), 100, 5000);
   end;
 
   WaitingServant := not Result;
@@ -273,22 +273,22 @@ begin
   Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
   if Result then
   begin
-    TotalActions += 1;
-    WL.Activity.Restart;
+    Self.TotalActions += 1;
+    WL.Activity.Restart();
     Wait(250, 300);
   end else
-    MainScreen.CloseInterface;
+    MainScreen.CloseInterface();
 end;
 
 
-function TBuilder.GetState: EState;
+function TBuilder.GetState(): EState;
 var
   S: String := Chat.GetChatTitle;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
     Exit(EState.LEVEL_UP);
 
   if S.Contains('remove') then
@@ -302,14 +302,14 @@ begin
 
   if MainScreen.IsClassicOpen then
   begin
-    if BankPin.IsOpen then
+    if BankPin.IsOpen() then
       Exit(EState.HANDLE_PIN);
     Exit(EState.HANDLE_FURNITURE_UI);
   end;
 
   if not Minimap.InPOH then
   begin
-    if not UsePhials or Inventory.IsFull then
+    if not UsePhials or Inventory.IsFull() then
       Exit(EState.ENTER_HOUSE);
     Exit(EState.GET_PLANKS);
   end;
@@ -317,7 +317,7 @@ begin
   if LarderIsBuilt then
     Exit(EState.DESTROY_LARDER);
 
-  if Inventory.Count > MinInvCount then
+  if Inventory.Count() > MinInvCount then
   begin
     WaitingServant := False;
     Exit(EState.BUILD_LARDER);
@@ -338,15 +338,15 @@ end;
 
 procedure TBuilder.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+    
 
-    case State of
+    case Self.State of
       EState.LEVEL_UP: Chat.HandleLevelUp(True);
 
       EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat;
@@ -369,15 +369,15 @@ begin
       END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
-  until Self.ShouldStop;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 var
   Builder: TBuilder;
 
 type
-  TBuilderConfig = record(TScriptConfig)
+  TBuilderConfig = record(TScriptForm)
     NPCSelector: TLabeledCombobox;
     LarderSelector: TLabeledCombobox;
     BuilderInfo: TLabel;
@@ -389,22 +389,22 @@ procedure TBuilderConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentNPC := ERSNPC(NPCSelector.Combobox.getItemIndex);
-  CurrentLarder := ERSLarder(LarderSelector.Combobox.getItemIndex);
+  CurrentNPC := ERSNPC(NPCSelector.Combobox.getItemIndex());
+  CurrentLarder := ERSLarder(LarderSelector.Combobox.getItemIndex());
 end;
 
-procedure TBuilderConfig.Setup; override;
+procedure TBuilderConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 250);
+  Self.UpdateFormSize(Form.GetWidth(), Form.GetHeight() + 250);
 
   with NPCSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Method:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetLeft(5);  
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Phials');
@@ -414,10 +414,10 @@ begin
 
   with LarderSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Larder:');
-    SetLeft(NPCSelector.getLeft + NPCSelector.GetWidth + 10);
-    SetTop(NPCSelector.getTop);
+    SetLeft(NPCSelector.GetLeft() + NPCSelector.GetWidth() + 10);
+    SetTop(NPCSelector.GetTop());
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Regular');
@@ -427,7 +427,7 @@ begin
 
   with BuilderInfo do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     setParent(ScriptSettingsPanel);
 
     SetCaption('For Phials method make sure you have noted planks with you.' +
@@ -438,8 +438,8 @@ begin
                STR_NEW_LINE +
                'You need a decoration that has green grass and the following layout:');
 
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(NPCSelector.getTop + NPCSelector.getHeight + 2);
+    SetLeft(5);  
+    SetTop(NPCSelector.GetTop() + NPCSelector.GetHeight() + 2);
   end;
 
   Pic.Init;
@@ -447,22 +447,22 @@ begin
 
   with ImagePanel do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetParent(ScriptSettingsPanel);
-    SetTop(BuilderInfo.GetTop + 65);
-    SetLeft(BuilderInfo.getLeft + 80);
+    SetTop(BuilderInfo.GetTop() + 65);
+    SetLeft(BuilderInfo.GetLeft() + 80);
     setWidth(195);
     SetHeight(194);
     setPicture(Pic);
   end;
 
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TBuilderConfig.Run; override;
+procedure TBuilderConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;

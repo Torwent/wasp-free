@@ -57,7 +57,7 @@ const
     [7941, 2831], [7941, 2363], [8337, 2370], [8341, 2837]
   ];
 
-procedure Antiban.Setup; override;
+procedure Antiban.Setup(); override;
 begin
   inherited;
 
@@ -68,32 +68,32 @@ end;
 
 procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Alcher';
+  Self.Name := 'Alcher';
 
   inherited;
 
-  RSW.Setup('x7789y2306');
-  ScriptBank := RSObjects.GEBank;
+  Self.RSW.Setup(GRAND_EXCHANGE_MAP);
+  Self.ScriptBank := RSObjects.GEBank;
 
   RSAction.AlchItemArray += CustomItem;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');
 
-  InVarrock := RSW.InPoly(VARROCK_BOUNDS);
+  Self.InVarrock := Self.RSW.InPoly(VARROCK_BOUNDS);
 end;
 
 
-procedure TAlcher.SetupAlchItems;
+procedure TAlcher.SetupAlchItems();
 var
   Item: TRSItem;
   Slot: Int32;
   ItemString: String;
 begin
-  if not Inventory.Open and not Inventory.SetSelectedItem(-1) then
+  if not Inventory.Open() and not Inventory.SetSelectedItem(-1) then
     Exit;
 
   for Item in RSAction.AlchItemArray do
@@ -107,13 +107,13 @@ begin
       if ItemString.Contains('noted ') then
         ItemString := ItemString.After('noted ');
 
-      ActionProfit := ItemData.GetHighAlchProfit(ItemString);
-      Writeln('Profit per alch: ', ActionProfit, '.');
+      Self.ActionProfit := ItemData.GetHighAlchProfit(ItemString);
+      Writeln('Profit per alch: ', Self.ActionProfit, '.');
 
-      if not LossProtection or (ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
+      if not LossProtection or (Self.ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
       begin
-        ExtraInfo := ' Current Item: ' +  ItemString + ' for ' + ToStr(ActionProfit) + ' each alch.';
-        AlchItem := Item;
+        Self.ExtraInfo := ' Current Item: ' +  ItemString + ' for ' + ToStr(Self.ActionProfit) + ' each alch.';
+        Self.AlchItem := Item;
         Exit;
       end;
 
@@ -127,12 +127,12 @@ end;
 
 function TAlcher.Withdraw(Item: TRSItem): Boolean;
 begin
-  Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
+  Result := Bank.WithdrawItem(Self.BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
 
-  if BankEmpty := ((not Result and Bank.IsOpen) and
-                    not Bank.FindItem(BankTab, Item)) then
-    if CollectEmpty and CollectTimer.IsFinished then
-      CollectEmpty := False;
+  if Self.BankEmpty := ((not Result and Bank.IsOpen) and
+                    not Bank.FindItem(Self.BankTab, Item)) then
+    if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
+      Self.CollectEmpty := False;
 end;
 
 function TAlcher.HandleCollectBox: Boolean;
@@ -144,49 +144,49 @@ begin
 
   if CollectBox.FindItems(ItemArray) then
   begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
+    if Result := Self.CollectEmpty := CollectBox.CollectToBank then
       WaitUntil(not CollectBox.FindItems(ItemArray), 100, 3000);
-    BankEmpty := not CollectEmpty;
+    Self.BankEmpty := not Self.CollectEmpty;
   end
-  else CollectEmpty := True;
+  else Self.CollectEmpty := True;
 
-  CollectTimer.Restart;
+  Self.CollectTimer.Restart();
 end;
 
 
 
-function TAlcher.ChooseSpell: Boolean;
+function TAlcher.ChooseSpell(): Boolean;
 begin
-  if not Magic.IsOpen and not Magic.CanActivate(AlchSpell) then
+  if not Magic.IsOpen() and not Magic.CanActivate(AlchSpell) then
     Exit;
   Result := Magic.CastSpell(AlchSpell);
 end;
 
-function TAlcher.MoveItem: Boolean;
+function TAlcher.MoveItem(): Boolean;
 var
   Slot: Int32;
 begin
-  if Inventory.FindItem(AlchItem, Slot) and (Slot = 11) then
+  if Inventory.FindItem(Self.AlchItem, Slot) and (Slot = 11) then
     Exit;
 
   Result := Inventory.Drag(Slot, 11);
 end;
 
-function TAlcher.ChooseItem: Boolean;
+function TAlcher.ChooseItem(): Boolean;
 var
   Slot: Int32;
   Slots: TIntegerArray;
 begin
-  if ToStr(AlchItem) = '' then
-    Self.SetupAlchItems;
+  if ToStr(Self.AlchItem) = '' then
+    Self.SetupAlchItems();
 
-  if Inventory.FindItem(AlchItem, Slot) then
+  if Inventory.FindItem(Self.AlchItem, Slot) then
   begin
-    if (Slot <> 11) and Inventory.ItemIsStackable(AlchItem) then
+    if (Slot <> 11) and Inventory.ItemIsStackable(Self.AlchItem) then
     begin
-      if ChooseOption.Open then
+      if ChooseOption.Open() then
         ChooseOption.Select('Cancel');
-      Self.MoveItem;
+      Self.MoveItem();
       Exit(False);
     end;
 
@@ -194,9 +194,9 @@ begin
     begin
       if WaitUntil(Magic.IsOpen, 50, SRL.TruncatedGauss(1200, 2000)) then
       begin
-        WL.Activity.Restart;
-        TotalActions += 1;
-        TotalProfit += ActionProfit;
+        WL.Activity.Restart();
+        Self.TotalActions += 1;
+        Self.TotalProfit += Self.ActionProfit;
 
         Wait(2800, 3000);
         Exit(True);
@@ -213,16 +213,16 @@ begin
   end;
 end;
 
-function TAlcher.HandleWarning: Boolean;
+function TAlcher.HandleWarning(): Boolean;
 begin
   if Chat.HasContinue then
     Chat.ClickContinue();
   Chat.ClickOption('Cancel the', False);
 
-  if not Magic.Open then
+  if not Magic.Open() then
     Exit;
 
-  if Magic.MouseSpell(AlchSpell, MOUSE_RIGHT) and ChooseOption.IsOpen then
+  if Magic.MouseSpell(AlchSpell, MOUSE_RIGHT) and ChooseOption.IsOpen() then
     ChooseOption.Select('Warnings');
 
   WaitUntil(Chat.HasContinue, 50, 2000);
@@ -237,35 +237,35 @@ begin
 end;
 
 
-function TAlcher.Terminate: Boolean; override;
+function TAlcher.Terminate(): Boolean; override;
 begin
   Result := False;
 end;
 
 
-function TAlcher.GetState: EAlcherState;
+function TAlcher.GetState(): EAlcherState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(EAlcherState.END_SCRIPT1);
-  if ChooseOption.IsOpen then
+  if ChooseOption.IsOpen() then
     Exit(EAlcherState.CLOSE_CONTEXT);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
-      if not Inventory.FindItem('Nature rune') then
+      if not Inventory.ContainsItem('Nature rune') then
         Exit(EAlcherState.WITHDRAW_NATS);
 
-      if not Inventory.FindItem('Coins') then
+      if not Inventory.ContainsItem('Coins') then
         Exit(EAlcherState.WITHDRAW_MONEY);
 
       Exit(EAlcherState.CLOSE_INTERFACE);
     end;
 
-    if CollectBox.IsOpen then
+    if CollectBox.IsOpen() then
     begin
-      if CollectEmpty then
+      if Self.CollectEmpty then
         Exit(EAlcherState.CLOSE_INTERFACE);
       Exit(EAlcherState.HANDLE_COLLECT);
     end;
@@ -273,28 +273,28 @@ begin
     Exit(EAlcherState.CLOSE_INTERFACE);
   end;
 
-  if InVarrock and not InGE then
+  if Self.InVarrock and not Self.InGE then
   begin
-    InGE := RSW.AtTile(ScriptBank.TileArray, 30);
-    if not InGE then
+    Self.InGE := Self.RSW.AtTile(Self.ScriptBank.TileArray, 30);
+    if not Self.InGE then
       Exit(EAlcherState.WALK_ALCH);
   end;
 
   if Chat.HasContinue then
     Exit(EAlcherState.HANDLE_WARNING);
 
-  if Magic.IsOpen then
+  if Magic.IsOpen() then
   begin
     if Magic.IsSpellSelected(AlchSpell) then
       Exit(EAlcherState.OPEN_INV_TAB);
 
     if not Magic.CanActivate(AlchSpell) and
-       not Inventory.FindItem('Nature rune') then
+       not Inventory.ContainsItem('Nature rune') then
     begin
-      if BankEmpty and CollectEmpty then
+      if Self.BankEmpty and Self.CollectEmpty then
         Exit(EAlcherState.END_SCRIPT2);
 
-      if BankEmpty then
+      if Self.BankEmpty then
         Exit(EAlcherState.OPEN_COLLECT);
 
       Exit(EAlcherState.OPEN_BANK);
@@ -303,12 +303,12 @@ begin
     Exit(EAlcherState.CHOOSE_SPELL);
   end;
 
-  if Inventory.IsOpen then
+  if Inventory.IsOpen() then
   begin
-    if ToStr(AlchItem) = '' then
-      Self.SetupAlchItems;
+    if ToStr(Self.AlchItem) = '' then
+      Self.SetupAlchItems();
 
-    if not Inventory.FindItem(AlchItem) then
+    if not Inventory.ContainsItem(Self.AlchItem) then
     begin
       if Inventory.GetSelectedSlot > -1 then
         Exit(EAlcherState.DESELECT_ITEM);
@@ -326,41 +326,40 @@ end;
 
 procedure TAlcher.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
-    case State of
-      EAlcherState.WALK_ALCH: InGe := RSW.WebWalk(ScriptBank.TileArray, 10, 0.2);
+    case Self.State of
+      EAlcherState.WALK_ALCH: Self.InGe := Self.RSW.WebWalk(Self.ScriptBank.TileArray, 10, 0.2);
 
-      EAlcherState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      EAlcherState.OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
       EAlcherState.WITHDRAW_NATS: Self.Withdraw('Nature rune');
       EAlcherState.WITHDRAW_MONEY: Self.Withdraw('Coins');
 
-      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface;
+      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen(Self.ScriptBank);
+      EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox();
+      EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      EAlcherState.CHOOSE_SPELL: Self.ChooseSpell;
-      EAlcherState.CHOOSE_ITEM: Self.ChooseItem;
-      EAlcherState.OPEN_MAGIC_TAB: Magic.Open;
-      EAlcherState.OPEN_INV_TAB: Inventory.Open;
-      EAlcherState.HANDLE_WARNING: Self.HandleWarning;
+      EAlcherState.CHOOSE_SPELL: Self.ChooseSpell();
+      EAlcherState.CHOOSE_ITEM: Self.ChooseItem();
+      EAlcherState.OPEN_MAGIC_TAB: Magic.Open();
+      EAlcherState.OPEN_INV_TAB: Inventory.Open();
+      EAlcherState.HANDLE_WARNING: Self.HandleWarning();
       EAlcherState.DESELECT_ITEM: Inventory.SetSelectedSlot(-1);
-      EAlcherState.CLOSE_CONTEXT: ChooseOption.Close;
+      EAlcherState.CLOSE_CONTEXT: ChooseOption.Close();
 
       EAlcherState.END_SCRIPT1, EAlcherState.END_SCRIPT2:
         Break;
     end;
 
-    Self.DoAntiban;
-  until Self.ShouldStop;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 
-  if not Self.Terminate then
+  if not Self.Terminate() then
     Self.Fatal('Didn''t terminate properly. Stopping execution.');
 end;
 
@@ -368,9 +367,9 @@ var
   Alcher: TAlcher;
 
 type
-  TAlcherConfig = record(TScriptConfig)
+  TAlcherConfig = record(TScriptForm)
     AlchSelector: TLabeledCombobox;
-    IgnoreProfit: TLabeledCheckbox;
+    IgnoreProfit: TCheckbox;
     CustomItemSelector: TLabeledEdit;
   end;
 
@@ -378,27 +377,27 @@ procedure TAlcherConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  case AlchSelector.Combobox.getItemIndex of
+  case Self.AlchSelector.Combobox.getItemIndex() of
     0: AlchSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
     1: AlchSpell := ERSSpell.LOW_LEVEL_ALCHEMY;
   end;
 
-  LossProtection := IgnoreProfit.IsChecked;
-  CustomItem := CustomItemSelector.GetText;
+  LossProtection := Self.IgnoreProfit.IsChecked;
+  CustomItem := Self.CustomItemSelector.getText();
 end;
 
-procedure TAlcherConfig.Setup; override;
+procedure TAlcherConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 50);
+  UpdateFormSize(Self.Form, Self.Form.GetWidth(), Self.Form.GetHeight() + 50);
 
-  with AlchSelector do
+  with Self.AlchSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Alchemy spell:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);  
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('High alchemy');
@@ -406,31 +405,31 @@ begin
     Combobox.setItemIndex(0);
   end;
 
-  with IgnoreProfit do
+  with Self.IgnoreProfit do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Prevent loss:');
-    SetLeft(AlchSelector.getLeft + AlchSelector.GetWidth + 20);
-    SetTop(AlchSelector.getTop + 20);
+    SetLeft(Self.AlchSelector.GetLeft() + Self.AlchSelector.GetWidth() + 20);
+    SetTop(Self.AlchSelector.GetTop() + 20);
     SetEnabled(LossProtection);
   end;
 
-  with CustomItemSelector do
+  with Self.CustomItemSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Custom item to alch:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(AlchSelector.getTop + AlchSelector.GetHeight);
+    SetLeft(5);  
+    SetTop(Self.AlchSelector.GetTop() + Self.AlchSelector.GetHeight());
     SetWidth(200);
     SetText(ToStr(CustomItem));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TAlcherConfig.Run; override;
+procedure TAlcherConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;

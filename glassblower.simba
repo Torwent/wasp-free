@@ -57,7 +57,7 @@ type
   end;
 
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -111,10 +111,10 @@ begin
     ERSGlassItem.BULB:     Product := ['Empty light orb', X_Number];
   end;
 
-  ExtraInfo := 'Blowing item: ' + Product.Item + '.';
+  Self.ExtraInfo := 'Blowing item: ' + Product.Item + '.';
   ProductCost := ItemData.GetAverage(Material.Item);
 
-  ActionProfit := (
+  Self.ActionProfit := (
     ItemData.GetAverage(Product.Item) -
     ProductCost
   );
@@ -124,19 +124,19 @@ end;
 
 procedure TBlower.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Glassblower';
+  Self.Name := 'Glassblower';
 
   inherited;
-  Self.SetupWLBanks;
+  Self.SetupWLBanks();
 
   if ScriptDebugEnabled then
-    DebugObjectArray += @ScriptBank;
+    DebugObjectArray += Self.ScriptBank;
 
   UseBestItem := CurrentGlass = ERSGlassItem.Best;
   ItemChanged := True;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   CurrentLevel := Stats.GetCurrentLevel(ERSSkill.CRAFTING);
 end;
@@ -164,14 +164,14 @@ end;
 function TBlower.Withdraw(Item: TRSBankWithdrawItem): Boolean;
 var
   UseQuantityButton: Boolean := Item.Quantity <> 1;
-  InvCount: Int32 := Inventory.Count;
+  InvCount: Int32 := Inventory.Count();
 begin
-  if Result := Bank.WithdrawItem(BankTab, Item, UseQuantityButton) then
-    WaitUntil(Inventory.Count > InvCount, 100, 3000);
+  if Result := Bank.WithdrawItem(Self.BankTab, Item, UseQuantityButton) then
+    WaitUntil(Inventory.Count() > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
-    if CollectEmpty and CollectTimer.IsFinished then
-      CollectEmpty := False;
+  if Self.BankEmpty := (not Result and not Bank.FindItem(Self.BankTab, Item)) then
+    if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
+      Self.CollectEmpty := False;
 end;
 
 function TBlower.DepositExtraItems: Boolean;
@@ -195,9 +195,9 @@ function TBlower.Deposit: Boolean;
 var
   ItemCount: Int32 := Self.CountItem;
 begin
-  if Result := Bank.DepositItem(BankTab, Product, True) then
+  if Result := Bank.DepositItem(Self.BankTab, Product, True) then
     if WaitUntil(Self.CountItem = 0, 100, 3000) then
-      TotalActions += ItemCount;
+      Self.TotalActions += ItemCount;
 end;
 
 function TBlower.HandleCollectBox: Boolean;
@@ -206,14 +206,14 @@ var
 begin
   if CollectBox.FindItems([Tool.Item, Material.Item], Slots) then
   begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
+    if Result := Self.CollectEmpty := CollectBox.CollectToBank then
       WaitUntil(not CollectBox.FindItems([Tool.Item, Material.Item], Slots), 50, 2000);
-    BankEmpty := not CollectEmpty;
+    Self.BankEmpty := not Self.CollectEmpty;
   end
   else
-    CollectEmpty := True;
+    Self.CollectEmpty := True;
 
-  CollectTimer.Restart;
+  Self.CollectTimer.Restart();
 end;
 
 
@@ -245,7 +245,7 @@ begin
 
   Button := Buttons[High(Buttons)];
 
-  if SRL.CountColor(ENABLED_COLOR, Button.Bounds) > 0 then
+  if SRL.CountColor(ENABLED_COLOR, Button.Bounds()) > 0 then
     Exit(True)
   else
     Exit(Button.Click);
@@ -284,26 +284,26 @@ begin
 end;
 
 
-function TBlower.GetState: EBlowerState;
+function TBlower.GetState(): EBlowerState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(EBlowerState.END_SCRIPT);
 
-  if XPBar.EarnedXP then
+  if XPBar.EarnedXP() then
     Exit(EBlowerState.WAIT_GLASS);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
   begin
     Blowing := False;
     Exit(EBlowerState.LEVEL_UP);
   end;
 
-  if Make.IsOpen then
+  if Make.IsOpen() then
     Exit(EBlowerState.HANDLE_MAKE);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
       if Inventory.FindItem(Product.Item) then
         Exit(EBlowerState.DEPOSIT_PRODUCT);
@@ -311,7 +311,7 @@ begin
       if Self.HasRandomItem then
         Exit(EBlowerState.DEPOSIT_RANDOM_ITEM);
 
-      if BankEmpty or Inventory.FindAllItems([Tool.Item, Material.Item]) then
+      if Self.BankEmpty or Inventory.FindAllItems([Tool.Item, Material.Item]) then
         Exit(EBlowerState.CLOSE_INTERFACE);
 
       if not Inventory.FindItem(Tool.Item) then
@@ -321,9 +321,9 @@ begin
         Exit(EBlowerState.WITHDRAW_MATERIAL);
     end;
 
-    if CollectBox.IsOpen then
+    if CollectBox.IsOpen() then
     begin
-      if CollectEmpty then
+      if Self.CollectEmpty then
         Exit(EBlowerState.CLOSE_INTERFACE);
 
       Exit(EBlowerState.HANDLE_COLLECT);
@@ -340,26 +340,26 @@ begin
     Exit(EBlowerState.DO_GLASS);
   end;
 
-  if BankEmpty and CollectEmpty then
+  if Self.BankEmpty and Self.CollectEmpty then
     Exit(EBlowerState.END_SCRIPT);
 
-  if BankEmpty then
-    Exit(EBlowerState.OPEN_COLLECT);
+  if Self.BankEmpty then
+    Exit(EBlowerState.Open()_COLLECT);
 
-  Exit(EBlowerState.OPEN_BANK);
+  Exit(EBlowerState.Open()_BANK);
 end;
 
-function TBlower.Terminate: Boolean; override;
+function TBlower.Terminate(): Boolean; override;
 begin
   if inherited then
     for 0 to 3 do
-      if Result := Bank.WithdrawItem(BankTab, [Product.Item, BANK_WITHDRAW_ALL, True], True) then
+      if Result := Bank.WithdrawItem(Self.BankTab, [Product.Item, BANK_WITHDRAW_ALL, True], True) then
         Break;
 end;
 
 procedure TBlower.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   while not Self.ShouldStop do
@@ -369,35 +369,35 @@ begin
 
     Self.SetupItems;
 
-    State := GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+    
 
-    case State of
-      EBlowerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+    case Self.State of
+      EBlowerState.Open()_BANK: Bank.WalkOpen(Self.ScriptBank);
       EBlowerState.WITHDRAW_TOOL: Self.Withdraw(Tool);
       EBlowerState.WITHDRAW_MATERIAL: Self.Withdraw(Material);
-      EBlowerState.DEPOSIT_PRODUCT: Self.Deposit;
-      EBlowerState.DEPOSIT_RANDOM_ITEM: Self.DepositExtraItems;
+      EBlowerState.DEPOSIT_PRODUCT: Self.Deposit();
+      EBlowerState.DEPOSIT_RANDOM_ITEM: Self.DepositExtraItems();
 
-      EBlowerState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EBlowerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
+      EBlowerState.Open()_COLLECT: CollectBox.WalkOpen(Self.ScriptBank);
+      EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox();
+      EBlowerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       EBlowerState.DO_GLASS: Self.DoGlass;
       EBlowerState.HANDLE_MAKE: Self.HandleMake;
       EBlowerState.WAIT_GLASS: Self.WaitBlowing;
 
-      EBlowerState.LEVEL_UP: Chat.HandleLevelUp;
-      EBlowerState.CLOSE_CONTEXT: ChooseOption.Close;
+      EBlowerState.LEVEL_UP: Chat.HandleLevelUp();
+      EBlowerState.CLOSE_CONTEXT: ChooseOption.Close();
 
       EBlowerState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
+    Self.DoAntiban();
   end;
 
-  if not Self.Terminate then
+  if not Self.Terminate() then
     TerminateScript(Name + ' didn''t terminate properly. Stopping execution.');
 end;
 
@@ -412,7 +412,7 @@ begin
 end;
 
 type
-  TBlowerConfig = record(TBankConfig)
+  TBlowerConfig = record(TScriptForm)
     GlassSelector: TLabeledCombobox;
   end;
 
@@ -420,19 +420,19 @@ procedure TBlowerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentGlass := ERSGlassItem(GlassSelector.Combobox.getItemIndex);
+  CurrentGlass := ERSGlassItem(GlassSelector.Combobox.getItemIndex());
 end;
 
-procedure TBlowerConfig.Setup(Strs: TStringArray); override;
+procedure TBlowerConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
   with GlassSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Glass item:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
+    SetLeft(5);  
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Beer glass');
@@ -447,12 +447,12 @@ begin
     Combobox.setItemIndex(Ord(CurrentGlass));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TBlowerConfig.Run; override;
+procedure TBlowerConfig.Run(); override;
 begin
-  Self.Setup(BankLocationStrings);
+  Self.Setup(False, False, True);
 
   inherited;
 end;

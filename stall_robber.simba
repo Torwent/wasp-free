@@ -40,7 +40,7 @@ type
     StallCooldown: TCountDown;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -54,7 +54,7 @@ begin
   case CurrentStall of
     ERSStall.TEA_STALL:
       begin
-        RSW.Setup('x7536y2363');
+        Self.RSW.Setup('x7536y2363');
         Stall := RSObjects.TeaStall;
         StallCooldown.Init(7000);
         SafeSpot := [8465, 2808];
@@ -63,7 +63,7 @@ begin
 
     ERSStall.SILK_STALL:
       begin
-        RSW.Setup('x5723y3038');
+        Self.RSW.Setup('x5723y3038');
         Stall := RSObjects.SilkStall;
         StallCooldown.Init(5000);
         SafeSpot := [6042, 3182];
@@ -72,7 +72,7 @@ begin
 
     ERSStall.FRUIT_STALL:
       begin
-        RSW.Setup('x2468y1912');
+        Self.RSW.Setup('x2468y1912');
         Stall := RSObjects.FruitStall;
         StallCooldown.Init(2000);
         DropList := [
@@ -88,14 +88,14 @@ end;
 
 procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'AIO StallRobber';
+  Self.Name := 'AIO StallRobber';
 
   inherited;
 
   Self.SetupStall;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   if ScriptDebugEnabled then
     DebugObjectArray += @Stall;
@@ -111,10 +111,10 @@ end;
 
 function TStallRobber.RobStall: Boolean;
 begin
-  if Stall.WalkClick and (Result := XPBar.WaitXP(2000)) then
+  if Stall.WalkClick() and (Result := XPBar.WaitXP(2000)) then
   begin
     StallCooldown.Restart(Random(-200, 200));
-    WL.Activity.Restart;
+    WL.Activity.Restart();
   end;
 end;
 
@@ -127,46 +127,46 @@ begin
   Result := Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
 
   if Result then
-    TotalActions += Length(Slots);
+    Self.TotalActions += Length(Slots);
 end;
 
 
-function TStallRobber.GetState: EStallRobberState;
+function TStallRobber.GetState(): EStallRobberState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
-  if Inventory.IsFull and Self.HasLoot then
+  if Inventory.IsFull() and Self.HasLoot then
     Exit(DROP_LOOT);
   if MainScreen.IsUpText('Steal-from') then
     Exit(ROB_STALL);
-  if not StallCooldown.IsFinished then
+  if not StallCooldown.IsFinished() then
     Exit(WAIT_STATE);
-  if (SafeSpot <> []) and not RSW.AtTile(SafeSpot, 5) then
+  if (SafeSpot <> []) and not Self.RSW.AtTile(SafeSpot, 5) then
     Exit(WALK_SPOT);
-  if RSW.AtTile(Stall.TileArray) then
+  if Self.RSW.AtTile(Stall.TileArray) then
     Exit(FIND_STALL);
 end;
 
 procedure TStallRobber.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   while not Self.ShouldStop do
   begin
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+    
 
-    case State of
+    case Self.State of
       DROP_LOOT: Self.DropItems;
       FIND_STALL, ROB_STALL: Self.RobStall;
       WAIT_STATE: Wait(100, 200);
-      WALK_SPOT: RSW.WebWalk(SafeSpot, 3, 0.2);
+      WALK_SPOT: Self.RSW.WebWalk(SafeSpot, 3, 0.2);
       END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
+    Self.DoAntiban();
   end;
 end;
 
@@ -174,7 +174,7 @@ var
   StallRobber: TStallRobber;
 
 type
-  TStallRobberConfig = record(TScriptConfig)
+  TStallRobberConfig = record(TScriptForm)
     StallSelector: TLabeledCombobox;
   end;
 
@@ -182,19 +182,19 @@ procedure TStallRobberConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentStall := ERSStall(StallSelector.Combobox.getItemIndex);
+  CurrentStall := ERSStall(StallSelector.Combobox.getItemIndex());
 end;
 
-procedure TStallRobberConfig.Setup; override;
+procedure TStallRobberConfig.Setup(); override;
 begin
   inherited;
 
   with StallSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Stall:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);  
+    SetTop(5);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('Tea stall');
@@ -203,12 +203,12 @@ begin
     Combobox.setItemIndex(Ord(CurrentStall));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TStallRobberConfig.Run; override;
+procedure TStallRobberConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;

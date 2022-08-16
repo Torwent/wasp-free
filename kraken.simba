@@ -62,7 +62,7 @@ begin
   Self.AddBreak(45 * ONE_MINUTE, 4 * ONE_MINUTE, 0.33, 0.15);
 end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -73,11 +73,11 @@ end;
 
 procedure TScript.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Kraken';
+  Self.Name := 'Kraken';
 
   inherited;
 
-  RSW.Setup('x10158y1010');
+  Self.RSW.Setup('x10158y1010');
   Bridge := [10391, 1145];
   BossRoomTPA := [
     [10369, 1085], [10420, 1086], [10440, 1107],
@@ -86,7 +86,7 @@ begin
     [10345, 1105]
   ];
 
-  FoodManager.MinInvPoints := 10;
+  FoodHandler.MinInvPoints := 10;
   PrayerManager.MinInvPoints := 90;
 
   KrakenFinder.ClusterDistance := 3;
@@ -98,8 +98,8 @@ begin
   UseImbuedHeart := True;
   ImbuedHeart.Setup(7 * ONE_MINUTE);
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
@@ -127,7 +127,7 @@ function TScript.EnterCrevice: Boolean;
 begin
   if RSObjects.KrakenEntrance.WalkSelectOption(['Private']) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil('Pay' in Chat.GetChatTitle, 100, 5000);
   end;
 end;
@@ -195,7 +195,7 @@ begin
   end;
 
   if Result then
-    WL.Activity.Restart;
+    WL.Activity.Restart();
 end;
 
 function TScript.AttackKraken: Boolean;
@@ -234,15 +234,15 @@ begin
   TPA := [Minimap.VecToMS(Vec3(Center.X - 1, Center.Y, 3), A),
           Minimap.VecToMS(Vec3(Center.X + 1, Center.Y, -3), A)];
 
-  Result := TPA.Bounds;
+  Result := TPA.Bounds();
 end;
 
 function TScript.CheckLoot: Boolean;
 var
   B: TBox := MainScreen.GetPlayerFloorBox;
 begin
-  while Inventory.IsFull and Inventory.FindConsumable(HEALTH_CONSUMABLE) do
-    Inventory.Consume(HEALTH_CONSUMABLE);
+  while Inventory.IsFull() and Inventory.FindConsumable(FOOD_CONSUMABLE) do
+    Inventory.Consume(FOOD_CONSUMABLE);
 
   Result := CheckedLoot := True;
 
@@ -252,9 +252,9 @@ end;
 
 
 
-function TScript.GetState: EState;
+function TScript.GetState(): EState;
 begin
-  if WL.Activity.IsFinished and not MainScreen.InCombat then
+  if WL.Activity.IsFinished() and not MainScreen.InCombat then
     Exit(END_SCRIPT);
 
   if not Self.InsideBossRoom then
@@ -266,7 +266,7 @@ begin
 
   if (Minimap.GetHPLevel <= 40) then
   begin
-    if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD)
     else if Self.FindRagingKraken then
       Exit(ATTACK_KRAKEN)
@@ -280,13 +280,13 @@ begin
   if CombatHandler.NeedBracelet then
     Exit(EQUIP_BRACELET);
 
-  if UseImbuedHeart and ImbuedHeart.IsFinished then
+  if UseImbuedHeart and ImbuedHeart.IsFinished() then
     Exit(BOOST);
 
   if not Minimap.IsPrayerEnabled and (Minimap.GetPrayerLevel > 0) then
     Exit(ENABLE_QPRAY);
 
-  if not RSW.AtTile(Bridge, 5) then
+  if not Self.RSW.AtTile(Bridge, 5) then
     Exit(WALK_BRIDGE);
 
   if Self.FindRagingKraken then
@@ -308,27 +308,27 @@ end;
 
 procedure TScript.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+    
 
-    case State of
+    case Self.State of
       //Outside
       ENTER_CREVICE: Self.EnterCrevice;
       HANDLE_CHAT: Self.HandlePayment;
 
       //Inside
-      WALK_BRIDGE: RSW.WebWalk(Bridge, 5, 0.2);
+      WALK_BRIDGE: Self.RSW.WebWalk(Bridge, 5, 0.2);
       WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
       CHECK_LOOT: Self.CheckLoot;
       WAKE_KRAKEN: Self.WakeKraken;
       ATTACK_KRAKEN: IsAttacking := Self.AttackKraken;
       BOOST: Self.BoostMagic;
-      EAT_FOOD: Inventory.Consume(HEALTH_CONSUMABLE);
+      EAT_FOOD: Inventory.Consume(FOOD_CONSUMABLE);
       DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
       ENABLE_QPRAY: Minimap.EnablePrayer;
       ALCH_DROP: if RSAction.AlchItems(RSAction.AlchItemArray) then Wait(600, 800);
@@ -337,7 +337,7 @@ begin
     end;
 
     Self.DoAntiban(True, False);
-  until Self.ShouldStop;
+  until Self.ShouldStop();
 end;
 
 
@@ -353,7 +353,7 @@ begin
 end;
 
 type
-  TConfig = record(TScriptConfig)
+  TConfig = record(TScriptForm)
     InfoText: TLabel;
   end;
 
@@ -361,19 +361,19 @@ procedure TConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  MaxActions := StrToInt(Self.ActionLimit.GetText);
-  MaxTime    := StrToInt64(Self.TimeLimit.GetText);
+  MaxActions := StrToInt(Self.ActionLimit.getText());
+  MaxTime    := StrToInt64(Self.TimeLimit.getText());
 end;
 
-procedure TConfig.Setup; override;
+procedure TConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth + 30, Form.getHeight + 40);
+  Self.UpdateFormSize(Form.GetWidth() + 30, Form.GetHeight() + 40);
 
   with InfoText do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     setParent(ScriptSettingsPanel);
     SetCaption(
       'Keep in mind this script was only tested with Sang Staff.'
@@ -386,17 +386,17 @@ begin
       + STR_NEW_LINE +
       'I recommend you check it every 40 mins or so to see if it needs banking.'
     );
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);  
+    SetTop(5);
     SetWidth(200);
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TConfig.Run; override;
+procedure TConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
   inherited;
 end;
 

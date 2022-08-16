@@ -28,7 +28,7 @@ type
     FillingBellows: Boolean;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -39,20 +39,20 @@ end;
 
 procedure TChompyHunter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Chompy Hunter';
+  Self.Name := 'Chompy Hunter';
 
   inherited;
 
   ItemFinder.Similarity := 0.9999;
-  RSW.Setup('x4595y3834');
+  Self.RSW.Setup('x4595y3834');
 
   CombatHandler.Setup(@RSMonsters.Chompy, 2000);
   Toad := RSNPCs.SwampToad;
 
   OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
@@ -76,9 +76,9 @@ var
   InvCount: Int32 := Self.CountBellows;
   TempCount: Int32;
 begin
-  if RSObjects.SwampBubbles.WalkClick then
+  if RSObjects.SwampBubbles.WalkClick() then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000);
   end;
 
@@ -105,7 +105,7 @@ begin
   MinimapTPA.Fill;
   MinimapTPA := MinimapTPA.Erode(3);
 
-  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds);
+  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds());
 
   MMDots := Minimap.GetDots(ERSMinimapDot.NPC).Offset(2, 2);
   MMDots := MMDots.Grow(2);
@@ -118,7 +118,7 @@ begin
 
   Mouse.Click(FinalTPA.RandomPoint, MOUSE_LEFT);
 
-  Minimap.WaitMoving;
+  Minimap.WaitMoving();
   Result := not Minimap.HasDotUnder;
 end;
 
@@ -136,12 +136,12 @@ end;
 
 function TChompyHunter.FillToad: Boolean;
 var
-  InvCount := Inventory.Count;
+  InvCount := Inventory.Count();
 begin
   if Toad.Click(True, 10) then
   begin
-    Minimap.WaitMoving;
-    Result := WaitUntil(InvCount < Inventory.Count, 100, 5000);
+    Minimap.WaitMoving();
+    Result := WaitUntil(InvCount < Inventory.Count(), 100, 5000);
   end;
 
   if Result then
@@ -161,17 +161,17 @@ begin
   if CombatHandler.Monster^.SelectOption(['Attack', 'Pluck']) then
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(Self.ClickedChompy(FeatherCount) or MainScreen.InCombat, 100, 3000);
   end;
 
   if Result then
-    TotalActions += 1;
+    Self.TotalActions += 1;
 end;
 
 
 
-function TChompyHunter.GetState: EState;
+function TChompyHunter.GetState(): EState;
 begin
   if FillingBellows then
   begin
@@ -198,16 +198,16 @@ end;
 
 procedure TChompyHunter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   while not Self.ShouldStop do
   begin
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+    
 
-    case State of
+    case Self.State of
       WAIT_STATE: Wait(800, 1200);
       FILL_TOAD: Self.FillToad;
       FILL_BELLOWS: Self.FillBellows;
@@ -215,7 +215,7 @@ begin
       CLICK_CHOMPY: Self.ClickChompy;
     end;
 
-    Self.DoAntiban;
+    Self.DoAntiban();
   end;
 end;
 
@@ -228,12 +228,12 @@ begin
   if Self.FindDepletedHPBar then
     Exit(False);
 
-  Result := (CombatHandler.IsSetup and not CombatHandler.InCombatTimer.IsFinished)
-            or XPBar.EarnedXP or (Self.FindHitsplats <> []);
+  Result := (CombatHandler.IsSetup and not CombatHandler.InCombatTimer.IsFinished())
+            or XPBar.EarnedXP() or (Self.FindHitsplats <> []);
 end;
 
 type
-  TChompyHunterConfig = record(TScriptConfig)
+  TChompyHunterConfig = record(TScriptForm)
     ChompyHunterInfo: TLabel;
   end;
 
@@ -242,13 +242,13 @@ begin
   Self.Init(Sender);
 end;
 
-procedure TChompyHunterConfig.Setup; override;
+procedure TChompyHunterConfig.Setup(); override;
 begin
   inherited;
 
   with ChompyHunterInfo do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     setParent(ScriptSettingsPanel);
 
     SetCaption('This script is in BETA!' +
@@ -257,16 +257,16 @@ begin
                STR_NEW_LINE +
                'It''s probably a good idea to BABY SIT!');
 
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);  
+    SetTop(5);
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TChompyHunterConfig.Run; override;
+procedure TChompyHunterConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;

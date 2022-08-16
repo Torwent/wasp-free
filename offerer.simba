@@ -54,7 +54,7 @@ type
     SpellCooldown: TCountDown;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -103,34 +103,34 @@ begin
     ERSRemains.SUPERIOR_BONES:  Remains := 'Superior dragon bones';
   end;
 
-  ActionProfit -= ((ItemData.GetAverage(Remains) * 3) -
+  Self.ActionProfit -= ((ItemData.GetAverage(Remains) * 3) -
                     ItemData.GetAverage(WrathRune) -
                     ItemData.GetAverage(AltRune));
 end;
 
 procedure TRemainOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Remain Offerer';
+  Self.Name := 'Remain Offerer';
 
   inherited;
-  Self.SetupWLBanks;
+  Self.SetupWLBanks();
 
   if ScriptDebugEnabled then
-    DebugObjectArray += @ScriptBank;
+    DebugObjectArray += Self.ScriptBank;
 
   Self.SetupSpell;
   Self.SetupRemains;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 end;
 
 
 function TRemainOfferer.CanCast: Boolean;
 begin
-  if Inventory.IsOpen then
+  if Inventory.IsOpen() then
     Result := Inventory.FindItem(WrathRune) and Inventory.FindItem(AltRune)
-  else if Magic.IsOpen then
+  else if Magic.IsOpen() then
     Result := Magic.CanActivate(OfferSpell)
   else
     Result := True;
@@ -142,22 +142,22 @@ begin
   begin
     SpellCooldown.Restart(Random(-100,500));
     RemainsLeft -= 3;
-    TotalActions += 1;
+    Self.TotalActions += 1;
   end
-  else if Inventory.Open then
+  else if Inventory.Open() then
     RemainsLeft := Inventory.CountItem(Remains);
 end;
 
 function TRemainOfferer.Withdraw(Item: TRSItem): Boolean;
 var
-  InvCount: Int32 := Inventory.Count;
+  InvCount: Int32 := Inventory.Count();
 begin
-  if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
-    WaitUntil(Inventory.Count > InvCount, 100, 3000);
+  if Result := Bank.WithdrawItem(Self.BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
+    WaitUntil(Inventory.Count() > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
-    if CollectEmpty and CollectTimer.IsFinished then
-      CollectEmpty := False;
+  if Self.BankEmpty := (not Result and not Bank.FindItem(Self.BankTab, Item)) then
+    if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
+      Self.CollectEmpty := False;
 end;
 
 function TRemainOfferer.HandleCollectBox: Boolean;
@@ -166,14 +166,14 @@ var
 begin
   if CollectBox.FindItems([WrathRune, AltRune, Remains], Slots) then
   begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
+    if Result := Self.CollectEmpty := CollectBox.CollectToBank then
       WaitUntil(not CollectBox.FindItems([WrathRune, AltRune, Remains], Slots), 50, 2000);
-    BankEmpty := not CollectEmpty;
+    Self.BankEmpty := not Self.CollectEmpty;
   end
   else
-    CollectEmpty := True;
+    Self.CollectEmpty := True;
 
-  CollectTimer.Restart;
+  Self.CollectTimer.Restart();
 end;
 
 procedure TRemainOfferer.WaitCoolDown;
@@ -211,14 +211,14 @@ begin
 end;
 
 
-function TRemainOfferer.GetState: EOffererState;
+function TRemainOfferer.GetState(): EOffererState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(EOffererState.END_SCRIPT);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
       if not Inventory.FindItem(WrathRune) then
         Exit(EOffererState.WITHDRAW_WRATH);
@@ -230,7 +230,7 @@ begin
       RemainsLeft := Inventory.CountItem(Remains);
     end;
 
-    if CollectBox.IsOpen and not CollectEmpty then
+    if CollectBox.IsOpen() and not Self.CollectEmpty then
       Exit(EOffererState.HANDLE_COLLECT);
 
     Exit(EOffererState.CLOSE_INTERFACE);
@@ -238,31 +238,31 @@ begin
 
   if (RemainsLeft < 3) or not Self.CanCast then
   begin
-    if not BankEmpty then
-      Exit(EOffererState.OPEN_BANK);
-    if not CollectEmpty then
-      Exit(EOffererState.OPEN_COLLECT);
+    if not Self.BankEmpty then
+      Exit(EOffererState.Open()_BANK);
+    if not Self.CollectEmpty then
+      Exit(EOffererState.Open()_COLLECT);
 
     Exit(EOffererState.END_SCRIPT);
   end;
 
-  if SpellCooldown.IsFinished then
+  if SpellCooldown.IsFinished() then
   begin
-    if Magic.IsOpen then
+    if Magic.IsOpen() then
     begin
       if Magic.CanActivate(OfferSpell) then
         Exit(EOffererState.CAST_SPELL)
 
-      if not BankEmpty then
-        Exit(EOffererState.OPEN_BANK);
+      if not Self.BankEmpty then
+        Exit(EOffererState.Open()_BANK);
 
-      if not CollectEmpty then
-        Exit(EOffererState.OPEN_COLLECT);
+      if not Self.CollectEmpty then
+        Exit(EOffererState.Open()_COLLECT);
 
       Exit(EOffererState.END_SCRIPT);
     end;
 
-    Exit(EOffererState.OPEN_MAGIC);
+    Exit(EOffererState.Open()_MAGIC);
   end;
 
   Exit(EOffererState.WAIT_STATE);
@@ -270,44 +270,44 @@ end;
 
 procedure TRemainOfferer.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    ExtraInfo := ' Spell: ' + ToStr(OfferSpell) +
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+    Self.ExtraInfo := ' Spell: ' + ToStr(OfferSpell) +
                  ' RemainsLeft: ' + ToStr(RemainsLeft) +
-                 ' SpellCooldown.IsFinished: ' + ToStr(SpellCooldown.IsFinished);
+                 ' SpellCooldown.IsFinished(): ' + ToStr(SpellCooldown.IsFinished());
 
-    Self.ProcessWhileWaiting;
+    
 
-    case State of
-      OPEN_BANK:        Bank.WalkOpen(ScriptBank);
+    case Self.State of
+      OPEN_BANK:        Bank.WalkOpen(Self.ScriptBank);
       WITHDRAW_WRATH:   Self.Withdraw(WrathRune);
       WITHDRAW_ALT:     Self.Withdraw(AltRune);
       WITHDRAW_REMAINS: Self.Withdraw(Remains);
 
-      OPEN_COLLECT:   CollectBox.WalkOpen(ScriptBank);
-      HANDLE_COLLECT: Self.HandleCollectBox;
+      OPEN_COLLECT:   CollectBox.WalkOpen(Self.ScriptBank);
+      HANDLE_COLLECT: Self.HandleCollectBox();
 
-      CLOSE_INTERFACE: MainScreen.CloseInterface;
+      CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      OPEN_MAGIC: Magic.Open;
+      OPEN_MAGIC: Magic.Open();
       CAST_SPELL: Self.CastSpell;
       WAIT_STATE: Self.WaitCoolDown;
 
       END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
-  until Self.ShouldStop;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 var RemainOfferer: TRemainOfferer;
 
 type
-  TRemainOffererConfig = record(TBankConfig)
+  TRemainOffererConfig = record(TScriptForm)
     RemainSelector: TLabeledCombobox;
   end;
 
@@ -315,22 +315,22 @@ procedure TRemainOffererConfig.StarTRemainOfferer(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentRemains := ERSRemains(RemainSelector.Combobox.getItemIndex);
+  CurrentRemains := ERSRemains(RemainSelector.Combobox.getItemIndex());
 
-  MaxActions := StrToInt(Self.ActionLimit.GetText);
-  MaxTime    := StrToInt64(Self.TimeLimit.GetText);
+  MaxActions := StrToInt(Self.ActionLimit.getText());
+  MaxTime    := StrToInt64(Self.TimeLimit.getText());
 end;
 
-procedure TRemainOffererConfig.Setup(Strs: TStringArray); override;
+procedure TRemainOffererConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
   with RemainSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel); 
     SetCaption('Task:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
+    SetLeft(5);  
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
 
@@ -355,9 +355,9 @@ begin
   StartButton.setOnClick(@Self.StarTRemainOfferer);
 end;
 
-procedure TRemainOffererConfig.Run; override;
+procedure TRemainOffererConfig.Run(); override;
 begin
-  Self.Setup(BankLocationStrings);
+  Self.Setup(False, False, True);
 
   inherited;
 end;

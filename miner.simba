@@ -240,8 +240,8 @@ begin
     'Celestial signet'
   ];
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   Options.SetZoomLevel(40);
 
@@ -260,7 +260,7 @@ end;
 
 function TMiner.MineRock(): Boolean;
 begin
-  Result := Self.Mining := Self.RSRock.Click or Self.RSRock.WalkClick;
+  Result := Self.Mining := Self.RSRock.Click or Self.RSRock.WalkClick();
   if Result then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
@@ -297,10 +297,10 @@ var
 begin
   Result := Inventory.ShiftDrop(Self.DropList, Inventory.RandomPattern);
 
-  Self.TotalActions += (InvCount - Inventory.Count);
+  Self.TotalActions += (InvCount - Inventory.Count());
 
   if Result then
-    WL.Activity.Restart;
+    WL.Activity.Restart();
 end;
 
 function TMiner.Deposit(): Boolean;
@@ -343,7 +343,7 @@ begin
     Exit(EMinerState.LEVEL_UP);
   end;
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
     if Bank.IsOpen() and Inventory.ContainsAny(Self.BankList) then
       Exit(EMinerState.DEPOSIT_ITEMS);
@@ -360,7 +360,7 @@ begin
     if not Self.UseBank then
       Exit(EMinerState.DROP_ITEMS);
 
-    Exit(EMinerState.OPEN_BANK);
+    Exit(EMinerState.Open()_BANK);
   end;
 
   if Self.Mining then
@@ -377,7 +377,7 @@ end;
 
 procedure TMiner.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
+  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   repeat
@@ -387,13 +387,13 @@ begin
                   STR_NEW_LINE +
                  ' Mining: ' + ToStr(Self.Mining);
 
-    Self.InvCount := Inventory.Count;
+    Self.InvCount := Inventory.Count();
 
     if Self.InvCount <> Self.PrevInvCount then
       WL.Activity.Restart();
 
     case Self.State of
-      EMinerState.OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
+      EMinerState.Open()_BANK: Bank.WalkOpen(Self.ScriptBank);
       EMinerState.DEPOSIT_ITEMS: Self.Deposit();
       EMinerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
       EMinerState.WALK_SPOT: Self.RSW.WebWalk(Self.RSRock.TileArray, 5, 0.2);
@@ -408,8 +408,8 @@ begin
 
     Self.PrevInvCount := Self.InvCount;
 
-    Self.DoAntiban;
-  until Self.ShouldStop;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 var
@@ -442,9 +442,9 @@ procedure TMinerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentRock := ERSRock(Self.RockSelector.Combobox.getItemIndex);
+  CurrentRock := ERSRock(Self.RockSelector.Combobox.getItemIndex());
 
-  case Self.BankSelector.Combobox.getText of
+  case Self.BankSelector.Combobox.getText() of
     'Power mine (mine and drop)': BankLocation := ERSBank.POWER_MINE;
     'P2P Mining Guild':           BankLocation := ERSBank.MINE_GUILD;
     'Crafting guild':             BankLocation := ERSBank.CRAFTING_GUILD_MINE;
@@ -460,7 +460,7 @@ begin
 
   Self.BankSelector.Clear;
 
-  case ERSRock(Self.RockSelector.Combobox.getItemIndex) of
+  case ERSRock(Self.RockSelector.Combobox.getItemIndex()) of
     ERSRock.CLAY:
       begin
         Self.BankSelector.AddItem('Power mine (mine and drop)');
@@ -514,7 +514,7 @@ procedure TMinerConfig.Setup(); override;
 begin
   inherited;
 
-  UpdateFormSize(Self.Form, Self.Form.getWidth(), Self.Form.getHeight() + 30);
+  UpdateFormSize(Self.Form, Self.Form.GetWidth(), Self.Form.GetHeight() + 30);
 
   with Self.RockSelector do
   begin
@@ -544,8 +544,8 @@ begin
     Init(Self.SSPanel.Panel);
     SetCaption('Bank location:');
     SetLeft(15);
-    SetTop(Self.RockSelector.getTop() + Self.RockSelector.GetHeight() - 5);
-    SetWidth(Self.RockSelector.GetWidth);
+    SetTop(Self.RockSelector.GetTop() + Self.RockSelector.GetHeight() - 5);
+    SetWidth(Self.RockSelector.GetWidth());
     Combobox.setStyle(csDropDownList);
   end;
 
@@ -555,7 +555,7 @@ end;
 
 procedure TMinerConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
