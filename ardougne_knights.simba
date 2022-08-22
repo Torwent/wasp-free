@@ -14,8 +14,8 @@ begin
 end;
 
 var
-  FoodAmount: Int32 := 15;
-  NeckAmount: Int32 := 4;
+  FoodAmount: Int32 := 13;
+  NeckAmount: Int32 := 7;
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
@@ -488,6 +488,14 @@ begin
     begin
       if Inventory.FindItems(Self.BankArray) then
         Exit(DEPOSIT_ITEMS);
+
+      if Inventory.IsFull() then
+      begin
+        if (Inventory.CountItem(Self.Necklace) < NeckAmount) or
+           not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
+        Bank.DepositAll();
+      end;
+
       if Inventory.CountItem(Self.Necklace) < NeckAmount then
         Exit(WITHDRAW_NECK);
       if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
@@ -588,7 +596,6 @@ begin
 
       END_SCRIPT: Break;
     end;
-
 
     Self.DoAntiban();       //Checks for due antiban
   until Self.ShouldStop();  //Stops if MaxAtions or MaxTime have been reached.
