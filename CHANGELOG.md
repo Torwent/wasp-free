@@ -1,3 +1,12 @@
+## [0.20.2](https://github.com/Torwent/wasp-free/compare/v0.20.1...v0.20.2) (2022-08-22)
+
+
+### Bug Fixes
+
+* simba-package ([fcd21dc](https://github.com/Torwent/wasp-free/commit/fcd21dc30b35efbe0221755db23c511fdba48ec9))
+
+
+
 ## [0.20.1](https://github.com/Torwent/wasp-free/compare/v0.20.0...v0.20.1) (2022-08-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **chompy hunter:** typo ([4394cf0](https://github.com/Torwent/wasp-free/commit/4394cf0d649fc8992cef85be3378ed9453ed8aa5))
-
-
-
-## [0.19.3](https://github.com/Torwent/wasp-free/compare/v0.19.2...v0.19.3) (2022-05-28)
-
-
-### Bug Fixes
-
-* **ardy knights:** minor logic fix doesn't really change anything ([6efdeeb](https://github.com/Torwent/wasp-free/commit/6efdeeb17524decb126919a1109e1dd1c95b8986))
 
 
 
