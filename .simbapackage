@@ -1,5 +1,5 @@
 // The package name to install under. 
-name=FreeWaspBots
+name=wasp-free
 // The path to install into, from the working directory.
 directory=Scripts
 // If true, files will be installed directly into the directory

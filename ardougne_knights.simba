@@ -280,12 +280,13 @@ var
   CurrentHP: Int32 := Minimap.GetHPLevel();
 begin
   if Self.NextHeal < 1 then
-    Self.NextHeal := Round(Antiban.GetUniqueNumber(Self.MaxHit * 8));
+    Self.NextHeal := Round(Antiban.GetUniqueNumber(Self.MaxHit * 5, Self.MaxHit + 1, Self.MaxHit * 15)) + Random(-Self.MaxHit, Self.MaxHit);
 
   if Self.NextHeal >= BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) then
-    Self.NextHeal := Round(BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) / 2);
+    Self.NextHeal := Round(BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) / 2) + Random(0, Self.MaxHit);
 
-  Self.NextHeal += Random(-Self.MaxHit, Self.MaxHit);
+  if Self.NextHeal <= Self.MaxHit then
+    Self.NextHeal += Random(0, Self.MaxHit);
 
   Result := (CurrentHP <= Self.NextHeal) or (CurrentHP <= Self.MaxHit);
 end;
