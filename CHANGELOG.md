@@ -1,3 +1,12 @@
+## [0.20.3](https://github.com/Torwent/wasp-free/compare/v0.20.2...v0.20.3) (2022-08-22)
+
+
+### Bug Fixes
+
+* **ardy knights:** added a failsafe to inventory full ([c0582b5](https://github.com/Torwent/wasp-free/commit/c0582b5903eb198205a539d598b94c73f4e8d83d))
+
+
+
 ## [0.20.2](https://github.com/Torwent/wasp-free/compare/v0.20.1...v0.20.2) (2022-08-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **miner:** temp fix for banking issues ([15cb830](https://github.com/Torwent/wasp-free/commit/15cb83096cd921534026d5702255e0977cb49296))
-
-
-
-## [0.19.4](https://github.com/Torwent/wasp-free/compare/v0.19.3...v0.19.4) (2022-07-11)
-
-
-### Bug Fixes
-
-* **chompy hunter:** typo ([4394cf0](https://github.com/Torwent/wasp-free/commit/4394cf0d649fc8992cef85be3378ed9453ed8aa5))
 
 
 
