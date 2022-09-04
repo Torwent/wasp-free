@@ -1,3 +1,12 @@
+## [1.0.3](https://github.com/Torwent/wasp-free/compare/v1.0.2...v1.0.3) (2022-09-04)
+
+
+### Bug Fixes
+
+* attempt to force update scripts ([0e62f7c](https://github.com/Torwent/wasp-free/commit/0e62f7cd1d17651c83047e80620d69e6f0d7abb5))
+
+
+
 ## [1.0.2](https://github.com/Torwent/wasp-free/compare/v1.0.1...v1.0.2) (2022-09-04)
 
 
@@ -37,15 +46,6 @@
 ### Bug Fixes
 
 * **ardy knights:** added a failsafe to inventory full ([c0582b5](https://github.com/Torwent/wasp-free/commit/c0582b5903eb198205a539d598b94c73f4e8d83d))
-
-
-
-## [0.20.2](https://github.com/Torwent/wasp-free/compare/v0.20.1...v0.20.2) (2022-08-22)
-
-
-### Bug Fixes
-
-* simba-package ([fcd21dc](https://github.com/Torwent/wasp-free/commit/fcd21dc30b35efbe0221755db23c511fdba48ec9))
 
 
 
