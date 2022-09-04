@@ -1,3 +1,18 @@
+# [1.0.0](https://github.com/Torwent/wasp-free/compare/v0.20.3...v1.0.0) (2022-09-04)
+
+
+### Bug Fixes
+
+* github action ([b8715d8](https://github.com/Torwent/wasp-free/commit/b8715d8edd31eff966827068f9dc038dde70c487))
+* refactored everything to be more compatible with Simba1500 SRL ([4d3ea63](https://github.com/Torwent/wasp-free/commit/4d3ea63c42311befda840138a8dd7b1d8c97ef08))
+
+
+### BREAKING CHANGES
+
+* This will require you to update SRL (my fork) and WaspLib
+
+
+
 ## [0.20.3](https://github.com/Torwent/wasp-free/compare/v0.20.2...v0.20.3) (2022-08-22)
 
 
@@ -31,15 +46,6 @@
 ### Features
 
 * **ardy knights:** the script was fully reworked. Runelite is no longer needed ([3fcf362](https://github.com/Torwent/wasp-free/commit/3fcf362351963adc7903b0096f0de19d0e550f03))
-
-
-
-## [0.19.5](https://github.com/Torwent/wasp-free/compare/v0.19.4...v0.19.5) (2022-07-19)
-
-
-### Bug Fixes
-
-* **miner:** temp fix for banking issues ([15cb830](https://github.com/Torwent/wasp-free/commit/15cb83096cd921534026d5702255e0977cb49296))
 
 
 
