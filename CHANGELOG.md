@@ -1,3 +1,12 @@
+## [1.0.4](https://github.com/Torwent/wasp-free/compare/v1.0.3...v1.0.4) (2022-09-04)
+
+
+### Bug Fixes
+
+* force update files attempt ([d8ab633](https://github.com/Torwent/wasp-free/commit/d8ab633cd40a74acf9a549975b0658df9eb73da5))
+
+
+
 ## [1.0.3](https://github.com/Torwent/wasp-free/compare/v1.0.2...v1.0.3) (2022-09-04)
 
 
@@ -37,15 +46,6 @@
 ### BREAKING CHANGES
 
 * This will require you to update SRL (my fork) and WaspLib
-
-
-
-## [0.20.3](https://github.com/Torwent/wasp-free/compare/v0.20.2...v0.20.3) (2022-08-22)
-
-
-### Bug Fixes
-
-* **ardy knights:** added a failsafe to inventory full ([c0582b5](https://github.com/Torwent/wasp-free/commit/c0582b5903eb198205a539d598b94c73f4e8d83d))
 
 
 
