@@ -437,7 +437,6 @@ begin
 end;
 
 
-
 type
   TMinerConfig = record(TScriptConfig)
     RockSelector: TLabeledCombobox;

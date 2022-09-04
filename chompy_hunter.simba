@@ -61,9 +61,6 @@ begin
 end;
 
 
-
-
-
 function TChompyHunter.CountBellows: Int32;
 begin
   Result := Inventory.CountItem('Ogre bellows (3)') +

@@ -436,7 +436,6 @@ begin
 end;
 
 
-
 function TRSInventory.HoverItems(Items: TRSItemArray): Boolean;
 var
   Item: TRSItem;
@@ -467,7 +466,6 @@ var
 begin
   for Item in Items do Result += Self.CountItem(Item);
 end;
-
 
 
 function TThiever.HasRogue: Boolean;

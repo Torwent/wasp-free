@@ -255,8 +255,6 @@ begin
 end;
 
 
-
-
 function TEnchanter.EnchantJewel: Boolean;
 begin
   if Result := Inventory.ClickItem(RegularJewel) then

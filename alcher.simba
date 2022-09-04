@@ -323,7 +323,6 @@ begin
   Exit(EAlcherState.OPEN_MAGIC_TAB);
 end;
 
-
 procedure TAlcher.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug;

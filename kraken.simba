@@ -139,9 +139,6 @@ begin
 end;
 
 
-
-
-
 function TScript.FindSleepyKraken: Boolean;
 var
   ATPA: T2DPointArray;
@@ -249,7 +246,6 @@ begin
   while CombatHandler.LootHandler.CheckLoot(B) and Inventory.HasSpace(1) do
     Wait(400, 600);
 end;
-
 
 
 function TScript.GetState: EState;

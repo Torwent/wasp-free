@@ -118,7 +118,6 @@ begin
   end;
 end;
 
-
 function TStallRobber.DropItems: Boolean;
 var
   Slots: TIntegerArray;

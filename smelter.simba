@@ -413,7 +413,7 @@ begin
 end;
 
 var
-  Smither: TSmelter;
+  Smelter: TSmelter;
 
 type
   TSmelterConfig = record(TScriptConfig)
@@ -477,13 +477,13 @@ begin
   inherited;
 end;
 
-var SmitherConfig: TSmelterConfig;
+var SmelterConfig: TSmelterConfig;
 
 {$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@SmitherConfig.Run);
+  Sync(@SmelterConfig.Run);
   {$ENDIF}
-  Smither.Run(MaxActions, MaxTime);
+  Smelter.Run(MaxActions, MaxTime);
 end.
 {$ENDIF}

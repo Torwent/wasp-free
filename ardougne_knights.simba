@@ -14,8 +14,8 @@ begin
 end;
 
 var
-  FoodAmount: Int32 := 13;
-  NeckAmount: Int32 := 7;
+  FoodAmount: Int32 := 15;
+  NeckAmount: Int32 := 5;
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;

@@ -82,7 +82,6 @@ begin
   Antiban.MaxZoom := 60;
 end;
 
-
 procedure TWoodcutter.SetupTree;
 begin
   TreeTimerMultiplier := 1;

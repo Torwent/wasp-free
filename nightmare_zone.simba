@@ -475,7 +475,6 @@ begin
 end;
 
 
-
 function TNMZFighter.LowerHealth: Boolean;
 var
   Slot: Int32;
@@ -592,7 +591,6 @@ begin
     ZapperTimer.Restart;
   end;
 end;
-
 
 
 function TNMZFighter.GetState: ENMZState;

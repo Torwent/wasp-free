@@ -156,21 +156,6 @@ begin
 end;
 
 
-function TWaspObject._SelectHelper(Action: TStringArray): Boolean; override;
-begin
-  if ChooseOption.IsOpen and ChooseOption.Select(Action) then
-    Exit(True);
-
-  if MainScreen.IsUpText(Action) then
-  begin
-    Mouse.Click(MOUSE_LEFT);
-    Result := MainScreen.DidRedClick;
-  end
-  else
-      Result := ChooseOption.Select(Action, MOUSE_LEFT, True, (False));
-end;
-
-
 function TBuilder.EnterHouse: Boolean;
 begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
@@ -369,12 +354,27 @@ begin
       END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
+    Self.DoAntiban();
   until Self.ShouldStop;
 end;
 
 var
   Builder: TBuilder;
+
+function TWaspObject._SelectHelper(Action: TStringArray): Boolean; override;
+begin
+  if ChooseOption.IsOpen and ChooseOption.Select(Action) then
+    Exit(True);
+
+  if MainScreen.IsUpText(Action) then
+  begin
+    Mouse.Click(MOUSE_LEFT);
+    Result := MainScreen.DidRedClick;
+  end
+  else
+      Result := ChooseOption.Select(Action, MOUSE_LEFT, True, (False));
+end;
+
 
 type
   TBuilderConfig = record(TScriptConfig)

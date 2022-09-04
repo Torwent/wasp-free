@@ -83,15 +83,6 @@ type
     UsingFire: Boolean;
   end;
 
-function TRSMake.Select(Index: Int32; Quantity: Int32; UseKeyboard: Boolean = True): Boolean; override;
-var
-  Buttons: TRSButtonArray;
-begin
-  Buttons := Self.GetItemButtons();
-  if Buttons <> [] then
-    Result := Self.SelectHelper(Buttons[Index], Quantity, UseKeyboard);
-end;
-
 
 procedure TCooker.SetupItems;
 var
@@ -237,7 +228,6 @@ begin
 
   Result := True;
 end;
-
 
 function TCooker.HandleCollectBox: Boolean;
 var
@@ -408,6 +398,16 @@ end;
 
 var
   Cooker: TCooker;
+
+function TRSMake.Select(Index: Int32; Quantity: Int32; UseKeyboard: Boolean = True): Boolean; override;
+var
+  Buttons: TRSButtonArray;
+begin
+  Buttons := Self.GetItemButtons();
+  if Index <= High(Buttons) then
+    Result := Self.SelectHelper(Buttons[Index], Quantity, UseKeyboard);
+end;
+
 
 type
   TCookerConfig = record(TScriptConfig)
