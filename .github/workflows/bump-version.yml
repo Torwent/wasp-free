@@ -9,15 +9,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.2.0
-    
-    - name: Regex replace
-      id: regex
-      uses: jacobtomlinson/gha-find-replace@v2
-      with:
-        find:
-            .*begin\n.*Login.PlayerIndex.*:=.*((.+\n)+).*end;\n
-        replace: |
+      - uses: actions/checkout@v2.2.0
+
+      - name: Regex replace
+        id: regex
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: .*begin\n.*Login.PlayerIndex.*:=.*((.+\n)+).*end;\n
+          replace: |
             begin
               Login.PlayerIndex     := 0;
               AntibanEnabled        := True; //Enables Most Antiban
@@ -27,91 +26,92 @@ jobs:
               ProgressReportEnabled := True; //Enables Graphical Progress Report
               ScriptDebugEnabled    := False; //Enables Script Debugging
             end;
-        include: "**.simba"
-        regex: true
-    
-    - name: Commit files
-      if: ${{ steps.regex.outputs.modifiedFiles > 0 }}
-      run: |
-        git config --local user.email "41898282+wasp-regex-replacer[bot]@users.noreply.github.com"
-        git config --local user.name "wasp-regex-replacer[bot]"
-        git commit -m "Regex replaced script settings" -a
-    
-    - name: Push changes
-      if: ${{ steps.regex.outputs.modifiedFiles > 0 }}
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref }}     
-    
-    - name: Conventional Changelog Action
-      id: changelog
-      uses: TriPSs/conventional-changelog-action@v3.8.0
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        git-message: 'chore(release): {version}'
-        preset: 'angular'
-        tag-prefix: 'v'
-        output-file: 'CHANGELOG.md'
-        skip-version-file: 'true'
-        skip-on-empty: 'true'
-        skip-commit: 'false'
-    
-    - name: Write version.txt file
-      if: ${{ steps.changelog.outputs.skipped == 'false' }}
-      shell: bash
-      run: echo ${{ steps.changelog.outputs.tag }} > version.txt
-      
-    - name: Update version.txt file
-      uses: test-room-7/action-update-file@v1
-      if: ${{ steps.changelog.outputs.skipped == 'false' }}
-      with:
-        file-path: version.txt
-        commit-msg: Bump version.txt and CHANGELOG.md
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Create Release
-      uses: actions/create-release@v1
-      if: ${{ steps.changelog.outputs.skipped == 'false' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.changelog.outputs.tag }}
-        release_name: ${{ steps.changelog.outputs.tag }}
-        body: ${{ steps.changelog.outputs.clean_changelog }}
+          include: "**.simba"
+          regex: true
 
-    - name: Update channel notification
-      uses: Sniddl/discord-commits@v1.3
-      with:
-        webhook: ${{ secrets.UPDATES_WEBHOOK }}
-        embed: '{ "title": "Free Scripts: {{ commit.title }}", "description": "{{ commit.description }}"}'
-        last-commit-only: false
+      - name: Commit files
+        if: ${{ steps.regex.outputs.modifiedFiles > 0 }}
+        run: |
+          git config --local user.email "41898282+wasp-regex-replacer[bot]@users.noreply.github.com"
+          git config --local user.name "wasp-regex-replacer[bot]"
+          git commit -m "Regex replaced script settings" -a
 
-    - name: Get changed files
+      - name: Push changes
+        if: ${{ steps.regex.outputs.modifiedFiles > 0 }}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3.8.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          git-message: "chore(release): {version}"
+          preset: "angular"
+          tag-prefix: "v"
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-on-empty: "true"
+          skip-commit: "false"
+
+      - name: Write version.txt file
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        shell: bash
+        run: echo ${{ steps.changelog.outputs.tag }} > version.txt
+
+      - name: Update version.txt file
+        uses: test-room-7/action-update-file@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        with:
+          file-path: version.txt
+          commit-msg: Bump version.txt and CHANGELOG.md
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+
+      - name: Update channel notification
+        uses: Sniddl/discord-commits@v1.3
+        with:
+          webhook: ${{ secrets.UPDATES_WEBHOOK }}
+          embed: '{ "title": "Free Scripts: {{ commit.title }}", "description": "{{ commit.description }}"}'
+          last-commit-only: false
+
+      - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v29.0.3
 
-    - name: Upload modified .simba files to waspscripts.com
-      uses: Torwent/wasp-upload-action@1.0.0
-      with:
-        SB_URL: ${{ secrets.SB_URL }}
-        SB_ANON_KEY: ${{ secrets.SB_ANON_KEY }}
-        EMAIL: ${{ secrets.EMAIL }}
-        PASSWORD: ${{ secrets.PASSWORD }}
-        SCRIPTS: |
-          0fb23f9b-3bc2-41cd-8670-3fec0eb256f1=ardougne_knights.simba
-          e8df872a-afaf-44b8-9fc5-eef079ada50b=smelter.simba
-          2c9e42f7-cb23-4976-827f-9ffe112a0c3f=stall_robber.simba
-          003b8e09-e988-42ca-b261-b2b76d131800=pickpocketer.simba
-          4e797d2f-966c-4ef2-bba5-febe1c1b7284=offerer.simba
-          b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e=nightmare_zone.simba
-          bffb9ec8-588b-406d-9872-9ab274b5c934=miner.simba
-          bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15=larder_builder.simba
-          a398a083-63fd-4f13-936b-3963354fb4c1=kraken.simba
-          6f619d33-4564-4650-95fe-db2f7e0925cd=glassblower.simba
-          207b1ab4-561d-4543-8467-705cdfce98ec=woodcutter.simba
-          242c8d26-e9c9-4de5-945b-5f0288307dfc=enchanter.simba
-          de957f22-8a37-4660-a7a3-9bef52cadd70=cooker.simba
-          7c40c4ac-0009-4a08-ab61-4887d9456420=chompy_hunter.simba
-          f6fc217a-3b03-44e1-8fa7-662dfb48f6d7=alcher.simba
-        MODIFIED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+      - name: Upload modified .simba files to waspscripts.com
+        uses: Torwent/wasp-upload-action@1.0.0
+        with:
+          SB_URL: ${{ secrets.SB_URL }}
+          SB_ANON_KEY: ${{ secrets.SB_ANON_KEY }}
+          EMAIL: ${{ secrets.EMAIL }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          ONLY_MODIFIED: false
+          SCRIPTS: |
+            0fb23f9b-3bc2-41cd-8670-3fec0eb256f1=ardougne_knights.simba
+            e8df872a-afaf-44b8-9fc5-eef079ada50b=smelter.simba
+            2c9e42f7-cb23-4976-827f-9ffe112a0c3f=stall_robber.simba
+            003b8e09-e988-42ca-b261-b2b76d131800=pickpocketer.simba
+            4e797d2f-966c-4ef2-bba5-febe1c1b7284=offerer.simba
+            b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e=nightmare_zone.simba
+            bffb9ec8-588b-406d-9872-9ab274b5c934=miner.simba
+            bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15=larder_builder.simba
+            a398a083-63fd-4f13-936b-3963354fb4c1=kraken.simba
+            6f619d33-4564-4650-95fe-db2f7e0925cd=glassblower.simba
+            207b1ab4-561d-4543-8467-705cdfce98ec=woodcutter.simba
+            242c8d26-e9c9-4de5-945b-5f0288307dfc=enchanter.simba
+            de957f22-8a37-4660-a7a3-9bef52cadd70=cooker.simba
+            7c40c4ac-0009-4a08-ab61-4887d9456420=chompy_hunter.simba
+            f6fc217a-3b03-44e1-8fa7-662dfb48f6d7=alcher.simba
+          MODIFIED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
