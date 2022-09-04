@@ -1,3 +1,12 @@
+## [1.0.1](https://github.com/Torwent/wasp-free/compare/v1.0.0...v1.0.1) (2022-09-04)
+
+
+### Bug Fixes
+
+* removed input from GH action ([7add949](https://github.com/Torwent/wasp-free/commit/7add949249565187fa5fdaa2ff251b0b2673d264))
+
+
+
 # [1.0.0](https://github.com/Torwent/wasp-free/compare/v0.20.3...v1.0.0) (2022-09-04)
 
 
@@ -37,15 +46,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** removed ardy knights ([11f0bc2](https://github.com/Torwent/wasp-free/commit/11f0bc24081c4768c12201533cd03385d03f64f5))
-
-
-
-# [0.20.0](https://github.com/Torwent/wasp-free/compare/v0.19.5...v0.20.0) (2022-08-14)
-
-
-### Features
-
-* **ardy knights:** the script was fully reworked. Runelite is no longer needed ([3fcf362](https://github.com/Torwent/wasp-free/commit/3fcf362351963adc7903b0096f0de19d0e550f03))
 
 
 
