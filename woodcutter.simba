@@ -218,82 +218,82 @@ begin
   if Equipment.Open then
   begin
     ToolShift := 30;
-    if Equipment.FindItem('Crystal axe') or Equipment.FindItem('Crystal axe (inactive)') then
+    if Equipment.ContainsAny(['Crystal axe', 'Crystal axe (inactive)']) then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
     end
-    else if Equipment.FindItem('Infernal axe') then
+    else if Equipment.ContainsItem('Infernal axe') then
     begin
       ToolShift := 70;
       ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
     end
-    else if Equipment.FindItem('3rd age axe') then
+    else if Equipment.ContainsItem('3rd age axe') then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    if Equipment.FindItem('Dragon axe') then
+    if Equipment.ContainsItem('Dragon axe') then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    else if Equipment.FindItem('Gilded axe') then
+    else if Equipment.ContainsItem('Gilded axe') then
       ToolType := CTS2(1019842, 14, 0.02, 0.63)
-    else if Equipment.FindItem('Rune axe') then
+    else if Equipment.ContainsItem('Rune axe') then
       ToolType := CTS2(6050622, 12, 0.10, 0.11)
-    else if Equipment.FindItem('Adamant axe') then
+    else if Equipment.ContainsItem('Adamant axe') then
       ToolType := CTS2(3951419, 11, 0.13, 0.16)
-    else if Equipment.FindItem('Mithril axe') then
+    else if Equipment.ContainsItem('Mithril axe') then
       ToolType := CTS2(4534853, 17, 1.11, 0.34)
-    else if Equipment.FindItem('Black axe') then
+    else if Equipment.ContainsItem('Black axe') then
       ToolType := CTS2(1118485, 1, 0.01, 0.01)
-    else if Equipment.FindItem('Steel axe') then
+    else if Equipment.ContainsItem('Steel axe') then
       ToolType := CTS2(6711151, 17, 0.11, 0.07)
-    else if Equipment.FindItem('Iron axe') then
+    else if Equipment.ContainsItem('Iron axe') then
       ToolType := CTS2(4671309, 11, 0.28, 0.09)
-    else if Equipment.FindItem('Bronze axe') then
+    else if Equipment.ContainsItem('Bronze axe') then
       ToolType := CTS2(1979716, 9, 0.10, 0.24);
   end;
 
   if (ToolType = []) and Inventory.Open then
   begin
     ToolShift := 30;
-    if Inventory.FindItem('Crystal axe') or Inventory.FindItem('Crystal axe (inactive)') then
+    if Inventory.ContainsAny(['Crystal axe', 'Crystal axe (inactive)']) then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
     end
-    else if Inventory.FindItem('Infernal axe') then
+    else if Inventory.ContainsItem('Infernal axe') then
     begin
       ToolShift := 70;
       ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
     end
-    else if Inventory.FindItem('3rd age axe') then
+    else if Inventory.ContainsItem('3rd age axe') then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    if Inventory.FindItem('Dragon axe') then
+    if Inventory.ContainsItem('Dragon axe') then
     begin
       ToolShift := 110;
       ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    else if Inventory.FindItem('Gilded axe') then
+    else if Inventory.ContainsItem('Gilded axe') then
       ToolType := CTS2(1019842, 14, 0.02, 0.63)
-    else if Inventory.FindItem('Rune axe') then
+    else if Inventory.ContainsItem('Rune axe') then
       ToolType := CTS2(6050622, 12, 0.10, 0.11)
-    else if Inventory.FindItem('Adamant axe') then
+    else if Inventory.ContainsItem('Adamant axe') then
       ToolType := CTS2(3951419, 11, 0.13, 0.16)
-    else if Inventory.FindItem('Mithril axe') then
+    else if Inventory.ContainsItem('Mithril axe') then
       ToolType := CTS2(4534853, 17, 1.11, 0.34)
-    else if Inventory.FindItem('Black axe') then
+    else if Inventory.ContainsItem('Black axe') then
       ToolType := CTS2(1118485, 1, 0.01, 0.01)
-    else if Inventory.FindItem('Steel axe') then
+    else if Inventory.ContainsItem('Steel axe') then
       ToolType := CTS2(6711151, 17, 0.11, 0.07)
-    else if Inventory.FindItem('Iron axe') then
+    else if Inventory.ContainsItem('Iron axe') then
       ToolType := CTS2(4671309, 11, 0.28, 0.09)
-    else if Inventory.FindItem('Bronze axe') then
+    else if Inventory.ContainsItem('Bronze axe') then
       ToolType := CTS2(1979716, 9, 0.10, 0.24);
   end;
 end;
@@ -343,14 +343,8 @@ begin
 end;
 
 function TWoodcutter.HasGear: Boolean;
-var
-  Item: TRSItem;
 begin
-  for Item in GearOutfit do
-    if Inventory.FindItem(Item) then
-      Exit(True);
-
-  Result := False;
+  Result := Inventory.ContainsAny(GearOutfit);
 end;
 
 function TWoodcutter.EquipGear: Boolean;
@@ -418,7 +412,7 @@ end;
 function TWoodcutter.MakePlanks: Boolean;
 begin
   if Make.Select(SawmillString, MAKE_QUANTITY_ALL, SRL.Dice(95)) then
-    Result := WaitUntil(Inventory.FindItem(Plank), 200, 10000);
+    Result := WaitUntil(Inventory.ContainsItem(Plank), 200, 10000);
 end;
 
 
@@ -462,7 +456,7 @@ begin
 
   if MainScreen.HasInterface then
   begin
-    if Bank.IsOpen and Inventory.FindItems(BankList) then
+    if Bank.IsOpen and Inventory.ContainsAny(BankList) then
       Exit(EWoodcutterState.DEPOSIT_ITEMS);
     Exit(EWoodcutterState.CLOSE_INTERFACE);
   end;
@@ -477,7 +471,7 @@ begin
     if not UseBank then
       Exit(EWoodcutterState.DROP_ITEMS);
 
-    if UseSawmill and not Inventory.FindItem(Plank) and Self.HasEnoughMoney then
+    if UseSawmill and not Inventory.ContainsItem(Plank) and Self.HasEnoughMoney then
       Exit(EWoodcutterState.OPEN_SAWMILL);
 
     Exit(EWoodcutterState.OPEN_BANK);

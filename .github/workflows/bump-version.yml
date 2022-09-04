@@ -87,31 +87,31 @@ jobs:
         embed: '{ "title": "Free Scripts: {{ commit.title }}", "description": "{{ commit.description }}"}'
         last-commit-only: false
 
-    - name: Zip files
-      shell: bash
-      run: zip wasp-free.zip *.simba *.md LICENSE version.txt
-    
-    - name: Set MY_DATE environment variable
-      run: echo "MY_DATE=$(date +%Y_%m_%d_%H_%M)" >> $GITHUB_ENV
-    
-    - name: Upload *.simba to Supabase
-      uses: torwent/supabase-upload@master
+    - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v29.0.3
+
+    - name: Upload modified .simba files to waspscripts.com
+      uses: Torwent/wasp-upload-action@1.0.0
       with:
-        EMAIL: "github@waspscripts.com"
-        PASSWORD: ${{ secrets.SB_USER_PASSWORD }}
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        BUCKET: "scripts"
-        TARGET_PATH: "free/${{ env.MY_DATE }}/"
-        ORIGIN_PATH: "*.simba"
-        
-    - name: Upload PremiumWaspScripts.zip to Supabase
-      uses: torwent/supabase-upload@master
-      with:
-        EMAIL: "github@waspscripts.com"
-        PASSWORD: ${{ secrets.SB_USER_PASSWORD }}
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        BUCKET: "scripts"
-        TARGET_PATH: "free/${{ env.MY_DATE }}/"
-        ORIGIN_PATH: "wasp-free.zip"
+        SB_URL: ${{ secrets.SB_URL }}
+        SB_ANON_KEY: ${{ secrets.SB_ANON_KEY }}
+        EMAIL: ${{ secrets.EMAIL }}
+        PASSWORD: ${{ secrets.PASSWORD }}
+        SCRIPTS: |
+          0fb23f9b-3bc2-41cd-8670-3fec0eb256f1=ardougne_knights.simba
+          e8df872a-afaf-44b8-9fc5-eef079ada50b=smelter.simba
+          2c9e42f7-cb23-4976-827f-9ffe112a0c3f=stall_robber.simba
+          003b8e09-e988-42ca-b261-b2b76d131800=pickpocketer.simba
+          4e797d2f-966c-4ef2-bba5-febe1c1b7284=offerer.simba
+          b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e=nightmare_zone.simba
+          bffb9ec8-588b-406d-9872-9ab274b5c934=miner.simba
+          bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15=larder_builder.simba
+          a398a083-63fd-4f13-936b-3963354fb4c1=kraken.simba
+          6f619d33-4564-4650-95fe-db2f7e0925cd=glassblower.simba
+          207b1ab4-561d-4543-8467-705cdfce98ec=woodcutter.simba
+          242c8d26-e9c9-4de5-945b-5f0288307dfc=enchanter.simba
+          de957f22-8a37-4660-a7a3-9bef52cadd70=cooker.simba
+          7c40c4ac-0009-4a08-ab61-4887d9456420=chompy_hunter.simba
+          f6fc217a-3b03-44e1-8fa7-662dfb48f6d7=alcher.simba
+        MODIFIED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}

@@ -279,80 +279,80 @@ var
 begin
   if Inventory.Open then
   begin
-    if Inventory.FindItem('Rogue mask') then
+    if Inventory.ContainsItem('Rogue mask') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue mask';
     end;
 
-    if Inventory.FindItem('Rogue top') then
+    if Inventory.ContainsItem('Rogue top') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue top';
     end;
 
-    if Inventory.FindItem('Rogue trousers') then
+    if Inventory.ContainsItem('Rogue trousers') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue trousers';
     end;
 
-    if Inventory.FindItem('Rogue gloves') then
+    if Inventory.ContainsItem('Rogue gloves') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue gloves';
     end;
 
-    if Inventory.FindItem('Rogue boots') then
+    if Inventory.ContainsItem('Rogue boots') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue boots';
     end;
 
     //This are not part of rogue equipment but are useful while thieving
-    if Inventory.FindItem('Thieving cape') then
+    if Inventory.ContainsItem('Thieving cape') then
       RogueEquipment += 'Thieving cape'
-    else if Inventory.FindItem('Thieving cape(t)') then
+    else if Inventory.ContainsItem('Thieving cape(t)') then
       RogueEquipment += 'Thieving cape(t)'
-    else if Inventory.FindItem('Max cape') then
+    else if Inventory.ContainsItem('Max cape') then
       RogueEquipment += 'Max cape';
 
     //Lava staves for shadow veil spell
-    if Inventory.FindItem('Lava battlestaff') then
+    if Inventory.ContainsItem('Lava battlestaff') then
       RogueEquipment += 'Lava battlestaff'
-    else if Inventory.FindItem('Mystic lava staff') then
+    else if Inventory.ContainsItem('Mystic lava staff') then
       RogueEquipment += 'Mystic lava staff'
-    else if Inventory.FindItem(21200) then
+    else if Inventory.ContainsItem(21200) then
       RogueEquipment += 21200;
   end;
 
   if Equipment.Open then
   begin
-    if Equipment.FindItem('Rogue mask') then
+    if Equipment.ContainsItem('Rogue mask') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue mask';
     end;
 
-    if Equipment.FindItem('Rogue top') then
+    if Equipment.ContainsItem('Rogue top') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue top';
     end;
 
-    if Equipment.FindItem('Rogue trousers') then
+    if Equipment.ContainsItem('Rogue trousers') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue trousers';
     end;
 
-    if Equipment.FindItem('Rogue gloves') then
+    if Equipment.ContainsItem('Rogue gloves') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue gloves';
     end;
 
-    if Equipment.FindItem('Rogue boots') then
+    if Equipment.ContainsItem('Rogue boots') then
     begin
       ProfitMultiplier += 0.2;
       RogueEquipment += 'Rogue boots';
@@ -360,17 +360,17 @@ begin
 
 
     //This are not part of rogue equipment but are useful while thieving
-    if Equipment.FindItem('Thieving cape') then
+    if Equipment.ContainsItem('Thieving cape') then
       RogueEquipment += 'Thieving cape'
-    else if Equipment.FindItem('Thieving cape(t)') then
+    else if Equipment.ContainsItem('Thieving cape(t)') then
       RogueEquipment += 'Thieving cape(t)';
 
     //Lava staves for shadow veil spell
-    if Equipment.FindItem('Lava battlestaff') then
+    if Equipment.ContainsItem('Lava battlestaff') then
       RogueEquipment += 'Lava battlestaff'
-    else if Equipment.FindItem('Mystic lava staff') then
+    else if Equipment.ContainsItem('Mystic lava staff') then
       RogueEquipment += 'Mystic lava staff'
-    else if Equipment.FindItem(21200) then
+    else if Equipment.ContainsItem(21200) then
       RogueEquipment += 21200;
 
   end;
@@ -410,7 +410,7 @@ begin
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
   Self.CheckRogueEquipment;
-  HasNeck := Equipment.FindItem(Necklace);
+  HasNeck := Equipment.ContainsItem(Necklace);
   if Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
   begin
     UseShadowVeil := True;
@@ -472,7 +472,7 @@ end;
 
 function TThiever.HasRogue: Boolean;
 begin
-  Result := Inventory.FindItems(RogueEquipment);
+  Result := Inventory.ContainsAny(RogueEquipment);
 end;
 
 function TThiever.EquipRogue: Boolean;
@@ -486,7 +486,7 @@ begin
   if Inventory.ClickItem(21200) then
     Wait(200, 300);
 
-  Result := not Self.HasRogue and not Inventory.FindItem('Lava battlestaff');
+  Result := not Self.HasRogue and not Inventory.ContainsItem('Lava battlestaff');
 end;
 
 
@@ -508,9 +508,9 @@ begin
       Result := (Inventory.CountEmptySlots > GearAmount)
     else
       Result := (Inventory.CountEmptySlots > GearAmount) or
-                (Inventory.FindItem(CoinPouch) and
-                 Inventory.FindItem('Coins')
-                 and not Inventory.FindItems(DropArray));
+                (Inventory.ContainsItem(CoinPouch) and
+                 Inventory.ContainsItem('Coins')
+                 and not Inventory.ContainsAny(DropArray));
   end
   else
   begin
@@ -518,9 +518,9 @@ begin
       Result := (Inventory.CountEmptySlots >= 2) //if has things oher than coins
     else                                         //we need at least 2 spaces always.
       Result := (Inventory.CountEmptySlots >= 2) or
-                (Inventory.FindItem(CoinPouch) and
-                 Inventory.FindItem('Coins')
-                 and not Inventory.FindItems(DropArray));
+                (Inventory.ContainsItem(CoinPouch) and
+                 Inventory.ContainsItem('Coins')
+                 and not Inventory.ContainsAny(DropArray));
   end;
 end;
 
@@ -587,7 +587,7 @@ begin
   if Inventory.ClickItem(CoinPouch) then
   begin
     Wait(300);
-    Result := WaitUntil(not Inventory.FindItem(CoinPouch), 100, 1200);
+    Result := WaitUntil(not Inventory.ContainsItem(CoinPouch), 100, 1200);
   end;
 
   if Result then
@@ -623,7 +623,7 @@ end;
 
 function TThiever.CheckNeck: Boolean;
 begin
-  Result := HasNeck := Equipment.FindItem(Necklace);
+  Result := HasNeck := Equipment.ContainsItem(Necklace);
 
   NeckTimer.Restart(Random(-30000, 60000));
 end;
@@ -703,7 +703,7 @@ var
   InvCount: Int32;
 begin
   for Item in Items do
-    if Bank.FindItem(Item) then Exit(Self.Withdraw(Item, Quantity));
+    if Bank.ContainsItem(Item) then Exit(Self.Withdraw(Item, Quantity));
 
   for Item in Items do
   begin
@@ -736,7 +736,7 @@ begin
 
   while not MainScreen.WaitArrow(GraveTPA, 3000) do
   begin
-    Mouse.Click(TPA.Grow(6).Random, MOUSE_LEFT);
+    Mouse.Click(TPA.Grow(6).RandomValue, MOUSE_LEFT);
     Minimap.WaitMoving;
   end;
 
@@ -807,7 +807,7 @@ begin
 
   if not Self.HasSpace then
   begin
-    if Inventory.FindItems(DropArray) then
+    if Inventory.ContainsAny(DropArray) then
       Exit(DROP_ITEMS);
     if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
       Exit(EAT_FOOD);
@@ -817,7 +817,7 @@ begin
 
   if (NeckAmount > 0) and not FreshNeck and (not HasNeck or Self.NecklaceExpired) then
   begin
-    if Inventory.FindItem(Necklace) then
+    if Inventory.ContainsItem(Necklace) then
       Exit(EQUIP_NECKLACE);
 
     Exit(OPEN_BANK);

@@ -205,8 +205,8 @@ var
   Item: TRSBankWithdrawItem;
   Find1, Find2: Boolean;
 begin
-  Find1 := Inventory.FindItem(Ore1.Item);
-  Find2 := (Ore2 = []) or Inventory.FindItem(Ore2.Item);
+  Find1 := Inventory.ContainsItem(Ore1.Item);
+  Find2 := (Ore2 = []) or Inventory.ContainsItem(Ore2.Item);
 
   if Find1 then
   begin
@@ -230,7 +230,7 @@ begin
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
   if BankEmpty := ((not Result and Bank.IsOpen) and
-                    not Bank.FindItem(BankTab, Item)) then
+                    not Bank.ContainsItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -248,10 +248,10 @@ function TSmelter.HandleCollectBox: Boolean;
 begin
   if not CollectBox.IsOpen then Exit;
 
-  if CollectBox.FindItems(Materials) then
+  if CollectBox.ContainsAny(Materials) then
   begin
     if Result := CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.FindItems(Materials), 100, 3000);
+      WaitUntil(not CollectBox.ContainsAny(Materials), 100, 3000);
     BankEmpty := not CollectEmpty;
   end
   else CollectEmpty := True;
@@ -272,7 +272,7 @@ end;
 
 function TSmelter.SmeltBar: Boolean;
 begin
-  if not Inventory.FindAllItems(Materials) then
+  if not Inventory.ContainsAll(Materials) then
     Exit;
 
   if Result := Make.Select(ToStr(Bar.Item), MAKE_QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
@@ -290,7 +290,7 @@ end;
 function TSmelter.WaitSmelt: Boolean;
 begin
   if Smelting then
-    Result := Smelting := (Inventory.FindAllItems(Materials) and Self.IsMakingItem)
+    Result := Smelting := (Inventory.ContainsAll(Materials) and Self.IsMakingItem)
   else
     Result := Smelting := Self.IsMakingItem;
 
@@ -315,13 +315,13 @@ begin
     HoveringBank := False;
     if Bank.IsOpen then
     begin
-      if Inventory.FindItem(Bar.Item) then
+      if Inventory.ContainsItem(Bar.Item) then
         Exit(ESmelterState.DEPOSIT_BAR);
 
       if Inventory.HasRandomItem(Materials) then
         Exit(ESmelterState.DEPOSIT_RANDOM_ITEM);
 
-      if not BankEmpty and not Inventory.FindAllItems(Materials) then
+      if not BankEmpty and not Inventory.ContainsAll(Materials) then
         Exit(ESmelterState.WITHDRAW_MATERIALS);
     end;
 
@@ -331,7 +331,7 @@ begin
     Exit(ESmelterState.CLOSE_INTERFACE);
   end;
 
-  if Inventory.FindAllItems(Materials) then
+  if Inventory.ContainsAll(Materials) then
   begin
     if Smelting then
     begin

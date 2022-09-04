@@ -215,7 +215,7 @@ begin
   if Result := Bank.WithdrawItem(BankTab, Ingredient, True) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Ingredient)) then
+  if BankEmpty := (not Result and not Bank.ContainsItem(BankTab, Ingredient)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -328,7 +328,7 @@ begin
       if Self.HasProducts then
         Exit(ECookerState.DEPOSIT_ITEMS);
 
-      if BankEmpty or Inventory.FindItem(Ingredient.Item) then
+      if BankEmpty or Inventory.ContainsItem(Ingredient.Item) then
         Exit(ECookerState.CLOSE_INTERFACE);
 
       Exit(ECookerState.WITHDRAW_ITEMS);
@@ -336,7 +336,7 @@ begin
 
     if CollectBox.IsOpen then
     begin
-      if CollectEmpty or Inventory.FindItem(Ingredient.Item) then
+      if CollectEmpty or Inventory.ContainsItem(Ingredient.Item) then
         Exit(ECookerState.CLOSE_INTERFACE);
 
       Exit(ECookerState.HANDLE_COLLECT);
@@ -345,7 +345,7 @@ begin
     Exit(ECookerState.CLOSE_INTERFACE);
   end;
 
-  if Inventory.FindItem(Ingredient.Item) then
+  if Inventory.ContainsItem(Ingredient.Item) then
   begin
     if Cooking then
       Exit(ECookerState.WAIT_COOKING);

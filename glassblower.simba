@@ -169,7 +169,7 @@ begin
   if Result := Bank.WithdrawItem(BankTab, Item, UseQuantityButton) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
+  if BankEmpty := (not Result and not Bank.ContainsItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -278,7 +278,7 @@ end;
 function TBlower.WaitBlowing: Boolean;
 begin
   if Blowing then
-    Result := Blowing := Inventory.FindItem(Material.Item) and XPBar.WaitXP(2000)
+    Result := Blowing := Inventory.ContainsItem(Material.Item) and XPBar.WaitXP(2000)
   else
     Result := Blowing := XPBar.WaitXP(2000);
 end;
@@ -305,19 +305,19 @@ begin
   begin
     if Bank.IsOpen then
     begin
-      if Inventory.FindItem(Product.Item) then
+      if Inventory.ContainsItem(Product.Item) then
         Exit(EBlowerState.DEPOSIT_PRODUCT);
 
       if Self.HasRandomItem then
         Exit(EBlowerState.DEPOSIT_RANDOM_ITEM);
 
-      if BankEmpty or Inventory.FindAllItems([Tool.Item, Material.Item]) then
+      if BankEmpty or Inventory.ContainsAll([Tool.Item, Material.Item]) then
         Exit(EBlowerState.CLOSE_INTERFACE);
 
-      if not Inventory.FindItem(Tool.Item) then
+      if not Inventory.ContainsItem(Tool.Item) then
         Exit(EBlowerState.WITHDRAW_TOOL);
 
-      if not Inventory.FindItem(Material.Item) then
+      if not Inventory.ContainsItem(Material.Item) then
         Exit(EBlowerState.WITHDRAW_MATERIAL);
     end;
 
@@ -332,7 +332,7 @@ begin
     Exit(EBlowerState.CLOSE_INTERFACE);
   end;
 
-  if Inventory.FindAllItems([Tool.Item, Material.Item]) then
+  if Inventory.ContainsAll([Tool.Item, Material.Item]) then
   begin
     if Blowing then
       Exit(EBlowerState.WAIT_GLASS);

@@ -275,7 +275,7 @@ var
   Item: TRSItem;
 begin
   for Item in ProspectorOutfit do
-    if Inventory.FindItem(Item) then
+    if Inventory.ContainsItem(Item) then
       Exit(True);
 
   Result := False;
@@ -347,7 +347,7 @@ begin
 
   if MainScreen.HasInterface then
   begin
-    if Bank.IsOpen and Inventory.FindItems(BankList) then
+    if Bank.IsOpen and Inventory.ContainsAny(BankList) then
       Exit(EMinerState.DEPOSIT_ITEMS);
 
     Exit(EMinerState.CLOSE_INTERFACE);
@@ -427,13 +427,13 @@ var
   ItemList: TRSItemArray;
 begin
   for Item in ItemArray do
-    if Inventory.FindItem(Item) then
+    if Inventory.ContainsItem(Item) then
       ItemList += Item;
 
   for Item in ItemList do
     Self.DepositItem(Tab, Item, UseQuantityButtons);
 
-  Result := not Inventory.FindItems(ItemList);
+  Result := not Inventory.ContainsAny(ItemList);
 end;
 
 

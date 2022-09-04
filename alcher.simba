@@ -130,7 +130,7 @@ begin
   Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
 
   if BankEmpty := ((not Result and Bank.IsOpen) and
-                    not Bank.FindItem(BankTab, Item)) then
+                    not Bank.ContainsItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -142,10 +142,10 @@ begin
   ItemArray += 'Coins';
   ItemArray += 'Nature rune';
 
-  if CollectBox.FindItems(ItemArray) then
+  if CollectBox.ContainsAny(ItemArray) then
   begin
     if Result := CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.FindItems(ItemArray), 100, 3000);
+      WaitUntil(not CollectBox.ContainsAny(ItemArray), 100, 3000);
     BankEmpty := not CollectEmpty;
   end
   else CollectEmpty := True;
@@ -254,10 +254,10 @@ begin
   begin
     if Bank.IsOpen then
     begin
-      if not Inventory.FindItem('Nature rune') then
+      if not Inventory.ContainsItem('Nature rune') then
         Exit(EAlcherState.WITHDRAW_NATS);
 
-      if not Inventory.FindItem('Coins') then
+      if not Inventory.ContainsItem('Coins') then
         Exit(EAlcherState.WITHDRAW_MONEY);
 
       Exit(EAlcherState.CLOSE_INTERFACE);
@@ -289,7 +289,7 @@ begin
       Exit(EAlcherState.OPEN_INV_TAB);
 
     if not Magic.CanActivate(AlchSpell) and
-       not Inventory.FindItem('Nature rune') then
+       not Inventory.ContainsItem('Nature rune') then
     begin
       if BankEmpty and CollectEmpty then
         Exit(EAlcherState.END_SCRIPT2);
@@ -308,7 +308,7 @@ begin
     if ToStr(AlchItem) = '' then
       Self.SetupAlchItems;
 
-    if not Inventory.FindItem(AlchItem) then
+    if not Inventory.ContainsItem(AlchItem) then
     begin
       if Inventory.GetSelectedSlot > -1 then
         Exit(EAlcherState.DESELECT_ITEM);

@@ -186,9 +186,9 @@ procedure TNMZFighter.SetupDamageItem;
 begin
   if not Inventory.Open then Exit;
 
-  if Inventory.FindItem('Locator orb') then
+  if Inventory.ContainsItem('Locator orb') then
     DamageItem := 'Locator orb'
-  else if Inventory.FindItem(7510) then  //7510 is rock cake ID
+  else if Inventory.ContainsItem(7510) then  //7510 is rock cake ID
     DamageItem := 7510;
 
   if ToStr(DamageItem) = '' then
@@ -451,7 +451,7 @@ end;
 
 function TNMZFighter.NeedAbsorption: Boolean;
 begin
-  Result := (Self.GetAbsorptionPoints < MinAbsPoints) and Inventory.FindItems(AbsPotion);
+  Result := (Self.GetAbsorptionPoints < MinAbsPoints) and Inventory.ContainsAny(AbsPotion);
 end;
 
 function TNMZFighter.NeedLowerHP(HPLevel: Int32 = -1): Boolean;
@@ -897,8 +897,8 @@ begin
   if not NMZFighter.PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= WeaponSpec) then
     Exit;
 
-  Result := ((Weapon <> 'Null') and Inventory.FindItem(Weapon)) or
-            ((Shield <> 'Null') and Inventory.FindItem(Shield));
+  Result := ((Weapon <> 'Null') and Inventory.ContainsItem(Weapon)) or
+            ((Shield <> 'Null') and Inventory.ContainsItem(Shield));
 end;
 
 function TCombatHandler.DoSpec: Boolean; override;
@@ -912,7 +912,7 @@ begin
   end;
 
   if (SpecWeapon <> Weapon) and Inventory.ClickItem(SpecWeapon) then
-    if not WaitUntil(Inventory.FindItem(Weapon), 100, 4000) then
+    if not WaitUntil(Inventory.ContainsItem(Weapon), 100, 4000) then
       Exit;
 
   InCombatTimer.Timeout := GetTickCount;

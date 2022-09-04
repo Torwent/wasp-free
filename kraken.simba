@@ -110,7 +110,7 @@ begin
   CombatHandler.LootHandler.Setup(@RSMonsters.Kraken, 5000);
 
 
-  if not Equipment.FindItem('Sanguinesti staff') then
+  if not Equipment.ContainsItem('Sanguinesti staff') then
   begin
     CombatHandler.LootHandler.Loot.UpText += 'Shark';
     CombatHandler.LootHandler.Drops += ['Shark', '', False, False, 5];
@@ -299,7 +299,7 @@ begin
   if not CheckedLoot then
     Exit(CHECK_LOOT);
 
-  if Inventory.FindItems(RSAction.AlchItemArray) then
+  if Inventory.ContainsAny(RSAction.AlchItemArray) then
     Exit(ALCH_DROP);
 
   if Self.FindSleepyKraken then

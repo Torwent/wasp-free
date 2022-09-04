@@ -128,9 +128,9 @@ end;
 
 function TRemainOfferer.CanCast: Boolean;
 begin
-  if Inventory.IsOpen then
-    Result := Inventory.FindItem(WrathRune) and Inventory.FindItem(AltRune)
-  else if Magic.IsOpen then
+  if Inventory.IsOpen() then
+    Result := Inventory.ContainsAll([WrathRune, AltRune])
+  else if Magic.IsOpen() then
     Result := Magic.CanActivate(OfferSpell)
   else
     Result := True;
@@ -155,7 +155,7 @@ begin
   if Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
+  if BankEmpty := (not Result and not Bank.ContainsItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -220,9 +220,9 @@ begin
   begin
     if Bank.IsOpen then
     begin
-      if not Inventory.FindItem(WrathRune) then
+      if not Inventory.ContainsItem(WrathRune) then
         Exit(EOffererState.WITHDRAW_WRATH);
-      if not Inventory.FindItem(AltRune) then
+      if not Inventory.ContainsItem(AltRune) then
         Exit(EOffererState.WITHDRAW_ALT);
       if (Inventory.CountItem(Remains) < 3) then
         Exit(EOffererState.WITHDRAW_REMAINS);

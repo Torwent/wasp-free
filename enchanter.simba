@@ -269,7 +269,7 @@ end;
 function TEnchanter.WaitEnchanting: Boolean;
 begin
   if Enchanting then
-    Result := Enchanting := Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel) and XPBar.WaitXP(2000)
+    Result := Enchanting := Inventory.ContainsItem(CosmicRune) and Inventory.ContainsItem(RegularJewel) and XPBar.WaitXP(2000)
   else
     Result := Enchanting := XPBar.WaitXP(2000);
 end;
@@ -299,9 +299,9 @@ begin
   Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
 
   if Result then
-    WaitUntil(Inventory.FindItem(Item), 100, 3000);
+    WaitUntil(Inventory.ContainsItem(Item), 100, 3000);
 
-  if BankEmpty := (not Result and not Bank.FindItem(BankTab, Item)) then
+  if BankEmpty := (not Result and not Bank.ContainsItem(BankTab, Item)) then
     if CollectEmpty and CollectTimer.IsFinished then
       CollectEmpty := False;
 end;
@@ -351,19 +351,19 @@ begin
       if Self.HasProduct then
         Exit(EEnchanterState.DEPOSIT_PRODUCT);
 
-      if BankEmpty or (Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel)) then
+      if BankEmpty or Inventory.ContainsAll([CosmicRune, RegularJewel]) then
         Exit(EEnchanterState.CLOSE_INTERFACE);
 
-      if not Inventory.FindItem(CosmicRune) then
+      if not Inventory.ContainsItem(CosmicRune) then
         Exit(EEnchanterState.WITHDRAW_TOOL);
 
-      if not Inventory.FindItem(RegularJewel) then
+      if not Inventory.ContainsItem(RegularJewel) then
         Exit(EEnchanterState.WITHDRAW_MATERIAL);
     end;
 
     if CollectBox.IsOpen then
     begin
-      if CollectEmpty or (Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel)) then
+      if CollectEmpty or Inventory.ContainsAll([CosmicRune, RegularJewel]) then
         Exit(EEnchanterState.CLOSE_INTERFACE);
       Exit(EEnchanterState.HANDLE_COLLECT);
     end;
@@ -373,7 +373,7 @@ begin
 
   if Inventory.IsOpen then
   begin
-    if Inventory.FindItem(CosmicRune) and Inventory.FindItem(RegularJewel) then
+    if Inventory.ContainsAll([CosmicRune, RegularJewel]) then
     begin
       if MainScreen.IsUpText('>') then
         Exit(EEnchanterState.ENCHANT_JEWEL);

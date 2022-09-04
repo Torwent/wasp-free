@@ -84,7 +84,7 @@ begin
 
 
   if Result then
-    while Inventory.FindItem('Ogre bellows') do
+    while Inventory.ContainsItem('Ogre bellows') do
     begin
       InvCount := TempCount;
       if not WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000) then
@@ -116,7 +116,7 @@ begin
     if SwampTPA.Find(P) = -1 then
       FinalTPA += P;
 
-  Mouse.Click(FinalTPA.Random, MOUSE_LEFT);
+  Mouse.Click(FinalTPA.RandomValue(), MOUSE_LEFT);
 
   Minimap.WaitMoving;
   Result := not Minimap.HasDotUnder;
@@ -130,7 +130,7 @@ begin
   if Inventory.ClickItem('Bloated toad') then
   begin
     Wait(1400, 1800);
-    Result := WaitUntil(not Inventory.FindItem('Bloated toad'), 100, 5000);
+    Result := WaitUntil(not Inventory.ContainsItem('Bloated toad'), 100, 5000);
   end;
 end;
 
@@ -175,13 +175,13 @@ function TChompyHunter.GetState: EState;
 begin
   if FillingBellows then
   begin
-    if FillingBellows := Inventory.FindItem('Ogre bellows') then
+    if FillingBellows := Inventory.ContainsItem('Ogre bellows') then
       Exit(WAIT_STATE);
 
     Exit;
   end;
 
-  if Inventory.FindItem('Bloated toad') then
+  if Inventory.ContainsItem('Bloated toad') then
     Exit(PLACE_TOAD);
 
   if MainScreen.InCombat then
@@ -190,7 +190,7 @@ begin
   if CombatHandler.Monster^.Find then
     Exit(CLICK_CHOMPY);
 
-  if Inventory.FindItems(OgreBellows) then
+  if Inventory.ContainsAny(OgreBellows) then
     Exit(FILL_TOAD);
 
   Exit(FILL_BELLOWS);
