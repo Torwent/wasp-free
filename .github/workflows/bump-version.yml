@@ -89,7 +89,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v29.0.3
 
-      - name: Upload modified .simba files to waspscripts.com
+      - name: Upload modified simba files to waspscripts.com
         uses: Torwent/wasp-upload-action@master
         with:
           SB_URL: ${{ secrets.SB_URL }}
