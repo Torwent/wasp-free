@@ -1,3 +1,12 @@
+## [1.0.2](https://github.com/Torwent/wasp-free/compare/v1.0.1...v1.0.2) (2022-09-04)
+
+
+### Bug Fixes
+
+* change wasp-upload-action to master ([a374fe9](https://github.com/Torwent/wasp-free/commit/a374fe9ffaf8dda5f49b99c6fe0c4db61141f375))
+
+
+
 ## [1.0.1](https://github.com/Torwent/wasp-free/compare/v1.0.0...v1.0.1) (2022-09-04)
 
 
@@ -37,15 +46,6 @@
 ### Bug Fixes
 
 * simba-package ([fcd21dc](https://github.com/Torwent/wasp-free/commit/fcd21dc30b35efbe0221755db23c511fdba48ec9))
-
-
-
-## [0.20.1](https://github.com/Torwent/wasp-free/compare/v0.20.0...v0.20.1) (2022-08-15)
-
-
-### Bug Fixes
-
-* **pickpocketer:** removed ardy knights ([11f0bc2](https://github.com/Torwent/wasp-free/commit/11f0bc24081c4768c12201533cd03385d03f64f5))
 
 
 
