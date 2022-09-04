@@ -1,3 +1,12 @@
+## [1.0.5](https://github.com/Torwent/wasp-free/compare/v1.0.4...v1.0.5) (2022-09-04)
+
+
+### Bug Fixes
+
+* changed order of github actions for better behaviour ([226c37d](https://github.com/Torwent/wasp-free/commit/226c37d0759505d4579b134e7661cbfaae1018b4))
+
+
+
 ## [1.0.4](https://github.com/Torwent/wasp-free/compare/v1.0.3...v1.0.4) (2022-09-04)
 
 
@@ -31,21 +40,6 @@
 ### Bug Fixes
 
 * removed input from GH action ([7add949](https://github.com/Torwent/wasp-free/commit/7add949249565187fa5fdaa2ff251b0b2673d264))
-
-
-
-# [1.0.0](https://github.com/Torwent/wasp-free/compare/v0.20.3...v1.0.0) (2022-09-04)
-
-
-### Bug Fixes
-
-* github action ([b8715d8](https://github.com/Torwent/wasp-free/commit/b8715d8edd31eff966827068f9dc038dde70c487))
-* refactored everything to be more compatible with Simba1500 SRL ([4d3ea63](https://github.com/Torwent/wasp-free/commit/4d3ea63c42311befda840138a8dd7b1d8c97ef08))
-
-
-### BREAKING CHANGES
-
-* This will require you to update SRL (my fork) and WaspLib
 
 
 
