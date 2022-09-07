@@ -78,8 +78,8 @@ begin
   inherited;
 
   Self.RSW.Setup('x10158y1010');
-  Bridge := [10391, 1145];
-  BossRoomTPA := [
+  Self.Bridge := [10391, 1145];
+  Self.BossRoomTPA := [
     [10369, 1085], [10420, 1086], [10440, 1107],
     [10440, 1149], [10415, 1155], [10411, 1187],
     [10373, 1187], [10367, 1156], [10345, 1148],
@@ -87,16 +87,16 @@ begin
   ];
 
   FoodHandler.MinInvPoints := 10;
-  PrayerManager.MinInvPoints := 90;
+  PrayerHandler.MinInvPoints := 90;
 
-  KrakenFinder.ClusterDistance := 3;
-  KrakenFinder.Erode := 2;
-  KrakenFinder.Grow := 4;
-  KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
-  KrakenFinder.MinShortSide := 70;
+  Self.KrakenFinder.ClusterDistance := 3;
+  Self.KrakenFinder.Erode := 2;
+  Self.KrakenFinder.Grow := 4;
+  Self.KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
+  Self.KrakenFinder.MinShortSide := 70;
   
-  UseImbuedHeart := True;
-  ImbuedHeart.Setup(7 * ONE_MINUTE);
+  Self.UseImbuedHeart := True;
+  Self.ImbuedHeart.Setup(7 * ONE_MINUTE);
 
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
@@ -110,7 +110,7 @@ begin
   CombatHandler.LootHandler.Setup(@RSMonsters.Kraken, 5000);
 
 
-  if not Equipment.FindItem('Sanguinesti staff') then
+  if not Equipment.ContainsItem('Sanguinesti staff') then
   begin
     CombatHandler.LootHandler.Loot.UpText += 'Shark';
     CombatHandler.LootHandler.Drops += ['Shark', '', False, False, 5];
@@ -146,10 +146,10 @@ function TScript.FindSleepyKraken: Boolean;
 var
   ATPA: T2DPointArray;
 begin
-  ATPA := MainScreen.FindObject(KrakenFinder);
+  ATPA := MainScreen.FindObject(Self.KrakenFinder);
   Result := ATPA <> [];
   if Result then
-    SleepyKraken := ATPA[0];
+    Self.SleepyKraken := ATPA[0];
 end;
 
 function TScript.FindRagingKraken: Boolean;
@@ -163,14 +163,14 @@ begin
   if not Result then
     Exit;
 
-  CheckedLoot := False;
+  Self.CheckedLoot := False;
 
   MMDots.Sort(MMDots.Mean);
   KrakenDot := MMDots[0];
 
-  KrakenTPA := Minimap.GetTilePoly(KrakenDot, [3, 3, 8], [-3, -3]);
-  KrakenTPA := KrakenTPA.Connect;
-  KrakenTPA.Fill;
+  Self.KrakenTPA := Minimap.GetPolygonMS(KrakenDot, [3, 3, 8], [-3, -3]);
+  Self.KrakenTPA := Self.KrakenTPA.Connect();
+  Self.KrakenTPA.Fill();
 end;
 
 
@@ -186,12 +186,12 @@ function TScript.WakeKraken: Boolean;
 begin
   if not Inventory.SetSelectedItem('Fishing explosive') then
     Exit;
-  Mouse.Move(SleepyKraken);
+  Mouse.Move(Self.SleepyKraken);
   if MainScreen.IsUpText('Whirl') then
   begin
     Mouse.Click(MOUSE_LEFT);
     if MainScreen.DidRedClick then
-      Result := IsAttacking := WaitUntil(Self.FindRagingKraken or Self.FinishedSlayerTask, 100, 7000);
+      Result := Self.IsAttacking := WaitUntil(Self.FindRagingKraken or Self.FinishedSlayerTask, 100, 7000);
   end;
 
   if Result then
@@ -200,11 +200,11 @@ end;
 
 function TScript.AttackKraken: Boolean;
 begin
-  Mouse.Move(KrakenTPA.Mean);
+  Mouse.Move(Self.KrakenTPA.Mean);
   if MainScreen.IsUpText('Attack K') then
   begin
     Mouse.Click(MOUSE_LEFT);
-    Result := IsAttacking := MainScreen.DidRedClick;
+    Result := Self.IsAttacking := MainScreen.DidRedClick;
   end;
 end;
 
@@ -214,14 +214,14 @@ function TScript.BoostMagic: Boolean;
 var
   Slot: Int32;
 begin
-  Result := UseImbuedHeart := Inventory.FindItem('Imbued heart', Slot);
+  Result := Self.UseImbuedHeart := Inventory.FindItem('Imbued heart', Slot);
 
   if not Result then
     Exit;
 
   Inventory.ClickSlot(Slot);
-  ImbuedHeart.Restart(Random(3000, 35000));
-  IsAttacking := False
+  Self.ImbuedHeart.Restart(Random(3000, 35000));
+  Self.IsAttacking := False
 end;
 
 
@@ -244,7 +244,7 @@ begin
   while Inventory.IsFull() and Inventory.FindConsumable(FOOD_CONSUMABLE) do
     Inventory.Consume(FOOD_CONSUMABLE);
 
-  Result := CheckedLoot := True;
+  Result := Self.CheckedLoot := True;
 
   while CombatHandler.LootHandler.CheckLoot(B) and Inventory.HasSpace(1) do
     Wait(400, 600);
@@ -254,12 +254,12 @@ end;
 
 function TScript.GetState(): EState;
 begin
-  if WL.Activity.IsFinished() and not MainScreen.InCombat then
+  if WL.Activity.IsFinished() and not MainScreen.InCombat() then
     Exit(END_SCRIPT);
 
-  if not Self.InsideBossRoom then
+  if not Self.InsideBossRoom() then
   begin
-    if 'Pay' in Chat.GetChatTitle then
+    if 'Pay' in Chat.GetChatTitle() then
       Exit(HANDLE_CHAT);
     Exit(ENTER_CREVICE);
   end;
@@ -268,7 +268,7 @@ begin
   begin
     if Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD)
-    else if Self.FindRagingKraken then
+    else if Self.FindRagingKraken() then
       Exit(ATTACK_KRAKEN)
     else if (Minimap.GetHPLevel <= 25) then
       TerminateScript('OUT OF FOOD AND HEALTH');
@@ -277,29 +277,29 @@ begin
   if (Minimap.GetPrayerLevel <= 30) and Inventory.FindConsumable(PRAYER_CONSUMABLE) then
     Exit(DRINK_PRAYER);
 
-  if CombatHandler.NeedBracelet then
+  if CombatHandler.NeedBracelet() then
     Exit(EQUIP_BRACELET);
 
-  if UseImbuedHeart and ImbuedHeart.IsFinished() then
+  if Self.UseImbuedHeart and Self.ImbuedHeart.IsFinished() then
     Exit(BOOST);
 
-  if not Minimap.IsPrayerEnabled and (Minimap.GetPrayerLevel > 0) then
+  if not Minimap.IsPrayerEnabled() and (Minimap.GetPrayerLevel > 0) then
     Exit(ENABLE_QPRAY);
 
-  if not Self.RSW.AtTile(Bridge, 5) then
+  if not Self.RSW.AtTile(Self.Bridge, 5) then
     Exit(WALK_BRIDGE);
 
-  if Self.FindRagingKraken then
+  if Self.FindRagingKraken() then
   begin
-    if IsAttacking then
+    if Self.IsAttacking then
       Exit(WAIT_STATE);
     Exit(ATTACK_KRAKEN);
   end;
 
-  if not CheckedLoot then
+  if not Self.CheckedLoot then
     Exit(CHECK_LOOT);
 
-  if Inventory.FindItems(RSAction.AlchItemArray) then
+  if Inventory.ContainsAny(RSAction.AlchItemArray) then
     Exit(ALCH_DROP);
 
   if Self.FindSleepyKraken then
@@ -322,11 +322,11 @@ begin
       HANDLE_CHAT: Self.HandlePayment;
 
       //Inside
-      WALK_BRIDGE: Self.RSW.WebWalk(Bridge, 5, 0.2);
+      WALK_BRIDGE: Self.RSW.WebWalk(Self.Bridge, 5, 0.2);
       WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
       CHECK_LOOT: Self.CheckLoot;
       WAKE_KRAKEN: Self.WakeKraken;
-      ATTACK_KRAKEN: IsAttacking := Self.AttackKraken;
+      ATTACK_KRAKEN: Self.IsAttacking := Self.AttackKraken;
       BOOST: Self.BoostMagic;
       EAT_FOOD: Inventory.Consume(FOOD_CONSUMABLE);
       DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
@@ -360,21 +360,18 @@ type
 procedure TConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
-
-  MaxActions := StrToInt(Self.ActionLimit.getText());
-  MaxTime    := StrToInt64(Self.TimeLimit.getText());
 end;
 
 procedure TConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.GetWidth() + 30, Form.GetHeight() + 40);
+  UpdateFormSize(Self.Form, Self.Form.GetWidth() + 30, Self.Form.GetHeight() + 40);
 
-  with InfoText do
+  with Self.InfoText do
   begin
     Init(Self.SSPanel.Panel); 
-    setParent(ScriptSettingsPanel);
+    setParent(Self.SSPanel.Panel);
     SetCaption(
       'Keep in mind this script was only tested with Sang Staff.'
       + STR_NEW_LINE +

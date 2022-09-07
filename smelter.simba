@@ -85,7 +85,7 @@ begin
   case CurrentFurnace of
     EFurnace.EDGEVILLE_FURNACE:
       begin
-        Self.RSW.Setup(GetMapBlock(EWaspMapBlock.VARROCK));
+        Self.RSW.Setup(VARROCK_MAP);
         Furnace := RSObjects.EdgevilleFurnace;
         Self.ScriptBank := RSObjects.EdgevilleBank;
       end;
@@ -349,7 +349,7 @@ begin
     if Make.IsOpen() then
       Exit(ESmelterState.SMELT_BAR);
 
-    Exit(ESmelterState.Open()_FURNACE);
+    Exit(ESmelterState.OPEN_FURNACE);
   end;
 
   if Self.BankEmpty then
@@ -357,13 +357,13 @@ begin
     if Self.CollectEmpty then
       Exit(ESmelterState.OUT_OF_SUPPLIES);
 
-    Exit(ESmelterState.Open()_COLLECT);
+    Exit(ESmelterState.OPEN_COLLECT);
   end;
 
   if Self.BankEmpty then
-    Exit(ESmelterState.Open()_COLLECT);
+    Exit(ESmelterState.OPEN_COLLECT);
 
-  Exit(ESmelterState.Open()_BANK);
+  Exit(ESmelterState.OPEN_BANK);
 end;
 
 function TSmelter.Terminate(): Boolean; override;
@@ -387,15 +387,15 @@ begin
 
     case Self.State of
       ESmelterState.HOVER_BANK: Self.Hover;
-      ESmelterState.Open()_BANK: Bank.WalkOpen(Self.ScriptBank);
+      ESmelterState.OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
       ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw();
       ESmelterState.DEPOSIT_BAR: Self.Deposit();
       ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositAllBut(Self.BankTab, Materials);
 
-      ESmelterState.Open()_COLLECT: CollectBox.WalkOpen(Self.ScriptBank);
+      ESmelterState.OPEN_COLLECT: CollectBox.WalkOpen(Self.ScriptBank);
       ESmelterState.HANDLE_COLLECT: Self.HandleCollectBox();
 
-      ESmelterState.Open()_FURNACE: Self.Open()Furnace;
+      ESmelterState.OPEN_FURNACE: Self.Open()Furnace;
       ESmelterState.SMELT_BAR: Self.SmeltBar;
       ESmelterState.WAIT_SMELT: Self.WaitSmelt;
 

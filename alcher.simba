@@ -130,7 +130,7 @@ begin
   Result := Bank.WithdrawItem(Self.BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
 
   if Self.BankEmpty := ((not Result and Bank.IsOpen) and
-                    not Bank.FindItem(Self.BankTab, Item)) then
+                    not Bank.ContainsItem(Self.BankTab, Item)) then
     if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
       Self.CollectEmpty := False;
 end;

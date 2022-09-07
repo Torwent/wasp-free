@@ -63,7 +63,7 @@ type
     UseShadowVeil: Boolean;
     UseRedemption: Boolean;
 
-    CurrentNPC: PRSNPC;
+    CurrentNPC: TRSNPC;
 
     CoinPouch: TRSItem;
     Necklace: TRSItem;
@@ -137,15 +137,15 @@ begin
   case PickedNPC of
     MAN:
       begin
-        Self.RSW.Setup('x7617y3214');
-        CurrentNPC := @RSNPCs.Man;
+        Self.RSW.Setup(LUMBRIDGE_MAP);
+        Self.CurrentNPC := RSNPCs.Man;
 
-        LootArray += CoinPouch;
-        LootArray += 'Coins';
+        Self.LootArray += Self.CoinPouch;
+        Self.LootArray += 'Coins';
 
-        StackableArray := LootArray;
+        Self.StackableArray := Self.LootArray;
 
-        NPCMaxHit := 1;
+        Self.NPCMaxHit := 1;
 
         if not SuicideMode then
           SuicideMode := True;
@@ -155,9 +155,9 @@ begin
 
     MASTER_FARMER:
       begin
-        Self.RSW.Setup('x7617y3214');
-        CurrentNPC := @RSNPCs.MasterFarmer;
-        LootArray := [
+        Self.RSW.Setup(LUMBRIDGE_MAP);
+        Self.CurrentNPC := RSNPCs.MasterFarmer;
+        Self.LootArray := [
           'Potato seed', 'Onion seed', 'Cabbage seed', 'Tomato seed',
           'Sweetcorn seed', 'Strawberry seed', 'Watermelon seed',
           'Snape grass seed',
@@ -177,7 +177,7 @@ begin
           'Potato cactus seed'
         ];
 
-        DropArray := [
+        Self.DropArray := [
           'Potato seed', 'Onion seed', 'Cabbage seed', 'Tomato seed',
           'Sweetcorn seed', 'Strawberry seed', 'Watermelon seed',
 
@@ -194,7 +194,7 @@ begin
           'Potato cactus seed'
         ];
 
-        NPCMaxHit := 3;
+        Self.NPCMaxHit := 3;
 
         Self.ScriptBank := RSObjects.DraynorBank;
 
@@ -204,78 +204,57 @@ begin
 
     GUARD:
       begin
-        Self.RSW.Setup('x7051y2796');
-        CurrentNPC := @RSNPCs.Guard;
+        Self.RSW.Setup(FALADOR_MAP);
+        Self.CurrentNPC := RSNPCs.Guard;
 
-        LootArray += CoinPouch;
-        LootArray += 'Coins';
+        Self.LootArray += Self.CoinPouch;
+        Self.LootArray += 'Coins';
 
-        StackableArray := LootArray;
+        Self.StackableArray := Self.LootArray;
 
-        NPCMaxHit := 2;
+        Self.NPCMaxHit := 2;
         Self.ActionProfit := 30;
 
         Self.ScriptBank := RSObjects.FaladorWestBank;
       end;
 
-    KNIGHT_OF_ARDOUGNE:
-      begin
-        Login.Players[Login.PlayerIndex].Worlds:= []; 
-        Self.RSW.Setup('x5723y3038');
-        CurrentNPC := @RSNPCs.KnightOfArdougne;
-        Self.ScriptBank := RSObjects.ArdougneSouthBank;
-
-        CurrentNPC^.Filter.MinimapDot := False;
-
-        LootArray += CoinPouch;
-        LootArray += 'Coins';
-
-        StackableArray := LootArray;
-
-        NPCMaxHit := 3;
-
-        Self.ActionProfit := 100;
-
-        SuicideMode := False;
-      end;
-
     ELF:
       begin
-        Self.RSW.Setup('x3583y1905');
-        CurrentNPC := @RSNPCs.Elf;
+        Self.RSW.Setup(PRIFDDINAS_MAP);
+        Self.CurrentNPC := RSNPCs.Elf;
         Self.ScriptBank := RSObjects.PrifddinasBank;
 
-        LootArray := [
-          CoinPouch, 'Coins', 'Death rune', 'Jug of wine', 'Nature rune',
+        Self.LootArray := [
+          Self.CoinPouch, 'Coins', 'Death rune', 'Jug of wine', 'Nature rune',
           'Fire orb', 'Diamond', 'Gold ore', 'Crystal shards',
           'Enhanced crystal teleport seed'
         ];
 
         Self.ActionProfit := 560;
-        ValuableItem := 'Enhanced crystal teleport seed';
-        ValuableItemValue := ItemData.GetAverage(ValuableItem);
+        Self.ValuableItem := 'Enhanced crystal teleport seed';
+        Self.ValuableItemValue := ItemData.GetAverage(Self.ValuableItem);
 
 
-        DropArray := ['Gold ore'];
+        Self.DropArray := ['Gold ore'];
 
-        StackableArray := [CoinPouch, 'Coins', 'Death rune', 'Nature rune',
+        Self.StackableArray := [Self.CoinPouch, 'Coins', 'Death rune', 'Nature rune',
                            'Crystal shards'];
 
-        NPCMaxHit := 5;
+        Self.NPCMaxHit := 5;
       end;
 
     TZHAAR_CITY:
       begin
         Self.RSW.Setup('x4333y310');
-        CurrentNPC := @RSNPCs.TzhaarHur;
-        LootArray := [
+        Self.CurrentNPC := RSNPCs.TzhaarHur;
+        Self.LootArray := [
           'Tokkul', 'Uncut sapphire', 'Uncut emerald',
           'Uncut ruby', 'Uncut diamond'
         ];
 
-        StackableArray := LootArray;
+        Self.StackableArray := Self.LootArray;
 
-        NPCMaxHit := 4;
+        Self.NPCMaxHit := 4;
 
         Self.ScriptBank := RSObjects.TzhaarBank;
 
@@ -284,143 +263,145 @@ begin
       end;
   end;
 
-  DropArray += 'Jug';
-  DropArray += 'Pie dish';
+  Self.DropArray += 'Jug';
+  Self.DropArray += 'Pie dish';
 
-  StackableArray += Necklace; //not stackable but this array is used to not bank items
-  StackableArray += 'Cosmic rune';
+  Self.StackableArray += Self.Necklace; //not stackable but this array is used to not bank items
+  Self.StackableArray += 'Cosmic rune';
 
-  CurrentNPC^.Filter.Walker := False;
+  Self.CurrentNPC.Filter.Walker := False;
 end;
 
-procedure TThiever.CheckRogueEquipment;
+procedure TThiever.CheckRogueEquipment();
 var
   ProfitMultiplier: Double;
   Item: TRSItem;
 begin
   if Inventory.Open() then
   begin
-    if Inventory.FindItem('Rogue mask') then
+    if Inventory.ContainsItem('Rogue mask') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue mask';
+      Self.RogueEquipment += 'Rogue mask';
     end;
 
-    if Inventory.FindItem('Rogue top') then
+    if Inventory.ContainsItem('Rogue top') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue top';
+      Self.RogueEquipment += 'Rogue top';
     end;
 
-    if Inventory.FindItem('Rogue trousers') then
+    if Inventory.ContainsItem('Rogue trousers') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue trousers';
+      Self.RogueEquipment += 'Rogue trousers';
     end;
 
-    if Inventory.FindItem('Rogue gloves') then
+    if Inventory.ContainsItem('Rogue gloves') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue gloves';
+      Self.RogueEquipment += 'Rogue gloves';
     end;
 
-    if Inventory.FindItem('Rogue boots') then
+    if Inventory.ContainsItem('Rogue boots') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue boots';
+      Self.RogueEquipment += 'Rogue boots';
     end;
 
     //This are not part of rogue equipment but are useful while thieving
-    if Inventory.FindItem('Thieving cape') then
-      RogueEquipment += 'Thieving cape'
-    else if Inventory.FindItem('Thieving cape(t)') then
-      RogueEquipment += 'Thieving cape(t)'
-    else if Inventory.FindItem('Max cape') then
-      RogueEquipment += 'Max cape';
+    if Inventory.ContainsItem('Thieving cape') then
+      Self.RogueEquipment += 'Thieving cape'
+    else if Inventory.ContainsItem('Thieving cape(t)') then
+      Self.RogueEquipment += 'Thieving cape(t)'
+    else if Inventory.ContainsItem('Max cape') then
+      Self.RogueEquipment += 'Max cape';
 
     //Lava staves for shadow veil spell
-    if Inventory.FindItem('Lava battlestaff') then
-      RogueEquipment += 'Lava battlestaff'
-    else if Inventory.FindItem('Mystic lava staff') then
-      RogueEquipment += 'Mystic lava staff'
-    else if Inventory.FindItem(21200) then
-      RogueEquipment += 21200;
+    if Inventory.ContainsItem('Lava battlestaff') then
+      Self.RogueEquipment += 'Lava battlestaff'
+    else if Inventory.ContainsItem('Mystic lava staff') then
+      Self.RogueEquipment += 'Mystic lava staff'
+    else if Inventory.ContainsItem(21200) then
+      Self.RogueEquipment += 21200;
   end;
 
   if Equipment.Open() then
   begin
-    if Equipment.FindItem('Rogue mask') then
+    if Equipment.ContainsItem('Rogue mask') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue mask';
+      Self.RogueEquipment += 'Rogue mask';
     end;
 
-    if Equipment.FindItem('Rogue top') then
+    if Equipment.ContainsItem('Rogue top') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue top';
+      Self.RogueEquipment += 'Rogue top';
     end;
 
-    if Equipment.FindItem('Rogue trousers') then
+    if Equipment.ContainsItem('Rogue trousers') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue trousers';
+      Self.RogueEquipment += 'Rogue trousers';
     end;
 
-    if Equipment.FindItem('Rogue gloves') then
+    if Equipment.ContainsItem('Rogue gloves') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue gloves';
+      Self.RogueEquipment += 'Rogue gloves';
     end;
 
-    if Equipment.FindItem('Rogue boots') then
+    if Equipment.ContainsItem('Rogue boots') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue boots';
+      Self.RogueEquipment += 'Rogue boots';
     end;
 
 
     //This are not part of rogue equipment but are useful while thieving
-    if Equipment.FindItem('Thieving cape') then
-      RogueEquipment += 'Thieving cape'
-    else if Equipment.FindItem('Thieving cape(t)') then
-      RogueEquipment += 'Thieving cape(t)';
+    if Equipment.ContainsItem('Thieving cape') then
+      Self.RogueEquipment += 'Thieving cape'
+    else if Equipment.ContainsItem('Thieving cape(t)') then
+      Self.RogueEquipment += 'Thieving cape(t)';
 
     //Lava staves for shadow veil spell
-    if Equipment.FindItem('Lava battlestaff') then
-      RogueEquipment += 'Lava battlestaff'
-    else if Equipment.FindItem('Mystic lava staff') then
-      RogueEquipment += 'Mystic lava staff'
-    else if Equipment.FindItem(21200) then
-      RogueEquipment += 21200;
+    if Equipment.ContainsItem('Lava battlestaff') then
+      Self.RogueEquipment += 'Lava battlestaff'
+    else if Equipment.ContainsItem('Mystic lava staff') then
+      Self.RogueEquipment += 'Mystic lava staff'
+    else if Equipment.ContainsItem(21200) then
+      Self.RogueEquipment += 21200;
 
   end;
 
-  GearAmount := Equipment.CountGear;
+  Self.GearAmount := Equipment.CountGear;
   if not Equipment.IsSlotUsed(ERSEquipmentButton.AMULET) then
-    GearAmount += 1;
+    Self.GearAmount += 1;
 
   Self.ActionProfit += Round(Self.ActionProfit * ProfitMultiplier);
 
-  for Item in RogueEquipment do
-    StackableArray += Item; //Adding RogueEquipment to the non banking item list
+  for Item in Self.RogueEquipment do
+    Self.StackableArray += Item; //Adding Self.RogueEquipment to the non banking item list
 end;
 
 procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name    := 'AIO Pickpocketer';
+  Self.Name := 'Pickpocketer';
 
   inherited;
 
-  UseRedemption := SuicideMode;
+  Mouse.Speed := 20;
 
-  CoinPouch := 'Coin pouch';
-  Necklace := 'Dodgy necklace';
+  Self.UseRedemption := SuicideMode;
+
+  Self.CoinPouch := 'Coin pouch';
+  Self.Necklace := 'Dodgy Necklace';
 
   Self.SetupNPC;
 
-  //NeckTimer to recheck necklace in case the script messes up.
-  NeckTimer.Init(140000);
+  //Self.NeckTimer to recheck necklace in case the script messes up.
+  Self.NeckTimer.Init(140000);
 
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
@@ -430,29 +411,29 @@ begin
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
-  Self.CheckRogueEquipment;
-  HasNeck := Equipment.FindItem(Necklace);
+  Self.CheckRogueEquipment();
+  Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
   if Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
   begin
-    UseShadowVeil := True;
+    Self.UseShadowVeil := True;
     Magic.CastSpell(ERSSpell.SHADOW_VEIL);
-    ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetCurrentLevel(ERSSkill.MAGIC)));
+    Self.ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetCurrentLevel(ERSSkill.MAGIC)));
   end;
 
   if not SuicideMode and ((FoodHandler.Amount + NeckAmount + 2) >= 26) then
   begin
-    if UseShadowVeil then
+    if Self.UseShadowVeil then
       FoodHandler.Amount := 26 - NeckAmount - 1
     else
       FoodHandler.Amount := 26 - NeckAmount;
   end
-  else if ((FoodHandler.Amount + NeckAmount + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
-    FoodHandler.Amount := 28 - NeckAmount - 2 - Length(StackableArray);
+  else if ((FoodHandler.Amount + NeckAmount + 2 + Length(Self.StackableArray)) >= (28 - Length(Self.StackableArray))) then
+    FoodHandler.Amount := 28 - NeckAmount - 2 - Length(Self.StackableArray);
 
   if ScriptDebugEnabled then
   begin
     DebugObjectArray += Self.ScriptBank;
-    DebugNPCArray += CurrentNPC;
+    DebugNPCArray += Self.CurrentNPC;
   end;
 end;
 
@@ -491,23 +472,23 @@ end;
 
 
 
-function TThiever.HasRogue: Boolean;
+function TThiever.HasRogue(): Boolean;
 begin
-  Result := Inventory.FindItems(RogueEquipment);
+  Result := Inventory.ContainsAny(Self.RogueEquipment);
 end;
 
-function TThiever.EquipRogue: Boolean;
+function TThiever.EquipRogue(): Boolean;
 var
   Item: TRSItem;
 begin
-  for Item in RogueEquipment do
+  for Item in Self.RogueEquipment do
     if Inventory.ClickItem(Item) then
       Wait(200, 300);
 
   if Inventory.ClickItem(21200) then
     Wait(200, 300);
 
-  Result := not Self.HasRogue and not Inventory.FindItem('Lava battlestaff');
+  Result := not Self.HasRogue() and not Inventory.ContainsItem('Lava battlestaff');
 end;
 
 
@@ -516,7 +497,7 @@ var
   Slots: TIntegerArray;
   UsedSlots: TIntegerArray := Inventory.GetUsedSlots;
 begin
-  Inventory.FindItems(StackableArray, Slots);
+  Inventory.FindItems(Self.StackableArray, Slots);
 
   Result := Length(Slots) <> Length(UsedSlots);
 end;
@@ -525,23 +506,23 @@ function TThiever.HasSpace: Boolean;
 begin
   if SuicideMode then //Makes sure we always have space to loot
   begin               //everything from the gravestone on suicide mode.
-    if (Length(LootArray) > 2) then
-      Result := (Inventory.CountEmptySlots() > GearAmount)
+    if (Length(Self.LootArray) > 2) then
+      Result := (Inventory.CountEmptySlots() > Self.GearAmount)
     else
-      Result := (Inventory.CountEmptySlots() > GearAmount) or
-                (Inventory.FindItem(CoinPouch) and
-                 Inventory.FindItem('Coins')
-                 and not Inventory.FindItems(DropArray));
+      Result := (Inventory.CountEmptySlots() > Self.GearAmount) or
+                (Inventory.ContainsItem(Self.CoinPouch) and
+                 Inventory.ContainsItem('Coins')
+                 and not Inventory.ContainsAny(Self.DropArray));
   end
   else
   begin
-    if (Length(LootArray) > 2) then
+    if (Length(Self.LootArray) > 2) then
       Result := (Inventory.CountEmptySlots() >= 2) //if has things oher than coins
     else                                         //we need at least 2 spaces always.
       Result := (Inventory.CountEmptySlots() >= 2) or
-                (Inventory.FindItem(CoinPouch) and
-                 Inventory.FindItem('Coins')
-                 and not Inventory.FindItems(DropArray));
+                (Inventory.ContainsItem(Self.CoinPouch) and
+                 Inventory.ContainsItem('Coins')
+                 and not Inventory.ContainsAny(Self.DropArray));
   end;
 end;
 
@@ -551,27 +532,53 @@ var
   CurrentHP: Int32 := Minimap.GetHPLevel;
 begin
   if NextHeal < 1 then
-    NextHeal := Round(Antiban.GetUniqueNumber(NPCMaxHit * 8));
+    NextHeal := Round(Antiban.GetUniqueNumber(Self.NPCMaxHit * 8));
 
   NextHeal += Random(-3, 3);
 
-  Result := (CurrentHP <= NextHeal) or (CurrentHP <= NPCMaxHit);
+  Result := (CurrentHP <= NextHeal) or (CurrentHP <= Self.NPCMaxHit);
 end;
 
 function TThiever.IsPouchFull: Boolean;
 begin
-  if CoinPouchLimit < 1 then
-    CoinPouchLimit := SRL.TruncatedGauss(28, 1);
-  Result := Inventory.CountItemStack(CoinPouch) >= CoinPouchLimit;
+  if Self.CoinPouchLimit < 1 then
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28, 1);
+  Result := Inventory.CountItemStack(Self.CoinPouch) >= Self.CoinPouchLimit;
 end;
 
+
+function TThiever.OpenCoinPouch(): Boolean;
+var
+  pouchCount, slot: Int32;
+begin
+  pouchCount := Inventory.CountItemStack(Self.CoinPouch);
+
+  if not Inventory.FindItem(Self.CoinPouch, slot) then
+    Exit;
+
+  if Inventory.ClickSlot(slot) then
+  begin
+    Wait(300);
+    Result := WaitUntil(not Inventory.ContainsItem(Self.CoinPouch), 100, 1200);
+  end;
+
+  if Result then
+  begin
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28, 1);
+    Self.TotalActions += pouchCount;
+    WL.Activity.Restart();
+  end;
+
+  if not Result then
+    Self.OpenCoinPouch();
+end;
 
 function TThiever.CheckFailed(StartingHP: Int32): Boolean;
 var
   HasHitSplat: Boolean;
   CurrentHP: Int32 := Minimap.GetHPLevel;
 begin
-  HasHitSplat := not RenderDisabled and
+  HasHitSplat := not Self.RenderDisabled and
                 (MainScreen.FindHitsplats(MainScreen.GetPlayerBox) <> []);
 
   Result := (CurrentHP < StartingHP) or HasHitSplat;
@@ -581,17 +588,17 @@ begin
     if HasHitSplat then
     begin
       Options.RenderSelf;
-      RenderDisabled := True;
+      Self.RenderDisabled := True;
     end
     else
-      Self.Open()CoinPouch;
+      Self.OpenCoinPouch();
   end;
 end;
 
-function TThiever.NecklaceExpired: Boolean;
+function TThiever.NecklaceExpired(): Boolean;
 begin
   Result := Chat.FindMessage('crumbles', [CHAT_COLOR_LIGHT_RED]);
-  HasNeck := not Result;
+  Self.HasNeck := not Result;
 end;
 
 function TThiever.Dodged: Boolean;
@@ -600,27 +607,7 @@ begin
 end;
 
 
-function TThiever.Open()CoinPouch: Boolean;
-var
-  PouchCount: Int32;
-begin
-  PouchCount := Inventory.CountItemStack(CoinPouch);
-  if Inventory.ClickItem(CoinPouch) then
-  begin
-    Wait(300);
-    Result := WaitUntil(not Inventory.FindItem(CoinPouch), 100, 1200);
-  end;
 
-  if Result then
-  begin
-    CoinPouchLimit := SRL.TruncatedGauss(28, 1);
-    Self.TotalActions += PouchCount;
-    WL.Activity.Restart();
-  end;
-
-  if not Result then
-    Self.Open()CoinPouch;
-end;
 
 function TThiever.Heal: Boolean;
 begin
@@ -632,37 +619,37 @@ begin
   until Result := (Minimap.GetHPPercent >= (50 + Antiban.GetUniqueNumber(20)));
 
   if Result then
-    NextHeal := Round(Antiban.GetUniqueNumber(NPCMaxHit * 7));
+    NextHeal := Round(Antiban.GetUniqueNumber(Self.NPCMaxHit * 7));
 end;
 
 function TThiever.EquipNeck: Boolean;
 begin
-  if Result := Inventory.ClickItem(Necklace) then Wait(300, 400);
+  if Result := Inventory.ClickItem(Self.Necklace) then Wait(300, 400);
 
-  FreshNeck := HasNeck := Result;
+  Self.FreshNeck := Self.HasNeck := Result;
 end;
 
 function TThiever.CheckNeck: Boolean;
 begin
-  Result := HasNeck := Equipment.FindItem(Necklace);
+  Result := Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
-  NeckTimer.Restart(Random(-30000, 60000));
+  Self.NeckTimer.Restart(Random(-30000, 60000));
 end;
 
 
 function TThiever.CastShadowVeil: Boolean;
 begin
-  if not UseShadowVeil or not Magic.Open() then
+  if not Self.UseShadowVeil or not Magic.Open() then
     Exit;
 
   if not Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
   begin
-    Result := UseShadowVeil := False;
+    Result := Self.UseShadowVeil := False;
     Exit(False);
   end;
 
   Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL);
-  ShadowVeilTimer.Restart(Random(-5000, 5000));
+  Self.ShadowVeilTimer.Restart(Random(-5000, 5000));
 end;
 
 function TThiever.PickNPC: Boolean;
@@ -672,7 +659,7 @@ var
 begin
   if Slot > -1 then Inventory.ClickSlot(Slot);
 
-  if Result := CurrentNPC^.SelectOption(['Pick', 'pocket']) then
+  if Result := Self.CurrentNPC.SelectOption(['Pick', 'pocket']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
 
@@ -681,24 +668,25 @@ begin
       RSObjects.Gravestone.TileArray.Pop;
 
     if not Self.NecklaceExpired then
-      FreshNeck := False;
+      Self.FreshNeck := False;
 
     Self.CheckFailed(CurrentHP);
     WL.Activity.Restart();
   end;
 end;
 
+
 function TThiever.Deposit: Boolean;
 var
   ItemCount: Int32;
 begin
-  if ToStr(ValuableItem) <> '' then
-    ItemCount := Inventory.CountItem(ValuableItem);
-  Result := Bank.DepositAllBut(Self.BankTab, StackableArray);
+  if ToStr(Self.ValuableItem) <> '' then
+    ItemCount := Inventory.CountItem(Self.ValuableItem);
+  Result := Bank.DepositAllBut(Self.BankTab, Self.StackableArray);
   if ItemCount > 0 then
   begin
-    if Inventory.CountItem(ValuableItem) = 0 then
-      Self.TotalProfit += (ItemCount * ValuableItemValue);
+    if Inventory.CountItem(Self.ValuableItem) = 0 then
+      Self.TotalProfit += (ItemCount * Self.ValuableItemValue);
   end;
 end;
 
@@ -712,7 +700,7 @@ begin
   if Result := Bank.WithdrawItem(Self.BankTab, [Item, QuantityNeeded, False], False) then
     WaitUntil(Inventory.Count() > InvCount, 100, 3000);
 
-  if not Result and (Item = Necklace) and (PickedNPC = GUARD) then
+  if not Result and (Item = Self.Necklace) and (PickedNPC = GUARD) then
     NeckAmount := 0;
 end;
 
@@ -724,7 +712,7 @@ var
   InvCount: Int32;
 begin
   for Item in Items do
-    if Bank.FindItem(Item) then Exit(Self.Withdraw(Item, Quantity));
+    if Bank.ContainsItem(Item) then Exit(Self.Withdraw(Item, Quantity));
 
   for Item in Items do
   begin
@@ -748,16 +736,16 @@ var
   P: TPoint;
   UpTextFound: Boolean;
 begin
-  HasNeck := False;
-  FreshNeck := False;
-  RedemptionEnabled := False;
+  Self.HasNeck := False;
+  Self.FreshNeck := False;
+  Self.RedemptionEnabled := False;
 
   if not Minimap.WaitArrow(TPA, 3000) then
     Exit;
 
   while not MainScreen.WaitArrow(GraveTPA, 3000) do
   begin
-    Mouse.Click(TPA.Grow(6).Random, MOUSE_LEFT);
+    Mouse.Click(TPA.Grow(6).RandomValue(), MOUSE_LEFT);
     Minimap.WaitMoving();
   end;
 
@@ -782,8 +770,9 @@ end;
 function TThiever.EnableRedemption: Boolean;
 begin
   Result := Prayer.ActivatePrayer(ERSPrayer.REDEMPTION);
-  UseRedemption := RedemptionEnabled := Result;
+  Self.UseRedemption := Self.RedemptionEnabled := Result;
 end;
+
 
 function TThiever.GetState(): EThieverState;
 begin
@@ -802,7 +791,7 @@ begin
     begin
       if Self.HasDepositItems then
         Exit(DEPOSIT_LOOT);
-      if Inventory.CountItem(Necklace) < NeckAmount then
+      if Inventory.CountItem(Self.Necklace) < NeckAmount then
         Exit(WITHDRAW_NECKLACES);
       if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
@@ -820,7 +809,7 @@ begin
   if not ChatButtons.IsActive(ERSChatButton.GAME_CHAT) then
     Exit(OPEN_CHAT);
 
-  if NeckTimer.IsFinished() then
+  if Self.NeckTimer.IsFinished() then
     Exit(CHECK_NECKLACE);
 
   if Self.HasRogue then
@@ -828,7 +817,7 @@ begin
 
   if not Self.HasSpace then
   begin
-    if Inventory.FindItems(DropArray) then
+    if Inventory.ContainsAny(Self.DropArray) then
       Exit(DROP_ITEMS);
     if Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD);
@@ -836,9 +825,9 @@ begin
     Exit(OPEN_BANK);
   end;
 
-  if (NeckAmount > 0) and not FreshNeck and (not HasNeck or Self.NecklaceExpired) then
+  if (NeckAmount > 0) and not Self.FreshNeck and (not Self.HasNeck or Self.NecklaceExpired) then
   begin
-    if Inventory.FindItem(Necklace) then
+    if Inventory.ContainsItem(Self.Necklace) then
       Exit(EQUIP_NECKLACE);
 
     Exit(OPEN_BANK);
@@ -846,24 +835,24 @@ begin
 
   if Self.IsLowHP then
   begin
-    if not RedemptionEnabled and Inventory.FindConsumable(FOOD_CONSUMABLE) then
+    if not Self.RedemptionEnabled and Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD);
     if not SuicideMode then
       Exit(OPEN_BANK);
-    if not Self.RSW.AtTile(CurrentNPC^.TileArray, 40) then
+    if not Self.RSW.AtTile(Self.CurrentNPC.TileArray, 40) then
       Exit(WALK_TO_NPC);
-    if UseRedemption and not RedemptionEnabled then
+    if Self.UseRedemption and not Self.RedemptionEnabled then
       Exit(ENABLE_REDEMPTION);
-    if UseShadowVeil and ShadowVeilTimer.IsFinished() then
+    if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
       Exit(CAST_SHADOW_VEIL);
 
     Exit(PICKPOCKET);
   end;
 
-  if not Self.RSW.AtTile(CurrentNPC^.TileArray, 40) then
+  if not Self.RSW.AtTile(Self.CurrentNPC.TileArray, 40) then
     Exit(WALK_TO_NPC);
 
-  if UseShadowVeil and ShadowVeilTimer.IsFinished() then
+  if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
     Exit(CAST_SHADOW_VEIL);
 
   Exit(PICKPOCKET);
@@ -878,37 +867,37 @@ begin
   begin
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
-    Self.ExtraInfo := ' FreshNeck: ' + ToStr(FreshNeck) +
-                 ',   HasNeck: ' + ToStr(HasNeck) +
+    Self.ExtraInfo := ' FreshNeck: ' + ToStr(Self.FreshNeck) +
+                 ',   HasNeck: ' + ToStr(Self.HasNeck) +
                  STR_NEW_LINE +
-                  ' UseRedemption: ' + ToStr(UseRedemption) +
-                  ',   RedemptionEnabled: ' + ToStr(RedemptionEnabled) +
+                  ' UseRedemption: ' + ToStr(Self.UseRedemption) +
+                  ',   RedemptionEnabled: ' + ToStr(Self.RedemptionEnabled) +
                   ',   NextHeal: ' + ToStr(NextHeal) +
                   STR_NEW_LINE +
                   ' SuicideMode: ' + ToStr(SuicideMode) +
-                  ',   UseShadowVeil: ' + ToStr(UseShadowVeil);
+                  ',   UseShadowVeil: ' + ToStr(Self.UseShadowVeil);
     
 
     case Self.State of
       OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
       DEPOSIT_LOOT: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
-      WITHDRAW_NECKLACES: Self.Withdraw(Necklace, NeckAmount);
+      WITHDRAW_NECKLACES: Self.Withdraw(Self.Necklace, NeckAmount);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
       CHANGE_CHAT_FILTER: ChatButtons.ChangeState(ERSChatButton.GAME_CHAT, ERSChatButtonState.ENABLED);
 
-      CAST_SHADOW_VEIL: Self.CastShadowVeil;
-      PICKPOCKET: Self.PickNPC;
-      OPEN_POUCH: Self.Open()CoinPouch;
+      CAST_SHADOW_VEIL: Self.CastShadowVeil();
+      PICKPOCKET: Self.PickNPC();
+      OPEN_POUCH: Self.OpenCoinPouch();
 
-      EAT_FOOD: Self.Heal;
-      EQUIP_NECKLACE: Self.EquipNeck;
-      CHECK_NECKLACE: Self.CheckNeck;
+      EAT_FOOD: Self.Heal();
+      EQUIP_NECKLACE: Self.EquipNeck();
+      CHECK_NECKLACE: Self.CheckNeck();
       CLOSE_CONTEXT: ChooseOption.Close();
-      DROP_ITEMS: Inventory.ShiftDrop(DropArray, Inventory.RandomPattern);
-      WALK_TO_NPC: Self.RSW.WebWalk(CurrentNPC^.TileArray, 30, 0.2);
+      DROP_ITEMS: Inventory.ShiftDrop(Self.DropArray, Inventory.RandomPattern);
+      WALK_TO_NPC: Self.RSW.WebWalk(Self.CurrentNPC.TileArray, 30, 0.2);
       EQUIP_ROGUE: Self.EquipRogue;
       LOOT_GRAVE: Self.LootGrave;
       ENABLE_REDEMPTION: Self.EnableRedemption;
@@ -923,49 +912,10 @@ end;
 var
   Thiever: TThiever;
 
-procedure TConsumableManager.Setup(ConsumableType: ERSConsumable); override;
-var
-  Item: TRSItem;
-begin
-  inherited;
-
-  if ConsumableType = FOOD_CONSUMABLE then
-    for Item in Self.ItemArray do
-      if Thiever.StackableArray.Find(Item) < 0 then
-        Thiever.StackableArray += Item;
-end;
-
-procedure TConsumableManager.SetupNew(ConsumableType: ERSConsumable); override;
-var
-  Item: TRSItem;
-begin
-  inherited;
-
-  if ConsumableType = FOOD_CONSUMABLE then
-    for Item in Self.ItemArray do
-      if Thiever.StackableArray.Find(Item) < 0 then
-        Thiever.StackableArray += Item;
-end;
-
 
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override;
 begin
   Result := Self.CountPoints(ConsumableType) >= FoodHandler.Amount;
-end;
-
-function TRSBank.WithdrawConsumableAmount(ConsumableType: ERSConsumable; Idx: Int32): Int32; override;
-var
-  HandlerManager: ^TConsumableManager := GetHandler(ConsumableType);
-begin
-  if ConsumableType = FOOD_CONSUMABLE then
-    Exit(FoodHandler.Amount - Inventory.Count()Consumable(FOOD_CONSUMABLE));
-
-  case HandlerManager^.Handlers[Idx].Amount of
-    BANK_WITHDRAW_ALL: Result := BANK_WITHDRAW_ALL;
-    BANK_WITHDRAW_ALL_BUT_ONE: Result := BANK_WITHDRAW_ALL_BUT_ONE;
-    else
-      Result := Ceil((HandlerManager^.MinInvPoints - Inventory.Count()Points(ConsumableType)) / HandlerManager^.Handlers[Idx].GetPoints);
-  end;
 end;
 
 type
@@ -981,64 +931,62 @@ procedure TThieverConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  PickedNPC := ENPC(NPCSelector.Combobox.getItemIndex());
-  SuicideMode := SuicideState.Checkbox.getState = cbChecked;
+  PickedNPC := ENPC(Self.NPCSelector.Combobox.getItemIndex());
+  SuicideMode := Self.SuicideState.getState = cbChecked;
 
-  FoodAmount := StrToInt(FoodAmountEdit.getText());
-  NeckAmount := StrToInt(NeckAmountEdit.getText());
-  NextHeal := StrToInt(MinHealthEdit.getText());
+  FoodAmount := StrToInt(Self.WLPanel.FoodPanel.ConsumableAmount.GetText());
+  NeckAmount := StrToInt(Self.NeckAmountEdit.getText());
+  NextHeal := StrToInt(Self.WLPanel.FoodPanel.MinPoints.GetText());
 end;
 
 procedure TThieverConfig.NPCSelectorOnChange(Sender: TObject);
 begin
   Writeln(Sender, ' has changed');
 
-  case ENPC(NPCSelector.Combobox.getItemIndex()) of
+  case ENPC(Self.NPCSelector.Combobox.getItemIndex()) of
     MAN:
       begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
+        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.setEnabled(False);
       end;
 
     MASTER_FARMER:
       begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
+        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.setEnabled(False);
       end;
 
     KNIGHT_OF_ARDOUGNE:
       begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
+        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.setEnabled(False);
       end;
 
     TZHAAR_CITY:
       begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
+        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.setEnabled(False);
       end;
 
     else
     begin
-      SuicideState.Checkbox.setState(cbChecked);
-      SuicideState.Checkbox.setEnabled(True);
+      Self.SuicideState.setState(cbChecked);
+      Self.SuicideState.setEnabled(True);
     end;
   end;
 
 end;
 
-procedure TThieverConfig.Setup(); override;
+procedure TThieverConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.GetWidth(), Form.GetHeight() + 70);
-
-  with NPCSelector do
+  with Self.NPCSelector do
   begin
     Init(Self.SSPanel.Panel); 
-    SetCaption('Agility course:');
+    SetCaption('NPC:');
     SetLeft(5);  
-    SetTop(5);
+    SetTop(30);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('Men and women (Lumbridge only)');
@@ -1051,54 +999,34 @@ begin
     Combobox.setOnChange(@Self.NPCSelectorOnChange);
   end;
 
-  with FoodAmountEdit do
-  begin
-    Init(Self.SSPanel.Panel); 
-    SetCaption('Food amount:');
-    SetLeft(NPCSelector.GetLeft());
-    SetTop(NPCSelector.GetTop() + NPCSelector.GetHeight() + 10);
-    SetWidth(80);
-    SetText(ToStr(FoodAmount));
-  end;
-
-  with NeckAmountEdit do
+  with Self.NeckAmountEdit do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Necklaces amount:');
-    SetLeft(FoodAmountEdit.GetLeft() + FoodAmountEdit.GetWidth() + 30);
-    SetTop(FoodAmountEdit.GetTop());
-    SetWidth(80);
+    SetLeft(250);
+    SetTop(30);
+    SetWidth(110);
     SetText(ToStr(NeckAmount));
   end;
 
-  with MinHealthEdit do
-  begin
-    Init(Self.SSPanel.Panel); 
-    SetCaption('Minimum health:');
-    SetLeft(NeckAmountEdit.GetLeft() + NeckAmountEdit.GetWidth() + 35);
-    SetTop(FoodAmountEdit.GetTop());
-    SetWidth(80);
-    SetText(ToStr(Round(Antiban.GetUniqueNumber(10 * 8))));
-  end;
-
-  with SuicideState do
+  with Self.SuicideState do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Suicide mode:');
-    SetLeft(NPCSelector.GetLeft() + NPCSelector.GetWidth() + 25);
-    SetTop(NPCSelector.GetHeight());
-    SetWidth(50);
-    SetHeight(10);
+    SetLeft(5);
+    SetTop(15);
     SetEnabled(True);
-    Self.NPCSelectorOnChange(@SuicideState);
+    Self.NPCSelectorOnChange(@Self.SuicideState);
   end;
 
+  Self.WLPanel.FoodPanel.ConsumableAmount.SetText(ToStr(FoodAmount));
+  Self.WLPanel.FoodPanel.ConsumableAmount.SetVisible(True);
   Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
 procedure TThieverConfig.Run(); override;
 begin
-  Self.Setup();
+  Self.Setup(True, False, False);
 
   inherited;
 end;

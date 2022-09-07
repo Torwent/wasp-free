@@ -478,9 +478,9 @@ begin
       Exit(EWoodcutterState.DROP_ITEMS);
 
     if UseSawmill and not Inventory.FindItem(Plank) and Self.HasEnoughMoney then
-      Exit(EWoodcutterState.Open()_SAWMILL);
+      Exit(EWoodcutterState.OPEN_SAWMILL);
 
-    Exit(EWoodcutterState.Open()_BANK);
+    Exit(EWoodcutterState.OPEN_BANK);
   end;
 
   if Woodcutting then
@@ -511,7 +511,7 @@ begin
     
 
     case Self.State of
-      EWoodcutterState.Open()_BANK: Bank.WalkOpen(Self.ScriptBank);
+      EWoodcutterState.OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
       EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(Self.BankTab, BankList, True);
       EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
       EWoodcutterState.WALK_SPOT: Self.RSW.WebWalk(RSTree^.TileArray, 10, 0.2);
@@ -521,7 +521,7 @@ begin
       EWoodcutterState.USE_SPEC: Minimap.EnableSpec(100);
       EWoodcutterState.PICKUP_NEST: Self.PickNest;
       EWoodcutterState.CUT_TREE: Self.CutTree;
-      EWoodcutterState.Open()_SAWMILL: Self.Open()Sawmill;
+      EWoodcutterState.OPEN_SAWMILL: Self.Open()Sawmill;
       EWoodcutterState.HANDLE_MAKE: Self.MakePlanks;
       EWoodcutterState.DROP_ITEMS: Self.DropItems;
       EWoodcutterState.END_SCRIPT: Break;

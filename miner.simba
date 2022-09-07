@@ -1,4 +1,4 @@
-{$IFDEF WINDOWS}{.$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -360,7 +360,7 @@ begin
     if not Self.UseBank then
       Exit(EMinerState.DROP_ITEMS);
 
-    Exit(EMinerState.Open()_BANK);
+    Exit(EMinerState.OPEN_BANK);
   end;
 
   if Self.Mining then
@@ -382,10 +382,8 @@ begin
 
   repeat
     Self.State := Self.GetState();
-    Self.Action := ToStr(Self.State);
-    Self.ExtraInfo := ' Bank: ' + ToStr(Self.UseBank) +
-                  STR_NEW_LINE +
-                 ' Mining: ' + ToStr(Self.Mining);
+    Self.ExtraInfo := ' Bank: ' + ToStr(Self.UseBank) + STR_NEW_LINE + ' Mining: ' + ToStr(Self.Mining);
+    Self.SetAction(ToStr(Self.State));
 
     Self.InvCount := Inventory.Count();
 
@@ -393,7 +391,7 @@ begin
       WL.Activity.Restart();
 
     case Self.State of
-      EMinerState.Open()_BANK: Bank.WalkOpen(Self.ScriptBank);
+      EMinerState.OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
       EMinerState.DEPOSIT_ITEMS: Self.Deposit();
       EMinerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
       EMinerState.WALK_SPOT: Self.RSW.WebWalk(Self.RSRock.TileArray, 5, 0.2);

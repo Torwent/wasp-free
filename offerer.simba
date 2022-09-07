@@ -64,48 +64,48 @@ begin
 end;
 
 
-procedure TRemainOfferer.SetupSpell;
+procedure TRemainOfferer.SetupSpell();
 begin
-  WrathRune := 'Wrath rune';
+  Self.WrathRune := 'Wrath rune';
 
-  SpellCooldown.Setup(4800);
+  Self.SpellCooldown.Setup(4800);
 
   case CurrentRemains of
     ERSRemains.FIENDISH_ASHES..ERSRemains.INFERNAL_ASHES:
       begin
-        OfferSpell := ERSSpell.DEMONIC_OFFERING;
-        AltRune := 'Soul rune';
+        Self.OfferSpell := ERSSpell.DEMONIC_OFFERING;
+        Self.AltRune := 'Soul rune';
       end;
     ERSRemains.BABY_BONES..ERSRemains.SUPERIOR_BONES:
       begin
-        OfferSpell := ERSSpell.SINISTER_OFFERING;
-        AltRune := 'Blood rune';
+        Self.OfferSpell := ERSSpell.SINISTER_OFFERING;
+        Self.AltRune := 'Blood rune';
       end;
   end;
 end;
 
-procedure TRemainOfferer.SetupRemains;
+procedure TRemainOfferer.SetupRemains();
 begin
   case CurrentRemains of
-    ERSRemains.FIENDISH_ASHES:  Remains := 'Fiendish ashes';
-    ERSRemains.VILE_ASHES:      Remains := 'Vile ashes';
-    ERSRemains.MALICIOUS_ASHES: Remains := 'Malicious ashes';
-    ERSRemains.ABYSSAL_ASHES:   Remains := 'Abyssal ashes';
-    ERSRemains.INFERNAL_ASHES:  Remains := 'Infernal ashes';
-    ERSRemains.BABY_BONES:      Remains := 'Babydragon bones';
-    ERSRemains.WYRM_BONES:      Remains := 'Wyrm bones';
-    ERSRemains.DRAGON_BONES:    Remains := 'Dragon bones';
-    ERSRemains.WYVERN_BONES:    Remains := 'Wyvern bones';
-    ERSRemains.DRAKE_BONES:     Remains := 'Drake bones';
-    ERSRemains.LAVA_BONES:      Remains := 'Lava dragon bones';
-    ERSRemains.HYDRA_BONES:     Remains := 'Hydra bones';
-    ERSRemains.DAGANNOTH_BONES: Remains := 'Dagannoth bones';
-    ERSRemains.SUPERIOR_BONES:  Remains := 'Superior dragon bones';
+    ERSRemains.FIENDISH_ASHES:  Self.Remains := 'Fiendish ashes';
+    ERSRemains.VILE_ASHES:      Self.Remains := 'Vile ashes';
+    ERSRemains.MALICIOUS_ASHES: Self.Remains := 'Malicious ashes';
+    ERSRemains.ABYSSAL_ASHES:   Self.Remains := 'Abyssal ashes';
+    ERSRemains.INFERNAL_ASHES:  Self.Remains := 'Infernal ashes';
+    ERSRemains.BABY_BONES:      Self.Remains := 'Babydragon bones';
+    ERSRemains.WYRM_BONES:      Self.Remains := 'Wyrm bones';
+    ERSRemains.DRAGON_BONES:    Self.Remains := 'Dragon bones';
+    ERSRemains.WYVERN_BONES:    Self.Remains := 'Wyvern bones';
+    ERSRemains.DRAKE_BONES:     Self.Remains := 'Drake bones';
+    ERSRemains.LAVA_BONES:      Self.Remains := 'Lava dragon bones';
+    ERSRemains.HYDRA_BONES:     Self.Remains := 'Hydra bones';
+    ERSRemains.DAGANNOTH_BONES: Self.Remains := 'Dagannoth bones';
+    ERSRemains.SUPERIOR_BONES:  Self.Remains := 'Superior dragon bones';
   end;
 
-  Self.ActionProfit -= ((ItemData.GetAverage(Remains) * 3) -
-                    ItemData.GetAverage(WrathRune) -
-                    ItemData.GetAverage(AltRune));
+  Self.ActionProfit -= ((ItemData.GetAverage(Self.Remains) * 3) -
+                    ItemData.GetAverage(Self.WrathRune) -
+                    ItemData.GetAverage(Self.AltRune));
 end;
 
 procedure TRemainOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;
@@ -118,34 +118,34 @@ begin
   if ScriptDebugEnabled then
     DebugObjectArray += Self.ScriptBank;
 
-  Self.SetupSpell;
-  Self.SetupRemains;
+  Self.SetupSpell();
+  Self.SetupRemains();
 
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 end;
 
 
-function TRemainOfferer.CanCast: Boolean;
+function TRemainOfferer.CanCast(): Boolean;
 begin
   if Inventory.IsOpen() then
-    Result := Inventory.FindItem(WrathRune) and Inventory.FindItem(AltRune)
+    Result := Inventory.ContainsAll([Self.WrathRune, Self.AltRune])
   else if Magic.IsOpen() then
-    Result := Magic.CanActivate(OfferSpell)
+    Result := Magic.CanActivate(Self.OfferSpell)
   else
     Result := True;
 end;
 
-function TRemainOfferer.CastSpell: Boolean;
+function TRemainOfferer.CastSpell(): Boolean;
 begin
-  if Result := Magic.CastSpell(OfferSpell) then
+  if Result := Magic.CastSpell(Self.OfferSpell) then
   begin
-    SpellCooldown.Restart(Random(-100,500));
-    RemainsLeft -= 3;
+    Self.SpellCooldown.Restart(Random(-100,500));
+    Self.RemainsLeft -= 3;
     Self.TotalActions += 1;
   end
   else if Inventory.Open() then
-    RemainsLeft := Inventory.CountItem(Remains);
+    Self.RemainsLeft := Inventory.CountItem(Self.Remains);
 end;
 
 function TRemainOfferer.Withdraw(Item: TRSItem): Boolean;
@@ -155,19 +155,19 @@ begin
   if Result := Bank.WithdrawItem(Self.BankTab, [Item, BANK_WITHDRAW_ALL, False], True) then
     WaitUntil(Inventory.Count() > InvCount, 100, 3000);
 
-  if Self.BankEmpty := (not Result and not Bank.FindItem(Self.BankTab, Item)) then
+  if Self.BankEmpty := (not Result and not Bank.ContainsItem(Self.BankTab, Item)) then
     if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
       Self.CollectEmpty := False;
 end;
 
-function TRemainOfferer.HandleCollectBox: Boolean;
+function TRemainOfferer.HandleCollectBox(): Boolean;
 var
   Slots: TIntegerArray;
 begin
-  if CollectBox.FindItems([WrathRune, AltRune, Remains], Slots) then
+  if CollectBox.FindItems([Self.WrathRune, Self.AltRune, Self.Remains], Slots) then
   begin
     if Result := Self.CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.FindItems([WrathRune, AltRune, Remains], Slots), 50, 2000);
+      WaitUntil(not CollectBox.FindItems([Self.WrathRune, Self.AltRune, Self.Remains], Slots), 50, 2000);
     Self.BankEmpty := not Self.CollectEmpty;
   end
   else
@@ -176,7 +176,7 @@ begin
   Self.CollectTimer.Restart();
 end;
 
-procedure TRemainOfferer.WaitCoolDown;
+procedure TRemainOfferer.WaitCoolDown();
 begin
   case Random(0, 500) of
     0:
@@ -220,14 +220,14 @@ begin
   begin
     if Bank.IsOpen() then
     begin
-      if not Inventory.FindItem(WrathRune) then
+      if not Inventory.ContainsItem(Self.WrathRune) then
         Exit(EOffererState.WITHDRAW_WRATH);
-      if not Inventory.FindItem(AltRune) then
+      if not Inventory.ContainsItem(Self.AltRune) then
         Exit(EOffererState.WITHDRAW_ALT);
-      if (Inventory.CountItem(Remains) < 3) then
+      if (Inventory.CountItem(Self.Remains) < 3) then
         Exit(EOffererState.WITHDRAW_REMAINS);
 
-      RemainsLeft := Inventory.CountItem(Remains);
+      Self.RemainsLeft := Inventory.CountItem(Self.Remains);
     end;
 
     if CollectBox.IsOpen() and not Self.CollectEmpty then
@@ -236,33 +236,33 @@ begin
     Exit(EOffererState.CLOSE_INTERFACE);
   end;
 
-  if (RemainsLeft < 3) or not Self.CanCast then
+  if (Self.RemainsLeft < 3) or not Self.CanCast() then
   begin
     if not Self.BankEmpty then
-      Exit(EOffererState.Open()_BANK);
+      Exit(EOffererState.OPEN_BANK);
     if not Self.CollectEmpty then
-      Exit(EOffererState.Open()_COLLECT);
+      Exit(EOffererState.OPEN_COLLECT);
 
     Exit(EOffererState.END_SCRIPT);
   end;
 
-  if SpellCooldown.IsFinished() then
+  if Self.SpellCooldown.IsFinished() then
   begin
     if Magic.IsOpen() then
     begin
-      if Magic.CanActivate(OfferSpell) then
+      if Magic.CanActivate(Self.OfferSpell) then
         Exit(EOffererState.CAST_SPELL)
 
       if not Self.BankEmpty then
-        Exit(EOffererState.Open()_BANK);
+        Exit(EOffererState.OPEN_BANK);
 
       if not Self.CollectEmpty then
-        Exit(EOffererState.Open()_COLLECT);
+        Exit(EOffererState.OPEN_COLLECT);
 
       Exit(EOffererState.END_SCRIPT);
     end;
 
-    Exit(EOffererState.Open()_MAGIC);
+    Exit(EOffererState.OPEN_MAGIC);
   end;
 
   Exit(EOffererState.WAIT_STATE);
@@ -276,17 +276,17 @@ begin
   repeat
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
-    Self.ExtraInfo := ' Spell: ' + ToStr(OfferSpell) +
-                 ' RemainsLeft: ' + ToStr(RemainsLeft) +
-                 ' SpellCooldown.IsFinished(): ' + ToStr(SpellCooldown.IsFinished());
+    Self.ExtraInfo := ' Spell: ' + ToStr(Self.OfferSpell) +
+                 ' Self.RemainsLeft: ' + ToStr(Self.RemainsLeft) +
+                 ' SpellCooldown.IsFinished(): ' + ToStr(Self.SpellCooldown.IsFinished());
 
     
 
     case Self.State of
       OPEN_BANK:        Bank.WalkOpen(Self.ScriptBank);
-      WITHDRAW_WRATH:   Self.Withdraw(WrathRune);
-      WITHDRAW_ALT:     Self.Withdraw(AltRune);
-      WITHDRAW_REMAINS: Self.Withdraw(Remains);
+      WITHDRAW_WRATH:   Self.Withdraw(Self.WrathRune);
+      WITHDRAW_ALT:     Self.Withdraw(Self.AltRune);
+      WITHDRAW_REMAINS: Self.Withdraw(Self.Remains);
 
       OPEN_COLLECT:   CollectBox.WalkOpen(Self.ScriptBank);
       HANDLE_COLLECT: Self.HandleCollectBox();
@@ -294,8 +294,8 @@ begin
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_MAGIC: Magic.Open();
-      CAST_SPELL: Self.CastSpell;
-      WAIT_STATE: Self.WaitCoolDown;
+      CAST_SPELL: Self.CastSpell();
+      WAIT_STATE: Self.WaitCoolDown();
 
       END_SCRIPT: Break;
     end;
@@ -311,21 +311,18 @@ type
     RemainSelector: TLabeledCombobox;
   end;
 
-procedure TRemainOffererConfig.StarTRemainOfferer(Sender: TObject);
+procedure TRemainOffererConfig.StartRemainOfferer(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentRemains := ERSRemains(RemainSelector.Combobox.getItemIndex());
-
-  MaxActions := StrToInt(Self.ActionLimit.getText());
-  MaxTime    := StrToInt64(Self.TimeLimit.getText());
+  CurrentRemains := ERSRemains(Self.RemainSelector.Combobox.getItemIndex());
 end;
 
 procedure TRemainOffererConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
-  with RemainSelector do
+  with Self.RemainSelector do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Task:');
@@ -352,7 +349,7 @@ begin
     Combobox.setItemIndex(Ord(CurrentRemains));
   end;
 
-  StartButton.setOnClick(@Self.StarTRemainOfferer);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartRemainOfferer);
 end;
 
 procedure TRemainOffererConfig.Run(); override;

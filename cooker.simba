@@ -93,14 +93,14 @@ begin
 end;
 
 
-procedure TCooker.SetupItems;
+procedure TCooker.SetupItems();
 var
   CookedPrefix: TStringArray;
   BurntFish: TStringArray;
 begin
-  Food := CurrentFood;
+  Self.Food := CurrentFood;
 
-  if ToStr(Food).ToLower() = 'shark' then
+  if ToStr(Self.Food).ToLower() = 'shark' then
     ItemFinder.Similarity := 0.9999;
 
   CookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat',
@@ -109,35 +109,35 @@ begin
   BurntFish := ['herring', 'mackerel', 'sardine', 'anchovies',
                 'giant carp', 'trout', 'cod', 'pike', 'salmon', 'tuna', 'bass'];
 
-  Ingredient := [('Raw ' + ToStr(Food).ToLower()), BANK_WITHDRAW_ALL, False];
+  Self.Ingredient := [('Raw ' + ToStr(Self.Food).ToLower()), BANK_WITHDRAW_ALL, False];
 
-  if (CookedPrefix.Find(LowerCase(Food)) > -1) then
-    Products := [
-      ['Cooked ' + ToStr(Food).ToLower(), BANK_DEPOSIT_ALL],
-      ['Burnt ' + ToStr(Food).ToLower(), BANK_DEPOSIT_ALL]]
-  else if (BurntFish.Find(LowerCase(Food)) > -1) then
-    Products := [
-      [Food, BANK_DEPOSIT_ALL],
+  if CookedPrefix.Contains(LowerCase(Self.Food)) then
+    Self.Products := [
+      ['Cooked ' + ToStr(Self.Food).ToLower(), BANK_DEPOSIT_ALL],
+      ['Burnt ' + ToStr(Self.Food).ToLower(), BANK_DEPOSIT_ALL]]
+  else if BurntFish.Contains(LowerCase(Self.Food)) then
+    Self.Products := [
+      [Self.Food, BANK_DEPOSIT_ALL],
       ['Burnt fish', BANK_DEPOSIT_ALL]]
   else
-    Products := [
-      [Food, BANK_DEPOSIT_ALL],
-      ['Burnt ' + ToStr(Food).ToLower(), BANK_DEPOSIT_ALL]];
+    Self.Products := [
+      [Self.Food, BANK_DEPOSIT_ALL],
+      ['Burnt ' + ToStr(Self.Food).ToLower(), BANK_DEPOSIT_ALL]];
 
   Self.ActionProfit := (
-    ItemData.GetAverage(Products[0].Item) -
-    ItemData.GetAverage(Ingredient.Item)
+    ItemData.GetAverage(Self.Products[0].Item) -
+    ItemData.GetAverage(Self.Ingredient.Item)
   );
 end;
 
-procedure TCooker.SetupLocation;
+procedure TCooker.SetupLocation();
 begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
       begin
         Self.RSW.Setup('x1916y1841');
         Self.ScriptBank := RSObjects.HosidiusKitchenBank;
-        CookingObj := RSObjects.HosidiusKitchenOven;
+        Self.CookingObj := RSObjects.HosidiusKitchenOven;
       end;
 
     ERSLocation.ROGUES_DEN:
@@ -148,7 +148,7 @@ begin
 
         RSObjects.EternalFire.Filter.Finder := False;
         RSObjects.EternalFire.Filter.UpText := False;
-        CookingObj := RSObjects.EternalFire;
+        Self.CookingObj := RSObjects.EternalFire;
       end;
   end;
 
@@ -179,24 +179,24 @@ begin
       ERSLocation.HOSIDIUS:   DebugObjectArray += Self.ScriptBank;
       ERSLocation.ROGUES_DEN: DebugNPCArray += Self.ScriptBanker;
     end;
-    DebugObjectArray += @CookingObj;
+    DebugObjectArray += Self.CookingObj;
   end;
 end;
 
 
-function TCooker.HasProducts: Boolean; overload;
+function TCooker.HasProducts(): Boolean; overload;
 var
   Product: TRSBankDepositItem;
   Slots: TIntegerArray;
 begin
-  for Product in Products do
+  for Product in Self.Products do
     if not Inventory.FindItem(Product.Item, Slots) then
       Exit(False);
 
   Result := True;
 end;
 
-function TCooker.Open()Bank: Boolean;
+function TCooker.OpenBank(): Boolean;
 begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:   Result := Bank.WalkOpen(Self.ScriptBank);
@@ -204,30 +204,30 @@ begin
   end;
 end;
 
-function TCooker.Withdraw: Boolean;
+function TCooker.Withdraw(): Boolean;
 var
   InvCount: Int32;
 begin
   if Self.BankTab = -1 then
-    Self.BankTab := Bank.FindItemTab(Ingredient.Item);
+    Self.BankTab := Bank.FindItemTab(Self.Ingredient.Item);
 
   InvCount := Inventory.Count();
-  if Result := Bank.WithdrawItem(Self.BankTab, Ingredient, True) then
+  if Result := Bank.WithdrawItem(Self.BankTab, Self.Ingredient, True) then
     WaitUntil(Inventory.Count() > InvCount, 100, 3000);
 
-  if Self.BankEmpty := (not Result and not Bank.FindItem(Self.BankTab, Ingredient)) then
+  if Self.BankEmpty := (not Result and not Bank.ContainsItem(Self.BankTab, Self.Ingredient)) then
     if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
       Self.CollectEmpty := False;
 end;
 
-function TCooker.Deposit: Boolean;
+function TCooker.Deposit(): Boolean;
 var
   InvCount: Int32 := Inventory.Count();
   Product: TRSBankDepositItem;
 begin
   Self.TotalActions += InvCount;
 
-  for Product in Products do
+  for Product in Self.Products do
   begin
     if not Bank.DepositItem(Self.BankTab, Product, True) then
       Exit(False);
@@ -239,14 +239,14 @@ begin
 end;
 
 
-function TCooker.HandleCollectBox: Boolean;
+function TCooker.HandleCollectBox(): Boolean;
 var
   Slots: TIntegerArray;
 begin
-  if CollectBox.FindItem(Ingredient.Item, Slots) then
+  if CollectBox.FindItem(Self.Ingredient.Item, Slots) then
   begin
     if Result := Self.CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.FindItem(Ingredient.Item, Slots), 100, 2000);
+      WaitUntil(not CollectBox.FindItem(Self.Ingredient.Item, Slots), 100, 2000);
     Self.BankEmpty := not Self.CollectEmpty;
   end
   else
@@ -256,48 +256,48 @@ begin
 end;
 
 
-function TCooker.DoCooking: Boolean;
+function TCooker.DoCooking(): Boolean;
 begin
   if CurrentLocation = ERSLocation.ROGUES_DEN then
     if Inventory.GetSelectedSlot = -1 then
-      Inventory.SetSelectedItem(Ingredient.Item);
+      Inventory.SetSelectedItem(Self.Ingredient.Item);
 
-  if CookingObj.WalkSelectOption(['Cook', 'Fire']) then
+  if Self.CookingObj.WalkSelectOption(['Cook', 'Fire']) then
   begin
     Minimap.WaitPlayerMoving(300, 3000);
     Result := Make.IsOpen(4000);
   end;
 end;
 
-function TCooker.HandleMake: Boolean;
+function TCooker.HandleMake(): Boolean;
 var
   i: Int32 := 0;
 begin
   if not Make.IsOpen() then //not sure if I can remove this.
     Exit;                 //it's probably not needed.
 
-  if 'arambwan' in Food then
+  if 'arambwan' in Self.Food then
     i := 1;
 
-  Result := Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice);
+  Result := Self.Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice);
   
   if Result then
-    WaitUntil(not Make.IsOpen, 100, 4000);  
+    WaitUntil(not Make.IsOpen(), 100, 4000);  
 end;
 
 function TCooker.IsCooking(WaitTime: Int32 = 2500): Boolean;
 var
-  ItemCount: Int32 := Inventory.CountItem(Ingredient.Item);
+  ItemCount: Int32 := Inventory.CountItem(Self.Ingredient.Item);
 begin
   if ItemCount = 0 then Exit;
 
-  if Result := WaitUntil(ItemCount > Inventory.CountItem(Ingredient.Item), 100, WaitTime) then
+  if Result := WaitUntil(ItemCount > Inventory.CountItem(Self.Ingredient.Item), 100, WaitTime) then
     WL.Activity.Restart();
 end;
 
-function TCooker.WaitCooking: Boolean;
+function TCooker.WaitCooking(): Boolean;
 begin
-  Result := Cooking := Self.IsCooking
+  Result := Self.Cooking := Self.IsCooking
 end;
 
 
@@ -314,7 +314,7 @@ begin
 
   if Chat.LeveledUp() then
   begin
-    Cooking := False;
+    Self.Cooking := False;
     Exit(ECookerState.LEVEL_UP);
   end;
 
@@ -325,10 +325,10 @@ begin
   begin
     if Bank.IsOpen() then
     begin
-      if Self.HasProducts then
+      if Self.HasProducts() then
         Exit(ECookerState.DEPOSIT_ITEMS);
 
-      if Self.BankEmpty or Inventory.FindItem(Ingredient.Item) then
+      if Self.BankEmpty or Inventory.ContainsItem(Self.Ingredient.Item) then
         Exit(ECookerState.CLOSE_INTERFACE);
 
       Exit(ECookerState.WITHDRAW_ITEMS);
@@ -336,7 +336,7 @@ begin
 
     if CollectBox.IsOpen() then
     begin
-      if Self.CollectEmpty or Inventory.FindItem(Ingredient.Item) then
+      if Self.CollectEmpty or Inventory.ContainsItem(Self.Ingredient.Item) then
         Exit(ECookerState.CLOSE_INTERFACE);
 
       Exit(ECookerState.HANDLE_COLLECT);
@@ -345,9 +345,9 @@ begin
     Exit(ECookerState.CLOSE_INTERFACE);
   end;
 
-  if Inventory.FindItem(Ingredient.Item) then
+  if Inventory.ContainsItem(Self.Ingredient.Item) then
   begin
-    if Cooking then
+    if Self.Cooking then
       Exit(ECookerState.WAIT_COOKING);
 
     Exit(ECookerState.DO_COOKING);
@@ -357,16 +357,16 @@ begin
     Exit(ECookerState.END_SCRIPT);
 
   if Self.BankEmpty then
-    Exit(ECookerState.Open()_COLLECT);
+    Exit(ECookerState.OPEN_COLLECT);
 
-  Exit(ECookerState.Open()_BANK);
+  Exit(ECookerState.OPEN_BANK);
 end;
 
 function TCooker.Terminate(): Boolean; override;
 begin
   if inherited then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(Self.BankTab, [Products[0].Item, BANK_WITHDRAW_ALL, True], True) then
+      if Result := Bank.WithdrawItem(Self.BankTab, [Self.Products[0].Item, BANK_WITHDRAW_ALL, True], True) then
         Break;
 end;
 
@@ -382,18 +382,18 @@ begin
     
 
     case Self.State of
-      ECookerState.Open()_BANK: Self.Open()Bank;
+      ECookerState.OPEN_BANK: Self.OpenBank();
       ECookerState.WITHDRAW_ITEMS: Self.Withdraw();
       ECookerState.DEPOSIT_ITEMS: Self.Deposit();
 
-      ECookerState.Open()_COLLECT: CollectBox.WalkOpen(Self.ScriptBank);
+      ECookerState.OPEN_COLLECT: CollectBox.WalkOpen(Self.ScriptBank);
       ECookerState.HANDLE_COLLECT: Self.HandleCollectBox();
       ECookerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       ECookerState.LEVEL_UP: Chat.HandleLevelUp();
-      ECookerState.DO_COOKING: Self.DoCooking;
-      ECookerState.HANDLE_MAKE: Self.HandleMake;
-      ECookerState.WAIT_COOKING: Self.WaitCooking;
+      ECookerState.DO_COOKING: Self.DoCooking();
+      ECookerState.HANDLE_MAKE: Self.HandleMake();
+      ECookerState.WAIT_COOKING: Self.WaitCooking();
       ECookerState.CLOSE_CONTEXT: ChooseOption.Close();
 
       ECookerState.END_SCRIPT: Break;
@@ -420,18 +420,19 @@ procedure TCookerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentLocation := ERSLocation(LocSelector.Combobox.getItemIndex());
-  if FoodSelector.getText() = 'Custom' then
-    CurrentFood := CustomFoodName.getText()
+  CurrentLocation := ERSLocation(Self.LocSelector.Combobox.getItemIndex());
+  if Self.FoodSelector.getText() = 'Custom' then
+    CurrentFood := Self.CustomFoodName.getText()
   else
-    CurrentFood := FoodSelector.getText();
+    CurrentFood := Self.FoodSelector.getText();
 end;
 
-
+{$H-}
 procedure TCookerConfig.FoodSelectorOnChange(Sender: TObject);
 begin
-  CustomFoodName.SetVisible(FoodSelector.getText() = 'Custom');
+  Self.CustomFoodName.SetVisible(Self.FoodSelector.getText() = 'Custom');
 end;
+{$H+}
 
 procedure TCookerConfig.Setup(); override;
 var
@@ -439,9 +440,9 @@ var
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.GetWidth(), Form.GetHeight() + 30);
+  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 30);
 
-  with LocSelector do
+  with Self.LocSelector do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Location:');
@@ -454,12 +455,12 @@ begin
     SetItemIndex(Ord(CurrentLocation));
   end;
 
-  with FoodSelector do
+  with Self.FoodSelector do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Food type:');
-    SetLeft(LocSelector.GetLeft() + LocSelector.GetWidth() + 20);
-    SetTop(LocSelector.GetTop());
+    SetLeft(Self.LocSelector.GetLeft() + Self.LocSelector.GetWidth() + 20);
+    SetTop(Self.LocSelector.GetTop());
     SetWidth(200);
     SetStyle(csDropDownList);
 
@@ -470,17 +471,17 @@ begin
     Combobox.setOnChange(@Self.FoodSelectorOnChange);
   end;
 
-  with CustomFoodName do
+  with Self.CustomFoodName do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Food name (must be the exact name):');
-    SetLeft(FoodSelector.GetLeft());
-    SetTop(LocSelector.GetTop() + LocSelector.GetHeight() - 15);
+    SetLeft(Self.FoodSelector.GetLeft());
+    SetTop(Self.LocSelector.GetTop() + Self.LocSelector.GetHeight() - 15);
     SetWidth(200);
     SetText(CurrentFood);
   end;
 
-  Self.FoodSelectorOnChange(FoodSelector.Combobox);
+  Self.FoodSelectorOnChange(Self.FoodSelector.Combobox);
 
   Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;

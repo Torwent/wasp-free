@@ -61,42 +61,42 @@ type
   end;
 
 
-procedure TBuilder.SetupNPC;
+procedure TBuilder.SetupNPC();
 begin
   case CurrentNPC of
     PHIALS:
-      UsePhials := True;
+      Self.UsePhials := True;
 
     SERVANT:
       begin
-        UsePhials := False;
+        Self.UsePhials := False;
 
-        ServantNPC.SetupCommon();
-        ServantNPC.UpText := ['Talk-to'];
-        ServantNPC.Filter.Finder := False;
-        ServantNPC.Filter.MinimapDot := True;
+        Self.ServantNPC.SetupCommon();
+        Self.ServantNPC.UpText := ['Talk-to'];
+        Self.ServantNPC.Filter.Finder := False;
+        Self.ServantNPC.Filter.MinimapDot := True;
       end;
   end;
 end;
 
-procedure TBuilder.SetupPlank;
+procedure TBuilder.SetupPlank();
 begin
   case CurrentLarder of
     REGULAR_LARDER:
       begin
-        Plank := 'Plank';
-        MinInvCount := 12;
+        Self.Plank := 'Self.Plank';
+        Self.MinInvCount := 12;
       end;
 
     OAK_LARDER:
       begin
-        Plank := 'Oak plank';
-        MinInvCount := 11;
+        Self.Plank := 'Oak Self.Plank';
+        Self.MinInvCount := 11;
       end;
   end;
 end;
 
-procedure TBuilder.SetupObjects;
+procedure TBuilder.SetupObjects();
 begin
   RSObjects.OakLarderBuilt.SetupCommon(1.5, 7, [[110, 86]]);
   RSObjects.OakLarderBuilt.WalkerIndex := 1;
@@ -108,8 +108,8 @@ begin
   RSObjects.OakLarderSpace.Filter.Finder := False;
   RSObjects.OakLarderSpace.Filter.UpText := False;
 
-  BuiltLarder := RSObjects.OakLarderBuilt;
-  LarderSpace := RSObjects.OakLarderSpace;
+  Self.BuiltLarder := RSObjects.OakLarderBuilt;
+  Self.LarderSpace := RSObjects.OakLarderSpace;
 end;
 
 procedure TAntiban.Setup(); override;
@@ -128,30 +128,30 @@ begin
   inherited;
 
   Self.RSW.Setup('x6953y3166');
-  POH.Setup('poh');
+  Self.POH.Setup('Self.POH');
 
-  Self.SetupNPC;
-  Self.SetupObjects;
-  Self.SetupPlank;
+  Self.SetupNPC();
+  Self.SetupObjects();
+  Self.SetupPlank();
 
-  Self.ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
+  Self.ActionProfit -= (ItemData.GetAverage(Self.Plank) * 8 + 40);
 
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
   if CurrentNPC = PHIALS then
     case CurrentLarder of
-      REGULAR_LARDER: Inventory.FindItem('noted Plank', NotedPlanksSlot);
-      OAK_LARDER: Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
+      REGULAR_LARDER: Inventory.FindItem('noted Self.Plank', Self.NotedPlanksSlot);
+      OAK_LARDER: Inventory.FindItem('noted Oak Self.Plank', Self.NotedPlanksSlot);
     end;
 
   if ScriptDebugEnabled then
   begin
-    DebugObjectArray += @BuiltLarder;
-    DebugObjectArray += @LarderSpace;
+    DebugObjectArray += Self.BuiltLarder;
+    DebugObjectArray += Self.LarderSpace;
     DebugObjectArray += RSObjects.POHPortal;
-    DebugNPCArray += @RSNPCs.Phials;
-    DebugNPCArray += @ServantNPC;
+    DebugNPCArray += RSNPCs.Phials;
+    DebugNPCArray += Self.ServantNPC;
   end;
 end;
 
@@ -171,7 +171,7 @@ begin
 end;
 
 
-function TBuilder.EnterHouse: Boolean;
+function TBuilder.EnterHouse(): Boolean;
 begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
   begin
@@ -180,9 +180,9 @@ begin
   end;
 end;
 
-function TBuilder.BuildLarder: Boolean;
+function TBuilder.BuildLarder(): Boolean;
 begin
-  if LarderSpace.WalkSelectOption(['Build La']) then
+  if Self.LarderSpace.WalkSelectOption(['Build La']) then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
@@ -190,13 +190,13 @@ begin
   else if ChooseOption.HasOption('Remove L') then
   begin
     ChooseOption.Close();
-    LarderIsBuilt := True;
+    Self.LarderIsBuilt := True;
   end;
 end;
 
-function TBuilder.DestroyLarder: Boolean;
+function TBuilder.DestroyLarder(): Boolean;
 begin
-  if BuiltLarder.WalkSelectOption(['Remove L']) then
+  if Self.BuiltLarder.WalkSelectOption(['Remove L']) then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
@@ -204,73 +204,73 @@ begin
   else if ChooseOption.HasOption('Build La') then
   begin
     ChooseOption.Close();
-    LarderIsBuilt := False;
+    Self.LarderIsBuilt := False;
   end;
 end;
 
 
-function TBuilder.CallServant: Boolean;
+function TBuilder.CallServant(): Boolean;
 begin
-  if ServantNPC.Click then
+  if Self.ServantNPC.Click then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(Chat.GetChatTitle = 'Repeat last task?',
                         SRL.TruncatedGauss(50, 1500), 5000);
   end
   else
-    Result := Options.CallServant;
+    Result := Options.CallServant();
 end;
 
-function TBuilder.PhialsGetPlanks: Boolean;
+function TBuilder.PhialsGetPlanks(): Boolean;
 begin
   if not RSNPCs.Phials.Find and not Self.RSW.AtTile(RSNPCs.Phials.TileArray, 8) then
     Self.RSW.WebWalk(RSNPCs.Phials.TileArray, 15, 0.2);
 
-  if (Inventory.SetSelectedSlot(NotedPlanksSlot) and RSNPCs.Phials.Click) then
+  if (Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and RSNPCs.Phials.Click) then
   begin
     Minimap.WaitFlag;
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
   end;
 end;
 
-function TBuilder.TalkServant: Boolean;
+function TBuilder.TalkServant(): Boolean;
 begin
-  if ServantNPC.Click then
+  if Self.ServantNPC.Click() then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(Inventory.IsFull(), 100, 5000);
   end;
 
-  WaitingServant := not Result;
+  Self.WaitingServant := not Result;
 end;
 
 
-function TBuilder.HandleServant: Boolean;
+function TBuilder.HandleServant(): Boolean;
 begin
   Result := Chat.ClickOption('Fetch', BioHash)
   if Result then
   begin
-    WaitingServant := True;
+    Self.WaitingServant := True;
     WaitUntil(Chat.GetChatTitle <> 'Repeat last task?', 200, 3000)
   end;
 end;
 
-function TBuilder.HandleLarderChat: Boolean;
+function TBuilder.HandleLarderChat(): Boolean;
 begin
   Keyboard.PressKey(VK_1);
   Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
-  LarderIsBuilt := not Result;
+  Self.LarderIsBuilt := not Result;
   Wait(100, 150);
 end;
 
-function TBuilder.HandleFurniture: Boolean;
+function TBuilder.HandleFurniture(): Boolean;
 begin
   case CurrentLarder of
     REGULAR_LARDER: Keyboard.PressKey(VK_1);
     OAK_LARDER: Keyboard.PressKey(VK_2);
   end;
 
-  Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
+  Result := Self.LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
   if Result then
   begin
     Self.TotalActions += 1;
@@ -300,7 +300,7 @@ begin
   if S.Contains('Repeat') then
     Exit(EState.HANDLE_SERVANT);
 
-  if MainScreen.IsClassicOpen then
+  if MainScreen.IsClassicOpen() then
   begin
     if BankPin.IsOpen() then
       Exit(EState.HANDLE_PIN);
@@ -309,26 +309,26 @@ begin
 
   if not Minimap.InPOH then
   begin
-    if not UsePhials or Inventory.IsFull() then
+    if not Self.UsePhials or Inventory.IsFull() then
       Exit(EState.ENTER_HOUSE);
     Exit(EState.GET_PLANKS);
   end;
 
-  if LarderIsBuilt then
+  if Self.LarderIsBuilt then
     Exit(EState.DESTROY_LARDER);
 
-  if Inventory.Count() > MinInvCount then
+  if Inventory.Count() > Self.MinInvCount then
   begin
-    WaitingServant := False;
+    Self.WaitingServant := False;
     Exit(EState.BUILD_LARDER);
   end;
 
-  if UsePhials then
+  if Self.UsePhials then
     Exit(EState.EXIT_HOUSE);
 
-  if WaitingServant then
+  if Self.WaitingServant then
   begin
-    if ServantNPC.Find then
+    if Self.ServantNPC.Find() then
       Exit(EState.TALK_SERVANT);
     Exit(EState.WAIT_STATE);
   end;
@@ -344,25 +344,24 @@ begin
   repeat
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
-    
 
     case Self.State of
       EState.LEVEL_UP: Chat.HandleLevelUp(True);
 
-      EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat;
+      EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat();
       EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
-      EState.HANDLE_FURNITURE_UI: Self.HandleFurniture;
-      EState.HANDLE_SERVANT: Self.HandleServant;
+      EState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
+      EState.HANDLE_SERVANT: Self.HandleServant();
       EState.HANDLE_PIN: if BankPin.Enter(Login.GetPlayerPin) then MainScreen.WaitLoadingPOH(10000);
 
-      EState.CALL_SERVANT: Self.CallServant;
-      EState.TALK_SERVANT: Self.TalkServant;
-      EState.EXIT_HOUSE: Options.LeaveHouse;
-      EState.GET_PLANKS: Self.PhialsGetPlanks;
+      EState.CALL_SERVANT: Self.CallServant();
+      EState.TALK_SERVANT: Self.TalkServant();
+      EState.EXIT_HOUSE: Options.LeaveHouse();
+      EState.GET_PLANKS: Self.PhialsGetPlanks();
 
-      EState.ENTER_HOUSE: Self.EnterHouse;
-      EState.BUILD_LARDER: Self.BuildLarder;
-      EState.DESTROY_LARDER: Self.DestroyLarder;
+      EState.ENTER_HOUSE: Self.EnterHouse();
+      EState.BUILD_LARDER: Self.BuildLarder();
+      EState.DESTROY_LARDER: Self.DestroyLarder();
 
       EState.WAIT_STATE: Wait(7000, 8000);
 
@@ -389,17 +388,17 @@ procedure TBuilderConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentNPC := ERSNPC(NPCSelector.Combobox.getItemIndex());
-  CurrentLarder := ERSLarder(LarderSelector.Combobox.getItemIndex());
+  CurrentNPC := ERSNPC(Self.NPCSelector.Combobox.getItemIndex());
+  CurrentLarder := ERSLarder(Self.LarderSelector.Combobox.getItemIndex());
 end;
 
 procedure TBuilderConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.GetWidth(), Form.GetHeight() + 250);
+  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 250);
 
-  with NPCSelector do
+  with Self.NPCSelector do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Method:');
@@ -412,12 +411,12 @@ begin
     Combobox.setItemIndex(Ord(CurrentNPC));
   end;
 
-  with LarderSelector do
+  with Self.LarderSelector do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Larder:');
-    SetLeft(NPCSelector.GetLeft() + NPCSelector.GetWidth() + 10);
-    SetTop(NPCSelector.GetTop());
+    SetLeft(Self.NPCSelector.GetLeft() + Self.NPCSelector.GetWidth() + 10);
+    SetTop(Self.NPCSelector.GetTop());
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Regular');
@@ -425,10 +424,10 @@ begin
     Combobox.setItemIndex(Ord(CurrentLarder));
   end;
 
-  with BuilderInfo do
+  with Self.BuilderInfo do
   begin
     Init(Self.SSPanel.Panel); 
-    setParent(ScriptSettingsPanel);
+    setParent(Self.SSPanel.Panel);
 
     SetCaption('For Phials method make sure you have noted planks with you.' +
                STR_NEW_LINE +
@@ -439,21 +438,21 @@ begin
                'You need a decoration that has green grass and the following layout:');
 
     SetLeft(5);  
-    SetTop(NPCSelector.GetTop() + NPCSelector.GetHeight() + 2);
+    SetTop(Self.NPCSelector.GetTop() + Self.NPCSelector.GetHeight() + 2);
   end;
 
-  Pic.Init;
-  Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\poh_layout.png');
+  Self.Pic.Init;
+  Self.Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\Self.POH_layout.png');
 
-  with ImagePanel do
+  with Self.ImagePanel do
   begin
     Init(Self.SSPanel.Panel); 
-    SetParent(ScriptSettingsPanel);
-    SetTop(BuilderInfo.GetTop() + 65);
-    SetLeft(BuilderInfo.GetLeft() + 80);
+    SetParent(Self.SSPanel.Panel);
+    SetTop(Self.BuilderInfo.GetTop() + 65);
+    SetLeft(Self.BuilderInfo.GetLeft() + 80);
     setWidth(195);
     SetHeight(194);
-    setPicture(Pic);
+    setPicture(Self.Pic);
   end;
 
 
