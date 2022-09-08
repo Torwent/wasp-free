@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -42,7 +41,7 @@ type
     END_SCRIPT
   );
 
-  TRemainOfferer = record(TBaseBankScript)
+  TOfferer = record(TBaseBankScript)
     State: EOffererState;
 
     OfferSpell: ERSSpell;
@@ -64,7 +63,7 @@ begin
 end;
 
 
-procedure TRemainOfferer.SetupSpell();
+procedure TOfferer.SetupSpell();
 begin
   Self.WrathRune := 'Wrath rune';
 
@@ -84,7 +83,7 @@ begin
   end;
 end;
 
-procedure TRemainOfferer.SetupRemains();
+procedure TOfferer.SetupRemains();
 begin
   case CurrentRemains of
     ERSRemains.FIENDISH_ASHES:  Self.Remains := 'Fiendish ashes';
@@ -108,9 +107,9 @@ begin
                     ItemData.GetAverage(Self.AltRune));
 end;
 
-procedure TRemainOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Self.Name := 'Remain Offerer';
+  Self.Name := 'Offerer';
 
   inherited;
   Self.SetupWLBanks();
@@ -126,7 +125,7 @@ begin
 end;
 
 
-function TRemainOfferer.CanCast(): Boolean;
+function TOfferer.CanCast(): Boolean;
 begin
   if Inventory.IsOpen() then
     Result := Inventory.ContainsAll([Self.WrathRune, Self.AltRune])
@@ -136,7 +135,7 @@ begin
     Result := True;
 end;
 
-function TRemainOfferer.CastSpell(): Boolean;
+function TOfferer.CastSpell(): Boolean;
 begin
   if Result := Magic.CastSpell(Self.OfferSpell) then
   begin
@@ -148,7 +147,7 @@ begin
     Self.RemainsLeft := Inventory.CountItem(Self.Remains);
 end;
 
-function TRemainOfferer.Withdraw(Item: TRSItem): Boolean;
+function TOfferer.Withdraw(Item: TRSItem): Boolean;
 var
   InvCount: Int32 := Inventory.Count();
 begin
@@ -160,7 +159,7 @@ begin
       Self.CollectEmpty := False;
 end;
 
-function TRemainOfferer.HandleCollectBox(): Boolean;
+function TOfferer.HandleCollectBox(): Boolean;
 var
   Slots: TIntegerArray;
 begin
@@ -176,7 +175,7 @@ begin
   Self.CollectTimer.Restart();
 end;
 
-procedure TRemainOfferer.WaitCoolDown();
+procedure TOfferer.WaitCoolDown();
 begin
   case Random(0, 500) of
     0:
@@ -211,7 +210,7 @@ begin
 end;
 
 
-function TRemainOfferer.GetState(): EOffererState;
+function TOfferer.GetState(): EOffererState;
 begin
   if WL.Activity.IsFinished() then
     Exit(EOffererState.END_SCRIPT);
@@ -268,7 +267,7 @@ begin
   Exit(EOffererState.WAIT_STATE);
 end;
 
-procedure TRemainOfferer.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TOfferer.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   ClearDebug();
   Self.Init(MaxActions, MaxTime);
@@ -304,21 +303,21 @@ begin
   until Self.ShouldStop();
 end;
 
-var RemainOfferer: TRemainOfferer;
+var Offerer: TOfferer;
 
 type
-  TRemainOffererConfig = record(TScriptForm)
+  TOffererConfig = record(TScriptForm)
     RemainSelector: TLabeledCombobox;
   end;
 
-procedure TRemainOffererConfig.StartRemainOfferer(Sender: TObject);
+procedure TOffererConfig.StartOfferer(Sender: TObject);
 begin
   Self.Init(Sender);
 
   CurrentRemains := ERSRemains(Self.RemainSelector.Combobox.getItemIndex());
 end;
 
-procedure TRemainOffererConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
+procedure TOffererConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
@@ -326,7 +325,7 @@ begin
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Task:');
-    SetLeft(5);  
+    SetLeft(15);  
     SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
@@ -349,21 +348,21 @@ begin
     Combobox.setItemIndex(Ord(CurrentRemains));
   end;
 
-  Self.WLPanel.StartButton.setOnClick(@Self.StartRemainOfferer);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartOfferer);
 end;
 
-procedure TRemainOffererConfig.Run(); override;
+procedure TOffererConfig.Run(); override;
 begin
   Self.Setup(False, False, True);
 
   inherited;
 end;
 
-var Config: TRemainOffererConfig;
+var Config: TOffererConfig;
 
 begin
   {$IFDEF SCRIPT_GUI}
   Sync(@Config.Run);
   {$ENDIF}
-  RemainOfferer.Run(MaxActions, MaxTime);
+  Offerer.Run(MaxActions, MaxTime);
 end.

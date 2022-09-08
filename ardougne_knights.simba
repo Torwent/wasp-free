@@ -1,6 +1,5 @@
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '1'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}              //by default I only use Forms in windows.
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -230,7 +229,7 @@ begin
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
-  if Antiban.BioDice then
+  if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);

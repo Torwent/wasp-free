@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -49,33 +48,33 @@ begin
   Antiban.MaxZoom := 85;
 end;
 
-procedure TStallRobber.SetupStall;
+procedure TStallRobber.SetupStall();
 begin
   case CurrentStall of
     ERSStall.TEA_STALL:
       begin
-        Self.RSW.Setup('x7536y2363');
-        Stall := RSObjects.TeaStall;
-        StallCooldown.Init(7000);
-        SafeSpot := [8465, 2808];
-        DropList := ['Cup of tea'];
+        Self.RSW.Setup(EAST_VARROCK_MAP);
+        Self.Stall := RSObjects.TeaStall;
+        Self.StallCooldown.Init(7000);
+        Self.SafeSpot := [8465, 2808];
+        Self.DropList := ['Cup of tea'];
       end;
 
     ERSStall.SILK_STALL:
       begin
-        Self.RSW.Setup('x5723y3038');
-        Stall := RSObjects.SilkStall;
-        StallCooldown.Init(5000);
-        SafeSpot := [6042, 3182];
-        DropList := ['Silk'];
+        Self.RSW.Setup(ARDOUGNE_MAP);
+        Self.Stall := RSObjects.SilkStall;
+        Self.StallCooldown.Init(5000);
+        Self.SafeSpot := [6042, 3182];
+        Self.DropList := ['Silk'];
       end;
 
     ERSStall.FRUIT_STALL:
       begin
-        Self.RSW.Setup('x2468y1912');
-        Stall := RSObjects.FruitStall;
-        StallCooldown.Init(2000);
-        DropList := [
+        Self.RSW.Setup(HOSIDIUS_FRUIT_STALL_HOUSE_MAP);
+        Self.Stall := RSObjects.FruitStall;
+        Self.StallCooldown.Init(2000);
+        Self.DropList := [
           'Cooking apple', 'Banana', 'Jangerberries', 'Lemon', 'Redberries',
           'Pineapple', 'Lime', 'Strawberry', 'Strange fruit',
           'Golovanova fruit top', 'Papaya fruit', 'Silk'
@@ -83,22 +82,22 @@ begin
       end;
   end;
 
-  StallCooldown.Timeout := GetTickCount;
+  Self.StallCooldown.Timeout := GetTickCount;
 end;
 
 procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Self.Name := 'AIO StallRobber';
+  Self.Name := 'Stall Robber';
 
   inherited;
 
-  Self.SetupStall;
+  Self.SetupStall();
 
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
   if ScriptDebugEnabled then
-    DebugObjectArray += @Stall;
+    DebugObjectArray += Self.Stall;
 end;
 
 
@@ -106,14 +105,14 @@ function TStallRobber.HasLoot: Boolean;
 var
   Slots: TIntegerArray;
 begin
-  Result := Inventory.FindItems(DropList, Slots);
+  Result := Inventory.FindItems(Self.DropList, Slots);
 end;
 
-function TStallRobber.RobStall: Boolean;
+function TStallRobber.RobStall(): Boolean;
 begin
-  if Stall.WalkClick() and (Result := XPBar.WaitXP(2000)) then
+  if Self.Stall.WalkClick() and (Result := XPBar.WaitXP(2000)) then
   begin
-    StallCooldown.Restart(Random(-200, 200));
+    Self.StallCooldown.Restart(Random(-200, 200));
     WL.Activity.Restart();
   end;
 end;
@@ -123,8 +122,8 @@ function TStallRobber.DropItems: Boolean;
 var
   Slots: TIntegerArray;
 begin
-  Inventory.FindItems(DropList, Slots);
-  Result := Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
+  Inventory.FindItems(Self.DropList, Slots);
+  Result := Inventory.ShiftDrop(Self.DropList, DROP_PATTERN_SNAKE);
 
   if Result then
     Self.TotalActions += Length(Slots);
@@ -139,11 +138,11 @@ begin
     Exit(DROP_LOOT);
   if MainScreen.IsUpText('Steal-from') then
     Exit(ROB_STALL);
-  if not StallCooldown.IsFinished() then
+  if not Self.StallCooldown.IsFinished() then
     Exit(WAIT_STATE);
-  if (SafeSpot <> []) and not Self.RSW.AtTile(SafeSpot, 5) then
+  if (Self.SafeSpot <> []) and not Self.RSW.AtTile(Self.SafeSpot, 5) then
     Exit(WALK_SPOT);
-  if Self.RSW.AtTile(Stall.TileArray) then
+  if Self.RSW.AtTile(Self.Stall.TileArray) then
     Exit(FIND_STALL);
 end;
 
@@ -160,9 +159,9 @@ begin
 
     case Self.State of
       DROP_LOOT: Self.DropItems;
-      FIND_STALL, ROB_STALL: Self.RobStall;
+      FIND_STALL, ROB_STALL: Self.RobStall();
       WAIT_STATE: Wait(100, 200);
-      WALK_SPOT: Self.RSW.WebWalk(SafeSpot, 3, 0.2);
+      WALK_SPOT: Self.RSW.WebWalk(Self.SafeSpot, 3, 0.2);
       END_SCRIPT: Break;
     end;
 
@@ -182,24 +181,24 @@ procedure TStallRobberConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentStall := ERSStall(StallSelector.Combobox.getItemIndex());
+  CurrentStall := ERSStall(Self.StallSelector.Combobox.getItemIndex());
 end;
 
 procedure TStallRobberConfig.Setup(); override;
 begin
   inherited;
 
-  with StallSelector do
+  with Self.StallSelector do
   begin
     Init(Self.SSPanel.Panel); 
-    SetCaption('Stall:');
+    SetCaption('Self.Stall:');
     SetLeft(5);  
-    SetTop(5);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
-    Combobox.getItems.Add('Tea stall');
-    Combobox.getItems.Add('Silk stall');
-    Combobox.getItems.Add('Fruit stall');
+    Combobox.getItems.Add('Tea Self.Stall');
+    Combobox.getItems.Add('Silk Self.Stall');
+    Combobox.getItems.Add('Fruit Self.Stall');
     Combobox.setItemIndex(Ord(CurrentStall));
   end;
 

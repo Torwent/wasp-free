@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -182,28 +181,28 @@ begin
   case BankLocation of
     MINE_GUILD:
       begin
-        Self.RSW.Setup('x6291y497');
+        Self.RSW.Setup(MINING_GUILD_MAP);
         Self.ScriptBank := RSObjects.MiningGuildBank;
         Self.UseBank := True;
       end;
 
     CRAFTING_GUILD_MINE:
       begin
-        Self.RSW.Setup('x6953y3166');
+        Self.RSW.Setup(CRAFTING_GUILD_MAP);
         Self.ScriptBank := RSObjects.CraftGuildBank;
         Self.UseBank := True;
       end;
 
     VARROCK_E:
       begin
-        Self.RSW.Setup('x7536y2363');
+        Self.RSW.Setup(EAST_VARROCK_MAP);
         Self.ScriptBank := RSObjects.VarrockEastBank;
         Self.UseBank := True;
       end;
 
     VARROCK_W:
       begin
-        Self.RSW.Setup('x7536y2363');
+        Self.RSW.Setup(WEST_VARROCK_MAP);
         Self.ScriptBank := RSObjects.VarrockWestBank;
         Self.UseBank := True;
       end;
@@ -214,7 +213,7 @@ end;
 
 procedure TMiner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Self.Name := 'AIO Miner';
+  Self.Name := 'Miner';
 
   inherited;
 
@@ -245,7 +244,7 @@ begin
 
   Options.SetZoomLevel(40);
 
-  if Antiban.BioDice then
+  if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
@@ -260,7 +259,7 @@ end;
 
 function TMiner.MineRock(): Boolean;
 begin
-  Result := Self.Mining := Self.RSRock.Click or Self.RSRock.WalkClick();
+  Result := Self.Mining := Self.RSRock.Click() or Self.RSRock.WalkClick();
   if Result then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
@@ -369,7 +368,7 @@ begin
   if Self.UseBank and not Self.RSW.AtTile(Self.RSRock.TileArray, 15) then
     Exit(EMinerState.WALK_SPOT);
 
-  if Minimap.IsSpecWeapon() and (Minimap.GetSpecLevel = 100) then
+  if Minimap.IsSpecWeapon() and (Minimap.GetSpecLevel() = 100) then
     Exit(EMinerState.USE_SPEC);
 
   Exit(EMinerState.MINE_ROCK);

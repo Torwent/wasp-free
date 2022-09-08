@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -163,7 +162,7 @@ begin
   Self.AbsBarrel := RSObjects.NMZAbsorptionBarrel;
 end;
 
-procedure TNMZFighter.SetupTimers;
+procedure TNMZFighter.SetupTimers();
 begin
   Self.DreamMiddle := [5456, 453];
 
@@ -173,7 +172,7 @@ begin
 end;
 
 
-procedure TNMZFighter.SetupPowerUps;
+procedure TNMZFighter.SetupPowerUps();
 begin
   Self.PowerSurgeTimer.Init(45000);
   Self.PowerSurgeTimer.Timeout := GetTickCount;
@@ -203,12 +202,12 @@ begin
 
   inherited;
 
-  Self.RSWDream.Setup('x5284y280');
-  Self.RSWReal.Setup('x5631y3844');
+  Self.RSWDream.Setup(KBD_AND_NMZ_MAP);
+  Self.RSWReal.Setup(YANILLE_MAP);
 
   Self.SetupPotions();
-  Self.SetupBarrels;
-  Self.SetupPowerUps;
+  Self.SetupBarrels();
+  Self.SetupPowerUps();
 
   RSNPCS.AnyNPC.UpText := ['Attack'];
   Self.MinAbsPoints := 250;
@@ -224,7 +223,7 @@ begin
   Self.SetupDamageItem();
 
   Self.PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
-  Self.SetupTimers;
+  Self.SetupTimers();
 
   if ScriptDebugEnabled then
   begin
@@ -337,7 +336,7 @@ begin
   if Barrel.WalkSelectOption(['Store']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
+    Result := WaitUntil('Store' in Chat.GetChatTitle(), 5000, 100);
   end;
 end;
 
@@ -354,14 +353,14 @@ begin
   if RSNPCs.DominicOnion.WalkSelectOption(['Dream']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
+    Result := WaitUntil('dream would' in Chat.GetChatTitle(), 100, 3000);
   end;
 end;
 
 function TNMZFighter.HandlePayment: Boolean;
 begin
   if Chat.ClickOption('Yes') then
-    Result := Self.DreamSetup := WaitUntil(not ('Agree' in Chat.GetChatTitle), 100, 3000);
+    Result := Self.DreamSetup := WaitUntil(not ('Agree' in Chat.GetChatTitle()), 100, 3000);
 end;
 
 function TNMZFighter.OpenNMZSetup(): Boolean;
@@ -431,7 +430,7 @@ begin
     Self.Boosted := False;
 
   if PotStr.Contains('Overload') then
-    Result := (Minimap.GetHPLevel > 50)
+    Result := (Minimap.GetHPLevel() > 50)
   else
     Result := not Self.Boosted;
 end;
@@ -462,7 +461,7 @@ begin
     Exit;
 
   if HPLevel = -1 then
-    HPLevel := Minimap.GetHPLevel; //if we don't pass a value in, set it.
+    HPLevel := Minimap.GetHPLevel(); //if we don't pass a value in, set it.
 
   if HPLevel = 1 then
     Exit(False);
@@ -490,13 +489,13 @@ begin
 
   if Inventory.FindItem(Self.DamageItem, Slot) then
   begin
-    CurrentHP := Minimap.GetHPLevel;
+    CurrentHP := Minimap.GetHPLevel();
     while Self.NeedLowerHP(CurrentHP) do
     begin
       Inventory.ClickSlot(Slot, SlotOption);
       Wait(150);
 
-      if not WaitUntil(CurrentHP > (NewHP := Minimap.GetHPLevel), 100, 1500) then
+      if not WaitUntil(CurrentHP > (NewHP := Minimap.GetHPLevel()), 100, 1500) then
         Antiban.SmallRandomMouse;
 
       CurrentHP := NewHP;
@@ -521,7 +520,7 @@ begin
   end;
 
   if PotStr.Contains('Overload') then
-    CurrentHP := Minimap.GetHPLevel;
+    CurrentHP := Minimap.GetHPLevel();
 
   if Inventory.ClickSlot(Slot) then
     Result := WaitUntil(
@@ -530,7 +529,7 @@ begin
   if (PotionArray = Self.BoostPotion) then
   begin
     if PotStr.Contains('Overload') then
-      Result := WaitUntil(Minimap.GetHPLevel < CurrentHP, 100, 4000)
+      Result := WaitUntil(Minimap.GetHPLevel() < CurrentHP, 100, 4000)
     else
       Wait(1200, 1600);
   end;
@@ -540,7 +539,7 @@ begin
     if (PotionArray = Self.BoostPotion) then
     begin
       if PotStr.Contains('Overload') then
-        if not WaitUntil(Minimap.GetHPLevel <= (CurrentHP - 45), 100, 12000) then
+        if not WaitUntil(Minimap.GetHPLevel() <= (CurrentHP - 45), 100, 12000) then
           Exit(False);
 
       Self.Boosted := True;
@@ -575,18 +574,18 @@ end;
 
 function TNMZFighter.GetPowerUp(): Boolean;
 begin
-  if RSObjects.NMZRecurrentDamage.Click then
+  if RSObjects.NMZRecurrentDamage.Click() then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000);
   end
-  else if RSObjects.NMZPowerSurge.Click then
+  else if RSObjects.NMZPowerSurge.Click() then
   begin
     Minimap.WaitMoving();
     if Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000) then
       Self.PowerSurgeTimer.Restart();
   end
-  else if Result := RSObjects.NMZZapper.Click then
+  else if Result := RSObjects.NMZZapper.Click() then
   begin
     Minimap.WaitMoving();
     Self.ZapperTimer.Restart();
@@ -653,7 +652,7 @@ begin
     Exit(END_SCRIPT);
 
   Query := Chat.GetQuery;
-  Title := Chat.GetChatTitle;
+  Title := Chat.GetChatTitle();
 
   if CombatHandler.NeedRegear then
     Exit(REEQUIP_GEAR);
@@ -902,7 +901,7 @@ begin
       Exit;
   end;
 
-  if not NMZFighter.PowerSurgeTimer.IsFinished() or (Minimap.GetSpecLevel >= Self.WeaponSpec) then
+  if not NMZFighter.PowerSurgeTimer.IsFinished() or (Minimap.GetSpecLevel() >= Self.WeaponSpec) then
     Exit;
 
   Result := ((Self.Weapon <> 'Null') and Inventory.ContainsItem(Self.Weapon)) or

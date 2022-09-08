@@ -1,6 +1,5 @@
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-  {$I SRL/osr.simba}
   {$I WaspLib/osr.simba}
 
 begin
@@ -135,7 +134,7 @@ begin
       Self.CollectEmpty := False;
 end;
 
-function TAlcher.HandleCollectBox: Boolean;
+function TAlcher.HandleCollectBox(): Boolean;
 var
   ItemArray: TRSItemArray;
 begin

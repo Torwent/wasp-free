@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -44,7 +43,7 @@ begin
   inherited;
 
   ItemFinder.Similarity := 0.9999;
-  Self.RSW.Setup('x4595y3834');
+  Self.RSW.Setup(CASTLE_WARS_MAP);
 
   CombatHandler.Setup(@RSMonsters.Chompy, 2000);
   Self.Toad := RSNPCs.SwampToad;
@@ -61,25 +60,22 @@ begin
 end;
 
 
-
-
-
-function TChompyHunter.CountBellows: Int32;
+function TChompyHunter.CountBellows(): Int32;
 begin
   Result := Inventory.CountItem('Ogre bellows (3)') +
             Inventory.CountItem('Ogre bellows (2)') +
             Inventory.CountItem('Ogre bellows (1)');
 end;
 
-function TChompyHunter.FillBellows: Boolean;
+function TChompyHunter.FillBellows(): Boolean;
 var
-  InvCount: Int32 := Self.CountBellows;
+  InvCount: Int32 := Self.CountBellows();
   TempCount: Int32;
 begin
   if RSObjects.SwampBubbles.WalkClick() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000);
+    Result := WaitUntil(InvCount <> (TempCount := Self.CountBellows()), 100, 5000);
   end;
 
 
@@ -87,13 +83,13 @@ begin
     while Inventory.ContainsItem('Ogre bellows') do
     begin
       InvCount := TempCount;
-      if not WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000) then
+      if not WaitUntil(InvCount <> (TempCount := Self.CountBellows()), 100, 5000) then
         Break;
     end;
 end;
 
 
-function TChompyHunter.MoveAround: Boolean;
+function TChompyHunter.MoveAround(): Boolean;
 var
   MinimapTPA: TPointArray;
   SwampTPA: TPointArray;
@@ -120,13 +116,13 @@ begin
   Mouse.Click(FinalTPA.RandomValue(), MOUSE_LEFT);
 
   Minimap.WaitMoving();
-  Result := not Minimap.HasDotUnder;
+  Result := not Minimap.HasDotUnder();
 end;
 
-function TChompyHunter.PlaceToad: Boolean;
+function TChompyHunter.PlaceToad(): Boolean;
 begin
-  if Minimap.HasDotUnder then
-    Self.MoveAround;
+  if Minimap.HasDotUnder() then
+    Self.MoveAround();
 
   if Inventory.ClickItem('Bloated toad') then
   begin
@@ -135,7 +131,7 @@ begin
   end;
 end;
 
-function TChompyHunter.FillToad: Boolean;
+function TChompyHunter.FillToad(): Boolean;
 var
   InvCount := Inventory.Count();
 begin
@@ -146,7 +142,7 @@ begin
   end;
 
   if Result then
-    Self.PlaceToad;
+    Self.PlaceToad();
 end;
 
 
@@ -155,7 +151,7 @@ begin
   Result := MainScreen.InCombat or (FeatherCount < Inventory.CountItemStack('Feather'));
 end;
 
-function TChompyHunter.ClickChompy: Boolean;
+function TChompyHunter.ClickChompy(): Boolean;
 var
   FeatherCount: Int32;
 begin
@@ -202,29 +198,28 @@ begin
   ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
     
 
     case Self.State of
       WAIT_STATE: Wait(800, 1200);
-      FILL_TOAD: Self.FillToad;
-      FILL_BELLOWS: Self.FillBellows;
-      PLACE_TOAD: Self.PlaceToad;
-      CLICK_CHOMPY: Self.ClickChompy;
+      FILL_TOAD: Self.FillToad();
+      FILL_BELLOWS: Self.FillBellows();
+      PLACE_TOAD: Self.PlaceToad();
+      CLICK_CHOMPY: Self.ClickChompy();
     end;
 
     Self.DoAntiban();
-  end;
+  until Self.ShouldStop();
 end;
 
 
 var
   ChompyHunter: TChompyHunter;
 
-function TRSMainScreen.InCombat: Boolean; override;
+function TRSMainScreen.InCombat(): Boolean; override;
 begin
   if Self.FindDepletedHPBar then
     Exit(False);
@@ -252,14 +247,14 @@ begin
     Init(Self.SSPanel.Panel); 
     setParent(Self.SSPanel.Panel);
 
-    SetCaption('This script is in BETA!' +
+    SetCaption('Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
                STR_NEW_LINE +
-               'Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
+               'Start south of castle wars, in the middle pools close to the smoke dungeon.' +
                STR_NEW_LINE +
-               'It''s probably a good idea to BABY SIT!');
+               'It''s probably a good idea to baby sit!');
 
     SetLeft(5);  
-    SetTop(5);
+    SetTop(45);
   end;
 
   Self.WLPanel.StartButton.setOnClick(@Self.StartScript);

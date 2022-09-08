@@ -1,6 +1,5 @@
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-  {$I SRL/osr.simba}
   {$I WaspLib/osr.simba}
 
 begin
@@ -88,7 +87,7 @@ begin
   end;
 end;
 
-procedure TBlower.SetupItems;
+procedure TBlower.SetupItems();
 var
   ProductCost: Int32;
   X_Number: Int32;
@@ -143,7 +142,7 @@ end;
 
 
 
-function TBlower.HasRandomItem: Boolean;
+function TBlower.HasRandomItem(): Boolean;
 var
   Slots: TIntegerArray;
   UsedSlots: TIntegerArray := Inventory.GetUsedSlots;
@@ -154,7 +153,7 @@ begin
   Result := Length(Slots) <> Length(UsedSlots);
 end;
 
-function TBlower.CountItem: Int32;
+function TBlower.CountItem(): Int32;
 begin
   if (Result := Inventory.CountItemStack(Self.Product.Item)) = 0 then
     Result := Inventory.CountItem(Self.Product.Item);
@@ -174,7 +173,7 @@ begin
       Self.CollectEmpty := False;
 end;
 
-function TBlower.DepositExtraItems: Boolean;
+function TBlower.DepositExtraItems(): Boolean;
 var
   Slots, DepositSlots: TIntegerArray;
   i: Int32;
@@ -191,7 +190,7 @@ begin
   until Result := (DepositSlots = []);
 end;
 
-function TBlower.Deposit: Boolean;
+function TBlower.Deposit(): Boolean;
 var
   ItemCount: Int32 := Self.CountItem;
 begin
@@ -200,7 +199,7 @@ begin
       Self.TotalActions += ItemCount;
 end;
 
-function TBlower.HandleCollectBox: Boolean;
+function TBlower.HandleCollectBox(): Boolean;
 var
   Slots: TIntegerArray;
 begin
@@ -217,7 +216,7 @@ begin
 end;
 
 
-function TBlower.DoGlass: Boolean;
+function TBlower.DoGlass(): Boolean;
 begin
   if SRL.Dice(50) then
     Result := Inventory.Use(Self.Tool.Item, Self.Material.Item)
@@ -252,7 +251,7 @@ begin
 end;
 
 
-function TBlower.HandleMake: Boolean;
+function TBlower.HandleMake(): Boolean;
 var
   MakeStringArray: TStringArray;
   ItemIndex: Int32;
@@ -275,7 +274,7 @@ begin
 end;
 
 
-function TBlower.WaitBlowing: Boolean;
+function TBlower.WaitBlowing(): Boolean;
 begin
   if Self.Blowing then
     Result := Self.Blowing := Inventory.ContainsItem(Self.Material.Item) and XPBar.WaitXP(2000)
@@ -308,7 +307,7 @@ begin
       if Inventory.ContainsItem(Self.Product.Item) then
         Exit(EBlowerState.DEPOSIT_PRODUCT);
 
-      if Self.HasRandomItem then
+      if Self.HasRandomItem() then
         Exit(EBlowerState.DEPOSIT_RANDOM_ITEM);
 
       if Self.BankEmpty or Inventory.FindAllItems([Self.Tool.Item, Self.Material.Item]) then
@@ -366,7 +365,7 @@ begin
     if Self.UseBestItem then
       Self.SetupProduct();
 
-    Self.SetupItems;
+    Self.SetupItems();
 
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));

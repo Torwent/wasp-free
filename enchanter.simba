@@ -1,6 +1,5 @@
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-  {$I SRL/osr.simba}
   {$I WaspLib/osr.simba}
 
 begin
@@ -73,7 +72,7 @@ begin
 end;
 
 
-procedure TEnchanter.SetSpell;
+procedure TEnchanter.SetSpell();
 var
   ItemString: String := ToStr(RegularJewel);
 begin
@@ -93,7 +92,7 @@ begin
     Self.Spell := ERSSpell.LVL7_ENCHANT
 end;
 
-procedure TEnchanter.SetEnchantedJewel;
+procedure TEnchanter.SetEnchantedJewel();
 var
   ItemString: String := ToStr(RegularJewel);
 begin
@@ -223,7 +222,7 @@ end;
 
 procedure TEnchanter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Self.Name := 'AIO Enchanter';
+  Self.Name := 'Enchanter';
 
   inherited;
   Self.SetupWLBanks();
@@ -231,8 +230,8 @@ begin
   Self.ExtraInfo := ' Currently Self.Enchanting: ' + RegularJewel + '.';
 
   Self.CosmicRune := 'Cosmic rune';
-  Self.SetSpell;
-  Self.SetEnchantedJewel;
+  Self.SetSpell();
+  Self.SetEnchantedJewel();
 
   Self.ActionProfit := (
     ItemData.GetAverage(Self.EnchantedJewel) -
@@ -247,7 +246,7 @@ begin
 end;
 
 
-function TEnchanter.HasProduct: Boolean
+function TEnchanter.HasProduct(): Boolean
 var
   Slots: TIntegerArray;
 begin
@@ -255,9 +254,7 @@ begin
 end;
 
 
-
-
-function TEnchanter.EnchantJewel: Boolean;
+function TEnchanter.EnchantJewel(): Boolean;
 begin
   if Result := Inventory.ClickItem(RegularJewel) then
   begin
@@ -274,7 +271,7 @@ begin
     Result := Self.Enchanting := XPBar.WaitXP(2000);
 end;
 
-function TEnchanter.DeselectSpell: Boolean;
+function TEnchanter.DeselectSpell(): Boolean;
 var
   Selected: ERSSpell;
 begin
@@ -306,7 +303,7 @@ begin
       Self.CollectEmpty := False;
 end;
 
-function TEnchanter.Deposit: Boolean;
+function TEnchanter.Deposit(): Boolean;
 var
   ItemCount: Int32 := Inventory.CountItem(Self.EnchantedJewel);
 begin
@@ -316,7 +313,7 @@ begin
 end;
 
 
-function TEnchanter.HandleCollectBox: Boolean;
+function TEnchanter.HandleCollectBox(): Boolean;
 var
   Slots: TIntegerArray;
 begin
@@ -417,11 +414,9 @@ begin
   ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
-    
 
     case Self.State of
       EEnchanterState.OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
@@ -446,7 +441,7 @@ begin
     end;
 
     Self.DoAntiban();
-  end;
+  until Self.ShouldStop();
 
   if not Self.Terminate() then
     TerminateScript('aio_enchanter didn''t terminate properly. Stopping execution.');

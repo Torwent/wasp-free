@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -127,8 +126,8 @@ begin
 
   inherited;
 
-  Self.RSW.Setup('x6953y3166');
-  Self.POH.Setup('Self.POH');
+  Self.RSW.Setup(RIMMINGTON_MAP);
+  Self.POH.Setup('POH');
 
   Self.SetupNPC();
   Self.SetupObjects();
@@ -164,7 +163,7 @@ begin
   if MainScreen.IsUpText(Action) then
   begin
     Mouse.Click(MOUSE_LEFT);
-    Result := MainScreen.DidRedClick;
+    Result := MainScreen.DidRedClick();
   end
   else
       Result := ChooseOption.Select(Action, MOUSE_LEFT, True, (False));
@@ -199,7 +198,7 @@ begin
   if Self.BuiltLarder.WalkSelectOption(['Remove L']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
+    Result := WaitUntil(Chat.GetChatTitle() = 'Really remove it?', 200, 3000);
   end
   else if ChooseOption.HasOption('Build La') then
   begin
@@ -211,10 +210,10 @@ end;
 
 function TBuilder.CallServant(): Boolean;
 begin
-  if Self.ServantNPC.Click then
+  if Self.ServantNPC.Click() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(Chat.GetChatTitle = 'Repeat last task?',
+    Result := WaitUntil(Chat.GetChatTitle() = 'Repeat last task?',
                         SRL.TruncatedGauss(50, 1500), 5000);
   end
   else
@@ -229,7 +228,7 @@ begin
   if (Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and RSNPCs.Phials.Click) then
   begin
     Minimap.WaitFlag;
-    Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
+    Result := WaitUntil(Chat.GetChatTitle() = 'Select an Option', 100, 15000);
   end;
 end;
 
@@ -251,14 +250,14 @@ begin
   if Result then
   begin
     Self.WaitingServant := True;
-    WaitUntil(Chat.GetChatTitle <> 'Repeat last task?', 200, 3000)
+    WaitUntil(Chat.GetChatTitle() <> 'Repeat last task?', 200, 3000)
   end;
 end;
 
 function TBuilder.HandleLarderChat(): Boolean;
 begin
   Keyboard.PressKey(VK_1);
-  Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
+  Result := WaitUntil(Chat.GetChatTitle() <> 'Really remove it?', 200, 3000);
   Self.LarderIsBuilt := not Result;
   Wait(100, 150);
 end;
@@ -283,7 +282,7 @@ end;
 
 function TBuilder.GetState(): EState;
 var
-  S: String := Chat.GetChatTitle;
+  S: String := Chat.GetChatTitle();
 begin
   if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
@@ -441,8 +440,8 @@ begin
     SetTop(Self.NPCSelector.GetTop() + Self.NPCSelector.GetHeight() + 2);
   end;
 
-  Self.Pic.Init;
-  Self.Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\Self.POH_layout.png');
+  Self.Pic.Init();
+  Self.Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\POH_layout.png');
 
   with Self.ImagePanel do
   begin

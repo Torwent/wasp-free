@@ -1,10 +1,3 @@
-// The package name to install under. 
-name=FreeWaspBots
-// The path to install into, from the working directory.
-directory=Scripts
-// If true, files will be installed directly into the directory
-extract_in_directory=false
-// collapse top level folders
-collapse=false
-// files not to install
-blacklist=.git,.gitignore,.simbapackage,.gitattributes
+path=Scripts/wasp-free
+flat=false
+ignore=.git,.gitignore,.simbapackage,.gitattributes

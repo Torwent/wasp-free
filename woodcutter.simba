@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -83,218 +82,218 @@ begin
 end;
 
 
-procedure TWoodcutter.SetupTree;
+procedure TWoodcutter.SetupTree();
 begin
-  TreeTimerMultiplier := 1;
+  Self.TreeTimerMultiplier := 1;
 
   case CurrentTree of
     ERSTree.REGULAR_TREE:
       begin
-        RSTree := @RSObjects.RegularTree;
-        Plank := 'Plank';
-        PlankPrice := 100;
-        SawmillString := 'Wood - 100gp';
+        Self.RSTree := RSObjects.RegularTree;
+        Self.Plank := 'Self.Plank';
+        Self.PlankPrice := 100;
+        Self.SawmillString := 'Wood - 100gp';
       end;
 
     ERSTree.OAK_TREE:
       begin
-        RSTree := @RSObjects.OakTree;
-        Plank := 'Oak plank';
-        PlankPrice := 250;
-        SawmillString := 'Oak - 250gp';
+        Self.RSTree := RSObjects.OakTree;
+        Self.Plank := 'Oak Self.Plank';
+        Self.PlankPrice := 250;
+        Self.SawmillString := 'Oak - 250gp';
       end;
 
     ERSTree.TEAK_TREE:
       begin
-        RSTree := @RSObjects.TeakTree;
-        Plank := 'Teak plank';
-        PlankPrice := 500;
-        SawmillString := 'Teak - 500gp';
+        Self.RSTree := RSObjects.TeakTree;
+        Self.Plank := 'Teak Self.Plank';
+        Self.PlankPrice := 500;
+        Self.SawmillString := 'Teak - 500gp';
       end;
 
     ERSTree.MAHOGANY_TREE:
       begin
-        RSTree := @RSObjects.MahoganyTree;
-        Plank := 'Mahogany plank';
-        PlankPrice := 1500;
-        SawmillString := 'Mahogany - 1,500gp';
+        Self.RSTree := RSObjects.MahoganyTree;
+        Self.Plank := 'Mahogany Self.Plank';
+        Self.PlankPrice := 1500;
+        Self.SawmillString := 'Mahogany - 1,500gp';
       end;
 
 
-    ERSTree.WILLOW_TREE:      RSTree := @RSObjects.WillowTree;
-    ERSTree.MAPLE_TREE:       RSTree := @RSObjects.MapleTree;
-    ERSTree.YEW_TREE:         RSTree := @RSObjects.YewTree;
-    ERSTree.BLISTERWOOD_TREE: RSTree := @RSObjects.BlisterwoodTree;
-    ERSTree.MAGIC_TREE:       RSTree := @RSObjects.MagicTree;
+    ERSTree.WILLOW_TREE:      Self.RSTree := RSObjects.WillowTree;
+    ERSTree.MAPLE_TREE:       Self.RSTree := RSObjects.MapleTree;
+    ERSTree.YEW_TREE:         Self.RSTree := RSObjects.YewTree;
+    ERSTree.BLISTERWOOD_TREE: Self.RSTree := RSObjects.BlisterwoodTree;
+    ERSTree.MAGIC_TREE:       Self.RSTree := RSObjects.MagicTree;
   end;
 
-  if Ord(CurrentTree) >= Ord(ERSTRee.MAPLE_TREE) then
-    TreeTimerMultiplier += 1;
+  if Ord(CurrentTree) >= Ord(ERSTree.MAPLE_TREE) then
+    Self.TreeTimerMultiplier += 1;
 
-  if Ord(CurrentTree) >= Ord(ERSTRee.YEW_TREE) then
-    TreeTimerMultiplier += 2;
+  if Ord(CurrentTree) >= Ord(ERSTree.YEW_TREE) then
+    Self.TreeTimerMultiplier += 2;
 
-  if Ord(CurrentTree) >= Ord(ERSTRee.MAGIC_TREE) then
-    TreeTimerMultiplier += 3;
+  if Ord(CurrentTree) >= Ord(ERSTree.MAGIC_TREE) then
+    Self.TreeTimerMultiplier += 3;
 
-  DropList := [
+  Self.DropList := [
     'Logs', 'Oak logs', 'Willow logs', 'Teak logs', 'Maple logs',
     'Mahogany logs', 'Yew logs', 'Blisterwood logs', 'Magic logs'
   ];
 
-  BankList := DropList;
+  Self.BankList := Self.DropList;
 
-  if ToStr(Plank) <> '' then
-    BankList += Plank;
+  if ToStr(Self.Plank) <> '' then
+    Self.BankList += Self.Plank;
 
-  BankList += 23866;
-  BankList += 23966;
-  BankList += 23967;
-  BankList += 23968;
-  BankList += 23969;
-  BankList += 23970;  //Crystal shards
+  Self.BankList += 23866;
+  Self.BankList += 23966;
+  Self.BankList += 23967;
+  Self.BankList += 23968;
+  Self.BankList += 23969;
+  Self.BankList += 23970;  //Crystal shards
 end;
 
-procedure TWoodcutter.SetupBank;
+procedure TWoodcutter.SetupBank();
 begin
 
   case BankLocation of
     WOODCUT_GUILD:
       begin
-        Self.RSW.Setup('x1564y2293');
+        Self.RSW.Setup(WOODCUTTING_GUILD_MAP);
         Self.ScriptBank := RSObjects.WCGuildBank;
-        UseBank := True;
+        Self.UseBank := True;
       end;
 
     GE:
       begin
-        Self.RSW.Setup('x7536y2363');
+        Self.RSW.Setup(VARROCK_MAP);
         Self.ScriptBank := RSObjects.GEBank;
-        UseBank := True;
+        Self.UseBank := True;
       end;
 
     VARROCK_E:
       begin
-        Self.RSW.Setup('x7536y2363');
+        Self.RSW.Setup(EAST_VARROCK_MAP);
         Self.ScriptBank := RSObjects.VarrockEastBank;
-        UseBank := True;
+        Self.UseBank := True;
       end;
 
     VARROCK_W:
       begin
-        Self.RSW.Setup('x7536y2363');
+        Self.RSW.Setup(WEST_VARROCK_MAP);
         Self.ScriptBank := RSObjects.VarrockWestBank;
-        UseBank := True;
+        Self.UseBank := True;
       end;
 
     EDGE:
       begin
-        Self.RSW.Setup('x7536y2363');
+        Self.RSW.Setup(EDGEVILLE_AND_BARBARIAN_VILLAGE_MAP);
         Self.ScriptBank := RSObjects.EdgevilleBank;
-        UseBank := True;
+        Self.UseBank := True;
       end;
 
     PRIFDDINAS:
       begin
-        Self.RSW.Setup('x3583y1905');
+        Self.RSW.Setup(PRIFDDINAS_MAP);
         Self.ScriptBank := RSObjects.PrifddinasBank;
-        UseBank := True;
+        Self.UseBank := True;
       end;
 
     DRAYNOR_VILLAGE:
       begin
-        Self.RSW.Setup('x7617y3214');
+        Self.RSW.Setup(DRAYNOR_VILLAGE_MAP);
         Self.ScriptBank := RSObjects.DraynorBank;
-        UseBank := True;
+        Self.UseBank := True;
       end;
 
-    POWER_WC: UseBank := False;
+    POWER_WC: Self.UseBank := False;
   end;
 end;
 
 
-procedure TWoodcutter.SetupTool;
+procedure TWoodcutter.SetupTool();
 begin
   if Equipment.Open() then
   begin
-    ToolShift := 30;
-    if Equipment.FindItem('Crystal axe') or Equipment.FindItem('Crystal axe (inactive)') then
+    Self.ToolShift := 30;
+    if Equipment.ContainsAny(['Crystal axe', 'Crystal axe (inactive)']) then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+      Self.ToolShift := 110;
+      Self.ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
     end
-    else if Equipment.FindItem('Infernal axe') then
+    else if Equipment.ContainsItem('Infernal axe') then
     begin
-      ToolShift := 70;
-      ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
+      Self.ToolShift := 70;
+      Self.ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
     end
-    else if Equipment.FindItem('3rd age axe') then
+    else if Equipment.ContainsItem('3rd age axe') then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
+      Self.ToolShift := 110;
+      Self.ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    if Equipment.FindItem('Dragon axe') then
+    if Equipment.ContainsItem('Dragon axe') then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
+      Self.ToolShift := 110;
+      Self.ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    else if Equipment.FindItem('Gilded axe') then
-      ToolType := CTS2(1019842, 14, 0.02, 0.63)
-    else if Equipment.FindItem('Rune axe') then
-      ToolType := CTS2(6050622, 12, 0.10, 0.11)
-    else if Equipment.FindItem('Adamant axe') then
-      ToolType := CTS2(3951419, 11, 0.13, 0.16)
-    else if Equipment.FindItem('Mithril axe') then
-      ToolType := CTS2(4534853, 17, 1.11, 0.34)
-    else if Equipment.FindItem('Black axe') then
-      ToolType := CTS2(1118485, 1, 0.01, 0.01)
-    else if Equipment.FindItem('Steel axe') then
-      ToolType := CTS2(6711151, 17, 0.11, 0.07)
-    else if Equipment.FindItem('Iron axe') then
-      ToolType := CTS2(4671309, 11, 0.28, 0.09)
-    else if Equipment.FindItem('Bronze axe') then
-      ToolType := CTS2(1979716, 9, 0.10, 0.24);
+    else if Equipment.ContainsItem('Gilded axe') then
+      Self.ToolType := CTS2(1019842, 14, 0.02, 0.63)
+    else if Equipment.ContainsItem('Rune axe') then
+      Self.ToolType := CTS2(6050622, 12, 0.10, 0.11)
+    else if Equipment.ContainsItem('Adamant axe') then
+      Self.ToolType := CTS2(3951419, 11, 0.13, 0.16)
+    else if Equipment.ContainsItem('Mithril axe') then
+      Self.ToolType := CTS2(4534853, 17, 1.11, 0.34)
+    else if Equipment.ContainsItem('Black axe') then
+      Self.ToolType := CTS2(1118485, 1, 0.01, 0.01)
+    else if Equipment.ContainsItem('Steel axe') then
+      Self.ToolType := CTS2(6711151, 17, 0.11, 0.07)
+    else if Equipment.ContainsItem('Iron axe') then
+      Self.ToolType := CTS2(4671309, 11, 0.28, 0.09)
+    else if Equipment.ContainsItem('Bronze axe') then
+      Self.ToolType := CTS2(1979716, 9, 0.10, 0.24);
   end;
 
-  if (ToolType = []) and Inventory.Open() then
+  if (Self.ToolType = []) and Inventory.Open() then
   begin
-    ToolShift := 30;
-    if Inventory.FindItem('Crystal axe') or Inventory.FindItem('Crystal axe (inactive)') then
+    Self.ToolShift := 30;
+    if Inventory.ContainsAny(['Crystal axe', 'Crystal axe (inactive)']) then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
+      Self.ToolShift := 110;
+      Self.ToolType := CTS2(397665, 9, 0.16, 1.39); //need to add proper color later
     end
-    else if Inventory.FindItem('Infernal axe') then
+    else if Inventory.ContainsItem('Infernal axe') then
     begin
-      ToolShift := 70;
-      ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
+      Self.ToolShift := 70;
+      Self.ToolType := CTS2(662647, 11, 0.17, 1.50); //need to add proper color later
     end
-    else if Inventory.FindItem('3rd age axe') then
+    else if Inventory.ContainsItem('3rd age axe') then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
+      Self.ToolShift := 110;
+      Self.ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    if Inventory.FindItem('Dragon axe') then
+    if Inventory.ContainsItem('Dragon axe') then
     begin
-      ToolShift := 110;
-      ToolType := CTS2(397665, 9, 0.16, 1.39);
+      Self.ToolShift := 110;
+      Self.ToolType := CTS2(397665, 9, 0.16, 1.39);
     end
-    else if Inventory.FindItem('Gilded axe') then
-      ToolType := CTS2(1019842, 14, 0.02, 0.63)
-    else if Inventory.FindItem('Rune axe') then
-      ToolType := CTS2(6050622, 12, 0.10, 0.11)
-    else if Inventory.FindItem('Adamant axe') then
-      ToolType := CTS2(3951419, 11, 0.13, 0.16)
-    else if Inventory.FindItem('Mithril axe') then
-      ToolType := CTS2(4534853, 17, 1.11, 0.34)
-    else if Inventory.FindItem('Black axe') then
-      ToolType := CTS2(1118485, 1, 0.01, 0.01)
-    else if Inventory.FindItem('Steel axe') then
-      ToolType := CTS2(6711151, 17, 0.11, 0.07)
-    else if Inventory.FindItem('Iron axe') then
-      ToolType := CTS2(4671309, 11, 0.28, 0.09)
-    else if Inventory.FindItem('Bronze axe') then
-      ToolType := CTS2(1979716, 9, 0.10, 0.24);
+    else if Inventory.ContainsItem('Gilded axe') then
+      Self.ToolType := CTS2(1019842, 14, 0.02, 0.63)
+    else if Inventory.ContainsItem('Rune axe') then
+      Self.ToolType := CTS2(6050622, 12, 0.10, 0.11)
+    else if Inventory.ContainsItem('Adamant axe') then
+      Self.ToolType := CTS2(3951419, 11, 0.13, 0.16)
+    else if Inventory.ContainsItem('Mithril axe') then
+      Self.ToolType := CTS2(4534853, 17, 1.11, 0.34)
+    else if Inventory.ContainsItem('Black axe') then
+      Self.ToolType := CTS2(1118485, 1, 0.01, 0.01)
+    else if Inventory.ContainsItem('Steel axe') then
+      Self.ToolType := CTS2(6711151, 17, 0.11, 0.07)
+    else if Inventory.ContainsItem('Iron axe') then
+      Self.ToolType := CTS2(4671309, 11, 0.28, 0.09)
+    else if Inventory.ContainsItem('Bronze axe') then
+      Self.ToolType := CTS2(1979716, 9, 0.10, 0.24);
   end;
 end;
 
@@ -304,10 +303,10 @@ begin
 
   inherited;
 
-  Self.SetupTree;
-  Self.SetupBank;
+  Self.SetupTree();
+  Self.SetupBank();
 
-  GearOutfit := [
+  Self.GearOutfit := [
     'Lumberjack hat',
     'Lumberjack top',
     'Lumberjack legs',
@@ -315,90 +314,85 @@ begin
     'Strung rabbit foot'
   ];
 
-  if not RSClient.IsLoggedIn() then Login.LoginPlayer();
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
-  if Antiban.BioDice then
+  if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
-  Self.SetupTool;
+  Self.SetupTool();
 
   if ScriptDebugEnabled then
   begin
     DebugObjectArray += Self.ScriptBank;
-    DebugObjectArray += RSTree;
-    DebugNPCArray += @RSNPCs.SawmillOperator;
+    DebugObjectArray += Self.RSTree;
+    DebugNPCArray += RSNPCs.SawmillOperator;
   end;
 end;
 
 
-function TWoodcutter.CutTree: Boolean;
+function TWoodcutter.CutTree(): Boolean;
 begin
-  if (UseBank and RSTree^.WalkClick) or RSTree^.Click then
+  if (Self.UseBank and Self.RSTree.WalkClick) or Self.RSTree.Click() then
   begin
     Minimap.WaitMoving();
-    Result := Woodcutting := True;
+    Result := Self.Woodcutting := True;
   end;
 end;
 
-function TWoodcutter.HasGear: Boolean;
-var
-  Item: TRSItem;
+function TWoodcutter.HasGear(): Boolean;
 begin
-  for Item in GearOutfit do
-    if Inventory.FindItem(Item) then
-      Exit(True);
-
-  Result := False;
+  Result := Inventory.ContainsAny(Self.GearOutfit);
 end;
 
-function TWoodcutter.EquipGear: Boolean;
+function TWoodcutter.EquipGear(): Boolean;
 var
   Item: TRSItem;
 begin
-  for Item in GearOutfit do
+  for Item in Self.GearOutfit do
     if Inventory.ClickItem(Item) then
       Wait(200, 300);
 
-  Result := not Self.HasGear;
+  Result := not Self.HasGear();
 end;
 
-function TWoodcutter.DropItems: Boolean;
+function TWoodcutter.DropItems(): Boolean;
 var
   InvCount: Int32 := 28;
 begin
-  Result := Inventory.ShiftDrop(DropList, Inventory.RandomPattern);
+  Result := Inventory.ShiftDrop(Self.DropList, Inventory.RandomPattern);
 
   Self.TotalActions += (InvCount - Inventory.Count());
 end;
 
 
-function TWoodcutter.HasEnoughMoney: Boolean;
+function TWoodcutter.HasEnoughMoney(): Boolean;
 begin
-  Result := (Inventory.CountItemStack(995) >= PlankPrice) or
-            (Inventory.CountItemStack(996) >= PlankPrice) or
-            (Inventory.CountItemStack(997) >= PlankPrice) or
-            (Inventory.CountItemStack(998) >= PlankPrice) or
-            (Inventory.CountItemStack(999) >= PlankPrice) or
-            (Inventory.CountItemStack(1000) >= PlankPrice) or
-            (Inventory.CountItemStack(1001) >= PlankPrice) or
-            (Inventory.CountItemStack(1002) >= PlankPrice) or
-            (Inventory.CountItemStack(1003) >= PlankPrice) or
-            (Inventory.CountItemStack(1004) >= PlankPrice);
+  Result := (Inventory.CountItemStack(995) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(996) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(997) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(998) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(999) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(1000) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(1001) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(1002) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(1003) >= Self.PlankPrice) or
+            (Inventory.CountItemStack(1004) >= Self.PlankPrice);
 end;
 
 
-function TWoodcutter.CheckNest: Boolean;
+function TWoodcutter.CheckNest(): Boolean;
 begin
   Result := PickNests and RSGroundItems.BirdNest.Find;
 end;
 
-function TWoodcutter.PickNest: Boolean;
+function TWoodcutter.PickNest(): Boolean;
 begin
   if Result := RSGroundItems.BirdNest.Click(True, 0) then
   begin
-    Woodcutting := False;
+    Self.Woodcutting := False;
     Wait(800);
     Minimap.WaitPlayerMoving(300, 8000);
     Wait(300);
@@ -406,19 +400,19 @@ begin
 end;
 
 
-function TWoodcutter.Open()Sawmill: Boolean;
+function TWoodcutter.OpenSawmill(): Boolean;
 begin
-  if RSNPCs.SawmillOperator.WalkSelectOption(['Buy', 'plank']) then
+  if RSNPCs.SawmillOperator.WalkSelectOption(['Buy', 'Self.Plank']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
     Result := WaitUntil(Make.IsOpen, 100, 10000);
   end;
 end;
 
-function TWoodcutter.MakePlanks: Boolean;
+function TWoodcutter.MakePlanks(): Boolean;
 begin
-  if Make.Select(SawmillString, MAKE_QUANTITY_ALL, SRL.Dice(95)) then
-    Result := WaitUntil(Inventory.FindItem(Plank), 200, 10000);
+  if Make.Select(Self.SawmillString, MAKE_QUANTITY_ALL, SRL.Dice(95)) then
+    Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 10000);
 end;
 
 
@@ -431,16 +425,16 @@ begin
       Exit(True);
 end;
 
-function TWoodcutter.IsCutting: Boolean;
+function TWoodcutter.IsCutting(): Boolean;
 var
   B: TBox := MainScreen.GetPlayerBox;
 begin
-  Result := Woodcutting := SRL.IsAnimating(B, MainScreen.ConvertDistance(600), 350, 10 * TreeTimerMultiplier);
+  Result := Self.Woodcutting := SRL.IsAnimating(B, MainScreen.ConvertDistance(600), 350, 10 * Self.TreeTimerMultiplier);
 end;
 
-function TWoodcutter.WaitCutting: Boolean;
+function TWoodcutter.WaitCutting(): Boolean;
 begin
-  if Result := Self.IsCutting then WL.Activity.Restart();
+  if Result := Self.IsCutting() then WL.Activity.Restart();
 end;
 
 function TWoodcutter.GetState(): EWoodcutterState;
@@ -453,7 +447,7 @@ begin
 
   if Chat.LeveledUp() then
   begin
-    Woodcutting := False;
+    Self.Woodcutting := False;
     Exit(EWoodcutterState.LEVEL_UP);
   end;
 
@@ -462,37 +456,37 @@ begin
 
   if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen() and Inventory.FindItems(BankList) then
+    if Bank.IsOpen() and Inventory.ContainsAny(Self.BankList) then
       Exit(EWoodcutterState.DEPOSIT_ITEMS);
     Exit(EWoodcutterState.CLOSE_INTERFACE);
   end;
 
-  if Self.HasGear then
+  if Self.HasGear() then
     Exit(EWoodcutterState.EQUIP_GEAR);
 
   if Inventory.IsFull() then
   begin
-    Woodcutting := False;
+    Self.Woodcutting := False;
 
-    if not UseBank then
+    if not Self.UseBank then
       Exit(EWoodcutterState.DROP_ITEMS);
 
-    if UseSawmill and not Inventory.FindItem(Plank) and Self.HasEnoughMoney then
+    if UseSawmill and not Inventory.ContainsItem(Self.Plank) and Self.HasEnoughMoney() then
       Exit(EWoodcutterState.OPEN_SAWMILL);
 
     Exit(EWoodcutterState.OPEN_BANK);
   end;
 
-  if Woodcutting then
+  if Self.Woodcutting then
     Exit(EWoodcutterState.WAIT_STATE);
 
-  if UseBank and not Self.RSW.AtTile(RSTree^.TileArray, 15) then
+  if Self.UseBank and not Self.RSW.AtTile(Self.RSTree.TileArray, 15) then
     Exit(EWoodcutterState.WALK_SPOT);
 
-  if Self.CheckNest then
+  if Self.CheckNest() then
     Exit(EWoodcutterState.PICKUP_NEST);
 
-  if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
+  if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel() = 100) then
     Exit(EWoodcutterState.USE_SPEC);
 
   Exit(EWoodcutterState.CUT_TREE);
@@ -506,24 +500,23 @@ begin
   repeat
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
-    Self.ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' Sawmill: ' + ToStr(UseSawmill)  +
-                 ' Plank: ' + ToStr(Plank);
-    
+    Self.ExtraInfo := ' Bank: ' + ToStr(Self.UseBank) + ' Sawmill: ' + ToStr(UseSawmill)  +
+                 ' Self.Plank: ' + ToStr(Self.Plank);
 
     case Self.State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
-      EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(Self.BankTab, BankList, True);
+      EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(Self.BankTab, Self.BankList, True);
       EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
-      EWoodcutterState.WALK_SPOT: Self.RSW.WebWalk(RSTree^.TileArray, 10, 0.2);
-      EWoodcutterState.WAIT_STATE: Self.WaitCutting;
+      EWoodcutterState.WALK_SPOT: Self.RSW.WebWalk(Self.RSTree.TileArray, 10, 0.2);
+      EWoodcutterState.WAIT_STATE: Self.WaitCutting();
       EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp();
-      EWoodcutterState.EQUIP_GEAR: Self.EquipGear;
+      EWoodcutterState.EQUIP_GEAR: Self.EquipGear();
       EWoodcutterState.USE_SPEC: Minimap.EnableSpec(100);
-      EWoodcutterState.PICKUP_NEST: Self.PickNest;
-      EWoodcutterState.CUT_TREE: Self.CutTree;
-      EWoodcutterState.OPEN_SAWMILL: Self.Open()Sawmill;
-      EWoodcutterState.HANDLE_MAKE: Self.MakePlanks;
-      EWoodcutterState.DROP_ITEMS: Self.DropItems;
+      EWoodcutterState.PICKUP_NEST: Self.PickNest();
+      EWoodcutterState.CUT_TREE: Self.CutTree();
+      EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill();
+      EWoodcutterState.HANDLE_MAKE: Self.MakePlanks();
+      EWoodcutterState.DROP_ITEMS: Self.DropItems();
       EWoodcutterState.END_SCRIPT: Break;
     end;
 
@@ -546,9 +539,9 @@ procedure TCutterConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentTree := ERSTree(TreeSelector.Combobox.getItemIndex());
+  CurrentTree := ERSTree(Self.TreeSelector.Combobox.getItemIndex());
 
-  case BankSelector.Combobox.getText() of
+  case Self.BankSelector.Combobox.getText() of
     'Power WC (cut and drop)': BankLocation := ERSBank.POWER_WC;
     'Grand Exchange':          BankLocation := ERSBank.GE;
     'Varrock east':            BankLocation := ERSBank.VARROCK_E;
@@ -560,127 +553,128 @@ begin
     'Prifddinas':              BankLocation := ERSBank.PRIFDDINAS;
   end;
 
-  UseSawmill := SawmillState.IsChecked;
-  PickNests := PickNestsState.IsChecked;
+  UseSawmill := Self.SawmillState.IsChecked();
+  PickNests := Self.PickNestsState.IsChecked();
 end;
 
-
+{$H-}
 procedure TCutterConfig.TreeSelectorOnChange(Sender: TObject);
 begin
-  case ERSTree(TreeSelector.Combobox.getItemIndex()) of
+  case ERSTree(Self.TreeSelector.Combobox.getItemIndex()) of
     REGULAR_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Grand Exchange');
-        BankSelector.AddItem('Varrock east (cuts close to sawmill)');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Grand Exchange');
+        Self.BankSelector.AddItem('Varrock east (cuts close to sawmill)');
+        Self.SawmillState.setEnabled(False);
       end;
 
     OAK_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Varrock east (cuts close to sawmill)');
-        BankSelector.AddItem('Varrock west');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Varrock east (cuts close to sawmill)');
+        Self.BankSelector.AddItem('Varrock west');
+        Self.SawmillState.setEnabled(False);
       end;
 
     WILLOW_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Draynor');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Draynor');
+        Self.SawmillState.setEnabled(False);
       end;
 
     TEAK_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Prifddinas');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Prifddinas');
+        Self.SawmillState.setEnabled(False);
       end;
 
     MAPLE_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Seers'' village');
-        BankSelector.AddItem('Woodcutting guild');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Seers'' village');
+        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.SawmillState.setEnabled(False);
       end;
 
     MAHOGANY_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Prifddinas');
-        SawmillState.Checkbox.setEnabled(True);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Prifddinas');
+        Self.SawmillState.setEnabled(True);
       end;
 
     YEW_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Seers'' village');
-        BankSelector.AddItem('Edgeville');
-        BankSelector.AddItem('Woodcutting guild');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Seers'' village');
+        Self.BankSelector.AddItem('Edgeville');
+        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.SawmillState.setEnabled(False);
       end;
 
     BLISTERWOOD_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.SawmillState.setEnabled(False);
       end;
 
     MAGIC_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Woodcutting guild');
-        BankSelector.AddItem('Prifddinas');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.BankSelector.AddItem('Prifddinas');
+        Self.SawmillState.setEnabled(False);
       end;
   end;
 
-  BankSelector.SetItemIndex(0);
+  Self.BankSelector.SetItemIndex(0);
 end;
 
 procedure TCutterConfig.BankSelectorOnChange(Sender: TObject);
 begin
-  case BankSelector.Combobox.getText() of
-    'Varrock east', 'Woodcutting guild', 'Prifddinas':
+  case Self.BankSelector.Combobox.getText() of
+    'Varrock east', 'Self.Woodcutting guild', 'Prifddinas':
       begin
-        case ERSTree(TreeSelector.Combobox.getItemIndex()) of
+        case ERSTree(Self.TreeSelector.Combobox.getItemIndex()) of
           REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
             begin
-              SawmillState.Checkbox.setState(cbUnchecked);
-              SawmillState.Checkbox.setEnabled(True);
+              Self.SawmillState.setState(cbUnchecked);
+              Self.SawmillState.setEnabled(True);
             end;
 
           else
             begin
-              SawmillState.Checkbox.setState(cbUnchecked);
-              SawmillState.Checkbox.setEnabled(False);
+              Self.SawmillState.setState(cbUnchecked);
+              Self.SawmillState.setEnabled(False);
             end;
         end;
       end;
 
     else
       begin
-        SawmillState.Checkbox.setState(cbUnchecked);
-        SawmillState.Checkbox.setEnabled(False);
+        Self.SawmillState.setState(cbUnchecked);
+        Self.SawmillState.setEnabled(False);
       end;
   end;
 end;
+{$H+}
 
 procedure TCutterConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.GetWidth(), Form.GetHeight() + 30);
+  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 30);
 
-  with TreeSelector do
+  with Self.TreeSelector do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Tree type:');
@@ -701,36 +695,38 @@ begin
     Combobox.SetOnChange(@Self.TreeSelectorOnChange);
   end;
 
-  with BankSelector do
+  with Self.BankSelector do
   begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Bank location:');
     SetLeft(5);  
-    SetTop(45);
-    SetWidth(TreeSelector.GetWidth());
+    SetTop(Self.TreeSelector.GetTop() + Self.TreeSelector.GetHeight());
+    SetWidth(Self.TreeSelector.GetWidth());
     SetStyle(csDropDownList);
     Combobox.SetOnChange(@Self.BankSelectorOnChange);
   end;
 
-  with SawmillState do
+  with Self.SawmillState do
   begin
-    Init(Self.SSPanel.Panel); 
+    Init(Self.SSPanel.Panel);
+    SetParent(Self.SSPanel.Panel);
     SetCaption('Sawmill:');
-    SetLeft(TreeSelector.GetLeft() + TreeSelector.GetWidth() + 25);
-    SetTop(TreeSelector.GetTop() + 20);
-    Checkbox.setEnabled(False);
+    SetLeft(Self.TreeSelector.GetLeft() + Self.TreeSelector.GetWidth() + 25);
+    SetTop(Self.TreeSelector.GetTop() + 20);
+    SetEnabled(False);
   end;
 
-  with PickNestsState do
+  with Self.PickNestsState do
   begin
-    Init(Self.SSPanel.Panel); 
+    Init(Self.SSPanel.Panel);
+    SetParent(Self.SSPanel.Panel);
     SetCaption('Pick nests:');
-    SetLeft(SawmillState.GetLeft());
-    SetTop(SawmillState.GetTop() + SawmillState.GetHeight() + 20);
-    Checkbox.setState(cbChecked);
+    SetLeft(Self.SawmillState.GetLeft());
+    SetTop(Self.BankSelector.GetTop() + 20);
+    SetChecked(True);
   end;
 
-  Self.TreeSelectorOnChange(BankSelector.Combobox);
+  Self.TreeSelectorOnChange(Self.BankSelector.Combobox);
   Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 

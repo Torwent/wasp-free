@@ -1,6 +1,5 @@
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-  {$I SRL/osr.simba}
   {$I WaspLib/osr.simba}
 
 begin
@@ -135,14 +134,14 @@ begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
       begin
-        Self.RSW.Setup('x1916y1841');
+        Self.RSW.Setup(HOSIDIUS_KITCHEN_MAP);
         Self.ScriptBank := RSObjects.HosidiusKitchenBank;
         Self.CookingObj := RSObjects.HosidiusKitchenOven;
       end;
 
     ERSLocation.ROGUES_DEN:
       begin
-        Self.RSW.Setup('x9921y310');
+        Self.RSW.Setup(ROGUES_DEN_MAP);
         RSNPCs.EmeraldBenedict.Filter.Finder := False;
         Self.ScriptBanker := RSNPCs.EmeraldBenedict;
 
@@ -151,7 +150,6 @@ begin
         Self.CookingObj := RSObjects.EternalFire;
       end;
   end;
-
 end;
 
 procedure TAntiban.Setup(); override;
@@ -164,14 +162,15 @@ end;
 
 procedure TCooker.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Self.Name := 'AIO Cooker';
+  Self.Name := 'Cooker';
 
   inherited;
 
-  Self.SetupItems;
-  Self.SetupLocation;
+  Self.SetupItems();
+  Self.SetupLocation();
 
-  if not RSClient.IsLoggedIn() then Login.LoginPlayer();
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   if ScriptDebugEnabled then
   begin
@@ -279,7 +278,7 @@ begin
   if 'arambwan' in Self.Food then
     i := 1;
 
-  Result := Self.Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice);
+  Result := Self.Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice());
   
   if Result then
     WaitUntil(not Make.IsOpen(), 100, 4000);  
@@ -447,7 +446,7 @@ begin
     Init(Self.SSPanel.Panel); 
     SetCaption('Location:');
     SetLeft(5);  
-    SetTop(5);
+    SetTop(35);
     SetWidth(200);
     SetStyle(csDropDownList);
     AddItem('Hosidius kitchen');

@@ -1,5 +1,4 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
-{$I SRL/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
@@ -130,7 +129,7 @@ begin
   Antiban.MaxZoom := 50;
 end;
 
-procedure TThiever.SetupNPC;
+procedure TThiever.SetupNPC();
 begin
   FoodHandler.Amount := FoodAmount;
 
@@ -155,7 +154,7 @@ begin
 
     MASTER_FARMER:
       begin
-        Self.RSW.Setup(LUMBRIDGE_MAP);
+        Self.RSW.Setup(DRAYNOR_VILLAGE_MAP);
         Self.CurrentNPC := RSNPCs.MasterFarmer;
         Self.LootArray := [
           'Potato seed', 'Onion seed', 'Cabbage seed', 'Tomato seed',
@@ -245,7 +244,7 @@ begin
 
     TZHAAR_CITY:
       begin
-        Self.RSW.Setup('x4333y310');
+        Self.RSW.Setup(TZHAAR_MAP);
         Self.CurrentNPC := RSNPCs.TzhaarHur;
         Self.LootArray := [
           'Tokkul', 'Uncut sapphire', 'Uncut emerald',
@@ -398,7 +397,7 @@ begin
   Self.CoinPouch := 'Coin pouch';
   Self.Necklace := 'Dodgy Necklace';
 
-  Self.SetupNPC;
+  Self.SetupNPC();
 
   //Self.NeckTimer to recheck necklace in case the script messes up.
   Self.NeckTimer.Init(140000);
@@ -406,7 +405,7 @@ begin
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
-  if Antiban.BioDice then
+  if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
@@ -529,7 +528,7 @@ end;
 
 function TThiever.IsLowHP: Boolean;
 var
-  CurrentHP: Int32 := Minimap.GetHPLevel;
+  CurrentHP: Int32 := Minimap.GetHPLevel();
 begin
   if NextHeal < 1 then
     NextHeal := Round(Antiban.GetUniqueNumber(Self.NPCMaxHit * 8));
@@ -576,7 +575,7 @@ end;
 function TThiever.CheckFailed(StartingHP: Int32): Boolean;
 var
   HasHitSplat: Boolean;
-  CurrentHP: Int32 := Minimap.GetHPLevel;
+  CurrentHP: Int32 := Minimap.GetHPLevel();
 begin
   HasHitSplat := not Self.RenderDisabled and
                 (MainScreen.FindHitsplats(MainScreen.GetPlayerBox) <> []);
@@ -616,7 +615,7 @@ begin
       Exit;
 
     Wait(300, 500);
-  until Result := (Minimap.GetHPPercent >= (50 + Antiban.GetUniqueNumber(20)));
+  until Result := (Minimap.GetHPPercent() >= (50 + Antiban.GetUniqueNumber(20)));
 
   if Result then
     NextHeal := Round(Antiban.GetUniqueNumber(Self.NPCMaxHit * 7));
@@ -655,7 +654,7 @@ end;
 function TThiever.PickNPC: Boolean;
 var
   Slot: Int32 := Inventory.GetSelectedSlot;
-  CurrentHP: Int32 := Minimap.GetHPLevel;
+  CurrentHP: Int32 := Minimap.GetHPLevel();
 begin
   if Slot > -1 then Inventory.ClickSlot(Slot);
 
