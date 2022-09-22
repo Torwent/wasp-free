@@ -349,7 +349,14 @@ begin
       EAlcherState.OPEN_MAGIC_TAB: Magic.Open;
       EAlcherState.OPEN_INV_TAB: Inventory.Open;
       EAlcherState.HANDLE_WARNING: Self.HandleWarning;
-      EAlcherState.DESELECT_ITEM: Inventory.SetSelectedSlot(-1);
+      EAlcherState.DESELECT_ITEM: //todo: make this cleaner.
+      begin
+        if Inventory.SetSelectedSlot(-1) then 
+        begin
+          Wait(1200, 2000);
+          WaitUntil(Inventory.ContainsItem(AlchItem), 100, 2000);
+        end;
+      end;
       EAlcherState.CLOSE_CONTEXT: ChooseOption.Close;
 
       EAlcherState.END_SCRIPT1, EAlcherState.END_SCRIPT2:
