@@ -1,3 +1,12 @@
+## [1.0.6](https://github.com/Torwent/wasp-free/compare/v1.0.5...v1.0.6) (2022-09-22)
+
+
+### Bug Fixes
+
+* **pickpocketer:** food withdraw amount fixed ([b776f74](https://github.com/Torwent/wasp-free/commit/b776f748cc215a150cdfb57a05f4066903868327))
+
+
+
 ## [1.0.5](https://github.com/Torwent/wasp-free/compare/v1.0.4...v1.0.5) (2022-09-04)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * change wasp-upload-action to master ([a374fe9](https://github.com/Torwent/wasp-free/commit/a374fe9ffaf8dda5f49b99c6fe0c4db61141f375))
-
-
-
-## [1.0.1](https://github.com/Torwent/wasp-free/compare/v1.0.0...v1.0.1) (2022-09-04)
-
-
-### Bug Fixes
-
-* removed input from GH action ([7add949](https://github.com/Torwent/wasp-free/commit/7add949249565187fa5fdaa2ff251b0b2673d264))
 
 
 
