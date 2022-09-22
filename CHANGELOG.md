@@ -1,3 +1,12 @@
+## [1.0.7](https://github.com/Torwent/wasp-free/compare/v1.0.6...v1.0.7) (2022-09-22)
+
+
+### Bug Fixes
+
+* **alcher:** quick fail safe to alcher script ([8281e02](https://github.com/Torwent/wasp-free/commit/8281e0297bc69ddca27c925a31b10fd0de84079c))
+
+
+
 ## [1.0.6](https://github.com/Torwent/wasp-free/compare/v1.0.5...v1.0.6) (2022-09-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * attempt to force update scripts ([0e62f7c](https://github.com/Torwent/wasp-free/commit/0e62f7cd1d17651c83047e80620d69e6f0d7abb5))
-
-
-
-## [1.0.2](https://github.com/Torwent/wasp-free/compare/v1.0.1...v1.0.2) (2022-09-04)
-
-
-### Bug Fixes
-
-* change wasp-upload-action to master ([a374fe9](https://github.com/Torwent/wasp-free/commit/a374fe9ffaf8dda5f49b99c6fe0c4db61141f375))
 
 
 
