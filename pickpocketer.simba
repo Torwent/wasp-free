@@ -91,35 +91,6 @@ type
     NPCMaxHit: Int32;
   end;
 
-function TRSChooseOption.Select(Text: TStringArray; MouseAction: Int32 = MOUSE_LEFT; CaseSensitive: Boolean = True; CloseIfNotFound: Boolean = True): Boolean; override;
-var
-  Choices: TRSChooseOption_OptionArray;
-  I, J: Int32;
-begin
-  if not Self.Open then
-    Exit;
-
-  Wait(0, 1000 - Round(1000*BioHash), wdLeft);
-
-  Choices := Self.GetOptions;
-
-  for I := 0 to High(Choices) do
-    for J := 0 to High(Text) do
-      if (CaseSensitive and (Text[J] in Choices[I].Text)) or
-         ((not CaseSensitive) and (Lowercase(Text[J]) in Lowercase(Choices[I].Text))) then
-      begin
-        Self.Select(Choices[I], MouseAction);
-        Exit(True);
-      end;
-
-  if CloseIfNotFound then
-  begin
-    WaitEx(350 - Round(350*BioHash), 50);
-    Self.Close;
-  end;
-
-end;
-
 
 procedure TAntiban.Setup; override;
 begin
@@ -924,6 +895,34 @@ begin
         Thiever.StackableArray += Item;
 end;
 
+function TRSChooseOption.Select(Text: TStringArray; MouseAction: Int32 = MOUSE_LEFT; CaseSensitive: Boolean = True; CloseIfNotFound: Boolean = True): Boolean; override;
+var
+  Choices: TRSChooseOption_OptionArray;
+  I, J: Int32;
+begin
+  if not Self.Open then
+    Exit;
+
+  Wait(0, 1000 - Round(1000*BioHash), wdLeft);
+
+  Choices := Self.GetOptions;
+
+  for I := 0 to High(Choices) do
+    for J := 0 to High(Text) do
+      if (CaseSensitive and (Text[J] in Choices[I].Text)) or
+         ((not CaseSensitive) and (Lowercase(Text[J]) in Lowercase(Choices[I].Text))) then
+      begin
+        Self.Select(Choices[I], MouseAction);
+        Exit(True);
+      end;
+
+  if CloseIfNotFound then
+  begin
+    WaitEx(350 - Round(350*BioHash), 50);
+    Self.Close;
+  end;
+
+end;
 
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override;
 begin
@@ -935,7 +934,7 @@ var
   HandlerManager: ^TConsumableManager := GetHandler(ConsumableType);
 begin
   if ConsumableType = HEALTH_CONSUMABLE then
-    Exit(FoodManager.Amount - Inventory.CountConsumable(HEALTH_CONSUMABLE));
+    Exit(FoodAmount - Inventory.CountConsumable(HEALTH_CONSUMABLE));
 
   case HandlerManager^.Handlers[Idx].Amount of
     BANK_WITHDRAW_ALL: Result := BANK_WITHDRAW_ALL;
