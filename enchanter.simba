@@ -463,7 +463,7 @@ procedure TEnchanterConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  RegularJewel := GemSelector.GetText + ' ' + JewelSelector.GetText.Lower;
+  RegularJewel := GemSelector.GetText().Replace('Red t', 'T') + ' ' + JewelSelector.GetText.Lower();
 end;
 
 procedure TEnchanterConfig.Setup(Strs: TStringArray); override;
