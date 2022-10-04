@@ -184,11 +184,13 @@ end;
 
 procedure TNMZFighter.SetupDamageItem;
 begin
-  if not Inventory.Open then Exit;
+  if not Inventory.Open() then Exit;
 
   if Inventory.ContainsItem('Locator orb') then
     DamageItem := 'Locator orb'
-  else if Inventory.ContainsItem(7510) then  //7510 is rock cake ID
+  else if Inventory.ContainsItem('Dwarven rock cake') then  //this will use 7509 ID which is hot cake
+    DamageItem := 'Dwarven rock cake'
+  else if Inventory.ContainsItem(7510) then  //7510 is cold rock cake ID
     DamageItem := 7510;
 
   if ToStr(DamageItem) = '' then
