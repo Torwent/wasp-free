@@ -1,3 +1,12 @@
+## [1.0.8](https://github.com/Torwent/wasp-free/compare/v1.0.7...v1.0.8) (2022-10-04)
+
+
+### Bug Fixes
+
+* **nmz:** add support to hot rock cake ([3849d48](https://github.com/Torwent/wasp-free/commit/3849d48e40bfd388e8e39df04201d0a6cf4beb81))
+
+
+
 ## [1.0.7](https://github.com/Torwent/wasp-free/compare/v1.0.6...v1.0.7) (2022-09-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * force update files attempt ([d8ab633](https://github.com/Torwent/wasp-free/commit/d8ab633cd40a74acf9a549975b0658df9eb73da5))
-
-
-
-## [1.0.3](https://github.com/Torwent/wasp-free/compare/v1.0.2...v1.0.3) (2022-09-04)
-
-
-### Bug Fixes
-
-* attempt to force update scripts ([0e62f7c](https://github.com/Torwent/wasp-free/commit/0e62f7cd1d17651c83047e80620d69e6f0d7abb5))
 
 
 
