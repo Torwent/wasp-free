@@ -73,7 +73,7 @@ type
     UseBank: Boolean;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -82,7 +82,7 @@ begin
   Antiban.MaxZoom := 60;
 end;
 
-procedure TWoodcutter.SetupTree;
+procedure TWoodcutter.SetupTree();
 begin
   TreeTimerMultiplier := 1;
 
@@ -154,7 +154,7 @@ begin
   BankList += 23970;  //Crystal shards
 end;
 
-procedure TWoodcutter.SetupBank;
+procedure TWoodcutter.SetupBank();
 begin
 
   case BankLocation of
@@ -212,7 +212,7 @@ begin
 end;
 
 
-procedure TWoodcutter.SetupTool;
+procedure TWoodcutter.SetupTool();
 begin
   if Equipment.Open then
   begin
@@ -303,8 +303,8 @@ begin
 
   inherited;
 
-  Self.SetupTree;
-  Self.SetupBank;
+  Self.SetupTree();
+  Self.SetupBank();
 
   GearOutfit := [
     'Lumberjack hat',
@@ -314,14 +314,15 @@ begin
     'Strung rabbit foot'
   ];
 
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
-  if Antiban.BioDice then
+  if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
-  Self.SetupTool;
+  Self.SetupTool();
 
   if ScriptDebugEnabled then
   begin
@@ -332,7 +333,7 @@ begin
 end;
 
 
-function TWoodcutter.CutTree: Boolean;
+function TWoodcutter.CutTree(): Boolean;
 begin
   if (UseBank and RSTree^.WalkClick) or RSTree^.Click then
   begin
@@ -341,12 +342,12 @@ begin
   end;
 end;
 
-function TWoodcutter.HasGear: Boolean;
+function TWoodcutter.HasGear(): Boolean;
 begin
   Result := Inventory.ContainsAny(GearOutfit);
 end;
 
-function TWoodcutter.EquipGear: Boolean;
+function TWoodcutter.EquipGear(): Boolean;
 var
   Item: TRSItem;
 begin
@@ -357,7 +358,7 @@ begin
   Result := not Self.HasGear;
 end;
 
-function TWoodcutter.DropItems: Boolean;
+function TWoodcutter.DropItems(): Boolean;
 var
   InvCount: Int32 := 28;
 begin
@@ -367,27 +368,18 @@ begin
 end;
 
 
-function TWoodcutter.HasEnoughMoney: Boolean;
+function TWoodcutter.HasEnoughMoney(): Boolean;
 begin
-  Result := (Inventory.CountItemStack(995) >= PlankPrice) or
-            (Inventory.CountItemStack(996) >= PlankPrice) or
-            (Inventory.CountItemStack(997) >= PlankPrice) or
-            (Inventory.CountItemStack(998) >= PlankPrice) or
-            (Inventory.CountItemStack(999) >= PlankPrice) or
-            (Inventory.CountItemStack(1000) >= PlankPrice) or
-            (Inventory.CountItemStack(1001) >= PlankPrice) or
-            (Inventory.CountItemStack(1002) >= PlankPrice) or
-            (Inventory.CountItemStack(1003) >= PlankPrice) or
-            (Inventory.CountItemStack(1004) >= PlankPrice);
+  Result := Inventory.CountItemStack('Coins') >= PlankPrice;
 end;
 
 
-function TWoodcutter.CheckNest: Boolean;
+function TWoodcutter.CheckNest(): Boolean;
 begin
   Result := PickNests and RSGroundItems.BirdNest.Find;
 end;
 
-function TWoodcutter.PickNest: Boolean;
+function TWoodcutter.PickNest(): Boolean;
 begin
   if Result := RSGroundItems.BirdNest.Click(True, 0) then
   begin
@@ -399,16 +391,16 @@ begin
 end;
 
 
-function TWoodcutter.OpenSawmill: Boolean;
+function TWoodcutter.OpenSawmill(): Boolean;
 begin
   if RSNPCs.SawmillOperator.WalkSelectOption(['Buy', 'plank']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
-    Result := WaitUntil(Make.IsOpen, 100, 10000);
+    Result := WaitUntil(Make.IsOpen(), 100, 10000);
   end;
 end;
 
-function TWoodcutter.MakePlanks: Boolean;
+function TWoodcutter.MakePlanks(): Boolean;
 begin
   if Make.Select(SawmillString, MAKE_QUANTITY_ALL, SRL.Dice(95)) then
     Result := WaitUntil(Inventory.ContainsItem(Plank), 200, 10000);
@@ -424,53 +416,53 @@ begin
       Exit(True);
 end;
 
-function TWoodcutter.IsCutting: Boolean;
+function TWoodcutter.IsCutting(): Boolean;
 var
   B: TBox := MainScreen.GetPlayerBox;
 begin
   Result := Woodcutting := SRL.IsAnimating(B, MainScreen.ConvertDistance(600), 350, 10 * TreeTimerMultiplier);
 end;
 
-function TWoodcutter.WaitCutting: Boolean;
+function TWoodcutter.WaitCutting(): Boolean;
 begin
   if Result := Self.IsCutting then WL.Activity.Restart;
 end;
 
-function TWoodcutter.GetState: EWoodcutterState;
+function TWoodcutter.GetState(): EWoodcutterState;
 begin
-  if XPBar.EarnedXP then
+  if XPBar.EarnedXP() then
     Exit(EWoodcutterState.WAIT_STATE);
 
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(EWoodcutterState.END_SCRIPT);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
   begin
     Woodcutting := False;
     Exit(EWoodcutterState.LEVEL_UP);
   end;
 
-  if UseSawmill and Make.IsOpen then
+  if UseSawmill and Make.IsOpen() then
     Exit(EWoodcutterState.HANDLE_MAKE);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen and Inventory.ContainsAny(BankList) then
+    if Bank.IsOpen() and Inventory.ContainsAny(BankList) then
       Exit(EWoodcutterState.DEPOSIT_ITEMS);
     Exit(EWoodcutterState.CLOSE_INTERFACE);
   end;
 
-  if Self.HasGear then
+  if Self.HasGear() then
     Exit(EWoodcutterState.EQUIP_GEAR);
 
-  if Inventory.IsFull then
+  if Inventory.IsFull() then
   begin
     Woodcutting := False;
 
     if not UseBank then
       Exit(EWoodcutterState.DROP_ITEMS);
 
-    if UseSawmill and not Inventory.ContainsItem(Plank) and Self.HasEnoughMoney then
+    if UseSawmill and not Inventory.ContainsItem(Plank) and Self.HasEnoughMoney() then
       Exit(EWoodcutterState.OPEN_SAWMILL);
 
     Exit(EWoodcutterState.OPEN_BANK);
@@ -482,10 +474,10 @@ begin
   if UseBank and not RSW.AtTile(RSTree^.TileArray, 15) then
     Exit(EWoodcutterState.WALK_SPOT);
 
-  if Self.CheckNest then
+  if Self.CheckNest() then
     Exit(EWoodcutterState.PICKUP_NEST);
 
-  if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
+  if Minimap.IsSpecWeapon() and (Minimap.GetSpecLevel = 100) then
     Exit(EWoodcutterState.USE_SPEC);
 
   Exit(EWoodcutterState.CUT_TREE);
@@ -667,7 +659,7 @@ begin
   end;
 end;
 
-procedure TCutterConfig.Setup; override;
+procedure TCutterConfig.Setup(); override;
 begin
   inherited;
 
@@ -727,7 +719,7 @@ begin
   StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TCutterConfig.Run; override;
+procedure TCutterConfig.Run(); override;
 begin
   Self.Setup;
 
