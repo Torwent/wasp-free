@@ -14,8 +14,8 @@ begin
 end;
 
 var
-  FoodAmount: Int32 := 15;
-  NeckAmount: Int32 := 5;
+  FoodAmount: Int32 := 20;
+  NeckAmount: Int32 := 4;
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
@@ -603,6 +603,13 @@ end;
 
 var
   Thiever: TThiever;
+
+function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override
+var
+  HandlerManager: PConsumableManager := GetHandler(ConsumableType);
+begin
+  Result := Self.CountConsumable(ConsumableType) >= HandlerManager^.Amount;
+end;
 
 type
   TThieverConfig = record(TScriptConfig)
