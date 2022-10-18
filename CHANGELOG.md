@@ -1,3 +1,12 @@
+## [1.0.11](https://github.com/Torwent/wasp-free/compare/v1.0.10...v1.0.11) (2022-10-18)
+
+
+### Bug Fixes
+
+* **ardy knights:** food counter was not counting right ([e485f15](https://github.com/Torwent/wasp-free/commit/e485f155264a11235d79f7e44c5af9ba99fe0cd5))
+
+
+
 ## [1.0.10](https://github.com/Torwent/wasp-free/compare/v1.0.9...v1.0.10) (2022-10-06)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** quick fail safe to alcher script ([8281e02](https://github.com/Torwent/wasp-free/commit/8281e0297bc69ddca27c925a31b10fd0de84079c))
-
-
-
-## [1.0.6](https://github.com/Torwent/wasp-free/compare/v1.0.5...v1.0.6) (2022-09-22)
-
-
-### Bug Fixes
-
-* **pickpocketer:** food withdraw amount fixed ([b776f74](https://github.com/Torwent/wasp-free/commit/b776f748cc215a150cdfb57a05f4066903868327))
 
 
 
