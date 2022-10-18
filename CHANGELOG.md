@@ -1,3 +1,12 @@
+## [1.0.12](https://github.com/Torwent/wasp-free/compare/v1.0.11...v1.0.12) (2022-10-18)
+
+
+### Bug Fixes
+
+* **cooker:** rogues then doesn't need the food to be selected anymore. ([6b6c20e](https://github.com/Torwent/wasp-free/commit/6b6c20e038b96624e0cc18e6f92ae16c931e7eaf))
+
+
+
 ## [1.0.11](https://github.com/Torwent/wasp-free/compare/v1.0.10...v1.0.11) (2022-10-18)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** add support to hot rock cake ([3849d48](https://github.com/Torwent/wasp-free/commit/3849d48e40bfd388e8e39df04201d0a6cf4beb81))
-
-
-
-## [1.0.7](https://github.com/Torwent/wasp-free/compare/v1.0.6...v1.0.7) (2022-09-22)
-
-
-### Bug Fixes
-
-* **alcher:** quick fail safe to alcher script ([8281e02](https://github.com/Torwent/wasp-free/commit/8281e0297bc69ddca27c925a31b10fd0de84079c))
 
 
 
