@@ -248,10 +248,6 @@ end;
 
 function TCooker.DoCooking: Boolean;
 begin
-  if CurrentLocation = ERSLocation.ROGUES_DEN then
-    if Inventory.GetSelectedSlot = -1 then
-      Inventory.SetSelectedItem(Ingredient.Item);
-
   if CookingObj.WalkSelectOption(['Cook', 'Fire']) then
   begin
     Minimap.WaitPlayerMoving(300, 3000);
