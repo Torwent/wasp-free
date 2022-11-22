@@ -4,13 +4,7 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  AntibanEnabled        := True; //Enables Most Antiban
-  BreaksEnabled         := True; //Enables Short Breaks
-  SleepEnabled          := True; //Enables Sleep Breaks
-  RemoteInputEnabled    := True; //Enables Remote Input
-  ProgressReportEnabled := True; //Enables Graphical Progress Report
-  ScriptDebugEnabled    := False; //Enables Script Debugging
+  Login.PlayerIndex := 0;
 end;
 
 var
