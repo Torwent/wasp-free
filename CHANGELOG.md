@@ -1,3 +1,12 @@
+## [1.0.13](https://github.com/Torwent/wasp-free/compare/v1.0.12...v1.0.13) (2022-11-22)
+
+
+### Bug Fixes
+
+* my SRL was renamed to SRL-T ([ac5b092](https://github.com/Torwent/wasp-free/commit/ac5b09227ed97f32bf54f2d0198732881f0ab8fe))
+
+
+
 ## [1.0.12](https://github.com/Torwent/wasp-free/compare/v1.0.11...v1.0.12) (2022-10-18)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** red topaz jewels should now be working ([64b3304](https://github.com/Torwent/wasp-free/commit/64b3304b6279b0ae14ee4f8b44de70a5380e9d5f))
-
-
-
-## [1.0.8](https://github.com/Torwent/wasp-free/compare/v1.0.7...v1.0.8) (2022-10-04)
-
-
-### Bug Fixes
-
-* **nmz:** add support to hot rock cake ([3849d48](https://github.com/Torwent/wasp-free/commit/3849d48e40bfd388e8e39df04201d0a6cf4beb81))
 
 
 
