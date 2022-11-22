@@ -127,7 +127,7 @@ end;
 
 function TScript.HandlePayment(): Boolean;
 begin
-  Chat.ClickOption('Yes', BioHash);
+  Chat.ClickOption('Yes', -1);
   Result := WaitUntil(Self.InsideBossRoom(), 100, 8000);
 end;
 
@@ -393,5 +393,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@Config.Run);
   {$ENDIF}
-  Script.Run(MaxActions, MaxTime);
+  Script.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.

@@ -2,9 +2,9 @@
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
-end;
+  begin
+    Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
+  end;
 {$ENDIF}
 
 type
@@ -180,7 +180,7 @@ begin
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += Self.ScriptBank;
     DebugObjectArray += Self.Furnace;
@@ -472,6 +472,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@SmitherConfig.Run);
   {$ENDIF}
-  Smither.Run(MaxActions, MaxTime);
+  Smither.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.
 {$ENDIF}

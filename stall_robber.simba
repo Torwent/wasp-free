@@ -90,7 +90,7 @@ begin
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += Self.Stall;
 end;
 
@@ -213,5 +213,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@StallRobberConfig.Run);
   {$ENDIF}
-  StallRobber.Run(MaxActions, MaxTime);
+  StallRobber.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.

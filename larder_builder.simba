@@ -138,7 +138,7 @@ begin
       OAK_LARDER: Inventory.FindItem('noted Oak Self.Plank', Self.NotedPlanksSlot);
     end;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += Self.BuiltLarder;
     DebugObjectArray += Self.LarderSpace;
@@ -240,7 +240,7 @@ end;
 
 function TBuilder.HandleServant(): Boolean;
 begin
-  Result := Chat.ClickOption('Fetch', BioHash)
+  Result := Chat.ClickOption('Fetch', -1)
   if Result then
   begin
     Self.WaitingServant := True;
@@ -466,5 +466,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BuilderConfig.Run);
   {$ENDIF}
-  Builder.Run(MaxActions, MaxTime);
+  Builder.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.

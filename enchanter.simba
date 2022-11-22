@@ -2,9 +2,9 @@
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
-end;
+  begin
+    Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
+  end;
 {$ENDIF}
 
 const
@@ -235,7 +235,7 @@ begin
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += Self.ScriptBank;
 end;
 
@@ -252,8 +252,8 @@ function TEnchanter.EnchantJewel(): Boolean;
 begin
   if Result := Inventory.ClickItem(RegularJewel) then
   begin
-    Self.Enchanting := SRL.Dice(20 * BioHash);
-    WaitUntil(Magic.IsOpen, 50, 2000);
+    Self.Enchanting := Antiban.BioDice();
+    WaitUntil(Magic.IsOpen(), 50, 2000);
   end;
 end;
 
@@ -507,6 +507,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@EnchanterConfig.Run);
   {$ENDIF}
-  Enchanter.Run(MaxActions, MaxTime);
+  Enchanter.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.
 {$ENDIF}

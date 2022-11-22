@@ -2,9 +2,9 @@
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
-end;
+  begin
+    Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
+  end;
 {$ENDIF}
 
 type
@@ -122,7 +122,7 @@ begin
   inherited;
   Self.SetupWLBanks();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += Self.ScriptBank;
 
   Self.UseBestItem := CurrentGlass = ERSGlassItem.Best;
@@ -396,7 +396,7 @@ end;
 var
   Blower: TBlower;
 
-function TRSChat.HandleLevelUp(Chance: Double = BioHash): Boolean; override;
+function TRSChat.HandleLevelUp(Chance: Double = -1): Boolean; override;
 begin
   Result := inherited(Chance);
 
@@ -457,6 +457,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BlowerConfig.Run);
   {$ENDIF}
-  Blower.Run(MaxActions, MaxTime);
+  Blower.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.
 {$ENDIF}

@@ -40,8 +40,8 @@ const
   ];
 
 var
-  CurrentFood: TRSItem   := 'Anglerfish';
-  CurrentLocation := ERSLocation.HOSIDIUS;
+  CurrentFood: TRSItem   := 'Shark';
+  CurrentLocation := ERSLocation.ROGUES_DEN;
 
 type
   ECookerState = (
@@ -166,7 +166,7 @@ begin
   if not RSClient.IsLoggedIn() then
     Login.LoginPlayer();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     case CurrentLocation of
       ERSLocation.HOSIDIUS:   DebugObjectArray += Self.ScriptBank;
@@ -251,10 +251,6 @@ end;
 
 function TCooker.DoCooking(): Boolean;
 begin
-  if CurrentLocation = ERSLocation.ROGUES_DEN then
-    if Inventory.GetSelectedSlot = -1 then
-      Inventory.SetSelectedItem(Self.Ingredient.Item);
-
   if Self.CookingObj.WalkSelectOption(['Cook', 'Fire']) then
   begin
     Minimap.WaitPlayerMoving(300, 3000);
@@ -368,11 +364,9 @@ begin
   ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
-    
 
     case Self.State of
       ECookerState.OPEN_BANK: Self.OpenBank();
@@ -393,10 +387,10 @@ begin
     end;
 
     Self.DoAntiban();
-  end;
+  until Self.ShouldStop();
 
   if not Self.Terminate() then
-    TerminateScript('aio_cooker didn''t terminate properly. Stopping execution.');
+    TerminateScript('Cooker didn''t terminate properly. Stopping execution.');
 end;
 
 var
@@ -494,6 +488,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@CookerConfig.Run);
   {$ENDIF}
-  Cooker.Run(MaxActions, MaxTime);
+  Cooker.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.
 {$ENDIF}

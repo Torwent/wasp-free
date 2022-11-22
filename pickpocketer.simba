@@ -92,7 +92,7 @@ begin
   if not Self.Open() then
     Exit;
 
-  Wait(0, 1000 - Round(1000*BioHash), wdLeft);
+  Wait(0, 1000 - Round(1000*Login.Players[Login.PlayerIndex].BioHash), wdLeft);
 
   Choices := Self.GetOptions;
 
@@ -107,7 +107,7 @@ begin
 
   if CloseIfNotFound then
   begin
-    WaitEx(350 - Round(350*BioHash), 50);
+    WaitEx(350 - Round(350*Login.Players[Login.PlayerIndex].BioHash), 50);
     Self.Close();
   end;
 
@@ -423,7 +423,7 @@ begin
   else if ((FoodHandler.Amount + NeckAmount + 2 + Length(Self.StackableArray)) >= (28 - Length(Self.StackableArray))) then
     FoodHandler.Amount := 28 - NeckAmount - 2 - Length(Self.StackableArray);
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += Self.ScriptBank;
     DebugNPCArray += Self.CurrentNPC;
@@ -1031,5 +1031,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@ThieverConfig.Run);
   {$ENDIF}
-  Thiever.Run(MaxActions, MaxTime);
+  Thiever.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.

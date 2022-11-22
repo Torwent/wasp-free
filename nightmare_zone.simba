@@ -162,7 +162,7 @@ begin
 
   if Self.PrayFlick then
     Self.PrayFlickTimer.Setup(60000);
-  Self.WalkMiddleTimer.Setup(190000 - Round(20000 * BioHash));
+  Self.WalkMiddleTimer.Setup(190000 - Round(20000 * Login.Players[Login.PlayerIndex].BioHash));
 end;
 
 
@@ -181,7 +181,9 @@ begin
 
   if Inventory.ContainsItem('Locator orb') then
     Self.DamageItem := 'Locator orb'
-  else if Inventory.ContainsItem(7510) then  //7510 is rock cake ID
+  else if Inventory.ContainsItem('Dwarven rock cake') then  //this will use 7509 ID which is hot cake
+    Self.DamageItem := 'Dwarven rock cake'
+  else if Inventory.ContainsItem(7510) then  //7510 is cold rock cake ID
     Self.DamageItem := 7510;
 
   if ToStr(Self.DamageItem) = '' then
@@ -211,7 +213,7 @@ begin
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
-  CombatHandler.Setup(True, @RSMonsters.AnyMonster, 25000 - Round(15000 * BioHash));
+  CombatHandler.Setup(True, @RSMonsters.AnyMonster, 25000 - Round(15000 * Login.Players[Login.PlayerIndex].BioHash));
   Combat.SetAutoRetaliate(True);
 
   Self.SetupDamageItem();
@@ -219,7 +221,7 @@ begin
   Self.PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += Self.BoostBarrel;
     DebugObjectArray += Self.AbsBarrel;
@@ -998,5 +1000,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@NMZConfig.Run);
   {$ENDIF}
-  NMZFighter.Run(MaxActions, MaxTime);
+  NMZFighter.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.

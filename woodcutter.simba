@@ -318,7 +318,7 @@ begin
 
   Self.SetupTool();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += Self.ScriptBank;
     DebugObjectArray += Self.RSTree;
@@ -738,5 +738,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@CutterConfig.Run);
   {$ENDIF}
-  Woodcutter.Run(MaxActions, MaxTime);
+  Woodcutter.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.

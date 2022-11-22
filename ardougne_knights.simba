@@ -231,7 +231,7 @@ begin
   Self.CheckRogueEquipment();
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += Self.ScriptBank;
     DebugNPCArray += Self.Knight;
@@ -642,5 +642,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@ThieverConfig.Run);
   {$ENDIF}
-  Thiever.Run(MaxActions, MaxTime);
+  Thiever.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.
