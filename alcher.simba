@@ -1,9 +1,9 @@
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I WaspLib/osr.simba}
-begin
-  Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
-end;
+  begin
+    Login.PlayerIndex := 0; //Type "WLSettings." below to open auto-completion and see extra settings you can set.
+  end;
 {$ENDIF}
 
 var
@@ -434,6 +434,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@AlcherConfig.Run);
   {$ENDIF}
-  Alcher.Run(MaxActions, MaxTime);
+  Alcher.Run(WLSettings.MaxActions, WLSettings.MaxTime); 
 end.
 {$ENDIF}
