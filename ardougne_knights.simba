@@ -385,7 +385,7 @@ begin
 
   if ATPA <> [] then
   begin
-    ATPA.SortByMiddle(MainScreen.Bounds().Middle());
+    ATPA.SortByMiddle(MainScreen.GetPlayerBox().Middle());
     TPA := ATPA[0];
     P := TPA.Mean();
     P.X += MainScreen.ConvertDistance(7);
