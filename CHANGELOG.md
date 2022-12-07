@@ -1,3 +1,12 @@
+## [1.0.15](https://github.com/Torwent/wasp-free/compare/v1.0.14...v1.0.15) (2022-12-07)
+
+
+### Bug Fixes
+
+* **ardy knights:** changed the message sorting point ([b3de7b0](https://github.com/Torwent/wasp-free/commit/b3de7b0c7ef6a5500bed6df49390995c20498397))
+
+
+
 ## [1.0.14](https://github.com/Torwent/wasp-free/compare/v1.0.13...v1.0.14) (2022-12-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** food counter was not counting right ([e485f15](https://github.com/Torwent/wasp-free/commit/e485f155264a11235d79f7e44c5af9ba99fe0cd5))
-
-
-
-## [1.0.10](https://github.com/Torwent/wasp-free/compare/v1.0.9...v1.0.10) (2022-10-06)
-
-
-### Bug Fixes
-
-* **wc:** script was crashing looking for coins. ([08afad6](https://github.com/Torwent/wasp-free/commit/08afad6a92146327c06ef162de865080e700df13))
 
 
 
