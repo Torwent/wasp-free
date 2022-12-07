@@ -1,3 +1,12 @@
+## [1.0.14](https://github.com/Torwent/wasp-free/compare/v1.0.13...v1.0.14) (2022-12-07)
+
+
+### Bug Fixes
+
+* **ardy knights:** fix attempt at having 2 knights in the room ([935d94a](https://github.com/Torwent/wasp-free/commit/935d94ac02f3e43ae60a89576c33c5397ef053f0))
+
+
+
 ## [1.0.13](https://github.com/Torwent/wasp-free/compare/v1.0.12...v1.0.13) (2022-11-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **wc:** script was crashing looking for coins. ([08afad6](https://github.com/Torwent/wasp-free/commit/08afad6a92146327c06ef162de865080e700df13))
-
-
-
-## [1.0.9](https://github.com/Torwent/wasp-free/compare/v1.0.8...v1.0.9) (2022-10-04)
-
-
-### Bug Fixes
-
-* **enchanter:** red topaz jewels should now be working ([64b3304](https://github.com/Torwent/wasp-free/commit/64b3304b6279b0ae14ee4f8b44de70a5380e9d5f))
 
 
 
