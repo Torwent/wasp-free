@@ -394,7 +394,7 @@ begin
     Mouse.Move(B);
     Result := MainScreen.IsUpText(Self.Knight.UpText);
   end
-  else
+  else if Length(Minimap.GetDots(ERSMinimapDot.PLAYER)) < 10 then
     Result := Self.Knight.Hover(0);
 
   if not Result and MainScreen.IsUpText('Climb') then
