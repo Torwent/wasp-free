@@ -368,6 +368,52 @@ begin
       Result := ChooseOption.Select(Action, MOUSE_LEFT, True, (False));
 end;
 
+//TEMP OPTION FIXES
+function TRSOptions.IsHouseOptionsOpen: Boolean; override;
+begin
+  Result := SRL.CountColor(CTS2(4630611, 23, 0.04, 0.79), Self.Bounds()) > 115;
+end;
+
+function TRSOptions.CallServant(): Boolean; override;
+var
+  s: String;
+  b: TBox;
+begin
+  if not Self.OpenHouseOptions() then
+    Exit;
+
+  b := Self.Bounds();
+
+  b.X1 += 9;
+  b.Y1 += 185;
+  b.X2 -= 9;
+  b.Y2 -= 50;
+
+  Mouse.Click(b, MOUSE_LEFT);
+  Result := WaitUntil(((s := Chat.GetChatTitle) = 'Demon buttler') or
+                       (s = 'Repeat last task?'), SRL.TruncatedGauss(50, 1500), 5000);
+end;
+
+
+function TRSOptions.LeaveHouse(): Boolean; override;
+var
+  s: String;
+  b: TBox;
+begin
+  if not Self.OpenHouseOptions() then
+    Exit;
+
+  b := Self.Bounds();
+
+  b.X1 += 9;
+  b.Y1 += 214;
+  b.X2 -= 9;
+  b.Y2 -= 21;
+
+  Mouse.Click(b, MOUSE_LEFT);
+  Result := WaitUntil(not Self.IsHouseOptionsOpen, SRL.TruncatedGauss(50, 1500), 5000);
+end;
+
 
 type
   TBuilderConfig = record(TScriptConfig)
