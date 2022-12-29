@@ -1,3 +1,12 @@
+## [1.0.19](https://github.com/Torwent/wasp-free/compare/v1.0.18...v1.0.19) (2022-12-29)
+
+
+### Bug Fixes
+
+* **woodcutter:** prif plank making ([8035835](https://github.com/Torwent/wasp-free/commit/8035835581dfcb8221e6d7608ee192ff45626673))
+
+
+
 ## [1.0.18](https://github.com/Torwent/wasp-free/compare/v1.0.17...v1.0.18) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** changed the message sorting point ([b3de7b0](https://github.com/Torwent/wasp-free/commit/b3de7b0c7ef6a5500bed6df49390995c20498397))
-
-
-
-## [1.0.14](https://github.com/Torwent/wasp-free/compare/v1.0.13...v1.0.14) (2022-12-07)
-
-
-### Bug Fixes
-
-* **ardy knights:** fix attempt at having 2 knights in the room ([935d94a](https://github.com/Torwent/wasp-free/commit/935d94ac02f3e43ae60a89576c33c5397ef053f0))
 
 
 
