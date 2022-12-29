@@ -82,6 +82,7 @@ jobs:
         uses: Sniddl/discord-commits@v1.5
         with:
           webhook: ${{ secrets.UPDATES_WEBHOOK }}
+          template: 'author-with-link'
           embed: '{ "title": "wasp-free", "description": "### {{ commit.title }}\n{{ commit.description }}"}, "author": {"name": "{{ commit.author.name }}", "icon_url": "https://github.com/{{ commit.author.username }}.png"}}'
 
       - name: Upload modified simba files to waspscripts.com
