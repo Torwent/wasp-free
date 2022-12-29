@@ -6,6 +6,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -46,7 +47,7 @@ begin
   Antiban.MaxZoom := 85;
 end;
 
-procedure TStallRobber.SetupStall;
+procedure TStallRobber.SetupStall();
 begin
   case CurrentStall of
     ERSStall.TEA_STALL:
