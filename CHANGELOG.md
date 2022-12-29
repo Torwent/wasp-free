@@ -1,3 +1,12 @@
+## [1.0.22](https://github.com/Torwent/wasp-free/compare/v1.0.21...v1.0.22) (2022-12-29)
+
+
+### Bug Fixes
+
+* test notification ([0f86812](https://github.com/Torwent/wasp-free/commit/0f86812425172069be3f1e19c296607388474885))
+
+
+
 ## [1.0.21](https://github.com/Torwent/wasp-free/compare/v1.0.20...v1.0.21) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * readd SRL-T include ([c4f5bbc](https://github.com/Torwent/wasp-free/commit/c4f5bbcdff747d251bbdea2d661f1e4c40ca462f))
-
-
-
-## [1.0.17](https://github.com/Torwent/wasp-free/compare/v1.0.16...v1.0.17) (2022-12-29)
-
-
-### Bug Fixes
-
-* **all scripts:** added stats ([1201322](https://github.com/Torwent/wasp-free/commit/12013229fa8e3cb254306d8b1c24f0e94d5e7458))
 
 
 
