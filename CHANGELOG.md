@@ -1,3 +1,12 @@
+## [1.0.23](https://github.com/Torwent/wasp-free/compare/v1.0.22...v1.0.23) (2022-12-29)
+
+
+### Bug Fixes
+
+* notification test ([53b3554](https://github.com/Torwent/wasp-free/commit/53b355483e2b363260bfa088e49d300d2f690416))
+
+
+
 ## [1.0.22](https://github.com/Torwent/wasp-free/compare/v1.0.21...v1.0.22) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** prif plank making ([8035835](https://github.com/Torwent/wasp-free/commit/8035835581dfcb8221e6d7608ee192ff45626673))
-
-
-
-## [1.0.18](https://github.com/Torwent/wasp-free/compare/v1.0.17...v1.0.18) (2022-12-29)
-
-
-### Bug Fixes
-
-* readd SRL-T include ([c4f5bbc](https://github.com/Torwent/wasp-free/commit/c4f5bbcdff747d251bbdea2d661f1e4c40ca462f))
 
 
 
