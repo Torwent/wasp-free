@@ -83,7 +83,7 @@ jobs:
         with:
           webhook: ${{ secrets.UPDATES_WEBHOOK }}
           template: 'author-with-link'
-          embed: '{ "title": "wasp-free", "description": "### {{ commit.title }}\n{{ commit.description }}", "author": {"name": "{{ commit.author.name }}"}, url: "{{ commit.url }}"}'
+          embed: '{ "title": "wasp-free", "description": "### {{ commit.title }}\n{{ commit.description }}", "author": {"name": "{{ commit.author.name }}"}, "url": "{{ commit.url }}"}'
 
       - name: Upload modified simba files to waspscripts.com
         uses: Torwent/wasp-upload-action@master
