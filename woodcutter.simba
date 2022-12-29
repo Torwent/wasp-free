@@ -189,8 +189,8 @@ begin
 
     PRIFDDINAS:
       begin
-        RSW.Setup('x3583y1905');
-        ScriptBank := RSObjects.PrifddinasBank;
+        Self.RSW.Setup('x3583y1905');
+        Self.ScriptBank := RSObjects.PrifddinasBank;
         UseBank := True;
       end;
 
@@ -387,11 +387,18 @@ end;
 
 function TWoodcutter.OpenSawmill(): Boolean;
 begin
-  if RSNPCs.SawmillOperator.WalkSelectOption(['Buy', 'plank']) then
+  if BankLocation = ERSBank.PRIFDDINAS then
   begin
-    Minimap.WaitPlayerMoving(300, 10000);
-    Result := WaitUntil(Make.IsOpen(), 100, 10000);
-  end;
+    if not Self.RSW.WebWalk([4103, 2075], 15, 0.2) then
+      Exit;
+    if not RSNPCs.SawmillOperator.SelectOption(['Buy', 'plank']) then
+      Exit;
+  end
+  else if not RSNPCs.SawmillOperator.WalkSelectOption(['Buy', 'plank']) then
+    Exit;
+
+  Minimap.WaitPlayerMoving(300, 10000);
+  Result := WaitUntil(Make.IsOpen(), 100, 10000);
 end;
 
 function TWoodcutter.MakePlanks(): Boolean;
