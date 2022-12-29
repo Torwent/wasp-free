@@ -1,3 +1,12 @@
+## [1.0.25](https://github.com/Torwent/wasp-free/compare/v1.0.24...v1.0.25) (2022-12-29)
+
+
+### Bug Fixes
+
+* notification test ([0f53f9b](https://github.com/Torwent/wasp-free/commit/0f53f9b5ee2149b3f4f795f9967c1977cc208cab))
+
+
+
 ## [1.0.24](https://github.com/Torwent/wasp-free/compare/v1.0.23...v1.0.24) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * update discord notifications gh action ([0374949](https://github.com/Torwent/wasp-free/commit/03749495a11c01cd4c29ed63ef65227866127533))
-
-
-
-## [1.0.20](https://github.com/Torwent/wasp-free/compare/v1.0.19...v1.0.20) (2022-12-29)
-
-
-### Bug Fixes
-
-* **gh action:** fixed StatsPayload line being removed ([0b5d3d5](https://github.com/Torwent/wasp-free/commit/0b5d3d52f62ee6d47dbedfbc0dc4f53e1f760839))
 
 
 
