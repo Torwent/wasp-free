@@ -1,3 +1,12 @@
+## [1.0.21](https://github.com/Torwent/wasp-free/compare/v1.0.20...v1.0.21) (2022-12-29)
+
+
+### Bug Fixes
+
+* update discord notifications gh action ([0374949](https://github.com/Torwent/wasp-free/commit/03749495a11c01cd4c29ed63ef65227866127533))
+
+
+
 ## [1.0.20](https://github.com/Torwent/wasp-free/compare/v1.0.19...v1.0.20) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **all scripts:** added stats ([1201322](https://github.com/Torwent/wasp-free/commit/12013229fa8e3cb254306d8b1c24f0e94d5e7458))
-
-
-
-## [1.0.16](https://github.com/Torwent/wasp-free/compare/v1.0.15...v1.0.16) (2022-12-12)
-
-
-### Bug Fixes
-
-* **larder builder:** temp fixes for larder builder to work ([5ff0a30](https://github.com/Torwent/wasp-free/commit/5ff0a307183c77ad0fba5a6013227d1a615bc806))
 
 
 
