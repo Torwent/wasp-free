@@ -1,4 +1,5 @@
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
