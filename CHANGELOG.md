@@ -1,3 +1,12 @@
+## [1.0.20](https://github.com/Torwent/wasp-free/compare/v1.0.19...v1.0.20) (2022-12-29)
+
+
+### Bug Fixes
+
+* **gh action:** fixed StatsPayload line being removed ([0b5d3d5](https://github.com/Torwent/wasp-free/commit/0b5d3d52f62ee6d47dbedfbc0dc4f53e1f760839))
+
+
+
 ## [1.0.19](https://github.com/Torwent/wasp-free/compare/v1.0.18...v1.0.19) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** temp fixes for larder builder to work ([5ff0a30](https://github.com/Torwent/wasp-free/commit/5ff0a307183c77ad0fba5a6013227d1a615bc806))
-
-
-
-## [1.0.15](https://github.com/Torwent/wasp-free/compare/v1.0.14...v1.0.15) (2022-12-07)
-
-
-### Bug Fixes
-
-* **ardy knights:** changed the message sorting point ([b3de7b0](https://github.com/Torwent/wasp-free/commit/b3de7b0c7ef6a5500bed6df49390995c20498397))
 
 
 
