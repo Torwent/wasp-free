@@ -1,3 +1,12 @@
+## [1.0.24](https://github.com/Torwent/wasp-free/compare/v1.0.23...v1.0.24) (2022-12-29)
+
+
+### Bug Fixes
+
+* notification test ([c723b0f](https://github.com/Torwent/wasp-free/commit/c723b0f98a1097f1058dea8304edcd27e7def0cf))
+
+
+
 ## [1.0.23](https://github.com/Torwent/wasp-free/compare/v1.0.22...v1.0.23) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **gh action:** fixed StatsPayload line being removed ([0b5d3d5](https://github.com/Torwent/wasp-free/commit/0b5d3d52f62ee6d47dbedfbc0dc4f53e1f760839))
-
-
-
-## [1.0.19](https://github.com/Torwent/wasp-free/compare/v1.0.18...v1.0.19) (2022-12-29)
-
-
-### Bug Fixes
-
-* **woodcutter:** prif plank making ([8035835](https://github.com/Torwent/wasp-free/commit/8035835581dfcb8221e6d7608ee192ff45626673))
 
 
 
