@@ -1,8 +1,11 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '2c9e42f7-cb23-4976-827f-9ffe112a0c3f'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '4'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I WaspLib/osr.simba}
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -17,6 +20,7 @@ var
 type
   EStallRobberState = (
     FIND_STALL,
+    LEVELED_UP,
     ROB_STALL,
     DROP_LOOT,
     WALK_SPOT,
@@ -81,14 +85,14 @@ end;
 
 procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'AIO StallRobber';
+  Name := 'Stall robber';
 
   inherited;
 
-  Self.SetupStall;
+  Self.SetupStall();
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   if ScriptDebugEnabled then
     DebugObjectArray += @Stall;
@@ -127,6 +131,8 @@ function TStallRobber.GetState: EStallRobberState;
 begin
   if WL.Activity.IsFinished then
     Exit(END_SCRIPT);
+  if Chat.LeveledUp() then
+    Exit(LEVELED_UP);
   if Inventory.IsFull and Self.HasLoot then
     Exit(DROP_LOOT);
   if MainScreen.IsUpText('Steal-from') then
@@ -141,16 +147,15 @@ end;
 
 procedure TStallRobber.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     State := Self.GetState;
     Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.ProcessWhileWaiting();
 
     case State of
+      LEVELED_UP: Chat.HandleLevelUp();
       DROP_LOOT: Self.DropItems;
       FIND_STALL, ROB_STALL: Self.RobStall;
       WAIT_STATE: Wait(100, 200);
@@ -159,7 +164,7 @@ begin
     end;
 
     Self.DoAntiban;
-  end;
+  until Self.ShouldStop();
 end;
 
 var

@@ -3,6 +3,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
