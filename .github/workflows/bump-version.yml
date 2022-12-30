@@ -78,13 +78,6 @@ jobs:
           release_name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
-      - name: Update channel notification
-        uses: Sniddl/discord-commits@v1.5
-        with:
-          webhook: ${{ secrets.UPDATES_WEBHOOK }}
-          template: 'author-with-link'
-          embed: '{ "title": "wasp-free", "description": "#{{ commit.title }}\n{{ commit.description }}", "author": {"name": "{{ commit.author.name }}"}, "url": "{{ commit.url }}"}'
-
       - name: Upload modified simba files to waspscripts.com
         uses: Torwent/wasp-upload-action@master
         with:
@@ -109,3 +102,10 @@ jobs:
             7c40c4ac-0009-4a08-ab61-4887d9456420=chompy_hunter.simba
             f6fc217a-3b03-44e1-8fa7-662dfb48f6d7=alcher.simba
           MODIFIED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+
+      - name: Discord Notification
+        uses: Sniddl/discord-commits@v1.5
+        with:
+          webhook: ${{ secrets.UPDATES_WEBHOOK }}
+          template: 'author-with-link'
+          embed: '{ "title": "wasp-free", "description": "#{{ commit.title }}\n{{ commit.description }}", "author": {"name": "{{ commit.author.name }}"}, "url": "{{ commit.url }}"}'
