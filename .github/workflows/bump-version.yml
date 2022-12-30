@@ -108,4 +108,4 @@ jobs:
         with:
           webhook: ${{ secrets.UPDATES_WEBHOOK }}
           message: ""
-          embed: '{ "title": "Update: wasp-free", "description": "Committer: {{ commit.author.name }}\n\n**{{ commit.title }}**\n{{ commit.description }}\n\nCommit URL: {{ commit.url }}"}'
+          embed: '{ "title": "Update: wasp-free", "description": "Committer: {{ commit.author.name }}\n\n**{{ commit.title }}**\n{{ commit.description }}"}'
