@@ -1,3 +1,12 @@
+## [1.0.31](https://github.com/Torwent/wasp-free/compare/v1.0.30...v1.0.31) (2022-12-30)
+
+
+### Bug Fixes
+
+* discord notifications ([9494e02](https://github.com/Torwent/wasp-free/commit/9494e0296f2228ef77957549b0001b5033d8f4da))
+
+
+
 ## [1.0.30](https://github.com/Torwent/wasp-free/compare/v1.0.29...v1.0.30) (2022-12-30)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * notification test ([024723a](https://github.com/Torwent/wasp-free/commit/024723ab11b2c461d19d3c80e051149e253c1f56))
-
-
-
-## [1.0.26](https://github.com/Torwent/wasp-free/compare/v1.0.25...v1.0.26) (2022-12-29)
-
-
-### Bug Fixes
-
-* notification test ([0e2b2d2](https://github.com/Torwent/wasp-free/commit/0e2b2d2d094b7f9312c5c90d2b305caf483527b4))
 
 
 
