@@ -1,3 +1,12 @@
+## [1.0.28](https://github.com/Torwent/wasp-free/compare/v1.0.27...v1.0.28) (2022-12-30)
+
+
+### Bug Fixes
+
+* dicord notification ([765ba4c](https://github.com/Torwent/wasp-free/commit/765ba4c336835ae9bf0bd68c14f7e9c98573ae5b))
+
+
+
 ## [1.0.27](https://github.com/Torwent/wasp-free/compare/v1.0.26...v1.0.27) (2022-12-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * notification test ([c723b0f](https://github.com/Torwent/wasp-free/commit/c723b0f98a1097f1058dea8304edcd27e7def0cf))
-
-
-
-## [1.0.23](https://github.com/Torwent/wasp-free/compare/v1.0.22...v1.0.23) (2022-12-29)
-
-
-### Bug Fixes
-
-* notification test ([53b3554](https://github.com/Torwent/wasp-free/commit/53b355483e2b363260bfa088e49d300d2f690416))
 
 
 
