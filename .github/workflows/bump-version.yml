@@ -107,5 +107,5 @@ jobs:
         uses: Sniddl/discord-commits@v1.5
         with:
           webhook: ${{ secrets.UPDATES_WEBHOOK }}
-          message: ""
+          template: "simple-link"
           embed: '{ "title": "Update: wasp-free", "description": "Committer: {{ commit.author.name }}\n\n**{{ commit.title }}**\n{{ commit.description }}", "url": "{{ commit.url }}"}'
