@@ -55,21 +55,8 @@ jobs:
           skip-on-empty: "true"
           skip-commit: "false"
 
-      - name: Write version.txt file
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        shell: bash
-        run: echo ${{ steps.changelog.outputs.tag }} > version.txt
-
-      - name: Update version.txt file
-        uses: test-room-7/action-update-file@v1
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        with:
-          file-path: version.txt
-          commit-msg: Bump version.txt and CHANGELOG.md
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        uses: actions/create-release@v1
+      - name: Create release
+        uses: actions/create-release@v1.1.14
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +65,7 @@ jobs:
           release_name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
-      - name: Upload modified simba files to waspscripts.com
+      - name: Upload to waspscripts.com
         uses: Torwent/wasp-upload-action@master
         with:
           SB_URL: ${{ secrets.SB_URL }}
