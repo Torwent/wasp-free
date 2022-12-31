@@ -90,9 +90,17 @@ jobs:
             f6fc217a-3b03-44e1-8fa7-662dfb48f6d7=alcher.simba
           MODIFIED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
 
-      - name: Discord Notification
-        uses: Sniddl/discord-commits@v1.5
+      - name: Fix commit message
+        id: step_one
+        run: |
+            echo "${{ github.event.head_commit.message }}" >> tmp.txt
+            sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' tmp.txt >> reddacted.txt
+            cat reddacted.txt
+            COMMIT=$(<reddacted.txt)
+            echo "COMMIT=$COMMIT" >> $GITHUB_ENV
+          
+      - name: Discord notification
+        uses: rguillaume/discord-action-embed@v1.0.4
         with:
           webhook: ${{ secrets.UPDATES_WEBHOOK }}
-          template: "simple-link"
-          embed: '{ "title": "Update: wasp-free", "description": "Committer: {{ commit.author.name }}\n\n**{{ commit.title }}**\n{{ commit.description }}", "url": "{{ commit.url }}"}'
+          embed: '{"title": "Update: ${{ github.event.repository.name }}", "description": "${{ env.COMMIT }}", "url": "${{ github.event.head_commit.url }}", "footer": {"text": "Committer: ${{ github.event.head_commit.author.username }}"}, "color": "16760576"}'
