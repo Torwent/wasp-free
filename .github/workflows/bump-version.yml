@@ -9,11 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.2.0
+      - uses: actions/checkout@v3.2.0
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v29.0.3
+        uses: tj-actions/changed-files@v35.2.0
         
       - name: Regex replace
         id: regex
@@ -42,9 +42,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
 
-      - name: Conventional Changelog Action
+      - name: Generate changelog
         id: changelog
-        uses: TriPSs/conventional-changelog-action@v3.8.0
+        uses: TriPSs/conventional-changelog-action@v3.18.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           git-message: "chore(release): {version}"
