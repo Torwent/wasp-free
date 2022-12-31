@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -246,7 +247,7 @@ begin
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += @ScriptBank;
     DebugObjectArray += RSRock;
@@ -565,5 +566,5 @@ begin
   {$IFDEF SCRIPT_GUI}
     Sync(@MinerConfig.Run);
   {$ENDIF}
-  Miner.Run(MaxActions, MaxTime);
+  Miner.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

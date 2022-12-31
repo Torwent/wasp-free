@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -222,7 +223,7 @@ begin
   PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += @BoostBarrel;
     DebugObjectArray += @AbsBarrel;
@@ -244,14 +245,14 @@ begin
 
   if Result then
   begin
-    BoostTimer.Resume;
+    BoostTimer.Resume();
     if PrayFlick then
-      PrayFlickTimer.Resume;
-    CombatHandler.InCombatTimer.Resume;
-    WalkMiddleTimer.Resume;
-    PowerSurgeTimer.Resume;
-    ZapperTimer.Resume;
-    WL.Activity.Restart;
+      PrayFlickTimer.Resume();
+    CombatHandler.InCombatTimer.Resume();
+    WalkMiddleTimer.Resume();
+    PowerSurgeTimer.Resume();
+    ZapperTimer.Resume();
+    WL.Activity.Restart();
   end
   else
   begin
@@ -987,5 +988,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@NMZConfig.Run);
   {$ENDIF}
-  NMZFighter.Run(MaxActions, MaxTime);
+  NMZFighter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

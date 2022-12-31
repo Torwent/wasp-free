@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -318,7 +319,7 @@ begin
 
   Self.SetupTool();
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += @ScriptBank;
     DebugObjectArray += RSTree;
@@ -734,5 +735,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@CutterConfig.Run);
   {$ENDIF}
-  Woodcutter.Run(MaxActions, MaxTime);
+  Woodcutter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

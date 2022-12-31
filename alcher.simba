@@ -5,6 +5,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 {$ENDIF}
 
@@ -443,6 +444,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@AlcherConfig.Run);
   {$ENDIF}
-  Alcher.Run(MaxActions, MaxTime);
+  Alcher.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
 {$ENDIF}

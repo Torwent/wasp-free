@@ -5,6 +5,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 {$ENDIF}
 
@@ -123,7 +124,7 @@ begin
   inherited;
   Self.SetupWLBanks;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += @ScriptBank;
 
   UseBestItem := CurrentGlass = ERSGlassItem.Best;
@@ -458,6 +459,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BlowerConfig.Run);
   {$ENDIF}
-  Blower.Run(MaxActions, MaxTime);
+  Blower.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
 {$ENDIF}

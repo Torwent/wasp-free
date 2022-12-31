@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -393,7 +394,7 @@ begin
   else if ((FoodManager.Amount + NeckAmount + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
     FoodManager.Amount := 28 - NeckAmount - 2 - Length(StackableArray);
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += @ScriptBank;
     DebugNPCArray += CurrentNPC;
@@ -567,7 +568,7 @@ end;
 function TThiever.Heal: Boolean;
 begin
   repeat
-    if not Inventory.Consume(HEALTH_CONSUMABLE) then
+    if not Inventory.Consume(FOOD_CONSUMABLE) then
       Exit;
 
     Wait(300, 500);
@@ -746,7 +747,7 @@ begin
         Exit(DEPOSIT_LOOT);
       if Inventory.CountItem(Necklace) < NeckAmount then
         Exit(WITHDRAW_NECKLACES);
-      if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
+      if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
     end;
 
@@ -772,7 +773,7 @@ begin
   begin
     if Inventory.ContainsAny(DropArray) then
       Exit(DROP_ITEMS);
-    if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
@@ -788,7 +789,7 @@ begin
 
   if Self.IsLowHP then
   begin
-    if not RedemptionEnabled and Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+    if not RedemptionEnabled and Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD);
     if not SuicideMode then
       Exit(OPEN_BANK);
@@ -834,7 +835,7 @@ begin
     case State of
       OPEN_BANK: Bank.WalkOpen(ScriptBank);
       DEPOSIT_LOOT: Self.Deposit;
-      WITHDRAW_FOOD: Bank.WithdrawConsumable(HEALTH_CONSUMABLE);
+      WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
       WITHDRAW_NECKLACES: Self.Withdraw(Necklace, NeckAmount);
       CLOSE_INTERFACE: MainScreen.CloseInterface;
 
@@ -871,7 +872,7 @@ var
 begin
   inherited;
 
-  if ConsumableType = HEALTH_CONSUMABLE then
+  if ConsumableType = FOOD_CONSUMABLE then
     for Item in Self.ItemArray do
       if Thiever.StackableArray.Find(Item) < 0 then
         Thiever.StackableArray += Item;
@@ -883,7 +884,7 @@ var
 begin
   inherited;
 
-  if ConsumableType = HEALTH_CONSUMABLE then
+  if ConsumableType = FOOD_CONSUMABLE then
     for Item in Self.ItemArray do
       if Thiever.StackableArray.Find(Item) < 0 then
         Thiever.StackableArray += Item;
@@ -927,8 +928,8 @@ function TRSBank.WithdrawConsumableAmount(ConsumableType: ERSConsumable; Idx: In
 var
   HandlerManager: ^TConsumableManager := GetHandler(ConsumableType);
 begin
-  if ConsumableType = HEALTH_CONSUMABLE then
-    Exit(FoodAmount - Inventory.CountConsumable(HEALTH_CONSUMABLE));
+  if ConsumableType = FOOD_CONSUMABLE then
+    Exit(FoodAmount - Inventory.CountConsumable(FOOD_CONSUMABLE));
 
   case HandlerManager^.Handlers[Idx].Amount of
     BANK_WITHDRAW_ALL: Result := BANK_WITHDRAW_ALL;
@@ -1073,5 +1074,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@ThieverConfig.Run);
   {$ENDIF}
-  Thiever.Run(MaxActions, MaxTime);
+  Thiever.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

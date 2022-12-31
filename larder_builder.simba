@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -139,7 +140,7 @@ begin
       OAK_LARDER: Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
     end;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += @BuiltLarder;
     DebugObjectArray += @LarderSpace;
@@ -398,7 +399,6 @@ end;
 
 function TRSOptions.LeaveHouse(): Boolean; override;
 var
-  s: String;
   b: TBox;
 begin
   if not Self.OpenHouseOptions() then
@@ -514,5 +514,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@BuilderConfig.Run);
   {$ENDIF}
-  Builder.Run(MaxActions, MaxTime);
+  Builder.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

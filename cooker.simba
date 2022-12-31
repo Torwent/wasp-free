@@ -5,6 +5,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 {$ENDIF}
 
@@ -158,7 +159,7 @@ begin
 
   if not RSClient.IsLoggedIn then Login.LoginPlayer;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     case CurrentLocation of
       ERSLocation.HOSIDIUS:   DebugObjectArray += @ScriptBank;
@@ -490,6 +491,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@CookerConfig.Run);
   {$ENDIF}
-  Cooker.Run(MaxActions, MaxTime);
+  Cooker.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
 {$ENDIF}

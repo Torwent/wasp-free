@@ -5,6 +5,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 {$ENDIF}
 
@@ -184,7 +185,7 @@ begin
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += @ScriptBank;
     DebugObjectArray += @Furnace;
@@ -478,6 +479,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@SmelterConfig.Run);
   {$ENDIF}
-  Smelter.Run(MaxActions, MaxTime);
+  Smelter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
 {$ENDIF}

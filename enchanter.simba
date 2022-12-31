@@ -5,6 +5,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 {$ENDIF}
 
@@ -236,7 +237,7 @@ begin
   if not RSClient.IsLoggedIn then
     Login.LoginPlayer;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += @ScriptBank;
 end;
 
@@ -510,6 +511,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@EnchanterConfig.Run);
   {$ENDIF}
-  Enchanter.Run(MaxActions, MaxTime);
+  Enchanter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
 {$ENDIF}

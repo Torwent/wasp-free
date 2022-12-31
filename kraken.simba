@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -232,8 +233,8 @@ function TScript.CheckLoot: Boolean;
 var
   B: TBox := MainScreen.GetPlayerFloorBox;
 begin
-  while Inventory.IsFull and Inventory.FindConsumable(HEALTH_CONSUMABLE) do
-    Inventory.Consume(HEALTH_CONSUMABLE);
+  while Inventory.IsFull and Inventory.FindConsumable(FOOD_CONSUMABLE) do
+    Inventory.Consume(FOOD_CONSUMABLE);
 
   Result := CheckedLoot := True;
 
@@ -256,7 +257,7 @@ begin
 
   if (Minimap.GetHPLevel <= 40) then
   begin
-    if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD)
     else if Self.FindRagingKraken then
       Exit(ATTACK_KRAKEN)
@@ -318,7 +319,7 @@ begin
       WAKE_KRAKEN: Self.WakeKraken;
       ATTACK_KRAKEN: IsAttacking := Self.AttackKraken;
       BOOST: Self.BoostMagic;
-      EAT_FOOD: Inventory.Consume(HEALTH_CONSUMABLE);
+      EAT_FOOD: Inventory.Consume(FOOD_CONSUMABLE);
       DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
       ENABLE_QPRAY: Minimap.EnablePrayer;
       ALCH_DROP: if RSAction.AlchItems(RSAction.AlchItemArray) then Wait(600, 800);
@@ -350,9 +351,6 @@ type
 procedure TConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
-
-  MaxActions := StrToInt(Self.ActionLimit.GetText);
-  MaxTime    := StrToInt64(Self.TimeLimit.GetText);
 end;
 
 procedure TConfig.Setup; override;
@@ -397,5 +395,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@Config.Run);
   {$ENDIF}
-  Script.Run(MaxActions, MaxTime);
+  Script.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

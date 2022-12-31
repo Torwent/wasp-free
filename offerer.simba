@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -109,7 +110,7 @@ begin
   inherited;
   Self.SetupWLBanks;
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += @ScriptBank;
 
   Self.SetupSpell;
@@ -175,29 +176,29 @@ begin
   case Random(0, 500) of
     0:
       begin
-        if not ABChat then Exit
-        else if (Random(20) <= 17) then Antiban.RandomChatButton
-        else Antiban.RandomChatButtonState;
+        if not WLSettings.Antiban.Chat then Exit
+        else if (Random(20) <= 17) then Antiban.RandomChatButton()
+        else Antiban.RandomChatButtonState();
       end;
 
     1..5:
       begin
-        if not ABCamera then Exit
-        else if (Random(10) <= 3) then Antiban.RandomRotate;
+        if not WLSettings.Antiban.Camera then Exit
+        else if (Random(10) <= 3) then Antiban.RandomRotate();
       end;
 
     6..10:
       begin
-        if not ABMouse then Exit
-        else if (Random(10) <= 3) then Antiban.RandomRightClick
-        else Antiban.SmallRandomMouse;
+        if not WLSettings.Antiban.Mouse then Exit
+        else if (Random(10) <= 3) then Antiban.RandomRightClick()
+        else Antiban.SmallRandomMouse();
       end;
 
     10, 14:
       begin
-        if not ABGameTabs then Exit
-        else if (Random(10) <= 9) then Antiban.RandomTab
-        else Antiban.CheckCharges;
+        if not WLSettings.Antiban.GameTabs then Exit
+        else if (Random(10) <= 9) then Antiban.RandomTab()
+        else Antiban.CheckCharges();
       end;
     else
       Wait(100);
@@ -311,9 +312,6 @@ begin
   Self.Init(Sender);
 
   CurrentRemains := ERSRemains(RemainSelector.Combobox.getItemIndex);
-
-  MaxActions := StrToInt(Self.ActionLimit.GetText);
-  MaxTime    := StrToInt64(Self.TimeLimit.GetText);
 end;
 
 procedure TRemainOffererConfig.Setup(Strs: TStringArray); override;
@@ -363,5 +361,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@Config.Run);
   {$ENDIF}
-  RemainOfferer.Run(MaxActions, MaxTime);
+  RemainOfferer.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

@@ -4,6 +4,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 type
@@ -50,7 +51,7 @@ begin
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
     DebugNPCArray += @Toad;
 end;
 
@@ -270,6 +271,6 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@ChompyHunterConfig.Run);
   {$ENDIF}
-  ChompyHunter.Run(MaxActions, MaxTime);
+  ChompyHunter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
 {$ENDIF}

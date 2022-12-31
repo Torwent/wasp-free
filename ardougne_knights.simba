@@ -5,6 +5,7 @@
 
 begin
   Login.PlayerIndex := 0;
+  StatsPayload.Username := '';
 end;
 
 var
@@ -232,7 +233,7 @@ begin
   Self.CheckRogueEquipment();
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
-  if ScriptDebugEnabled then
+  if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += @Self.ScriptBank;
     DebugNPCArray += @Self.Knight;
@@ -343,7 +344,7 @@ end;
 function TThiever.Heal(): Boolean;
 begin
   repeat
-    if not Inventory.Consume(HEALTH_CONSUMABLE) then
+    if not Inventory.Consume(FOOD_CONSUMABLE) then
       Exit;
 
     Wait(300, 500);
@@ -486,13 +487,13 @@ begin
       if Inventory.IsFull() then
       begin
         if (Inventory.CountItem(Self.Necklace) < NeckAmount) or
-           not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
+           not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         Bank.DepositAll();
       end;
 
       if Inventory.CountItem(Self.Necklace) < NeckAmount then
         Exit(WITHDRAW_NECK);
-      if not Inventory.HasEnoughConsumable(HEALTH_CONSUMABLE) then
+      if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
     end;
 
@@ -521,7 +522,7 @@ begin
   begin
     if Inventory.ContainsAny(Self.BankArray) then
       Exit(OPEN_BANK);
-    if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
@@ -537,7 +538,7 @@ begin
 
   if Self.IsLowHP() then
   begin
-    if Inventory.FindConsumable(HEALTH_CONSUMABLE) then
+    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
@@ -569,7 +570,7 @@ begin
     case Self.State of
       OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
       DEPOSIT_ITEMS: Self.Deposit();
-      WITHDRAW_FOOD: Bank.WithdrawConsumable(HEALTH_CONSUMABLE);
+      WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
       WITHDRAW_NECK: Self.Withdraw(Self.Necklace, NeckAmount);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
@@ -662,5 +663,5 @@ begin
   {$IFDEF SCRIPT_GUI}
   Sync(@ThieverConfig.Run);
   {$ENDIF}
-  Thiever.Run(MaxActions, MaxTime);
+  Thiever.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
