@@ -1,3 +1,17 @@
+# [2.0.0](https://github.com/Torwent/wasp-free/compare/v1.0.36...v2.0.0) (2022-12-31)
+
+
+### Features
+
+* update compatibility with latest WaspLib ([0e69bb3](https://github.com/Torwent/wasp-free/commit/0e69bb365eee1cc20affbaa820dc6101d737afcc))
+
+
+### BREAKING CHANGES
+
+* This update breaks compatibility with older WaspLib versions. You need to update WaspLib and Scripts
+
+
+
 ## [1.0.36](https://github.com/Torwent/wasp-free/compare/v1.0.35...v1.0.36) (2022-12-31)
 
 
@@ -32,15 +46,6 @@
 ### Bug Fixes
 
 * discord notifications ([16abef2](https://github.com/Torwent/wasp-free/commit/16abef218255fbf689cb06088477d7f38dc7ad6d))
-
-
-
-## [1.0.32](https://github.com/Torwent/wasp-free/compare/v1.0.31...v1.0.32) (2022-12-30)
-
-
-### Bug Fixes
-
-* discord notifications ([c3c96dd](https://github.com/Torwent/wasp-free/commit/c3c96ddad806cfc961e933ebe958061066103152))
 
 
 
