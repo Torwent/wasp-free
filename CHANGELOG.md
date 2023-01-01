@@ -1,3 +1,12 @@
+## [2.1.2](https://github.com/Torwent/wasp-free/compare/v2.1.1...v2.1.2) (2023-01-01)
+
+
+### Bug Fixes
+
+* discord notifications ([59ccc87](https://github.com/Torwent/wasp-free/commit/59ccc8725849caa8773497292784b20ae078b5da))
+
+
+
 ## [2.1.1](https://github.com/Torwent/wasp-free/compare/v2.1.0...v2.1.1) (2023-01-01)
 
 
@@ -36,16 +45,6 @@
 ### Bug Fixes
 
 * better discord notifications ([c5ff0ef](https://github.com/Torwent/wasp-free/commit/c5ff0efe566a75e5f27b1164e4e75a80bb71d022))
-
-
-
-## [1.0.35](https://github.com/Torwent/wasp-free/compare/v1.0.34...v1.0.35) (2022-12-31)
-
-
-### Bug Fixes
-
-* more gh actions fixes. ([39824e4](https://github.com/Torwent/wasp-free/commit/39824e4c5b2e244d93fe638c508998b5dddcdae7))
-* more github action fixes ([6c00c1b](https://github.com/Torwent/wasp-free/commit/6c00c1ba9504ece6984d0893be741eafcfdeab49))
 
 
 
