@@ -1,3 +1,12 @@
+# [2.1.0](https://github.com/Torwent/wasp-free/compare/v2.0.0...v2.1.0) (2023-01-01)
+
+
+### Features
+
+* WaspLib compatibility fix ([40bef75](https://github.com/Torwent/wasp-free/commit/40bef75e702c347b780aa219b8c6000d27e18d12))
+
+
+
 # [2.0.0](https://github.com/Torwent/wasp-free/compare/v1.0.36...v2.0.0) (2022-12-31)
 
 
@@ -37,15 +46,6 @@
 ### Bug Fixes
 
 * update github actions ([1804e16](https://github.com/Torwent/wasp-free/commit/1804e1652ad4971c3a09b14b6534f99fc02331ab))
-
-
-
-## [1.0.33](https://github.com/Torwent/wasp-free/compare/v1.0.32...v1.0.33) (2022-12-30)
-
-
-### Bug Fixes
-
-* discord notifications ([16abef2](https://github.com/Torwent/wasp-free/commit/16abef218255fbf689cb06088477d7f38dc7ad6d))
 
 
 
