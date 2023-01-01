@@ -52,7 +52,7 @@ type
   end;
 
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -61,7 +61,7 @@ begin
   Antiban.MaxZoom := 85;
 end;
 
-procedure TBlower.SetupProduct;
+procedure TBlower.SetupProduct();
 var
   CurrentLevelItem: ERSGlassItem;
 begin
@@ -83,7 +83,7 @@ begin
   end;
 end;
 
-procedure TBlower.SetupItems;
+procedure TBlower.SetupItems();
 var
   ProductCost: Int32;
   X_Number: Int32;
@@ -137,7 +137,7 @@ begin
 end;
 
 
-function TBlower.HasRandomItem: Boolean;
+function TBlower.HasRandomItem(): Boolean;
 var
   Slots: TIntegerArray;
   UsedSlots: TIntegerArray := Inventory.GetUsedSlots;
@@ -148,7 +148,7 @@ begin
   Result := Length(Slots) <> Length(UsedSlots);
 end;
 
-function TBlower.CountItem: Int32;
+function TBlower.CountItem(): Int32;
 begin
   if (Result := Inventory.CountItemStack(Product.Item)) = 0 then
     Result := Inventory.CountItem(Product.Item);
@@ -168,7 +168,7 @@ begin
       CollectEmpty := False;
 end;
 
-function TBlower.DepositExtraItems: Boolean;
+function TBlower.DepositExtraItems(): Boolean;
 var
   Slots, DepositSlots: TIntegerArray;
   i: Int32;
@@ -185,7 +185,7 @@ begin
   until Result := (DepositSlots = []);
 end;
 
-function TBlower.Deposit: Boolean;
+function TBlower.Deposit(): Boolean;
 var
   ItemCount: Int32 := Self.CountItem;
 begin
@@ -194,7 +194,7 @@ begin
       TotalActions += ItemCount;
 end;
 
-function TBlower.HandleCollectBox: Boolean;
+function TBlower.HandleCollectBox(): Boolean;
 var
   Slots: TIntegerArray;
 begin
@@ -211,7 +211,7 @@ begin
 end;
 
 
-function TBlower.DoGlass: Boolean;
+function TBlower.DoGlass(): Boolean;
 begin
   if SRL.Dice(50) then
     Result := Inventory.Use(Tool.Item, Material.Item)
@@ -246,7 +246,7 @@ begin
 end;
 
 
-function TBlower.HandleMake: Boolean;
+function TBlower.HandleMake(): Boolean;
 var
   MakeStringArray: TStringArray;
   ItemIndex: Int32;
@@ -269,7 +269,7 @@ begin
 end;
 
 
-function TBlower.WaitBlowing: Boolean;
+function TBlower.WaitBlowing(): Boolean;
 begin
   if Blowing then
     Result := Blowing := Inventory.ContainsItem(Material.Item) and XPBar.WaitXP(2000)
@@ -278,7 +278,7 @@ begin
 end;
 
 
-function TBlower.GetState: EBlowerState;
+function TBlower.GetState(): EBlowerState;
 begin
   if WL.Activity.IsFinished then
     Exit(EBlowerState.END_SCRIPT);
@@ -343,7 +343,7 @@ begin
   Exit(EBlowerState.OPEN_BANK);
 end;
 
-function TBlower.Terminate: Boolean; override;
+function TBlower.Terminate(): Boolean; override;
 begin
   if inherited then
     for 0 to 3 do
@@ -405,8 +405,10 @@ begin
   Blower.CurrentLevel += 1;
 end;
 
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
 type
-  TBlowerConfig = record(TBankConfig)
+  TBlowerConfig = record(TScriptForm)
     GlassSelector: TLabeledCombobox;
   end;
 
@@ -414,19 +416,19 @@ procedure TBlowerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentGlass := ERSGlassItem(GlassSelector.Combobox.getItemIndex);
+  CurrentGlass := ERSGlassItem(Self.GlassSelector.Combobox.getItemIndex());
 end;
 
-procedure TBlowerConfig.Setup(Strs: TStringArray); override;
+procedure TBlowerConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
-  with GlassSelector do
+  with Self.GlassSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Glass item:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Beer glass');
@@ -441,18 +443,20 @@ begin
     Combobox.setItemIndex(Ord(CurrentGlass));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TBlowerConfig.Run; override;
+procedure TBlowerConfig.Run(); override;
 begin
-  Self.Setup(BankLocationStrings);
+  Self.Setup(False, False, True);
 
   inherited;
 end;
 
 var
   BlowerConfig: TBlowerConfig;
+{$ENDIF}
+{$ENDIF}
 
 {$IFNDEF SCRIPT_CHAIN}
 begin

@@ -368,10 +368,12 @@ end;
 var
   Alcher: TAlcher;
 
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
 type
-  TAlcherConfig = record(TScriptConfig)
+  TAlcherConfig = record(TScriptForm)
     AlchSelector: TLabeledCombobox;
-    IgnoreProfit: TLabeledCheckbox;
+    IgnoreProfit: TCheckbox;
     CustomItemSelector: TLabeledEdit;
   end;
 
@@ -379,27 +381,27 @@ procedure TAlcherConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  case AlchSelector.Combobox.getItemIndex of
+  case Self.AlchSelector.Combobox.getItemIndex() of
     0: AlchSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
     1: AlchSpell := ERSSpell.LOW_LEVEL_ALCHEMY;
   end;
 
-  LossProtection := IgnoreProfit.IsChecked;
-  CustomItem := CustomItemSelector.GetText;
+  LossProtection := Self.IgnoreProfit.IsChecked;
+  CustomItem := Self.CustomItemSelector.getText();
 end;
 
-procedure TAlcherConfig.Setup; override;
+procedure TAlcherConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 50);
+  UpdateFormSize(Self.Form, Self.Form.GetWidth(), Self.Form.GetHeight() + 50);
 
-  with AlchSelector do
+  with Self.AlchSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Alchemy spell:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('High alchemy');
@@ -407,37 +409,39 @@ begin
     Combobox.setItemIndex(0);
   end;
 
-  with IgnoreProfit do
+  with Self.IgnoreProfit do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Prevent loss:');
-    SetLeft(AlchSelector.getLeft + AlchSelector.GetWidth + 20);
-    SetTop(AlchSelector.getTop + 20);
+    SetLeft(Self.AlchSelector.GetLeft() + Self.AlchSelector.GetWidth() + 20);
+    SetTop(Self.AlchSelector.GetTop() + 20);
     SetEnabled(LossProtection);
   end;
 
-  with CustomItemSelector do
+  with Self.CustomItemSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Custom item to alch:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(AlchSelector.getTop + AlchSelector.GetHeight);
+    SetLeft(5);
+    SetTop(Self.AlchSelector.GetTop() + Self.AlchSelector.GetHeight());
     SetWidth(200);
     SetText(ToStr(CustomItem));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TAlcherConfig.Run; override;
+procedure TAlcherConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
 var
   AlcherConfig: TAlcherConfig;
+{$ENDIF}
+{$ENDIF}
 
 {$IFNDEF SCRIPT_CHAIN}
 begin

@@ -302,28 +302,29 @@ end;
 var
   RemainOfferer: TRemainOfferer;
 
+{$IFDEF SCRIPT_GUI}
 type
-  TRemainOffererConfig = record(TBankConfig)
+  TOffererConfig = record(TScriptForm)
     RemainSelector: TLabeledCombobox;
   end;
 
-procedure TRemainOffererConfig.StarTRemainOfferer(Sender: TObject);
+procedure TOffererConfig.StartOfferer(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentRemains := ERSRemains(RemainSelector.Combobox.getItemIndex);
+  CurrentRemains := ERSRemains(Self.RemainSelector.Combobox.getItemIndex());
 end;
 
-procedure TRemainOffererConfig.Setup(Strs: TStringArray); override;
+procedure TOffererConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
-  with RemainSelector do
+  with Self.RemainSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Task:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
+    SetLeft(15);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
 
@@ -345,17 +346,19 @@ begin
     Combobox.setItemIndex(Ord(CurrentRemains));
   end;
 
-  StartButton.setOnClick(@Self.StarTRemainOfferer);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartOfferer);
 end;
 
-procedure TRemainOffererConfig.Run; override;
+procedure TOffererConfig.Run(); override;
 begin
-  Self.Setup(BankLocationStrings);
+  Self.Setup(False, False, True);
 
   inherited;
 end;
 
-var Config: TRemainOffererConfig;
+var
+  Config: TOffererConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

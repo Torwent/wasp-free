@@ -81,8 +81,8 @@ begin
     [10345, 1105]
   ];
 
-  FoodManager.MinInvPoints := 10;
-  PrayerManager.MinInvPoints := 90;
+  FoodHandler.MinInvPoints := 10;
+  FoodHandler.MinInvPoints := 90;
 
   KrakenFinder.ClusterDistance := 3;
   KrakenFinder.Erode := 2;
@@ -233,7 +233,7 @@ function TScript.CheckLoot: Boolean;
 var
   B: TBox := MainScreen.GetPlayerFloorBox;
 begin
-  while Inventory.IsFull and Inventory.FindConsumable(FOOD_CONSUMABLE) do
+  while Inventory.IsFull() and Inventory.ContainsConsumable(FOOD_CONSUMABLE) do
     Inventory.Consume(FOOD_CONSUMABLE);
 
   Result := CheckedLoot := True;
@@ -257,7 +257,7 @@ begin
 
   if (Minimap.GetHPLevel <= 40) then
   begin
-    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
+    if Inventory.ContainsConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD)
     else if Self.FindRagingKraken then
       Exit(ATTACK_KRAKEN)
@@ -265,7 +265,7 @@ begin
       TerminateScript('OUT OF FOOD AND HEALTH');
   end;
 
-  if (Minimap.GetPrayerLevel <= 30) and Inventory.FindConsumable(PRAYER_CONSUMABLE) then
+  if (Minimap.GetPrayerLevel <= 30) and Inventory.ContainsConsumable(PRAYER_CONSUMABLE) then
     Exit(DRINK_PRAYER);
 
   if CombatHandler.NeedBracelet then
@@ -343,8 +343,9 @@ begin
     Script.IsAttacking := False;
 end;
 
+{$IFDEF SCRIPT_GUI}
 type
-  TConfig = record(TScriptConfig)
+  TConfig = record(TScriptForm)
     InfoText: TLabel;
   end;
 
@@ -353,43 +354,44 @@ begin
   Self.Init(Sender);
 end;
 
-procedure TConfig.Setup; override;
+procedure TConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth + 30, Form.getHeight + 40);
+  UpdateFormSize(Self.Form, Self.Form.GetWidth() + 30, Self.Form.GetHeight() + 40);
 
-  with InfoText do
+  with Self.InfoText do
   begin
-    Init(ScriptSettingsPanel);
-    setParent(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
+    setParent(Self.SSPanel.Panel);
     SetCaption(
-      'Keep in mind this script was only tested with Sang Staff.'
-      + STR_NEW_LINE +
+      'Keep in mind this script doesn''t bank so Sang Staff is highly recommended.'
+      + LineEnding +
       'If you have issues staying alive consider using magic and defense boosting prayers.'
-      + STR_NEW_LINE +
+      + LineEnding +
       'Overhead prayers have no effect on kraken.'
-      + STR_NEW_LINE + STR_NEW_LINE +
+      + LineEnding + LineEnding +
       'Also keep in mind this won''t stop when you have your inventory full of loot.'
-      + STR_NEW_LINE +
+      + LineEnding +
       'I recommend you check it every 40 mins or so to see if it needs banking.'
     );
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TConfig.Run; override;
+procedure TConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
   inherited;
 end;
 
 var
   Config: TConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

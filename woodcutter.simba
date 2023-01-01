@@ -521,21 +521,22 @@ end;
 var
   Woodcutter: TWoodcutter;
 
+{$IFDEF SCRIPT_GUI}
 type
-  TCutterConfig = record(TScriptConfig)
+  TCutterConfig = record(TScriptForm)
     TreeSelector: TLabeledCombobox;
     BankSelector: TLabeledCombobox;
-    SawmillState: TLabeledCheckbox;
-    PickNestsState: TLabeledCheckbox;
+    SawmillState: TCheckbox;
+    PickNestsState: TCheckbox;
   end;
 
 procedure TCutterConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentTree := ERSTree(TreeSelector.Combobox.getItemIndex);
+  CurrentTree := ERSTree(Self.TreeSelector.Combobox.getItemIndex());
 
-  case BankSelector.Combobox.getText of
+  case Self.BankSelector.Combobox.getText() of
     'Power WC (cut and drop)': BankLocation := ERSBank.POWER_WC;
     'Grand Exchange':          BankLocation := ERSBank.GE;
     'Varrock east':            BankLocation := ERSBank.VARROCK_E;
@@ -547,132 +548,133 @@ begin
     'Prifddinas':              BankLocation := ERSBank.PRIFDDINAS;
   end;
 
-  UseSawmill := SawmillState.IsChecked;
-  PickNests := PickNestsState.IsChecked;
+  UseSawmill := Self.SawmillState.IsChecked();
+  PickNests := Self.PickNestsState.IsChecked();
 end;
 
-
+{$H-}
 procedure TCutterConfig.TreeSelectorOnChange(Sender: TObject);
 begin
-  case ERSTree(TreeSelector.Combobox.getItemIndex) of
+  case ERSTree(Self.TreeSelector.Combobox.getItemIndex()) of
     REGULAR_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Grand Exchange');
-        BankSelector.AddItem('Varrock east (cuts close to sawmill)');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Grand Exchange');
+        Self.BankSelector.AddItem('Varrock east (cuts close to sawmill)');
+        Self.SawmillState.setEnabled(False);
       end;
 
     OAK_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Varrock east (cuts close to sawmill)');
-        BankSelector.AddItem('Varrock west');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Varrock east (cuts close to sawmill)');
+        Self.BankSelector.AddItem('Varrock west');
+        Self.SawmillState.setEnabled(False);
       end;
 
     WILLOW_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Draynor');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Draynor');
+        Self.SawmillState.setEnabled(False);
       end;
 
     TEAK_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Prifddinas');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Prifddinas');
+        Self.SawmillState.setEnabled(False);
       end;
 
     MAPLE_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        BankSelector.AddItem('Seers'' village');
-        BankSelector.AddItem('Woodcutting guild');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.BankSelector.AddItem('Seers'' village');
+        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.SawmillState.setEnabled(False);
       end;
 
     MAHOGANY_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Prifddinas');
-        SawmillState.Checkbox.setEnabled(True);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Prifddinas');
+        Self.SawmillState.setEnabled(True);
       end;
 
     YEW_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Seers'' village');
-        BankSelector.AddItem('Edgeville');
-        BankSelector.AddItem('Woodcutting guild');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Seers'' village');
+        Self.BankSelector.AddItem('Edgeville');
+        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.SawmillState.setEnabled(False);
       end;
 
     BLISTERWOOD_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Power WC (cut and drop)');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Power WC (cut and drop)');
+        Self.SawmillState.setEnabled(False);
       end;
 
     MAGIC_TREE:
       begin
-        BankSelector.Clear;
-        BankSelector.AddItem('Woodcutting guild');
-        BankSelector.AddItem('Prifddinas');
-        SawmillState.Checkbox.setEnabled(False);
+        Self.BankSelector.Clear;
+        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.BankSelector.AddItem('Prifddinas');
+        Self.SawmillState.setEnabled(False);
       end;
   end;
 
-  BankSelector.SetItemIndex(0);
+  Self.BankSelector.SetItemIndex(0);
 end;
 
 procedure TCutterConfig.BankSelectorOnChange(Sender: TObject);
 begin
-  case BankSelector.Combobox.getText of
-    'Varrock east', 'Woodcutting guild', 'Prifddinas':
+  case Self.BankSelector.Combobox.getText() of
+    'Varrock east', 'Self.Woodcutting guild', 'Prifddinas':
       begin
-        case ERSTree(TreeSelector.Combobox.getItemIndex) of
+        case ERSTree(Self.TreeSelector.Combobox.getItemIndex()) of
           REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
             begin
-              SawmillState.Checkbox.setState(cbUnchecked);
-              SawmillState.Checkbox.setEnabled(True);
+              Self.SawmillState.setState(cbUnchecked);
+              Self.SawmillState.setEnabled(True);
             end;
 
           else
             begin
-              SawmillState.Checkbox.setState(cbUnchecked);
-              SawmillState.Checkbox.setEnabled(False);
+              Self.SawmillState.setState(cbUnchecked);
+              Self.SawmillState.setEnabled(False);
             end;
         end;
       end;
 
     else
       begin
-        SawmillState.Checkbox.setState(cbUnchecked);
-        SawmillState.Checkbox.setEnabled(False);
+        Self.SawmillState.setState(cbUnchecked);
+        Self.SawmillState.setEnabled(False);
       end;
   end;
 end;
+{$H+}
 
 procedure TCutterConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 30);
+  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 30);
 
-  with TreeSelector do
+  with Self.TreeSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Tree type:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     SetStyle(csDropDownList);
     AddItem('Regular tree');
@@ -688,48 +690,51 @@ begin
     Combobox.SetOnChange(@Self.TreeSelectorOnChange);
   end;
 
-  with BankSelector do
+  with Self.BankSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Bank location:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 45);
-    SetWidth(TreeSelector.GetWidth);
+    SetLeft(5);
+    SetTop(Self.TreeSelector.GetTop() + Self.TreeSelector.GetHeight());
+    SetWidth(Self.TreeSelector.GetWidth());
     SetStyle(csDropDownList);
     Combobox.SetOnChange(@Self.BankSelectorOnChange);
   end;
 
-  with SawmillState do
+  with Self.SawmillState do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
+    SetParent(Self.SSPanel.Panel);
     SetCaption('Sawmill:');
-    SetLeft(TreeSelector.getLeft + TreeSelector.GetWidth + 25);
-    SetTop(TreeSelector.getTop + 20);
-    Checkbox.setEnabled(False);
+    SetLeft(Self.TreeSelector.GetLeft() + Self.TreeSelector.GetWidth() + 25);
+    SetTop(Self.TreeSelector.GetTop() + 20);
+    SetEnabled(False);
   end;
 
-  with PickNestsState do
+  with Self.PickNestsState do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
+    SetParent(Self.SSPanel.Panel);
     SetCaption('Pick nests:');
-    SetLeft(SawmillState.getLeft);
-    SetTop(SawmillState.getTop + SawmillState.GetHeight + 20);
-    Checkbox.setState(cbChecked);
+    SetLeft(Self.SawmillState.GetLeft());
+    SetTop(Self.BankSelector.GetTop() + 20);
+    SetChecked(True);
   end;
 
-  Self.TreeSelectorOnChange(BankSelector.Combobox);
-  StartButton.setOnClick(@Self.StartScript);
+  Self.TreeSelectorOnChange(Self.BankSelector.Combobox);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
 procedure TCutterConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
 var
   CutterConfig: TCutterConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

@@ -210,7 +210,7 @@ begin
   Self.ScriptBank := RSObjects.ArdougneSouthBank;
   Self.SetupKnight();
 
-  FoodManager.Amount := FoodAmount;
+  FoodHandler.Amount := FoodAmount;
 
   Self.CoinPouch := 'Coin pouch';
   Self.Necklace := 'Dodgy necklace';
@@ -601,14 +601,14 @@ var
 
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override
 var
-  HandlerManager: PConsumableManager := GetHandler(ConsumableType);
+  consumableHandler: PConsumableHandler := GetHandler(ConsumableType);
 begin
-  Result := Self.CountConsumable(ConsumableType) >= HandlerManager^.Amount;
+  Result := Self.CountPoints(ConsumableType) >= consumableHandler^.Amount;
 end;
 
+{$IFDEF SCRIPT_GUI}
 type
-  TThieverConfig = record(TScriptConfig)
-    FoodAmountEdit: TLabeledEdit;
+  TThieverConfig = record(TScriptForm)
     NeckAmountEdit: TLabeledEdit;
   end;
 
@@ -616,48 +616,39 @@ procedure TThieverConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  FoodAmount := StrToInt(FoodAmountEdit.GetText);
-  NeckAmount := StrToInt(NeckAmountEdit.GetText);
+  FoodAmount := StrToInt(Self.WLPanel.FoodPanel.ConsumableAmount.GetText());
+  NeckAmount := StrToInt(Self.NeckAmountEdit.getText());
 end;
 
-procedure TThieverConfig.Setup; override;
+procedure TThieverConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 70);
-
-  with FoodAmountEdit do
+  with Self.NeckAmountEdit do
   begin
-    Init(ScriptSettingsPanel);
-    SetCaption('Food amount:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
-    SetWidth(80);
-    SetText(ToStr(FoodAmount));
-  end;
-
-  with NeckAmountEdit do
-  begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Necklaces amount:');
-    SetLeft(FoodAmountEdit.getLeft + FoodAmountEdit.GetWidth + 30);
-    SetTop(FoodAmountEdit.getTop);
-    SetWidth(80);
+    SetLeft(150);
+    SetTop(50);
+    SetWidth(110);
     SetText(ToStr(NeckAmount));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.FoodPanel.ConsumableAmount.SetText(ToStr(FoodAmount));
+  Self.WLPanel.FoodPanel.ConsumableAmount.SetVisible(True);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TThieverConfig.Run; override;
+procedure TThieverConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup(True, False, False);
 
   inherited;
 end;
 
 var
   ThieverConfig: TThieverConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

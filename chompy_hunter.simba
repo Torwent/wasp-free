@@ -224,8 +224,9 @@ begin
             or XPBar.EarnedXP or (Self.FindHitsplats <> []);
 end;
 
+{$IFDEF SCRIPT_GUI}
 type
-  TChompyHunterConfig = record(TScriptConfig)
+  TChompyHunterConfig = record(TScriptForm)
     ChompyHunterInfo: TLabel;
   end;
 
@@ -234,43 +235,42 @@ begin
   Self.Init(Sender);
 end;
 
-procedure TChompyHunterConfig.Setup; override;
+procedure TChompyHunterConfig.Setup(); override;
 begin
   inherited;
 
-  with ChompyHunterInfo do
+  with Self.ChompyHunterInfo do
   begin
-    Init(ScriptSettingsPanel);
-    setParent(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
+    setParent(Self.SSPanel.Panel);
 
-    SetCaption('This script is in BETA!' +
-               STR_NEW_LINE +
-               'Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
-               STR_NEW_LINE +
-               'It''s probably a good idea to BABY SIT!');
+    SetCaption('Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
+               LineEnding +
+               'Start south of castle wars, in the middle pools close to the smoke dungeon.' +
+               LineEnding +
+               'It''s probably a good idea to baby sit!');
 
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);
+    SetTop(45);
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TChompyHunterConfig.Run; override;
+procedure TChompyHunterConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
 var
   ChompyHunterConfig: TChompyHunterConfig;
+{$ENDIF}
 
-{$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
   Sync(@ChompyHunterConfig.Run);
   {$ENDIF}
   ChompyHunter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
-{$ENDIF}

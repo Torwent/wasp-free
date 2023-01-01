@@ -98,7 +98,7 @@ end;
 
 procedure TThiever.SetupNPC;
 begin
-  FoodManager.Amount := FoodAmount;
+  FoodHandler.Amount := FoodAmount;
 
   case PickedNPC of
     MAN:
@@ -384,15 +384,15 @@ begin
     ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetCurrentLevel(ERSSkill.MAGIC)));
   end;
 
-  if not SuicideMode and ((FoodManager.Amount + NeckAmount + 2) >= 26) then
+  if not SuicideMode and ((FoodHandler.Amount + NeckAmount + 2) >= 26) then
   begin
-    if UseShadowVeil then
-      FoodManager.Amount := 26 - NeckAmount - 1
+    if Self.UseShadowVeil then
+      FoodHandler.Amount := 26 - NeckAmount - 1
     else
-      FoodManager.Amount := 26 - NeckAmount;
+      FoodHandler.Amount := 26 - NeckAmount;
   end
-  else if ((FoodManager.Amount + NeckAmount + 2 + Length(StackableArray)) >= (28 - Length(StackableArray))) then
-    FoodManager.Amount := 28 - NeckAmount - 2 - Length(StackableArray);
+  else if ((FoodHandler.Amount + NeckAmount + 2 + Length(Self.StackableArray)) >= (28 - Length(Self.StackableArray))) then
+    FoodHandler.Amount := 28 - NeckAmount - 2 - Length(Self.StackableArray);
 
   if WLSettings.RemoteInput.ScriptDebug then
   begin
@@ -682,7 +682,7 @@ begin
     end;
   end;
 
-  FoodManager.Amount := 0;
+  FoodHandler.Amount := 0;
 end;
 
 function TThiever.LootGrave: Boolean;
@@ -730,20 +730,20 @@ end;
 
 function TThiever.GetState: EThieverState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
 
-  if ChooseOption.IsOpen then
+  if ChooseOption.IsOpen() then
     Exit(CLOSE_CONTEXT);
 
-  if MainScreen.FindGrave then
+  if MainScreen.FindGrave() then
     Exit(LOOT_GRAVE);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
-      if Self.HasDepositItems then
+      if Self.HasDepositItems() then
         Exit(DEPOSIT_LOOT);
       if Inventory.CountItem(Necklace) < NeckAmount then
         Exit(WITHDRAW_NECKLACES);
@@ -763,13 +763,13 @@ begin
   if not ChatButtons.IsActive(ERSChatButton.GAME_CHAT) then
     Exit(OPEN_CHAT);
 
-  if NeckTimer.IsFinished then
+  if NeckTimer.IsFinished() then
     Exit(CHECK_NECKLACE);
 
-  if Self.HasRogue then
+  if Self.HasRogue() then
     Exit(EQUIP_ROGUE);
 
-  if not Self.HasSpace then
+  if not Self.HasSpace() then
   begin
     if Inventory.ContainsAny(DropArray) then
       Exit(DROP_ITEMS);
@@ -789,7 +789,7 @@ begin
 
   if Self.IsLowHP then
   begin
-    if not RedemptionEnabled and Inventory.FindConsumable(FOOD_CONSUMABLE) then
+    if not RedemptionEnabled and Inventory.ContainsConsumable(FOOD_CONSUMABLE) then
       Exit(EAT_FOOD);
     if not SuicideMode then
       Exit(OPEN_BANK);
@@ -797,7 +797,7 @@ begin
       Exit(WALK_TO_NPC);
     if UseRedemption and not RedemptionEnabled then
       Exit(ENABLE_REDEMPTION);
-    if UseShadowVeil and ShadowVeilTimer.IsFinished then
+    if UseShadowVeil and ShadowVeilTimer.IsFinished() then
       Exit(CAST_SHADOW_VEIL);
 
     Exit(PICKPOCKET);
@@ -806,7 +806,7 @@ begin
   if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
     Exit(WALK_TO_NPC);
 
-  if UseShadowVeil and ShadowVeilTimer.IsFinished then
+  if UseShadowVeil and ShadowVeilTimer.IsFinished() then
     Exit(CAST_SHADOW_VEIL);
 
   Exit(PICKPOCKET);
@@ -866,29 +866,6 @@ end;
 var
   Thiever: TThiever;
 
-procedure TConsumableManager.Setup(ConsumableType: ERSConsumable); override;
-var
-  Item: TRSItem;
-begin
-  inherited;
-
-  if ConsumableType = FOOD_CONSUMABLE then
-    for Item in Self.ItemArray do
-      if Thiever.StackableArray.Find(Item) < 0 then
-        Thiever.StackableArray += Item;
-end;
-
-procedure TConsumableManager.SetupNew(ConsumableType: ERSConsumable); override;
-var
-  Item: TRSItem;
-begin
-  inherited;
-
-  if ConsumableType = FOOD_CONSUMABLE then
-    for Item in Self.ItemArray do
-      if Thiever.StackableArray.Find(Item) < 0 then
-        Thiever.StackableArray += Item;
-end;
 
 function TRSChooseOption.Select(Text: TStringArray; MouseAction: Int32 = MOUSE_LEFT; CaseSensitive: Boolean = True; CloseIfNotFound: Boolean = True): Boolean; override;
 var
@@ -921,154 +898,121 @@ end;
 
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override;
 begin
-  Result := Self.CountPoints(ConsumableType) >= FoodManager.Amount;
+  Result := Self.CountPoints(ConsumableType) >= FoodHandler.Amount;
 end;
 
-function TRSBank.WithdrawConsumableAmount(ConsumableType: ERSConsumable; Idx: Int32): Int32; override;
-var
-  HandlerManager: ^TConsumableManager := GetHandler(ConsumableType);
-begin
-  if ConsumableType = FOOD_CONSUMABLE then
-    Exit(FoodAmount - Inventory.CountConsumable(FOOD_CONSUMABLE));
 
-  case HandlerManager^.Handlers[Idx].Amount of
-    BANK_WITHDRAW_ALL: Result := BANK_WITHDRAW_ALL;
-    BANK_WITHDRAW_ALL_BUT_ONE: Result := BANK_WITHDRAW_ALL_BUT_ONE;
-    else
-      Result := Ceil((HandlerManager^.MinInvPoints - Inventory.CountPoints(ConsumableType)) / HandlerManager^.Handlers[Idx].GetPoints);
-  end;
-end;
-
+{$IFDEF SCRIPT_GUI}
 type
-  TThieverConfig = record(TScriptConfig)
+  TThieverConfig = record(TScriptForm)
     NPCSelector: TLabeledCombobox;
     FoodAmountEdit: TLabeledEdit;
     NeckAmountEdit: TLabeledEdit;
     MinHealthEdit: TLabeledEdit;
-    SuicideState: TLabeledCheckbox;
+    SuicideState: TCheckbox;
   end;
 
 procedure TThieverConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  PickedNPC := ENPC(NPCSelector.Combobox.getItemIndex);
-  SuicideMode := SuicideState.Checkbox.getState = cbChecked;
+  PickedNPC := ENPC(Self.NPCSelector.Combobox.getItemIndex());
+  SuicideMode := Self.SuicideState.getState = cbChecked;
 
-  FoodAmount := StrToInt(FoodAmountEdit.GetText);
-  NeckAmount := StrToInt(NeckAmountEdit.GetText);
-  NextHeal := StrToInt(MinHealthEdit.GetText);
+  FoodAmount := StrToInt(Self.WLPanel.FoodPanel.ConsumableAmount.GetText());
+  NeckAmount := StrToInt(Self.NeckAmountEdit.getText());
+  NextHeal := StrToInt(Self.WLPanel.FoodPanel.MinPoints.GetText());
 end;
 
 procedure TThieverConfig.NPCSelectorOnChange(Sender: TObject);
 begin
   Writeln(Sender, ' has changed');
 
-  case ENPC(NPCSelector.Combobox.getItemIndex) of
+  case ENPC(Self.NPCSelector.Combobox.getItemIndex()) of
     MAN:
       begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
+        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.setEnabled(False);
       end;
 
     MASTER_FARMER:
       begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
+        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.setEnabled(False);
       end;
 
     TZHAAR_CITY:
       begin
-        SuicideState.Checkbox.setState(cbUnchecked);
-        SuicideState.Checkbox.setEnabled(False);
+        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.setEnabled(False);
       end;
 
     else
     begin
-      SuicideState.Checkbox.setState(cbChecked);
-      SuicideState.Checkbox.setEnabled(True);
+      Self.SuicideState.setState(cbChecked);
+      Self.SuicideState.setEnabled(True);
     end;
   end;
 
 end;
 
-procedure TThieverConfig.Setup; override;
+procedure TThieverConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 70);
-
-  with NPCSelector do
+  with Self.NPCSelector do
   begin
-    Init(ScriptSettingsPanel);
-    SetCaption('Agility course:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    Init(Self.SSPanel.Panel);
+    SetCaption('NPC:');
+    SetLeft(5);
+    SetTop(30);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('Men and women (Lumbridge only)');
     Combobox.getItems.Add('Master farmers (Draynor only)');
     Combobox.getItems.Add('Guards (Falador only)');
+    Combobox.getItems.Add('Knights of Ardougne');
     Combobox.getItems.Add('Elves (Prifddinas only)');
     Combobox.getItems.Add('Tzhaars');
     Combobox.setItemIndex(Ord(PickedNPC));
     Combobox.setOnChange(@Self.NPCSelectorOnChange);
   end;
 
-  with FoodAmountEdit do
+  with Self.NeckAmountEdit do
   begin
-    Init(ScriptSettingsPanel);
-    SetCaption('Food amount:');
-    SetLeft(NPCSelector.getLeft);
-    SetTop(NPCSelector.getTop + NPCSelector.GetHeight + 10);
-    SetWidth(80);
-    SetText(ToStr(FoodAmount));
-  end;
-
-  with NeckAmountEdit do
-  begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Necklaces amount:');
-    SetLeft(FoodAmountEdit.getLeft + FoodAmountEdit.GetWidth + 30);
-    SetTop(FoodAmountEdit.getTop);
-    SetWidth(80);
+    SetLeft(250);
+    SetTop(30);
+    SetWidth(110);
     SetText(ToStr(NeckAmount));
   end;
 
-  with MinHealthEdit do
+  with Self.SuicideState do
   begin
-    Init(ScriptSettingsPanel);
-    SetCaption('Minimum health:');
-    SetLeft(NeckAmountEdit.getLeft + NeckAmountEdit.GetWidth + 35);
-    SetTop(FoodAmountEdit.getTop);
-    SetWidth(80);
-    SetText(ToStr(Round(Antiban.GetUniqueNumber(10 * 8))));
-  end;
-
-  with SuicideState do
-  begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Suicide mode:');
-    SetLeft(NPCSelector.getLeft + NPCSelector.GetWidth + 25);
-    SetTop(NPCSelector.getHeight);
-    SetWidth(50);
-    SetHeight(10);
+    SetLeft(5);
+    SetTop(15);
     SetEnabled(True);
-    Self.NPCSelectorOnChange(@SuicideState);
+    Self.NPCSelectorOnChange(@Self.SuicideState);
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.FoodPanel.ConsumableAmount.SetText(ToStr(FoodAmount));
+  Self.WLPanel.FoodPanel.ConsumableAmount.SetVisible(True);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TThieverConfig.Run; override;
+procedure TThieverConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup(True, False, False);
 
   inherited;
 end;
 
 var
   ThieverConfig: TThieverConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

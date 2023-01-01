@@ -448,8 +448,10 @@ end;
 var
   Enchanter: TEnchanter;
 
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
 type
-  TEnchanterConfig = record(TBankConfig)
+  TEnchanterConfig = record(TScriptForm)
     GemSelector: TLabeledCombobox;
     JewelSelector: TLabeledCombobox;
   end;
@@ -458,21 +460,21 @@ procedure TEnchanterConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  RegularJewel := GemSelector.GetText().Replace('Red t', 'T') + ' ' + JewelSelector.GetText.Lower();
+  RegularJewel := Self.GemSelector.getText() + ' ' + Self.JewelSelector.getText().ToLower();
 end;
 
-procedure TEnchanterConfig.Setup(Strs: TStringArray); override;
+procedure TEnchanterConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
 var
   Str: String
 begin
   inherited;
 
-  with GemSelector do
+  with Self.GemSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Gem type:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 55);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     SetStyle(csDropDownList);
     for Str in GEM_TYPE do
@@ -480,12 +482,12 @@ begin
     SetItemIndex(3);
   end;
 
-  with JewelSelector do
+  with Self.JewelSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Jewel type:');
-    SetLeft(GemSelector.GetLeft + GemSelector.GetWidth + 5);
-    SetTop(GemSelector.GetTop);
+    SetLeft(Self.GemSelector.GetLeft() + Self.GemSelector.GetWidth() + 5);
+    SetTop(Self.GemSelector.GetTop());
     SetWidth(200);
     SetStyle(csDropDownList);
     for Str in JEWELRY_TYPE do
@@ -493,18 +495,20 @@ begin
     SetItemIndex(0);
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TEnchanterConfig.Run; override;
+procedure TEnchanterConfig.Run(); override;
 begin
-  Self.Setup(BankLocationStrings);
+  Self.Setup(False, False, True);
 
   inherited;
 end;
 
 var
   EnchanterConfig: TEnchanterConfig;
+{$ENDIF}
+{$ENDIF}
 
 {$IFNDEF SCRIPT_CHAIN}
 begin

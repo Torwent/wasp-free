@@ -171,8 +171,9 @@ end;
 var
   StallRobber: TStallRobber;
 
+{$IFDEF SCRIPT_GUI}
 type
-  TStallRobberConfig = record(TScriptConfig)
+  TStallRobberConfig = record(TScriptForm)
     StallSelector: TLabeledCombobox;
   end;
 
@@ -180,39 +181,41 @@ procedure TStallRobberConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentStall := ERSStall(StallSelector.Combobox.getItemIndex);
+  CurrentStall := ERSStall(Self.StallSelector.Combobox.getItemIndex());
 end;
 
-procedure TStallRobberConfig.Setup; override;
+procedure TStallRobberConfig.Setup(); override;
 begin
   inherited;
 
-  with StallSelector do
+  with Self.StallSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Stall:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('Tea stall');
+    Combobox.getItems.Add('Food stall');
     Combobox.getItems.Add('Silk stall');
     Combobox.getItems.Add('Fruit stall');
     Combobox.setItemIndex(Ord(CurrentStall));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TStallRobberConfig.Run; override;
+procedure TStallRobberConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
 var
   StallRobberConfig: TStallRobberConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

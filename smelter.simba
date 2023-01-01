@@ -10,17 +10,17 @@ end;
 {$ENDIF}
 
 type
-  EBar = (
+  ERSBarType = (
     BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANT, RUNITE, MOLTEN_GLASS
   );
 
-  EFurnace = (
+  ERSFurnace = (
     EDGEVILLE_FURNACE, FALADOR_FURNACE
   );
 
 var
-  CurrentBar = EBar.GOLD;
-  CurrentFurnace = EFurnace.EDGEVILLE_FURNACE;
+  CurrentBar = ERSBarType.GOLD;
+  CurrentFurnace = ERSFurnace.EDGEVILLE_FURNACE;
 
 type
   ESmelterState = (
@@ -78,14 +78,14 @@ end;
 procedure TSmelter.SetupFurnaces;
 begin
   case CurrentFurnace of
-    EFurnace.EDGEVILLE_FURNACE:
+    ERSFurnace.EDGEVILLE_FURNACE:
       begin
         RSW.Setup(GetMapBlock(EWaspMapBlock.VARROCK));
         Furnace := RSObjects.EdgevilleFurnace;
         ScriptBank := RSObjects.EdgevilleBank;
       end;
 
-    EFurnace.FALADOR_FURNACE:
+    ERSFurnace.FALADOR_FURNACE:
       begin
         RSW.Setup(GetMapBlock(EWaspMapBlock.FALADOR));
         Furnace := RSObjects.FaladorFurnace;
@@ -99,60 +99,60 @@ begin
   Bar.Quantity := BANK_DEPOSIT_ALL;
 
   case CurrentBar of
-    EBar.BRONZE:
+    ERSBarType.BRONZE:
       begin
         Bar.Item := 'Bronze bar';
         Ore1 := ['Copper ore', 14, False];
         Ore2 := ['Tin ore', 14, False];
       end;
 
-    EBar.IRON:
+    ERSBarType.IRON:
       begin
         Bar.Item := 'Iron bar';
         Ore1 := ['Iron ore', BANK_WITHDRAW_ALL, False];
       end;
 
-    EBar.SILVER:
+    ERSBarType.SILVER:
       begin
         Bar.Item := 'Silver bar';
         Ore1 := ['Silver ore', BANK_WITHDRAW_ALL, False];
       end;
 
-    EBar.STEEL:
+    ERSBarType.STEEL:
       begin
         Bar.Item := 'Steel bar';
         Ore1 := ['Iron ore', 9, False];
         Ore2 := ['Coal', 18, False];
       end;
 
-    EBar.GOLD:
+    ERSBarType.GOLD:
       begin
         Bar.Item := 'Gold bar';
         Ore1 := ['Gold ore', BANK_WITHDRAW_ALL, False];
       end;
 
-    EBar.MITHRIL:
+    ERSBarType.MITHRIL:
       begin
         Bar.Item := 'Mithril bar';
         Ore1 := ['Mithril ore', 5, False];
         Ore2 := ['Coal', 20, False];
       end;
 
-    EBar.ADAMANT:
+    ERSBarType.ADAMANT:
       begin
         Bar.Item := 'Adamantite bar';
         Ore1 := ['Adamantite ore', 4, False];
         Ore2 := ['Coal', 24, False];
       end;
 
-    EBar.RUNITE:
+    ERSBarType.RUNITE:
       begin
         Bar.Item := 'Runite bar';
         Ore1 := ['Runite ore', 3, False];
         Ore2 := ['Coal', 27, False];
       end;
 
-    EBar.MOLTEN_GLASS:
+    ERSBarType.MOLTEN_GLASS:
       begin
         Bar.Item := 'Molten glass';
         Ore1 := ['Soda ash', 14, False];
@@ -410,31 +410,32 @@ end;
 var
   Smelter: TSmelter;
 
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
 type
-  TSmelterConfig = record(TScriptConfig)
+  TSmelterConfig = record(TScriptForm)
     BarTypeSelector: TLabeledCombobox;
     FurnaceSelector: TLabeledCombobox;
-    MetalItemSelector: TLabeledEdit;
   end;
 
 procedure TSmelterConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentBar := EBar(BarTypeSelector.GetItemIndex);
-  CurrentFurnace := EFurnace(FurnaceSelector.GetItemIndex);
+  CurrentBar := ERSBarType(Self.BarTypeSelector.getItemIndex());
+  CurrentFurnace := ERSFurnace(Self.FurnaceSelector.getItemIndex());
 end;
 
-procedure TSmelterConfig.Setup; override;
+procedure TSmelterConfig.Setup(); override;
 begin
   inherited;
 
-  with BarTypeSelector do
+  with Self.BarTypeSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Bar type:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     SetStyle(csDropDownList);
     AddItem('Bronze');
@@ -449,12 +450,12 @@ begin
     SetItemIndex(Ord(CurrentBar));
   end;
 
-  with FurnaceSelector do
+  with Self.FurnaceSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Furnace:');
-    SetLeft(BarTypeSelector.GetLeft + BarTypeSelector.GetWidth + 5);
-    SetTop(BarTypeSelector.GetTop);
+    SetLeft(Self.BarTypeSelector.GetLeft() + Self.BarTypeSelector.GetWidth() + 5);
+    SetTop(Self.BarTypeSelector.GetTop());
     SetWidth(200);
     SetStyle(csDropDownList);
     AddItem('Edgeville');
@@ -462,17 +463,20 @@ begin
     SetItemIndex(Ord(CurrentFurnace));
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TSmelterConfig.Run; override;
+procedure TSmelterConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
-var SmelterConfig: TSmelterConfig;
+var
+  SmelterConfig: TSmelterConfig;
+{$ENDIF}
+{$ENDIF}
 
 {$IFNDEF SCRIPT_CHAIN}
 begin

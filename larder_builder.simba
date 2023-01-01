@@ -396,7 +396,6 @@ begin
                        (s = 'Repeat last task?'), SRL.TruncatedGauss(50, 1500), 5000);
 end;
 
-
 function TRSOptions.LeaveHouse(): Boolean; override;
 var
   b: TBox;
@@ -416,8 +415,9 @@ begin
 end;
 
 
+{$IFDEF SCRIPT_GUI}
 type
-  TBuilderConfig = record(TScriptConfig)
+  TBuilderConfig = record(TScriptForm)
     NPCSelector: TLabeledCombobox;
     LarderSelector: TLabeledCombobox;
     BuilderInfo: TLabel;
@@ -429,22 +429,22 @@ procedure TBuilderConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentNPC := ERSNPC(NPCSelector.Combobox.getItemIndex);
-  CurrentLarder := ERSLarder(LarderSelector.Combobox.getItemIndex);
+  CurrentNPC := ERSNPC(Self.NPCSelector.Combobox.getItemIndex());
+  CurrentLarder := ERSLarder(Self.LarderSelector.Combobox.getItemIndex());
 end;
 
-procedure TBuilderConfig.Setup; override;
+procedure TBuilderConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 250);
+  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 250);
 
-  with NPCSelector do
+  with Self.NPCSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Method:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Phials');
@@ -452,12 +452,12 @@ begin
     Combobox.setItemIndex(Ord(CurrentNPC));
   end;
 
-  with LarderSelector do
+  with Self.LarderSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Larder:');
-    SetLeft(NPCSelector.getLeft + NPCSelector.GetWidth + 10);
-    SetTop(NPCSelector.getTop);
+    SetLeft(Self.NPCSelector.GetLeft() + Self.NPCSelector.GetWidth() + 10);
+    SetTop(Self.NPCSelector.GetTop());
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Regular');
@@ -465,50 +465,51 @@ begin
     Combobox.setItemIndex(Ord(CurrentLarder));
   end;
 
-  with BuilderInfo do
+  with Self.BuilderInfo do
   begin
-    Init(ScriptSettingsPanel);
-    setParent(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
+    setParent(Self.SSPanel.Panel);
 
     SetCaption('For Phials method make sure you have noted planks with you.' +
-               STR_NEW_LINE +
+               LineEnding +
                'For Demon buttler make sure you previously asked him for 24 planks and' +
-               STR_NEW_LINE +
+               LineEnding +
                'you need to have money in the servant''s money bag.' +
-               STR_NEW_LINE +
+               LineEnding +
                'You need a decoration that has green grass and the following layout:');
 
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(NPCSelector.getTop + NPCSelector.getHeight + 2);
+    SetLeft(5);
+    SetTop(Self.NPCSelector.GetTop() + Self.NPCSelector.GetHeight() + 2);
   end;
 
-  Pic.Init;
-  Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\poh_layout.png');
+  Self.Pic.Init();
+  Self.Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\POH_layout.png');
 
-  with ImagePanel do
+  with Self.ImagePanel do
   begin
-    Init(ScriptSettingsPanel);
-    SetParent(ScriptSettingsPanel);
-    SetTop(BuilderInfo.GetTop + 65);
-    SetLeft(BuilderInfo.getLeft + 80);
+    Init(Self.SSPanel.Panel);
+    SetParent(Self.SSPanel.Panel);
+    SetTop(Self.BuilderInfo.GetTop() + 65);
+    SetLeft(Self.BuilderInfo.GetLeft() + 80);
     setWidth(195);
     SetHeight(194);
-    setPicture(Pic);
+    setPicture(Self.Pic);
   end;
 
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TBuilderConfig.Run; override;
+procedure TBuilderConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
 var
   BuilderConfig: TBuilderConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

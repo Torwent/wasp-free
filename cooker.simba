@@ -400,8 +400,10 @@ begin
 end;
 
 
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
 type
-  TCookerConfig = record(TScriptConfig)
+  TCookerConfig = record(TScriptForm)
     LocSelector: TLabeledCombobox;
     CustomFoodName: TLabeledEdit;
     FoodSelector: TLabeledCombobox;
@@ -411,33 +413,34 @@ procedure TCookerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentLocation := ERSLocation(LocSelector.Combobox.getItemIndex);
-  if FoodSelector.GetText = 'Custom' then
-    CurrentFood := CustomFoodName.GetText
+  CurrentLocation := ERSLocation(Self.LocSelector.Combobox.getItemIndex());
+  if Self.FoodSelector.getText() = 'Custom' then
+    CurrentFood := Self.CustomFoodName.getText()
   else
-    CurrentFood := FoodSelector.GetText;
+    CurrentFood := Self.FoodSelector.getText();
 end;
 
-
+{$H-}
 procedure TCookerConfig.FoodSelectorOnChange(Sender: TObject);
 begin
-  CustomFoodName.SetVisible(FoodSelector.GetText = 'Custom');
+  Self.CustomFoodName.SetVisible(Self.FoodSelector.getText() = 'Custom');
 end;
+{$H+}
 
-procedure TCookerConfig.Setup; override;
+procedure TCookerConfig.Setup(); override;
 var
   Str: String;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 30);
+  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 30);
 
-  with LocSelector do
+  with Self.LocSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Location:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 5);
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     SetStyle(csDropDownList);
     AddItem('Hosidius kitchen');
@@ -445,12 +448,12 @@ begin
     SetItemIndex(Ord(CurrentLocation));
   end;
 
-  with FoodSelector do
+  with Self.FoodSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Food type:');
-    SetLeft(LocSelector.GetLeft + LocSelector.GetWidth + 20);
-    SetTop(LocSelector.GetTop);
+    SetLeft(Self.LocSelector.GetLeft() + Self.LocSelector.GetWidth() + 20);
+    SetTop(Self.LocSelector.GetTop());
     SetWidth(200);
     SetStyle(csDropDownList);
 
@@ -461,30 +464,32 @@ begin
     Combobox.setOnChange(@Self.FoodSelectorOnChange);
   end;
 
-  with CustomFoodName do
+  with Self.CustomFoodName do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Food name (must be the exact name):');
-    SetLeft(FoodSelector.getLeft);
-    SetTop(LocSelector.getTop + LocSelector.GetHeight - 15);
+    SetLeft(Self.FoodSelector.GetLeft());
+    SetTop(Self.LocSelector.GetTop() + Self.LocSelector.GetHeight() - 15);
     SetWidth(200);
     SetText(CurrentFood);
   end;
 
-  Self.FoodSelectorOnChange(FoodSelector.Combobox);
+  Self.FoodSelectorOnChange(Self.FoodSelector.Combobox);
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TCookerConfig.Run; override;
+procedure TCookerConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
 var
   CookerConfig: TCookerConfig;
+{$ENDIF}
+{$ENDIF}
 
 {$IFNDEF SCRIPT_CHAIN}
 begin

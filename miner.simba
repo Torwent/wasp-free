@@ -431,9 +431,9 @@ begin
   Result := not Inventory.ContainsAny(ItemList);
 end;
 
-
+{$IFDEF SCRIPT_GUI}
 type
-  TMinerConfig = record(TScriptConfig)
+  TMinerConfig = record(TScriptForm)
     RockSelector: TLabeledCombobox;
     BankSelector: TLabeledCombobox;
   end;
@@ -442,9 +442,9 @@ procedure TMinerConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentRock := ERSRock(RockSelector.Combobox.getItemIndex);
+  CurrentRock := ERSRock(Self.RockSelector.Combobox.getItemIndex());
 
-  case BankSelector.Combobox.getText of
+  case Self.BankSelector.Combobox.getText() of
     'Power mine (mine and drop)': BankLocation := ERSBank.POWER_MINE;
     'P2P Mining Guild':           BankLocation := ERSBank.MINE_GUILD;
     'Crafting guild':             BankLocation := ERSBank.CRAFTING_GUILD_MINE;
@@ -458,70 +458,70 @@ procedure TMinerConfig.RockSelectorOnChange(Sender: TObject);
 begin
   Writeln(Sender, ' has changed');
 
-  BankSelector.Clear;
+  Self.BankSelector.Clear;
 
-  case ERSRock(RockSelector.Combobox.getItemIndex) of
+  case ERSRock(Self.RockSelector.Combobox.getItemIndex()) of
     ERSRock.CLAY:
       begin
-        BankSelector.AddItem('Power mine (mine and drop)');
-        BankSelector.AddItem('Crafting guild');
-        BankSelector.AddItem('Varrock west');
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Crafting guild');
+        Self.BankSelector.AddItem('Varrock west');
       end;
 
     ERSRock.TIN:
       begin
-        BankSelector.AddItem('Power mine (mine and drop)');
-        BankSelector.AddItem('Varrock east');
-        BankSelector.AddItem('Varrock west');
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Varrock east');
+        Self.BankSelector.AddItem('Varrock west');
       end;
 
     ERSRock.COPPER:
       begin
-        BankSelector.AddItem('Power mine (mine and drop)');
-        BankSelector.AddItem('Varrock east');
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Varrock east');
       end;
 
     ERSRock.IRON:
       begin
-        BankSelector.AddItem('Power mine (mine and drop)');
-        BankSelector.AddItem('P2P Mining Guild');
-        BankSelector.AddItem('Varrock east');
-        BankSelector.AddItem('Varrock west');
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('P2P Mining Guild');
+        Self.BankSelector.AddItem('Varrock east');
+        Self.BankSelector.AddItem('Varrock west');
       end;
 
     ERSRock.SILVER:
       begin
-        BankSelector.AddItem('Power mine (mine and drop)');
-        BankSelector.AddItem('Crafting guild');
-        BankSelector.AddItem('Varrock west');
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Crafting guild');
+        Self.BankSelector.AddItem('Varrock west');
       end;
 
     ERSRock.GOLD:
       begin
-        BankSelector.AddItem('Power mine (mine and drop)');
-        BankSelector.AddItem('Crafting guild');
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Crafting guild');
       end;
 
     else
-      BankSelector.AddItem('P2P Mining Guild');
+      Self.BankSelector.AddItem('P2P Mining Guild');
 
   end;
 
-  BankSelector.SetItemIndex(0);
+  Self.BankSelector.SetItemIndex(0);
 end;
 
-procedure TMinerConfig.Setup; override;
+procedure TMinerConfig.Setup(); override;
 begin
   inherited;
 
-  Self.UpdateFormSize(Form.getWidth, Form.getHeight + 30);
+  UpdateFormSize(Self.Form, Self.Form.GetWidth(), Self.Form.GetHeight() + 30);
 
-  with RockSelector do
+  with Self.RockSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Rock type:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    SetLeft(15);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Clay');
@@ -539,28 +539,30 @@ begin
     Combobox.SetOnChange(@Self.RockSelectorOnChange);
   end;
 
-  with BankSelector do
+  with Self.BankSelector do
   begin
-    Init(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
     SetCaption('Bank location:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight + 45);
-    SetWidth(RockSelector.GetWidth);
+    SetLeft(15);
+    SetTop(Self.RockSelector.GetTop() + Self.RockSelector.GetHeight() - 5);
+    SetWidth(Self.RockSelector.GetWidth());
     Combobox.setStyle(csDropDownList);
   end;
 
-  Self.RockSelectorOnChange(BankSelector.Combobox);
-  StartButton.setOnClick(@Self.StartScript);
+  Self.RockSelectorOnChange(Self.BankSelector.Combobox);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TMinerConfig.Run; override;
+procedure TMinerConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
-var MinerConfig: TMinerConfig;
+var
+  MinerConfig: TMinerConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}

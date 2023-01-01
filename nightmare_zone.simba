@@ -927,8 +927,9 @@ begin
     Self.Regear;
 end;
 
+{$IFDEF SCRIPT_GUI}
 type
-  TNMZConfig = record(TScriptConfig)
+  TNMZConfig = record(TScriptForm)
     PotionSelector: TLabeledCombobox;
     NMZInfo: TLabel;
   end;
@@ -937,19 +938,19 @@ procedure TNMZConfig.StartScript(Sender: TObject);
 begin
   Self.Init(Sender);
 
-  CurrentPotion := ERSNMZPotion(PotionSelector.Combobox.getItemIndex)
+  CurrentPotion := ERSNMZPotion(Self.PotionSelector.Combobox.getItemIndex())
 end;
 
-procedure TNMZConfig.Setup; override;
+procedure TNMZConfig.Setup(); override;
 begin
   inherited;
 
-  with PotionSelector do
+  with Self.PotionSelector do
   begin
-    Init(ScriptSettingsPanel);
-    SetCaption('NMZ Potion:');
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(ScriptSettingsLabel.getTop + ScriptSettingsLabel.getHeight);
+    Init(Self.SSPanel.Panel);
+    SetCaption('NMZ Self.Potion:');
+    SetLeft(5);
+    SetTop(35);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Overload');
@@ -958,31 +959,32 @@ begin
     Combobox.setItemIndex(Ord(CurrentPotion));
   end;
 
-  with NMZInfo do
+  with Self.NMZInfo do
   begin
-    Init(ScriptSettingsPanel);
-    setParent(ScriptSettingsPanel);
+    Init(Self.SSPanel.Panel);
+    setParent(Self.SSPanel.Panel);
 
     SetCaption('Should work with most setups.' +
-                STR_NEW_LINE +
+                LineEnding +
                'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
 
-    SetLeft(ScriptSettingsLabel.getLeft + 5);
-    SetTop(PotionSelector.Combobox.GetTop + PotionSelector.Combobox.getHeight + 2);
+    SetLeft(5);
+    SetTop(Self.PotionSelector.Combobox.GetTop() + Self.PotionSelector.Combobox.GetHeight() + 2);
   end;
 
-  StartButton.setOnClick(@Self.StartScript);
+  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
-procedure TNMZConfig.Run; override;
+procedure TNMZConfig.Run(); override;
 begin
-  Self.Setup;
+  Self.Setup();
 
   inherited;
 end;
 
 var
   NMZConfig: TNMZConfig;
+{$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}
