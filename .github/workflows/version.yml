@@ -1,9 +1,9 @@
-name: Bump and release
+name: Version
 on:
   push:
-    branches: master
+    branches: [master]
   pull_request:
-    branches: master
+    branches: [master]
 
 jobs:
   build:

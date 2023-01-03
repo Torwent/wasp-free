@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '10'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -50,13 +52,15 @@ type
 
     WALK_MIDDLE,
     ATTACK_NPC,
-    WAIT_STATE1,
-    WAIT_STATE2,
-    WAIT_STATE3,
+    WAIT_LEVEL,
+    WAIT_SPEC,
+    WAIT_CENTER,
+    WAIT_STATE,
 
     USE_POWER,
     USE_SPEC,
     REEQUIP_GEAR,
+    LEVELED_UP,
 
     LOWER_HEALTH,
     FLICK_PRAYER,
@@ -99,7 +103,7 @@ type
     CofferChecked: Boolean;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -108,7 +112,7 @@ begin
   Antiban.MaxZoom := 40;
 end;
 
-procedure TNMZFighter.SetupPotions;
+procedure TNMZFighter.SetupPotions();
 var
   i: Int32;
 begin
@@ -137,7 +141,7 @@ begin
   AbsAmount := 15;
 end;
 
-procedure TNMZFighter.SetupBarrels;
+procedure TNMZFighter.SetupBarrels();
 begin
   RSObjects.NMZChest.WalkerIndex := 1;
   RSObjects.NMZPotion.WalkerIndex := 1;
@@ -158,7 +162,7 @@ begin
   AbsBarrel := RSObjects.NMZAbsorptionBarrel;
 end;
 
-procedure TNMZFighter.SetupTimers;
+procedure TNMZFighter.SetupTimers();
 begin
   DreamMiddle := [5456, 453];
 
@@ -168,7 +172,7 @@ begin
 end;
 
 
-procedure TNMZFighter.SetupPowerUps;
+procedure TNMZFighter.SetupPowerUps();
 begin
   PowerSurgeTimer.Init(45000);
   PowerSurgeTimer.Timeout := GetTickCount;
@@ -177,7 +181,7 @@ begin
   ZapperTimer.Timeout := GetTickCount;
 end;
 
-procedure TNMZFighter.SetupDamageItem;
+procedure TNMZFighter.SetupDamageItem();
 begin
   if not Inventory.Open() then Exit;
 
@@ -239,7 +243,7 @@ begin
 end;
 
 
-function TNMZFighter.InDream: Boolean;
+function TNMZFighter.InDream(): Boolean;
 begin
   Result := InsideDream := MainScreen.InMultiCombat;
 
@@ -270,7 +274,7 @@ end;
 
 
 //Outside Dream.
-function TNMZFighter.OpenChest: Boolean;
+function TNMZFighter.OpenChest(): Boolean;
 begin
   if RSObjects.NMZChest.WalkClick then
   begin
@@ -279,7 +283,7 @@ begin
   end;
 end;
 
-function TNMZFighter.HandleChest: Boolean;
+function TNMZFighter.HandleChest(): Boolean;
 begin
   Result := True;
 end;
@@ -302,12 +306,12 @@ begin
 end;
 
 
-function TNMZFighter.HasEnoughBoost: Boolean;
+function TNMZFighter.HasEnoughBoost(): Boolean;
 begin
   Result := Inventory.CountItem(BoostPotion[3]) = BoostAmount;
 end;
 
-function TNMZFighter.HasEnoughAbs: Boolean;
+function TNMZFighter.HasEnoughAbs(): Boolean;
 begin
   Result := Inventory.IsFull or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount);
 end;
@@ -346,7 +350,7 @@ begin
   Result := WaitUntil(InvCount <> Inventory.Count, 100, 3000);
 end;
 
-function TNMZFighter.TalkWithDominic: Boolean;
+function TNMZFighter.TalkWithDominic(): Boolean;
 begin
   if RSNPCs.DominicOnion.WalkSelectOption(['Dream']) then
   begin
@@ -355,13 +359,13 @@ begin
   end;
 end;
 
-function TNMZFighter.HandlePayment: Boolean;
+function TNMZFighter.HandlePayment(): Boolean;
 begin
   if Chat.ClickOption('Yes') then
     Result := DreamSetup := WaitUntil(not ('Agree' in Chat.GetChatTitle), 100, 3000);
 end;
 
-function TNMZFighter.OpenNMZSetup: Boolean;
+function TNMZFighter.OpenNMZSetup(): Boolean;
 begin
   if RSObjects.NMZPotion.WalkClick then
   begin
@@ -370,7 +374,7 @@ begin
   end;
 end;
 
-function TNMZFighter.HandleNMZSetup: Boolean;
+function TNMZFighter.HandleNMZSetup(): Boolean;
 var
   TPA: TPointArray;
 begin
@@ -384,7 +388,7 @@ begin
 end;
 
 
-function TNMZFighter.CheckCoffer: Boolean;
+function TNMZFighter.CheckCoffer(): Boolean;
 begin
   if RSObjects.NMZCoffer.WalkHover then
   begin
@@ -393,7 +397,7 @@ begin
   end;
 end;
 
-function TNMZFighter.OpenCoffer: Boolean;
+function TNMZFighter.OpenCoffer(): Boolean;
 begin
   if RSObjects.NMZCoffer.WalkClick then
   begin
@@ -404,7 +408,7 @@ end;
 
 
 //Inside Dream.
-function TNMZFighter.HasBoostPot: Boolean;
+function TNMZFighter.HasBoostPot(): Boolean;
 var
   PotDose: TRSItem;
   Slots: TIntegerArray;
@@ -417,7 +421,7 @@ begin
   Result := Slots <> [];
 end;
 
-function TNMZFighter.NeedBoost: Boolean;
+function TNMZFighter.NeedBoost(): Boolean;
 var
   PotStr: String := ToStr(BoostPotion[0]);
 begin
@@ -433,7 +437,7 @@ begin
     Result := not Boosted;
 end;
 
-function TNMZFighter.GetAbsorptionPoints: Int32;
+function TNMZFighter.GetAbsorptionPoints(): Int32;
 var
   B: TBox;
 begin
@@ -446,7 +450,7 @@ begin
   Result := OCR.RecognizeNumber(B, TOCRShadowRule.Create(20), RS_FONT_QUILL);
 end;
 
-function TNMZFighter.NeedAbsorption: Boolean;
+function TNMZFighter.NeedAbsorption(): Boolean;
 begin
   Result := (Self.GetAbsorptionPoints < MinAbsPoints) and Inventory.ContainsAny(AbsPotion);
 end;
@@ -472,7 +476,7 @@ begin
 end;
 
 
-function TNMZFighter.LowerHealth: Boolean;
+function TNMZFighter.LowerHealth(): Boolean;
 var
   Slot: Int32;
   SlotOption: String;
@@ -547,7 +551,7 @@ begin
   end;
 end;
 
-function TNMZFighter.FlickPrayer: Boolean;
+function TNMZFighter.FlickPrayer(): Boolean;
 begin
   if Minimap.IsPrayerEnabled then
     Result := Minimap.DisablePrayer
@@ -562,14 +566,14 @@ begin
 end;
 
 
-function TNMZFighter.PowerUpAvailable: Boolean;
+function TNMZFighter.PowerUpAvailable(): Boolean;
 begin
   Result := RSObjects.NMZRecurrentDamage.Find or
             RSObjects.NMZPowerSurge.Find or
             (ZapperTimer.IsFinished and RSObjects.NMZZapper.Find);
 end;
 
-function TNMZFighter.GetPowerUp: Boolean;
+function TNMZFighter.GetPowerUp(): Boolean;
 begin
   if RSObjects.NMZRecurrentDamage.Click then
   begin
@@ -590,67 +594,68 @@ begin
 end;
 
 
-function TNMZFighter.GetState: ENMZState;
-var
-  Query: String; //to cache the query and title.
-  Title: String; //not doing multiple checks improves performance.
+function TNMZFighter.GetDreamState(): ENMZState;
 begin
-  if Self.InDream then
-  begin
-    DreamSetup := False;
+  Self.DreamSetup := False;
 
-    if CombatHandler.NeedAntiPoison then
-      Exit(DRINK_ANTIPOISON);
+  if CombatHandler.NeedAntiPoison then
+    Exit(DRINK_ANTIPOISON);
 
-    if Self.NeedAbsorption then
-      Exit(DRINK_ABSORPTION);
+  if Self.NeedAbsorption then
+    Exit(DRINK_ABSORPTION);
 
-    if Self.NeedBoost then
-      Exit(DRINK_BOOST);
+  if Chat.LeveledUp() then
+    Exit(WAIT_LEVEL);
 
-    if Self.NeedLowerHP then
-      Exit(LOWER_HEALTH);
+  if Self.NeedBoost then
+    Exit(DRINK_BOOST);
 
-    if PrayFlick and PrayFlickTimer.IsFinished then
-      Exit(FLICK_PRAYER);
+  if Self.NeedLowerHP then
+    Exit(LOWER_HEALTH);
 
-    if not MainScreen.WaitInCombat(600) then
-      Exit(ATTACK_NPC);
+  if PrayFlick and PrayFlickTimer.IsFinished then
+    Exit(FLICK_PRAYER);
 
-    if CombatHandler.CanSpec then
-      Exit(USE_SPEC);
+  if not MainScreen.WaitInCombat(600) then
+    Exit(ATTACK_NPC);
 
-    if Minimap.IsSpecEnabled then
-      Exit(WAIT_STATE1);
+  if CombatHandler.CanSpec then
+    Exit(USE_SPEC);
 
-    if CombatHandler.NeedRegear then
-      Exit(REEQUIP_GEAR);
-
-    if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished then
-    begin
-      if Self.PowerUpAvailable then
-        Exit(USE_POWER);
-      if not MainScreen.InCombat then
-        Exit(ATTACK_NPC);
-
-      Exit(WAIT_STATE2);
-    end;
-
-    if WalkMiddleTimer.IsFinished then
-      Exit(WALK_MIDDLE);
-
-    Exit(WAIT_STATE3);
-  end;
-
-
-  //if not Self.InDream
-  if WL.Activity.IsFinished then
-    Exit(END_SCRIPT);
-
-  Query := Chat.GetQuery;
-  Title := Chat.GetChatTitle;
+  if Minimap.IsSpecEnabled then
+    Exit(WAIT_SPEC);
 
   if CombatHandler.NeedRegear then
+    Exit(REEQUIP_GEAR);
+
+  if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished then
+  begin
+    if Self.PowerUpAvailable then
+      Exit(USE_POWER);
+    if not MainScreen.InCombat then
+      Exit(ATTACK_NPC);
+
+    Exit(WAIT_CENTER);
+  end;
+
+  if WalkMiddleTimer.IsFinished then
+    Exit(WALK_MIDDLE);
+
+  Exit(WAIT_STATE);
+end;
+
+function TNMZFighter.GetRealLifeState(): ENMZState;
+var
+  query: String; //to cache the query and title.
+  title: String; //not doing multiple checks improves performance.
+begin
+  if WL.Activity.IsFinished() then
+    Exit(END_SCRIPT);
+
+  query := Chat.GetQuery();
+  title := Chat.GetChatTitle();
+
+  if CombatHandler.NeedRegear() then
     Exit(REEQUIP_GEAR);
 
   if not CofferChecked then
@@ -659,44 +664,43 @@ begin
   if CofferLocked then
     Exit(OPEN_COFFER);
 
-  if MainScreen.IsClassicOpen then
+  if MainScreen.IsClassicOpen() then
   begin
-    if BankPin.IsOpen then
+    if BankPin.IsOpen() then
       Exit(UNLOCK_COFFER);
 
     Exit(HANDLE_NMZSETUP);
   end;
 
-  if 'How many doses' in Query then
+  if 'How many doses' in query then
   begin
-    if not Self.HasEnoughBoost then
+    if not Self.HasEnoughBoost() then
     begin
-      if Potion.Lower in Query then
+      if Potion.Lower in query then
         Exit(ANSWER_BOOST);
 
       Exit(WITHDRAW_BOOST);
     end;
 
-    if not Self.HasEnoughAbs then
+    if not Self.HasEnoughAbs() then
     begin
-      if 'absorption' in Query then
+      if 'absorption' in query then
         Exit(ANSWER_ABSORPTION);
 
       Exit(WITHDRAW_ABSORPTION);
     end;
 
-    if DreamSetup then
+    if Self.DreamSetup then
       Exit(OPEN_NMZSETUP);
 
     Exit(TALK_DOMINIC);
   end;
 
-
-  if not Self.HasEnoughBoost then
+  if not Self.HasEnoughBoost() then
   begin
     if Inventory.CountItem(BoostPotion[3]) > BoostAmount then
     begin
-      if Potion.Lower in Title then
+      if Potion.Lower() in title then
         Exit(HANDLE_DEPOSIT);
 
       Exit(DEPOSIT_BOOST);
@@ -706,35 +710,42 @@ begin
       Exit(WITHDRAW_BOOST);
   end;
 
-  if not Self.HasEnoughAbs then
+  if not Self.HasEnoughAbs() then
     Exit(WITHDRAW_ABSORPTION);
 
-  if DreamSetup then
+  if Self.DreamSetup then
   begin
-    if 'When you purchase' in Chat.GetChat then
+    if 'When you purchase' in Chat.GetChat() then
     begin
-      DreamSetup := False;
+      Self.DreamSetup := False;
       Exit(TALK_DOMINIC);
     end;
 
     Exit(OPEN_NMZSETUP);
   end;
 
-  if 'dream would' in Title then
+  if 'dream would' in title then
     Exit(CHOOSE_DREAM);
 
-  if ('Dominic' in Title) and ('deduct the money' in Chat.GetChat) then
+  if ('Dominic' in title) and ('deduct the money' in Chat.GetChat()) then
     Exit(HANDLE_DOMINIC);
 
-  if 'Agree' in Title then
+  if 'Agree' in title then
     Exit(PAY_DOMINIC);
 
   Exit(TALK_DOMINIC);
 end;
 
+function TNMZFighter.GetState(): ENMZState;
+begin
+  if Self.InDream then
+    Exit(Self.GetDreamState());
+
+  Result := Self.GetRealLifeState();
+end;
+
 procedure TNMZFighter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
   repeat
@@ -752,12 +763,12 @@ begin
       END_SCRIPT: Break;
 
       //Outside Dream.
-      CHECK_COFFER: Self.CheckCoffer;
-      OPEN_COFFER: Self.OpenCoffer;
-      UNLOCK_COFFER: BankPin.Enter(Login.GetPlayerPin);
+      CHECK_COFFER: Self.CheckCoffer();
+      OPEN_COFFER: Self.OpenCoffer();
+      UNLOCK_COFFER: BankPin.Enter(Login.GetPlayerPin());
 
-      OPEN_NMZREWARD: Self.OpenChest;
-      BUY_POTS: Self.HandleChest;
+      OPEN_NMZREWARD: Self.OpenChest();
+      BUY_POTS: Self.HandleChest();
 
       WITHDRAW_BOOST: Self.WithdrawPotion(BoostBarrel);
       WITHDRAW_ABSORPTION: Self.WithdrawPotion(AbsBarrel);
@@ -771,38 +782,38 @@ begin
 
       TALK_DOMINIC: Self.TalkWithDominic;
       CHOOSE_DREAM: Chat.ClickOption('Previous', False);
-      HANDLE_DOMINIC: Chat.ClickContinue;
-      PAY_DOMINIC: Self.HandlePayment;
+      HANDLE_DOMINIC: Chat.ClickContinue();
+      PAY_DOMINIC: Self.HandlePayment();
 
-      OPEN_NMZSETUP: Self.OpenNMZSetup;
-      HANDLE_NMZSETUP: Self.HandleNMZSetup;
-      CLOSE_INTERFACE: MainScreen.CloseInterface;
+      OPEN_NMZSETUP: Self.OpenNMZSetup();
+      HANDLE_NMZSETUP: Self.HandleNMZSetup();
+      CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       //Inside Dream.
       DRINK_BOOST: Self.DrinkPotion(BoostPotion);
       DRINK_ABSORPTION: Self.DrinkPotion(AbsPotion);
       DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON_CONSUMABLE);
 
-      WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart;
-      ATTACK_NPC: CombatHandler.AttackMonster;
-      WAIT_STATE1, WAIT_STATE2, WAIT_STATE3: XPBar.WaitXP(1200);
+      WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart();
+      ATTACK_NPC: CombatHandler.AttackMonster();
+      WAIT_LEVEL, WAIT_SPEC, WAIT_CENTER, WAIT_STATE : XPBar.WaitXP(1200);
 
-      USE_POWER: Self.GetPowerUp;
-      USE_SPEC: CombatHandler.DoSpec;
-      REEQUIP_GEAR: CombatHandler.ReGear;
+      USE_POWER: Self.GetPowerUp();
+      USE_SPEC: CombatHandler.DoSpec();
+      REEQUIP_GEAR: CombatHandler.ReGear();
 
-      LOWER_HEALTH: Self.LowerHealth;
-      FLICK_PRAYER: Self.FlickPrayer;
+      LOWER_HEALTH: Self.LowerHealth();
+      FLICK_PRAYER: Self.FlickPrayer();
     end;
 
-    if InsideDream then
+    if Self.InsideDream then
     begin
-      if PowerSurgeTimer.IsFinished then
+      if PowerSurgeTimer.IsFinished() then
         Self.DoAntiban(False, False);
     end
     else
-      Self.DoAntiban;
-  until Self.ShouldStop;
+      Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 var
