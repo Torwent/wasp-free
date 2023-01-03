@@ -1,3 +1,12 @@
+## [2.1.3](https://github.com/Torwent/wasp-free/compare/v2.1.2...v2.1.3) (2023-01-03)
+
+
+### Bug Fixes
+
+* **nmz:** now submits levels to wasp-stats ([fccee8d](https://github.com/Torwent/wasp-free/commit/fccee8d40bc602fd10a831f7d7299d9f70b9aed6))
+
+
+
 ## [2.1.2](https://github.com/Torwent/wasp-free/compare/v2.1.1...v2.1.2) (2023-01-01)
 
 
@@ -36,15 +45,6 @@
 ### BREAKING CHANGES
 
 * This update breaks compatibility with older WaspLib versions. You need to update WaspLib and Scripts
-
-
-
-## [1.0.36](https://github.com/Torwent/wasp-free/compare/v1.0.35...v1.0.36) (2022-12-31)
-
-
-### Bug Fixes
-
-* better discord notifications ([c5ff0ef](https://github.com/Torwent/wasp-free/commit/c5ff0efe566a75e5f27b1164e4e75a80bb71d022))
 
 
 
