@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '10'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -56,7 +58,7 @@ type
   end;
 
 
-procedure TBuilder.SetupNPC;
+procedure TBuilder.SetupNPC();
 begin
   case CurrentNPC of
     PHIALS:
@@ -74,7 +76,7 @@ begin
   end;
 end;
 
-procedure TBuilder.SetupPlank;
+procedure TBuilder.SetupPlank();
 begin
   case CurrentLarder of
     REGULAR_LARDER:
@@ -91,7 +93,7 @@ begin
   end;
 end;
 
-procedure TBuilder.SetupObjects;
+procedure TBuilder.SetupObjects();
 begin
   RSObjects.OakLarderBuilt.SetupCommon(1.5, 7, [[110, 86]]);
   RSObjects.OakLarderBuilt.WalkerIndex := 1;
@@ -107,7 +109,7 @@ begin
   LarderSpace := RSObjects.OakLarderSpace;
 end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -125,14 +127,14 @@ begin
   RSW.Setup('x6953y3166');
   POH.Setup('poh');
 
-  Self.SetupNPC;
-  Self.SetupObjects;
-  Self.SetupPlank;
+  Self.SetupNPC();
+  Self.SetupObjects();
+  Self.SetupPlank();
 
   ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  if not RSClient.IsLoggedIn() then
+    Login.LoginPlayer();
 
   if CurrentNPC = PHIALS then
     case CurrentLarder of
@@ -151,30 +153,30 @@ begin
 end;
 
 
-function TBuilder.EnterHouse: Boolean;
+function TBuilder.EnterHouse(): Boolean;
 begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := MainScreen.WaitLoadingPOH(10000);
   end;
 end;
 
-function TBuilder.BuildLarder: Boolean;
+function TBuilder.BuildLarder(): Boolean;
 begin
   if LarderSpace.WalkSelectOption(['Build La']) then
   begin
-    Minimap.WaitMoving;
-    Result := WaitUntil(MainScreen.IsClassicOpen, 200, 5000);
+    Minimap.WaitMoving();
+    Result := WaitUntil(MainScreen.IsClassicOpen(), 200, 5000);
   end
   else if ChooseOption.HasOption('Remove L') then
   begin
-    ChooseOption.Close;
+    ChooseOption.Close();
     LarderIsBuilt := True;
   end;
 end;
 
-function TBuilder.DestroyLarder: Boolean;
+function TBuilder.DestroyLarder(): Boolean;
 begin
   if BuiltLarder.WalkSelectOption(['Remove L']) then
   begin
@@ -189,7 +191,7 @@ begin
 end;
 
 
-function TBuilder.CallServant: Boolean;
+function TBuilder.CallServant(): Boolean;
 begin
   if ServantNPC.Click then
   begin
@@ -201,7 +203,7 @@ begin
     Result := Options.CallServant;
 end;
 
-function TBuilder.PhialsGetPlanks: Boolean;
+function TBuilder.PhialsGetPlanks(): Boolean;
 begin
   if not RSNPCs.Phials.Find and not RSW.AtTile(RSNPCs.Phials.TileArray, 8) then
     RSW.WebWalk(RSNPCs.Phials.TileArray, 15, 0.2);
@@ -213,7 +215,7 @@ begin
   end;
 end;
 
-function TBuilder.TalkServant: Boolean;
+function TBuilder.TalkServant(): Boolean;
 begin
   if ServantNPC.Click then
   begin
@@ -225,17 +227,17 @@ begin
 end;
 
 
-function TBuilder.HandleServant: Boolean;
+function TBuilder.HandleServant(): Boolean;
 begin
-  Result := Chat.ClickOption('Fetch', BioHash)
+  Result := Chat.ClickOption('Fetch', BioHash);
   if Result then
   begin
     WaitingServant := True;
-    WaitUntil(Chat.GetChatTitle <> 'Repeat last task?', 200, 3000)
+    WaitUntil(Chat.GetChatTitle() <> 'Repeat last task?', 200, 3000)
   end;
 end;
 
-function TBuilder.HandleLarderChat: Boolean;
+function TBuilder.HandleLarderChat(): Boolean;
 begin
   Keyboard.PressKey(VK_1);
   Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
@@ -243,32 +245,32 @@ begin
   Wait(100, 150);
 end;
 
-function TBuilder.HandleFurniture: Boolean;
+function TBuilder.HandleFurniture(): Boolean;
 begin
   case CurrentLarder of
     REGULAR_LARDER: Keyboard.PressKey(VK_1);
     OAK_LARDER: Keyboard.PressKey(VK_2);
   end;
 
-  Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen, 100, 3000);
+  Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
   if Result then
   begin
-    TotalActions += 1;
-    WL.Activity.Restart;
+    Self.TotalActions += 1;
+    WL.Activity.Restart();
     Wait(250, 300);
   end else
-    MainScreen.CloseInterface;
+    MainScreen.CloseInterface();
 end;
 
 
-function TBuilder.GetState: EState;
+function TBuilder.GetState(): EState;
 var
   S: String := Chat.GetChatTitle;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
     Exit(EState.LEVEL_UP);
 
   if S.Contains('remove') then
@@ -280,16 +282,16 @@ begin
   if S.Contains('Repeat') then
     Exit(EState.HANDLE_SERVANT);
 
-  if MainScreen.IsClassicOpen then
+  if MainScreen.IsClassicOpen() then
   begin
-    if BankPin.IsOpen then
+    if BankPin.IsOpen() then
       Exit(EState.HANDLE_PIN);
     Exit(EState.HANDLE_FURNITURE_UI);
   end;
 
-  if not Minimap.InPOH then
+  if not Minimap.InPOH() then
   begin
-    if not UsePhials or Inventory.IsFull then
+    if not UsePhials or Inventory.IsFull() then
       Exit(EState.ENTER_HOUSE);
     Exit(EState.GET_PLANKS);
   end;
@@ -297,7 +299,7 @@ begin
   if LarderIsBuilt then
     Exit(EState.DESTROY_LARDER);
 
-  if Inventory.Count > MinInvCount then
+  if Inventory.Count() > MinInvCount then
   begin
     WaitingServant := False;
     Exit(EState.BUILD_LARDER);
@@ -308,7 +310,7 @@ begin
 
   if WaitingServant then
   begin
-    if ServantNPC.Find then
+    if ServantNPC.Find() then
       Exit(EState.TALK_SERVANT);
     Exit(EState.WAIT_STATE);
   end;
@@ -322,27 +324,27 @@ begin
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
+    State := Self.GetState();
     Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.ProcessWhileWaiting();
 
     case State of
       EState.LEVEL_UP: Chat.HandleLevelUp(True);
 
-      EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat;
+      EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat();
       EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
-      EState.HANDLE_FURNITURE_UI: Self.HandleFurniture;
-      EState.HANDLE_SERVANT: Self.HandleServant;
-      EState.HANDLE_PIN: if BankPin.Enter(Login.GetPlayerPin) then MainScreen.WaitLoadingPOH(10000);
+      EState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
+      EState.HANDLE_SERVANT: Self.HandleServant();
+      EState.HANDLE_PIN: if BankPin.Enter(Login.GetPlayerPin()) then MainScreen.WaitLoadingPOH(10000);
 
-      EState.CALL_SERVANT: Self.CallServant;
-      EState.TALK_SERVANT: Self.TalkServant;
-      EState.EXIT_HOUSE: Options.LeaveHouse;
-      EState.GET_PLANKS: Self.PhialsGetPlanks;
+      EState.CALL_SERVANT: Self.CallServant();
+      EState.TALK_SERVANT: Self.TalkServant();
+      EState.EXIT_HOUSE: Options.LeaveHouse();
+      EState.GET_PLANKS: Self.PhialsGetPlanks();
 
-      EState.ENTER_HOUSE: Self.EnterHouse;
-      EState.BUILD_LARDER: Self.BuildLarder;
-      EState.DESTROY_LARDER: Self.DestroyLarder;
+      EState.ENTER_HOUSE: Self.EnterHouse();
+      EState.BUILD_LARDER: Self.BuildLarder();
+      EState.DESTROY_LARDER: Self.DestroyLarder();
 
       EState.WAIT_STATE: Wait(7000, 8000);
 
@@ -350,7 +352,7 @@ begin
     end;
 
     Self.DoAntiban();
-  until Self.ShouldStop;
+  until Self.ShouldStop();
 end;
 
 var
@@ -371,7 +373,7 @@ begin
 end;
 
 //TEMP OPTION FIXES
-function TRSOptions.IsHouseOptionsOpen: Boolean; override;
+function TRSOptions.IsHouseOptionsOpen(): Boolean; override;
 begin
   Result := SRL.CountColor(CTS2(4630611, 23, 0.04, 0.79), Self.Bounds()) > 115;
 end;
