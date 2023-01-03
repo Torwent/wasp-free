@@ -1,3 +1,12 @@
+## [2.1.4](https://github.com/Torwent/wasp-free/compare/v2.1.3...v2.1.4) (2023-01-03)
+
+
+### Bug Fixes
+
+* **larder builder:** was missing a ; and it could break things. ([c780f16](https://github.com/Torwent/wasp-free/commit/c780f16a68cf460c71deee3b789a7739c26a108b))
+
+
+
 ## [2.1.3](https://github.com/Torwent/wasp-free/compare/v2.1.2...v2.1.3) (2023-01-03)
 
 
@@ -31,20 +40,6 @@
 ### Features
 
 * WaspLib compatibility fix ([40bef75](https://github.com/Torwent/wasp-free/commit/40bef75e702c347b780aa219b8c6000d27e18d12))
-
-
-
-# [2.0.0](https://github.com/Torwent/wasp-free/compare/v1.0.36...v2.0.0) (2022-12-31)
-
-
-### Features
-
-* update compatibility with latest WaspLib ([0e69bb3](https://github.com/Torwent/wasp-free/commit/0e69bb365eee1cc20affbaa820dc6101d737afcc))
-
-
-### BREAKING CHANGES
-
-* This update breaks compatibility with older WaspLib versions. You need to update WaspLib and Scripts
 
 
 
