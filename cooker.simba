@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'de957f22-8a37-4660-a7a3-9bef52cadd70'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '10'}
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
@@ -79,7 +81,7 @@ type
   end;
 
 
-procedure TCooker.SetupItems;
+procedure TCooker.SetupItems();
 var
   CookedPrefix: TStringArray;
   BurntFish: TStringArray;
@@ -116,7 +118,7 @@ begin
   );
 end;
 
-procedure TCooker.SetupLocation;
+procedure TCooker.SetupLocation();
 begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
@@ -140,7 +142,7 @@ begin
 
 end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
   Antiban.Skills := [ERSSkill.COOKING, ERSSkill.TOTAL];
@@ -170,7 +172,7 @@ begin
 end;
 
 
-function TCooker.HasProducts: Boolean; overload;
+function TCooker.HasProducts(): Boolean; overload;
 var
   Product: TRSBankDepositItem;
   Slots: TIntegerArray;
@@ -182,7 +184,7 @@ begin
   Result := True;
 end;
 
-function TCooker.OpenBank: Boolean;
+function TCooker.OpenBank(): Boolean;
 begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:   Result := Bank.WalkOpen(ScriptBank);
@@ -190,7 +192,7 @@ begin
   end;
 end;
 
-function TCooker.Withdraw: Boolean;
+function TCooker.Withdraw(): Boolean;
 var
   InvCount: Int32;
 begin
@@ -206,7 +208,7 @@ begin
       CollectEmpty := False;
 end;
 
-function TCooker.Deposit: Boolean;
+function TCooker.Deposit(): Boolean;
 var
   InvCount: Int32 := Inventory.Count;
   Product: TRSBankDepositItem;
@@ -224,7 +226,7 @@ begin
   Result := True;
 end;
 
-function TCooker.HandleCollectBox: Boolean;
+function TCooker.HandleCollectBox(): Boolean;
 var
   Slots: TIntegerArray;
 begin
@@ -241,7 +243,7 @@ begin
 end;
 
 
-function TCooker.DoCooking: Boolean;
+function TCooker.DoCooking(): Boolean;
 begin
   if CookingObj.WalkSelectOption(['Cook', 'Fire']) then
   begin
@@ -250,7 +252,7 @@ begin
   end;
 end;
 
-function TCooker.HandleMake: Boolean;
+function TCooker.HandleMake(): Boolean;
 var
   i: Int32 := 0;
 begin
@@ -276,37 +278,37 @@ begin
     WL.Activity.Restart;
 end;
 
-function TCooker.WaitCooking: Boolean;
+function TCooker.WaitCooking(): Boolean;
 begin
   Result := Cooking := Self.IsCooking
 end;
 
 
-function TCooker.GetState: ECookerState;
+function TCooker.GetState(): ECookerState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(ECookerState.END_SCRIPT);
 
-  if ChooseOption.IsOpen then
+  if ChooseOption.IsOpen() then
     Exit(ECookerState.CLOSE_CONTEXT);
 
-  if XPBar.EarnedXP then
+  if XPBar.EarnedXP() then
     Exit(ECookerState.WAIT_COOKING);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
   begin
     Cooking := False;
     Exit(ECookerState.LEVEL_UP);
   end;
 
-  if Make.IsOpen then
+  if Make.IsOpen() then
     Exit(ECookerState.HANDLE_MAKE);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
-      if Self.HasProducts then
+      if Self.HasProducts() then
         Exit(ECookerState.DEPOSIT_ITEMS);
 
       if BankEmpty or Inventory.ContainsItem(Ingredient.Item) then
@@ -315,7 +317,7 @@ begin
       Exit(ECookerState.WITHDRAW_ITEMS);
     end;
 
-    if CollectBox.IsOpen then
+    if CollectBox.IsOpen() then
     begin
       if CollectEmpty or Inventory.ContainsItem(Ingredient.Item) then
         Exit(ECookerState.CLOSE_INTERFACE);
@@ -343,9 +345,10 @@ begin
   Exit(ECookerState.OPEN_BANK);
 end;
 
-function TCooker.Terminate: Boolean; override;
+function TCooker.Terminate(): Boolean; override;
 begin
-  if inherited then
+  Result := inherited();
+  if Result then
     for 0 to 5 do
       if Result := Bank.WithdrawItem(BankTab, [Products[0].Item, BANK_WITHDRAW_ALL, True], True) then
         Break;
@@ -353,35 +356,33 @@ end;
 
 procedure TCooker.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
-    State := Self.GetState;
+  repeat
+    State := Self.GetState();
     Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    Self.ProcessWhileWaiting();
 
     case State of
-      ECookerState.OPEN_BANK: Self.OpenBank;
-      ECookerState.WITHDRAW_ITEMS: Self.Withdraw;
-      ECookerState.DEPOSIT_ITEMS: Self.Deposit;
+      ECookerState.OPEN_BANK: Self.OpenBank();
+      ECookerState.WITHDRAW_ITEMS: Self.Withdraw();
+      ECookerState.DEPOSIT_ITEMS: Self.Deposit();
 
       ECookerState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      ECookerState.HANDLE_COLLECT: Self.HandleCollectBox;
-      ECookerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
+      ECookerState.HANDLE_COLLECT: Self.HandleCollectBox();
+      ECookerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      ECookerState.LEVEL_UP: Chat.HandleLevelUp;
-      ECookerState.DO_COOKING: Self.DoCooking;
-      ECookerState.HANDLE_MAKE: Self.HandleMake;
-      ECookerState.WAIT_COOKING: Self.WaitCooking;
-      ECookerState.CLOSE_CONTEXT: ChooseOption.Close;
+      ECookerState.LEVEL_UP: Chat.HandleLevelUp();
+      ECookerState.DO_COOKING: Self.DoCooking();
+      ECookerState.HANDLE_MAKE: Self.HandleMake();
+      ECookerState.WAIT_COOKING: Self.WaitCooking();
+      ECookerState.CLOSE_CONTEXT: ChooseOption.Close();
 
       ECookerState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
-  end;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 
   if not Self.Terminate then
     TerminateScript('aio_cooker didn''t terminate properly. Stopping execution.');
