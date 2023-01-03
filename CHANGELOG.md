@@ -1,3 +1,12 @@
+## [2.1.5](https://github.com/Torwent/wasp-free/compare/v2.1.4...v2.1.5) (2023-01-03)
+
+
+### Bug Fixes
+
+* **cooker:** wasp-stats fix ([e1f7bac](https://github.com/Torwent/wasp-free/commit/e1f7bace445c7df97934db599fde7afa63ff5853))
+
+
+
 ## [2.1.4](https://github.com/Torwent/wasp-free/compare/v2.1.3...v2.1.4) (2023-01-03)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * fixed an issue that prevent discord notifications from firing ([2e1a2d6](https://github.com/Torwent/wasp-free/commit/2e1a2d677ed12aeacef7f523e3a5218fc8edf196))
-
-
-
-# [2.1.0](https://github.com/Torwent/wasp-free/compare/v2.0.0...v2.1.0) (2023-01-01)
-
-
-### Features
-
-* WaspLib compatibility fix ([40bef75](https://github.com/Torwent/wasp-free/commit/40bef75e702c347b780aa219b8c6000d27e18d12))
 
 
 
