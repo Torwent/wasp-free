@@ -1,5 +1,6 @@
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '1'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}              //by default I only use Forms in windows.
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '0fb23f9b-3bc2-41cd-8670-3fec0eb256f1'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '15'}
+{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -275,7 +276,7 @@ var
   CurrentHP: Int32 := Minimap.GetHPLevel();
 begin
   if Self.NextHeal < 1 then
-    Self.NextHeal := Round(Antiban.GetUniqueNumber(Self.MaxHit * 5, Self.MaxHit + 1, Self.MaxHit * 15)) + Random(-Self.MaxHit, Self.MaxHit);
+    Self.NextHeal := Round(Antiban.GetUniqueNumber(Self.MaxHit * 4, Self.MaxHit + 1, Self.MaxHit * 15)) + Random(-Self.MaxHit, Self.MaxHit);
 
   if Self.NextHeal >= BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) then
     Self.NextHeal := Round(BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) / 2) + Random(0, Self.MaxHit);
@@ -556,7 +557,6 @@ end;
 //Main loop.
 procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug();
   Self.Init(MaxActions, MaxTime);
 
   repeat
