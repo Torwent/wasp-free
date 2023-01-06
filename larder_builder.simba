@@ -394,7 +394,7 @@ begin
   b.Y2 -= 50;
 
   Mouse.Click(b, MOUSE_LEFT);
-  Result := WaitUntil(((s := Chat.GetChatTitle) = 'Demon buttler') or
+  Result := WaitUntil(((s := Chat.GetChatTitle) = 'Demon butler') or
                        (s = 'Repeat last task?'), SRL.TruncatedGauss(50, 1500), 5000);
 end;
 
@@ -450,7 +450,7 @@ begin
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Phials');
-    AddItem('Demon buttler');
+    AddItem('Demon butler');
     Combobox.setItemIndex(Ord(CurrentNPC));
   end;
 
@@ -474,7 +474,7 @@ begin
 
     SetCaption('For Phials method make sure you have noted planks with you.' +
                LineEnding +
-               'For Demon buttler make sure you previously asked him for 24 planks and' +
+               'For Demon butler make sure you previously asked him for 24 planks and' +
                LineEnding +
                'you need to have money in the servant''s money bag.' +
                LineEnding +
