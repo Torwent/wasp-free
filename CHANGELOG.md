@@ -1,3 +1,12 @@
+## [2.1.6](https://github.com/Torwent/wasp-free/compare/v2.1.5...v2.1.6) (2023-01-06)
+
+
+### Bug Fixes
+
+* **larder builder:** fixed typos (buttler > butler) ([d1935b8](https://github.com/Torwent/wasp-free/commit/d1935b85b06d9d9a446bad32fa045cc8eb03fce1))
+
+
+
 ## [2.1.5](https://github.com/Torwent/wasp-free/compare/v2.1.4...v2.1.5) (2023-01-03)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * discord notifications ([59ccc87](https://github.com/Torwent/wasp-free/commit/59ccc8725849caa8773497292784b20ae078b5da))
-
-
-
-## [2.1.1](https://github.com/Torwent/wasp-free/compare/v2.1.0...v2.1.1) (2023-01-01)
-
-
-### Bug Fixes
-
-* fixed an issue that prevent discord notifications from firing ([2e1a2d6](https://github.com/Torwent/wasp-free/commit/2e1a2d677ed12aeacef7f523e3a5218fc8edf196))
 
 
 
