@@ -38,7 +38,7 @@ type
     StallCooldown: TCountDown;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -100,23 +100,26 @@ begin
 end;
 
 
-function TStallRobber.HasLoot: Boolean;
+function TStallRobber.HasLoot(): Boolean;
 var
   Slots: TIntegerArray;
 begin
   Result := Inventory.FindItems(DropList, Slots);
 end;
 
-function TStallRobber.RobStall: Boolean;
+function TStallRobber.RobStall(): Boolean;
 begin
-  if Stall.WalkClick and (Result := XPBar.WaitXP(2000)) then
+  if Stall.WalkClick() then
+    Result := XPBar.WaitXP(2000);
+
+  if Result then
   begin
-    StallCooldown.Restart(Random(-200, 200));
-    WL.Activity.Restart;
+    StallCooldown.Restart(-200, 200);
+    WL.Activity.Restart();
   end;
 end;
 
-function TStallRobber.DropItems: Boolean;
+function TStallRobber.DropItems(): Boolean;
 var
   Slots: TIntegerArray;
 begin
@@ -128,20 +131,26 @@ begin
 end;
 
 
-function TStallRobber.GetState: EStallRobberState;
+function TStallRobber.GetState(): EStallRobberState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
+
   if Chat.LeveledUp() then
     Exit(LEVELED_UP);
-  if Inventory.IsFull and Self.HasLoot then
+
+  if Inventory.IsFull() and Self.HasLoot() then
     Exit(DROP_LOOT);
+
   if MainScreen.IsUpText('Steal-from') then
     Exit(ROB_STALL);
-  if not StallCooldown.IsFinished then
+
+  if not StallCooldown.IsFinished() then
     Exit(WAIT_STATE);
+
   if (SafeSpot <> []) and not RSW.AtTile(SafeSpot, 5) then
     Exit(WALK_SPOT);
+
   if RSW.AtTile(Stall.TileArray) then
     Exit(FIND_STALL);
 end;
@@ -151,20 +160,20 @@ begin
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
+    State := Self.GetState();
     Action := ToStr(State);
     Self.ProcessWhileWaiting();
 
     case State of
       LEVELED_UP: Chat.HandleLevelUp();
-      DROP_LOOT: Self.DropItems;
-      FIND_STALL, ROB_STALL: Self.RobStall;
+      DROP_LOOT:  Self.DropItems();
+      FIND_STALL, ROB_STALL: Self.RobStall();
       WAIT_STATE: Wait(100, 200);
-      WALK_SPOT: RSW.WebWalk(SafeSpot, 3, 0.2);
+      WALK_SPOT:  RSW.WebWalk(SafeSpot, 3, 0.2);
       END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
+    Self.DoAntiban();
   until Self.ShouldStop();
 end;
 
@@ -197,7 +206,6 @@ begin
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('Tea stall');
-    Combobox.getItems.Add('Food stall');
     Combobox.getItems.Add('Silk stall');
     Combobox.getItems.Add('Fruit stall');
     Combobox.setItemIndex(Ord(CurrentStall));
