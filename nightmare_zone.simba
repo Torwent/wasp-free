@@ -68,10 +68,8 @@ type
     END_SCRIPT
   );
 
-  TNMZFighter = record(TBaseScript)
+  TNMZFighter = record(TBaseWalkerScript)
     State: ENMZState;
-    RSWReal: TRSWalker;
-    RSWDream: TRSWalker;
 
     InsideDream: Boolean;
     DreamSetup: Boolean;
@@ -195,7 +193,7 @@ begin
 
   inherited;
 
-  RSWDream.Setup([RSRegions.YANILLE, RSRegions.KBD_AND_NMZ]);
+  RSW.Setup([RSRegions.YANILLE, RSRegions.KBD_AND_NMZ]);
 
   Self.SetupPotions();
   Self.SetupBarrels();
@@ -615,7 +613,7 @@ begin
   if CombatHandler.NeedRegear then
     Exit(REEQUIP_GEAR);
 
-  if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished() then
+  if RSW.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished() then
   begin
     if Self.PowerUpAvailable then
       Exit(USE_POWER);
@@ -780,7 +778,7 @@ begin
       DRINK_ABSORPTION: Self.DrinkPotion(AbsPotion);
       DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON_CONSUMABLE);
 
-      WALK_MIDDLE: if RSWDream.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart();
+      WALK_MIDDLE: if RSW.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart();
       ATTACK_NPC: CombatHandler.AttackMonster();
       WAIT_LEVEL, WAIT_SPEC, WAIT_CENTER, WAIT_STATE : XPBar.WaitXP(1200);
 
