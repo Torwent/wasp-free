@@ -94,16 +94,17 @@ end;
 
 procedure TBuilder.SetupObjects();
 begin
-  RSObjects.OakLarderBuilt.Setup(1.5, 7, [[3604, 86]]);
-  RSObjects.OakLarderBuilt.Filter.Finder := False;
-  RSObjects.OakLarderBuilt.Filter.UpText := False;
+  BuiltLarder.Setup(1.5, 7, [[3604, 86]]);
+  BuiltLarder.Setup(['Larder']);
+  BuiltLarder.Filter.Finder := False;
+  BuiltLarder.Filter.UpText := False;
+  BuiltLarder.Finder.ColorClusters += [CTS2(6916239, 10, 0.33, 1.18), CTS2(4154749, 9, 0.13, 0.65), 150];
 
-  RSObjects.OakLarderSpace.Setup(1.5, 7, [[3604, 86]]);
-  RSObjects.OakLarderSpace.Filter.Finder := False;
-  RSObjects.OakLarderSpace.Filter.UpText := False;
-
-  BuiltLarder := RSObjects.OakLarderBuilt;
-  LarderSpace := RSObjects.OakLarderSpace;
+  LarderSpace.Setup(1.5, 7, [[3604, 86]]);
+  LarderSpace.Setup(['2 more']);
+  LarderSpace.Filter.Finder := False;
+  LarderSpace.Filter.UpText := False;
+  LarderSpace.Finder.ColorClusters += [CTS2(10529472, 16, 0.25, 0.95), CTS2(8884636, 16, 0.16, 0.18), 80];
 end;
 
 procedure TAntiban.Setup(); override;
@@ -111,7 +112,7 @@ begin
   inherited;
 
   Antiban.Skills := [ERSSkill.CONSTRUCTION, ERSSkill.TOTAL];
-  Antiban.MinZoom := 1;
+  Antiban.MinZoom := 0;
   Antiban.MaxZoom := 35;
 end;
 
@@ -193,7 +194,7 @@ begin
                         SRL.TruncatedGauss(50, 1500), 5000);
   end
   else
-    Result := Options.CallServant;
+    Result := Options.CallServant();
 end;
 
 function TBuilder.PhialsGetPlanks(): Boolean;
@@ -203,8 +204,8 @@ begin
 
   if (Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and RSNPCs.Phials.Click()) then
   begin
-    Minimap.WaitFlag;
-    Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
+    Minimap.WaitFlag();
+    Result := WaitUntil(Chat.GetChatTitle() = 'Select an Option', 100, 15000);
   end;
 end;
 
@@ -258,7 +259,7 @@ end;
 
 function TBuilder.GetState(): EState;
 var
-  S: String := Chat.GetChatTitle;
+  s: String;
 begin
   if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
@@ -266,13 +267,15 @@ begin
   if Chat.LeveledUp() then
     Exit(EState.LEVEL_UP);
 
-  if S.Contains('remove') then
+  s := Chat.GetChatTitle();
+
+  if s.Contains('remove') then
     Exit(EState.HANDLE_LARDER_CHAT);
 
-  if S.Contains('Select') then
+  if s.Contains('Select') then
     Exit(EState.HANDLE_PHIALS_CHAT);
 
-  if S.Contains('Repeat') then
+  if s.Contains('Repeat') then
     Exit(EState.HANDLE_SERVANT);
 
   if MainScreen.IsClassicOpen() then
@@ -289,16 +292,16 @@ begin
     Exit(EState.GET_PLANKS);
   end;
 
-  if LarderIsBuilt then
+  if Self.LarderIsBuilt then
     Exit(EState.DESTROY_LARDER);
 
-  if Inventory.Count() > MinInvCount then
+  if Inventory.Count() > Self.MinInvCount then
   begin
     WaitingServant := False;
     Exit(EState.BUILD_LARDER);
   end;
 
-  if UsePhials then
+  if Self.UsePhials then
     Exit(EState.EXIT_HOUSE);
 
   if WaitingServant then
@@ -413,9 +416,16 @@ begin
   b.Y2 -= 21;
 
   Mouse.Click(b, MOUSE_LEFT);
-  Result := WaitUntil(not Self.IsHouseOptionsOpen, SRL.TruncatedGauss(50, 1500), 5000);
+  Result := WaitUntil(not Self.IsHouseOptionsOpen(), RandomLeft(50, 1500), 5000);
 end;
 
+procedure TRSMinimap.SetCompassAngle(Degrees: Double; Accuracy: Double = 5); override;
+begin
+  if MainScreen.IsUpText('>') then
+    ChooseOption.Select('Cancel');
+
+  inherited;
+end;
 
 {$IFDEF SCRIPT_GUI}
 type
