@@ -1,3 +1,12 @@
+## [2.2.1](https://github.com/Torwent/wasp-free/compare/v2.2.0...v2.2.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* **nmz:** nmz should now work again ([f9336a5](https://github.com/Torwent/wasp-free/commit/f9336a5e5b71d79bba354835878dda4438a44588))
+
+
+
 # [2.2.0](https://github.com/Torwent/wasp-free/compare/v2.1.8...v2.2.0) (2023-01-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** fixed typos (buttler > butler) ([d1935b8](https://github.com/Torwent/wasp-free/commit/d1935b85b06d9d9a446bad32fa045cc8eb03fce1))
-
-
-
-## [2.1.5](https://github.com/Torwent/wasp-free/compare/v2.1.4...v2.1.5) (2023-01-03)
-
-
-### Bug Fixes
-
-* **cooker:** wasp-stats fix ([e1f7bac](https://github.com/Torwent/wasp-free/commit/e1f7bace445c7df97934db599fde7afa63ff5853))
 
 
 
