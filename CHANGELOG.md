@@ -1,3 +1,12 @@
+# [2.2.0](https://github.com/Torwent/wasp-free/compare/v2.1.8...v2.2.0) (2023-01-16)
+
+
+### Features
+
+* fix compatibility with latest SRL and WaspLib ([d255762](https://github.com/Torwent/wasp-free/commit/d25576206dd8e7c6a043e3a322e90ff1628b6c06))
+
+
+
 ## [2.1.8](https://github.com/Torwent/wasp-free/compare/v2.1.7...v2.1.8) (2023-01-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** wasp-stats fix ([e1f7bac](https://github.com/Torwent/wasp-free/commit/e1f7bace445c7df97934db599fde7afa63ff5853))
-
-
-
-## [2.1.4](https://github.com/Torwent/wasp-free/compare/v2.1.3...v2.1.4) (2023-01-03)
-
-
-### Bug Fixes
-
-* **larder builder:** was missing a ; and it could break things. ([c780f16](https://github.com/Torwent/wasp-free/commit/c780f16a68cf460c71deee3b789a7739c26a108b))
 
 
 
