@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '207b1ab4-561d-4543-8467-705cdfce98ec'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '11'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -51,7 +53,7 @@ type
   TWoodcutter = record(TBaseBankScript)
     State: EWoodcutterState;
 
-    RSTree: PRSObject;
+    RSTree: TRSObject;
     TreeTimerMultiplier: Int32;
 
     ToolType: TCTS2Color;
@@ -84,7 +86,7 @@ begin
   case CurrentTree of
     ERSTree.REGULAR_TREE:
       begin
-        RSTree := @RSObjects.RegularTree;
+        RSTree := RSObjects.RegularTree;
         Plank := 'Plank';
         PlankPrice := 100;
         SawmillString := 'Wood - 100gp';
@@ -92,7 +94,7 @@ begin
 
     ERSTree.OAK_TREE:
       begin
-        RSTree := @RSObjects.OakTree;
+        RSTree := RSObjects.OakTree;
         Plank := 'Oak plank';
         PlankPrice := 250;
         SawmillString := 'Oak - 250gp';
@@ -100,7 +102,7 @@ begin
 
     ERSTree.TEAK_TREE:
       begin
-        RSTree := @RSObjects.TeakTree;
+        RSTree := RSObjects.TeakTree;
         Plank := 'Teak plank';
         PlankPrice := 500;
         SawmillString := 'Teak - 500gp';
@@ -108,18 +110,18 @@ begin
 
     ERSTree.MAHOGANY_TREE:
       begin
-        RSTree := @RSObjects.MahoganyTree;
+        RSTree := RSObjects.MahoganyTree;
         Plank := 'Mahogany plank';
         PlankPrice := 1500;
         SawmillString := 'Mahogany - 1,500gp';
       end;
 
 
-    ERSTree.WILLOW_TREE:      RSTree := @RSObjects.WillowTree;
-    ERSTree.MAPLE_TREE:       RSTree := @RSObjects.MapleTree;
-    ERSTree.YEW_TREE:         RSTree := @RSObjects.YewTree;
-    ERSTree.BLISTERWOOD_TREE: RSTree := @RSObjects.BlisterwoodTree;
-    ERSTree.MAGIC_TREE:       RSTree := @RSObjects.MagicTree;
+    ERSTree.WILLOW_TREE:      RSTree := RSObjects.WillowTree;
+    ERSTree.MAPLE_TREE:       RSTree := RSObjects.MapleTree;
+    ERSTree.YEW_TREE:         RSTree := RSObjects.YewTree;
+    ERSTree.BLISTERWOOD_TREE: RSTree := RSObjects.BlisterwoodTree;
+    ERSTree.MAGIC_TREE:       RSTree := RSObjects.MagicTree;
   end;
 
   if Ord(CurrentTree) >= Ord(ERSTRee.MAPLE_TREE) then
@@ -155,50 +157,37 @@ begin
   case BankLocation of
     WOODCUT_GUILD:
       begin
-        RSW.Setup('x1564y2293');
-        ScriptBank := RSObjects.WCGuildBank;
+        RSW.Setup([RSRegions.WOODCUTTING_GUILD]);
         UseBank := True;
       end;
 
-    GE:
+    GE, VARROCK_W:
       begin
-        RSW.Setup('x7536y2363');
-        ScriptBank := RSObjects.GEBank;
+        RSW.Setup([RSRegions.VARROCK_WEST]);
         UseBank := True;
       end;
 
     VARROCK_E:
       begin
-        RSW.Setup('x7536y2363');
-        ScriptBank := RSObjects.VarrockEastBank;
-        UseBank := True;
-      end;
-
-    VARROCK_W:
-      begin
-        RSW.Setup('x7536y2363');
-        ScriptBank := RSObjects.VarrockWestBank;
+        RSW.Setup([RSRegions.VARROCK_EAST]);
         UseBank := True;
       end;
 
     EDGE:
       begin
-        RSW.Setup('x7536y2363');
-        ScriptBank := RSObjects.EdgevilleBank;
+        RSW.Setup([RSRegions.EDGEVILLE]);
         UseBank := True;
       end;
 
     PRIFDDINAS:
       begin
-        Self.RSW.Setup('x3583y1905');
-        Self.ScriptBank := RSObjects.PrifddinasBank;
+        Self.RSW.Setup([RSRegions.PRIFDDINAS]);
         UseBank := True;
       end;
 
     DRAYNOR_VILLAGE:
       begin
-        RSW.Setup('x7617y3214');
-        ScriptBank := RSObjects.DraynorBank;
+        RSW.Setup([RSRegions.DRAYNOR_VILLAGE]);
         UseBank := True;
       end;
 
@@ -294,8 +283,6 @@ end;
 
 procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Woodcutter';
-
   inherited;
 
   Self.SetupTree();
@@ -309,9 +296,6 @@ begin
     'Strung rabbit foot'
   ];
 
-  if not RSClient.IsLoggedIn() then
-    Login.LoginPlayer();
-
   if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
@@ -321,16 +305,15 @@ begin
 
   if WLSettings.RemoteInput.ScriptDebug then
   begin
-    DebugObjectArray += @ScriptBank;
     DebugObjectArray += RSTree;
-    DebugNPCArray += @RSNPCs.SawmillOperator;
+    DebugNPCArray += RSNPCs.SawmillOperator;
   end;
 end;
 
 
 function TWoodcutter.CutTree(): Boolean;
 begin
-  if (UseBank and RSTree^.WalkClick) or RSTree^.Click then
+  if (UseBank and RSTree.WalkClick) or RSTree.Click then
   begin
     Minimap.WaitMoving;
     Result := Woodcutting := True;
@@ -422,12 +405,12 @@ function TWoodcutter.IsCutting(): Boolean;
 var
   B: TBox := MainScreen.GetPlayerBox;
 begin
-  Result := Woodcutting := SRL.IsAnimating(B, MainScreen.ConvertDistance(600), 350, 10 * TreeTimerMultiplier);
+  Result := Woodcutting := SRL.IsAnimating(B, MainScreen.NormalizeDistance(600), 350, 10 * TreeTimerMultiplier);
 end;
 
 function TWoodcutter.WaitCutting(): Boolean;
 begin
-  if Result := Self.IsCutting then WL.Activity.Restart;
+  if Result := Self.IsCutting then WL.Activity.Restart();
 end;
 
 function TWoodcutter.GetState(): EWoodcutterState;
@@ -473,7 +456,7 @@ begin
   if Woodcutting then
     Exit(EWoodcutterState.WAIT_STATE);
 
-  if UseBank and not RSW.AtTile(RSTree^.TileArray, 15) then
+  if UseBank and not RSW.AtTile(RSTree.Coordinates, 15) then
     Exit(EWoodcutterState.WALK_SPOT);
 
   if Self.CheckNest() then
@@ -487,35 +470,33 @@ end;
 
 procedure TWoodcutter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    ExtraInfo := ' Bank: ' + ToStr(UseBank) + ' Sawmill: ' + ToStr(UseSawmill)  +
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
+    ' Bank: ' + ToStr(UseBank) + ' Sawmill: ' + ToStr(UseSawmill)  +
                  ' Plank: ' + ToStr(Plank);
-    Self.ProcessWhileWaiting;
 
     case State of
-      EWoodcutterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      EWoodcutterState.OPEN_BANK: Bank.WalkOpen();
       EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
-      EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface;
-      EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree^.TileArray, 10, 0.2);
-      EWoodcutterState.WAIT_STATE: Self.WaitCutting;
-      EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp;
-      EWoodcutterState.EQUIP_GEAR: Self.EquipGear;
+      EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree.Coordinates, 10, 0.2);
+      EWoodcutterState.WAIT_STATE: Self.WaitCutting();
+      EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp();
+      EWoodcutterState.EQUIP_GEAR: Self.EquipGear();
       EWoodcutterState.USE_SPEC: Minimap.EnableSpec(100);
-      EWoodcutterState.PICKUP_NEST: Self.PickNest;
-      EWoodcutterState.CUT_TREE: Self.CutTree;
-      EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill;
-      EWoodcutterState.HANDLE_MAKE: Self.MakePlanks;
-      EWoodcutterState.DROP_ITEMS: Self.DropItems;
+      EWoodcutterState.PICKUP_NEST: Self.PickNest();
+      EWoodcutterState.CUT_TREE: Self.CutTree();
+      EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill();
+      EWoodcutterState.HANDLE_MAKE: Self.MakePlanks();
+      EWoodcutterState.DROP_ITEMS: Self.DropItems();
       EWoodcutterState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
-  until Self.ShouldStop;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 var

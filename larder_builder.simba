@@ -68,8 +68,7 @@ begin
       begin
         UsePhials := False;
 
-        ServantNPC.SetupCommon;
-        ServantNPC.UpText := ['Talk-to'];
+        ServantNPC.Setup(['Talk-to']);
         ServantNPC.Filter.Finder := False;
         ServantNPC.Filter.MinimapDot := True;
       end;
@@ -95,13 +94,11 @@ end;
 
 procedure TBuilder.SetupObjects();
 begin
-  RSObjects.OakLarderBuilt.SetupCommon(1.5, 7, [[110, 86]]);
-  RSObjects.OakLarderBuilt.WalkerIndex := 1;
+  RSObjects.OakLarderBuilt.Setup(1.5, 7, [[3604, 86]]);
   RSObjects.OakLarderBuilt.Filter.Finder := False;
   RSObjects.OakLarderBuilt.Filter.UpText := False;
 
-  RSObjects.OakLarderSpace.SetupCommon(1.5, 7, [[110, 86]]);
-  RSObjects.OakLarderSpace.WalkerIndex := 1;
+  RSObjects.OakLarderSpace.Setup(1.5, 7, [[3604, 86]]);
   RSObjects.OakLarderSpace.Filter.Finder := False;
   RSObjects.OakLarderSpace.Filter.UpText := False;
 
@@ -120,12 +117,8 @@ end;
 
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Larder Builder';
-
   inherited;
-
-  RSW.Setup('x6953y3166');
-  POH.Setup('poh');
+  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH]);
 
   Self.SetupNPC();
   Self.SetupObjects();
@@ -144,11 +137,11 @@ begin
 
   if WLSettings.RemoteInput.ScriptDebug then
   begin
-    DebugObjectArray += @BuiltLarder;
-    DebugObjectArray += @LarderSpace;
-    DebugObjectArray += @RSObjects.POHPortal;
-    DebugNPCArray += @RSNPCs.Phials;
-    DebugNPCArray += @ServantNPC;
+    DebugObjectArray += BuiltLarder;
+    DebugObjectArray += LarderSpace;
+    DebugObjectArray += RSObjects.POHPortal;
+    DebugNPCArray += RSNPCs.Phials;
+    DebugNPCArray += ServantNPC;
   end;
 end;
 
@@ -205,10 +198,10 @@ end;
 
 function TBuilder.PhialsGetPlanks(): Boolean;
 begin
-  if not RSNPCs.Phials.Find and not RSW.AtTile(RSNPCs.Phials.TileArray, 8) then
-    RSW.WebWalk(RSNPCs.Phials.TileArray, 15, 0.2);
+  if not RSNPCs.Phials.Find() and not RSW.AtTile(RSNPCs.Phials.Coordinates, 8) then
+    RSW.WebWalk(RSNPCs.Phials.Coordinates, 15, 0.2);
 
-  if (Inventory.SetSelectedSlot(NotedPlanksSlot) and RSNPCs.Phials.Click) then
+  if (Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and RSNPCs.Phials.Click()) then
   begin
     Minimap.WaitFlag;
     Result := WaitUntil(Chat.GetChatTitle = 'Select an Option', 100, 15000);
@@ -320,13 +313,11 @@ end;
 
 procedure TBuilder.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
   repeat
     State := Self.GetState();
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting();
+    Self.SetAction(ToStr(State));
 
     case State of
       EState.LEVEL_UP: Chat.HandleLevelUp(True);
@@ -358,18 +349,27 @@ end;
 var
   Builder: TBuilder;
 
-function TWaspObject._SelectHelper(Action: TStringArray): Boolean; override;
+function TRSWalkerObject._SelectHelper(action: TStringArray): Boolean; override;
 begin
-  if ChooseOption.IsOpen and ChooseOption.Select(Action) then
+  if Self.CurrentUpText <> [] then
+    Self.CurrentUpText := [];
+
+  if Self.RedClicked then
+  begin
+    Self.RedClicked := False;
+    Exit(True);
+  end;
+
+  if ChooseOption.IsOpen() and ChooseOption.Select(action) then
     Exit(True);
 
-  if MainScreen.IsUpText(Action) then
+  if MainScreen.IsUpText(action) then
   begin
     Mouse.Click(MOUSE_LEFT);
-    Result := MainScreen.DidRedClick;
-  end
-  else
-      Result := ChooseOption.Select(Action, MOUSE_LEFT, True, (False));
+    Exit(MainScreen.DidRedClick());
+  end;
+
+  Result := ChooseOption.Select(action, MOUSE_LEFT, True, (False));
 end;
 
 //TEMP OPTION FIXES

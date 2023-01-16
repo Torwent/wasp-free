@@ -11,7 +11,7 @@ end;
 
 var
   FoodAmount: Int32 := 20;
-  NeckAmount: Int32 := 4;
+  NeckAmount: Int32 := 0;
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
@@ -190,25 +190,23 @@ begin
 end;
 
 procedure TThiever.SetupKnight();
+var
+  p: TPoint;
 begin
-  Self.Knight.SetupCommon();
-  Self.Knight.UpText := ['Knight', 'of', 'Ardougne'];
-  Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
-  Self.Knight.TileArray := [[6006, 3315]];
-  Self.Knight.ShapeArray := [[Self.Knight.TileArray, [1, 1, 6]]];
+  p := [6006, 3315];
+  Self.Knight.Setup([p]);
   Self.Knight.DotFilter.Setup(BANK_POLYGON, True);
-  Self.Knight.Filter.Walker := True;
+  Self.Knight.ShapeArray.SetShape([1, 1, 6]);
+  Self.Knight.Setup(['Knight', 'of', 'Ardougne']);
+  Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
 end;
 
 
 procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Self.Name :='Ardougne Knights';
-
   inherited;
 
-  Self.RSW.Setup('x5723y3038');
-  Self.ScriptBank := RSObjects.ArdougneSouthBank;
+  Self.RSW.Setup([RSRegions.ARDOUGNE]);
   Self.SetupKnight();
 
   FoodHandler.Amount := FoodAmount;
@@ -223,9 +221,6 @@ begin
 
   Self.NeckTimer.Init(140000);
 
-  if not RSClient.IsLoggedIn() then
-    Login.LoginPlayer();
-
   if Antiban.BioDice then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
@@ -235,10 +230,7 @@ begin
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
   if WLSettings.RemoteInput.ScriptDebug then
-  begin
-    DebugObjectArray += @Self.ScriptBank;
-    DebugNPCArray += @Self.Knight;
-  end;
+    DebugNPCArray += Self.Knight;
 end;
 
 
@@ -391,9 +383,9 @@ begin
     ATPA.SortByMiddle(MainScreen.GetPlayerBox().Middle());
     TPA := ATPA[0];
     P := TPA.Mean();
-    P.X += MainScreen.ConvertDistance(7);
-    P.Y += MainScreen.ConvertDistance(18);
-    B := Box(P, MainScreen.ConvertDistance(12), MainScreen.ConvertDistance(20));
+    P.X += MainScreen.NormalizeDistance(7);
+    P.Y += MainScreen.NormalizeDistance(18);
+    B := Box(P, MainScreen.NormalizeDistance(12), MainScreen.NormalizeDistance(20));
     Mouse.Move(B);
     Result := MainScreen.IsUpText(Self.Knight.UpText);
   end
@@ -432,19 +424,6 @@ begin
   Result := Bank.DepositItemArray(Self.BankTab, Self.BankArray, False);
 end;
 
-function TThiever.Withdraw(Item: TRSItem; Quantity: Int32): Boolean;
-var
-  ItemCount: Int32 := Inventory.CountItem(Item);
-  QuantityNeeded: Int32 := Quantity - ItemCount;
-  InvCount: Int32;
-begin
-  InvCount := Inventory.Count();
-  if Result := Bank.WithdrawItem(Self.BankTab, [Item, QuantityNeeded, False], False) then
-    WaitUntil(Inventory.Count() > InvCount, 100, 3000);
-
-  if not Result and (Item = Self.Necklace) then
-    NeckAmount := 0;
-end;
 
 procedure TThiever.HandleUpstairs();
 const
@@ -561,17 +540,13 @@ begin
 
   repeat
     State := Self.GetState();
-    Action := ToStr(State);
-    ExtraInfo := ' FreshNeck: ' + ToStr(FreshNeck) +
-                 ', HasNeck: ' + ToStr(HasNeck) +
-                 ', NextHeal: ' + ToStr(NextHeal);
-    Self.ProcessWhileWaiting();
+    Self.SetAction(ToStr(State));
 
     case Self.State of
-      OPEN_BANK: Bank.WalkOpen(Self.ScriptBank);
+      OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_ITEMS: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
-      WITHDRAW_NECK: Self.Withdraw(Self.Necklace, NeckAmount);
+      WITHDRAW_NECK: Self.Withdraw([Self.Necklace, NeckAmount, False]);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
@@ -586,7 +561,7 @@ begin
       CHECK_NECK: Self.CheckNeck();
       CLOSE_CONTEXT: ChooseOption.Close();
       IS_UPSTAIRS: Self.HandleUpstairs();
-      WALK_TO_BANK: Self.RSW.WebWalk(Self.Knight.TileArray, 30, 0.2);
+      WALK_TO_BANK: Self.RSW.WebWalk(Self.Knight.Coordinates, 30, 0.2);
       EQUIP_ROGUE: Self.EquipRogue();
 
       END_SCRIPT: Break;

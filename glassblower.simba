@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '6f619d33-4564-4650-95fe-db2f7e0925cd'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '9'}
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
@@ -106,7 +108,7 @@ begin
     ERSGlassItem.BULB:     Product := ['Empty light orb', X_Number];
   end;
 
-  ExtraInfo := 'Blowing item: ' + Product.Item + '.';
+  'Blowing item: ' + Product.Item + '.';
   ProductCost := ItemData.GetAverage(Material.Item);
 
   ActionProfit := (
@@ -119,34 +121,16 @@ end;
 
 procedure TBlower.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Glassblower';
-
   inherited;
-  Self.SetupWLBanks;
+  Self.RSW.SetupNamedRegion();
 
-  if WLSettings.RemoteInput.ScriptDebug then
-    DebugObjectArray += @ScriptBank;
+  Self.UseBestItem := CurrentGlass = ERSGlassItem.Best;
+  Self.ItemChanged := True;
 
-  UseBestItem := CurrentGlass = ERSGlassItem.Best;
-  ItemChanged := True;
-
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
-
-  CurrentLevel := Stats.GetCurrentLevel(ERSSkill.CRAFTING);
+  Self.CurrentLevel := BaseStats.GetCurrentLevel(ERSSkill.CRAFTING);
 end;
 
 
-function TBlower.HasRandomItem(): Boolean;
-var
-  Slots: TIntegerArray;
-  UsedSlots: TIntegerArray := Inventory.GetUsedSlots;
-begin
-  Inventory.FindItem(Tool.Item, Slots);
-  Inventory.FindItem(Material.Item, Slots);
-
-  Result := Length(Slots) <> Length(UsedSlots);
-end;
 
 function TBlower.CountItem(): Int32;
 begin
@@ -154,19 +138,6 @@ begin
     Result := Inventory.CountItem(Product.Item);
 end;
 
-
-function TBlower.Withdraw(Item: TRSBankWithdrawItem): Boolean;
-var
-  UseQuantityButton: Boolean := Item.Quantity <> 1;
-  InvCount: Int32 := Inventory.Count;
-begin
-  if Result := Bank.WithdrawItem(BankTab, Item, UseQuantityButton) then
-    WaitUntil(Inventory.Count > InvCount, 100, 3000);
-
-  if BankEmpty := (not Result and not Bank.ContainsItem(BankTab, Item)) then
-    if CollectEmpty and CollectTimer.IsFinished then
-      CollectEmpty := False;
-end;
 
 function TBlower.DepositExtraItems(): Boolean;
 var
@@ -194,21 +165,6 @@ begin
       TotalActions += ItemCount;
 end;
 
-function TBlower.HandleCollectBox(): Boolean;
-var
-  Slots: TIntegerArray;
-begin
-  if CollectBox.FindItems([Tool.Item, Material.Item], Slots) then
-  begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.FindItems([Tool.Item, Material.Item], Slots), 50, 2000);
-    BankEmpty := not CollectEmpty;
-  end
-  else
-    CollectEmpty := True;
-
-  CollectTimer.Restart;
-end;
 
 
 function TBlower.DoGlass(): Boolean;
@@ -302,7 +258,7 @@ begin
       if Inventory.ContainsItem(Product.Item) then
         Exit(EBlowerState.DEPOSIT_PRODUCT);
 
-      if Self.HasRandomItem then
+      if Inventory.HasRandomItem([Tool.Item, Material.Item]) then
         Exit(EBlowerState.DEPOSIT_RANDOM_ITEM);
 
       if BankEmpty or Inventory.ContainsAll([Tool.Item, Material.Item]) then
@@ -353,43 +309,40 @@ end;
 
 procedure TBlower.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
+  repeat
     if UseBestItem then
-      Self.SetupProduct;
+      Self.SetupProduct();
 
-    Self.SetupItems;
+    Self.SetupItems();
 
-    State := GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
 
     case State of
-      EBlowerState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
+      EBlowerState.OPEN_BANK: Bank.WalkOpen();
       EBlowerState.WITHDRAW_TOOL: Self.Withdraw(Tool);
       EBlowerState.WITHDRAW_MATERIAL: Self.Withdraw(Material);
-      EBlowerState.DEPOSIT_PRODUCT: Self.Deposit;
-      EBlowerState.DEPOSIT_RANDOM_ITEM: Self.DepositExtraItems;
+      EBlowerState.DEPOSIT_PRODUCT: Self.Deposit();
+      EBlowerState.DEPOSIT_RANDOM_ITEM: Self.DepositExtraItems();
 
-      EBlowerState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EBlowerState.CLOSE_INTERFACE: MainScreen.CloseInterface;
+      EBlowerState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox([Tool.Item, Material.Item]);
+      EBlowerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      EBlowerState.DO_GLASS: Self.DoGlass;
-      EBlowerState.HANDLE_MAKE: Self.HandleMake;
-      EBlowerState.WAIT_GLASS: Self.WaitBlowing;
+      EBlowerState.DO_GLASS: Self.DoGlass();
+      EBlowerState.HANDLE_MAKE: Self.HandleMake();
+      EBlowerState.WAIT_GLASS: Self.WaitBlowing();
 
-      EBlowerState.LEVEL_UP: Chat.HandleLevelUp;
-      EBlowerState.CLOSE_CONTEXT: ChooseOption.Close;
+      EBlowerState.LEVEL_UP: Chat.HandleLevelUp();
+      EBlowerState.CLOSE_CONTEXT: ChooseOption.Close();
 
       EBlowerState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
-  end;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 
   if not Self.Terminate then
     TerminateScript(Name + ' didn''t terminate properly. Stopping execution.');

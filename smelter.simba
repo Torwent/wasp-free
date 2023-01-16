@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'e8df872a-afaf-44b8-9fc5-eef079ada50b'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '9'}
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
@@ -80,21 +82,19 @@ begin
   case CurrentFurnace of
     ERSFurnace.EDGEVILLE_FURNACE:
       begin
-        RSW.Setup(GetMapBlock(EWaspMapBlock.VARROCK));
+        RSW.Setup([RSRegions.VARROCK]);
         Furnace := RSObjects.EdgevilleFurnace;
-        ScriptBank := RSObjects.EdgevilleBank;
       end;
 
     ERSFurnace.FALADOR_FURNACE:
       begin
-        RSW.Setup(GetMapBlock(EWaspMapBlock.FALADOR));
+        RSW.Setup([RSRegions.FALADOR]);
         Furnace := RSObjects.FaladorFurnace;
-        ScriptBank := RSObjects.FaladorWestBank;
       end;
   end;
 end;
 
-procedure TSmelter.SetupItems;
+procedure TSmelter.SetupItems();
 begin
   Bar.Quantity := BANK_DEPOSIT_ALL;
 
@@ -175,26 +175,18 @@ end;
 
 procedure TSmelter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Smelter';
-
   inherited;
 
-  Self.SetupFurnaces;
-  Self.SetupItems;
-
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  Self.SetupFurnaces();
+  Self.SetupItems();
 
   if WLSettings.RemoteInput.ScriptDebug then
-  begin
-    DebugObjectArray += @ScriptBank;
-    DebugObjectArray += @Furnace;
-  end;
+    DebugObjectArray += Furnace;
 end;
 
 
 
-function TSmelter.Withdraw: Boolean;
+function TSmelter.Withdraw(): Boolean; overload;
 var
   InvCount: Int32;
   Item: TRSBankWithdrawItem;
@@ -226,36 +218,21 @@ begin
 
   if BankEmpty := ((not Result and Bank.IsOpen) and
                     not Bank.ContainsItem(BankTab, Item)) then
-    if CollectEmpty and CollectTimer.IsFinished then
+    if CollectEmpty and CollectTimer.IsFinished() then
       CollectEmpty := False;
 end;
 
-function TSmelter.Deposit: Boolean;
+function TSmelter.Deposit(): Boolean;
 var
   ItemCount: Int32 := Inventory.Count;
 begin
-  if Result := Bank.DepositAll then
+  if Result := Bank.DepositAll() then
     if WaitUntil(Inventory.Count = 0, 100, 3000) then
       TotalActions += ItemCount;
 end;
 
-function TSmelter.HandleCollectBox: Boolean;
-begin
-  if not CollectBox.IsOpen then Exit;
 
-  if CollectBox.ContainsAny(Materials) then
-  begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.ContainsAny(Materials), 100, 3000);
-    BankEmpty := not CollectEmpty;
-  end
-  else CollectEmpty := True;
-
-  CollectTimer.Restart;
-end;
-
-
-function TSmelter.OpenFurnace: Boolean;
+function TSmelter.OpenFurnace(): Boolean;
 begin
   if Furnace.WalkSelectOption(['Smelt']) then
   begin
@@ -265,7 +242,7 @@ begin
 end;
 
 
-function TSmelter.SmeltBar: Boolean;
+function TSmelter.SmeltBar(): Boolean;
 begin
   if not Inventory.ContainsAll(Materials) then
     Exit;
@@ -279,10 +256,10 @@ var
   ItemCount: Int32 := Inventory.CountItem(Bar.Item);
 begin
   if Result := WaitUntil(ItemCount < Inventory.CountItem(Bar.Item), 100, WaitTime) then
-    WL.Activity.Restart;
+    WL.Activity.Restart();
 end;
 
-function TSmelter.WaitSmelt: Boolean;
+function TSmelter.WaitSmelt(): Boolean;
 begin
   if Smelting then
     Result := Smelting := (Inventory.ContainsAll(Materials) and Self.IsMakingItem)
@@ -290,25 +267,25 @@ begin
     Result := Smelting := Self.IsMakingItem;
 
   if Result then
-    WL.Activity.Restart;
+    WL.Activity.Restart();
 end;
 
 
-function TSmelter.GetState: ESmelterState;
+function TSmelter.GetState(): ESmelterState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(ESmelterState.END_SCRIPT);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
   begin
     Smelting := False;
     Exit(ESmelterState.LEVEL_UP);
   end;
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
     HoveringBank := False;
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
       if Inventory.ContainsItem(Bar.Item) then
         Exit(ESmelterState.DEPOSIT_BAR);
@@ -320,7 +297,7 @@ begin
         Exit(ESmelterState.WITHDRAW_MATERIALS);
     end;
 
-    if not CollectEmpty and CollectBox.IsOpen then
+    if not CollectEmpty and CollectBox.IsOpen() then
       Exit(ESmelterState.HANDLE_COLLECT);
 
     Exit(ESmelterState.CLOSE_INTERFACE);
@@ -334,7 +311,7 @@ begin
       begin
         Self.CountItemsLeft(Ore1.Item);
 
-        if Self.ShouldHover then
+        if Self.ShouldHoverBank() then
           Exit(ESmelterState.HOVER_BANK);
       end;
 
@@ -361,7 +338,7 @@ begin
   Exit(ESmelterState.OPEN_BANK);
 end;
 
-function TSmelter.Terminate: Boolean; override;
+function TSmelter.Terminate(): Boolean; override;
 begin
   Result := inherited;
   if Result then
@@ -372,39 +349,38 @@ end;
 
 procedure TSmelter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
 
     case State of
-      ESmelterState.HOVER_BANK: Self.Hover;
-      ESmelterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw;
-      ESmelterState.DEPOSIT_BAR: Self.Deposit;
-      ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositAllBut(BankTab, Materials);
+      ESmelterState.HOVER_BANK: Self.HoverBank();
+      ESmelterState.OPEN_BANK: Bank.WalkOpen();
+      ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw();
+      ESmelterState.DEPOSIT_BAR: Self.Deposit();
+      ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositAllBut(Self.BankTab, Self.Materials);
 
-      ESmelterState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      ESmelterState.HANDLE_COLLECT: Self.HandleCollectBox;
+      ESmelterState.OPEN_COLLECT: CollectBox.WalkOpen();
+      ESmelterState.HANDLE_COLLECT: Self.HandleCollectBox(Self.Materials);
 
-      ESmelterState.OPEN_FURNACE: Self.OpenFurnace;
-      ESmelterState.SMELT_BAR: Self.SmeltBar;
-      ESmelterState.WAIT_SMELT: Self.WaitSmelt;
+      ESmelterState.OPEN_FURNACE: Self.OpenFurnace();
+      ESmelterState.SMELT_BAR: Self.SmeltBar();
+      ESmelterState.WAIT_SMELT: Self.WaitSmelt();
 
-      ESmelterState.CLOSE_INTERFACE: MainScreen.CloseInterface;
-      ESmelterState.CLOSE_CONTEXT: ChooseOption.Close;
-      ESmelterState.LEVEL_UP: Chat.HandleLevelUp;
+      ESmelterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      ESmelterState.CLOSE_CONTEXT: ChooseOption.Close();
+      ESmelterState.LEVEL_UP: Chat.HandleLevelUp();
 
       ESmelterState.END_SCRIPT, ESmelterState.OUT_OF_SUPPLIES: Break;
     end;
 
-    Self.DoAntiban;
-  until Self.ShouldStop;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 
-  if not Self.Terminate then TerminateScript(Self.Name + ' didn''t terminate properly. Stopping execution.');
+  if not Self.Terminate() then
+    TerminateScript(Self.Name + ' didn''t terminate properly. Stopping execution.');
 end;
 
 var

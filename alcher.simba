@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'f6fc217a-3b03-44e1-8fa7-662dfb48f6d7'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '10'}
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
@@ -52,7 +54,7 @@ const
     [7941, 2831], [7941, 2363], [8337, 2370], [8341, 2837]
   ];
 
-procedure Antiban.Setup; override;
+procedure Antiban.Setup(); override;
 begin
   inherited;
 
@@ -63,17 +65,11 @@ end;
 
 procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Alcher';
-
   inherited;
 
-  RSW.Setup('x7789y2306');
-  ScriptBank := RSObjects.GEBank;
+  RSW.Setup([RSRegions.GRAND_EXCHANGE]);
 
-  RSAction.AlchItemArray += CustomItem;
-
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  AlchItemArray += CustomItem;
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');
@@ -82,7 +78,7 @@ begin
 end;
 
 
-procedure TAlcher.SetupAlchItems;
+procedure TAlcher.SetupAlchItems();
 var
   Item: TRSItem;
   Slot: Int32;
@@ -91,7 +87,7 @@ begin
   if not Inventory.Open and not Inventory.SetSelectedItem(-1) then
     Exit;
 
-  for Item in RSAction.AlchItemArray do
+  for Item in AlchItemArray do
   begin
     if Inventory.FindItem(Item, Slot) then
     begin
@@ -107,7 +103,7 @@ begin
 
       if not LossProtection or (ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
       begin
-        ExtraInfo := ' Current Item: ' +  ItemString + ' for ' + ToStr(ActionProfit) + ' each alch.';
+        ' Current Item: ' +  ItemString + ' for ' + ToStr(ActionProfit) + ' each alch.';
         AlchItem := Item;
         Exit;
       end;
@@ -120,44 +116,14 @@ begin
 end;
 
 
-function TAlcher.Withdraw(Item: TRSItem): Boolean;
-begin
-  Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
-
-  if BankEmpty := ((not Result and Bank.IsOpen) and
-                    not Bank.ContainsItem(BankTab, Item)) then
-    if CollectEmpty and CollectTimer.IsFinished then
-      CollectEmpty := False;
-end;
-
-function TAlcher.HandleCollectBox: Boolean;
-var
-  ItemArray: TRSItemArray;
-begin
-  ItemArray += 'Coins';
-  ItemArray += 'Nature rune';
-
-  if CollectBox.ContainsAny(ItemArray) then
-  begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.ContainsAny(ItemArray), 100, 3000);
-    BankEmpty := not CollectEmpty;
-  end
-  else CollectEmpty := True;
-
-  CollectTimer.Restart;
-end;
-
-
-
-function TAlcher.ChooseSpell: Boolean;
+function TAlcher.ChooseSpell(): Boolean;
 begin
   if not Magic.IsOpen and not Magic.CanActivate(AlchSpell) then
     Exit;
   Result := Magic.CastSpell(AlchSpell);
 end;
 
-function TAlcher.MoveItem: Boolean;
+function TAlcher.MoveItem(): Boolean;
 var
   Slot: Int32;
 begin
@@ -167,7 +133,7 @@ begin
   Result := Inventory.Drag(Slot, 11);
 end;
 
-function TAlcher.ChooseItem: Boolean;
+function TAlcher.ChooseItem(): Boolean;
 var
   Slot: Int32;
   Slots: TIntegerArray;
@@ -189,7 +155,7 @@ begin
     begin
       if WaitUntil(Magic.IsOpen, 50, SRL.TruncatedGauss(1200, 2000)) then
       begin
-        WL.Activity.Restart;
+        WL.Activity.Restart();
         TotalActions += 1;
         TotalProfit += ActionProfit;
 
@@ -208,7 +174,7 @@ begin
   end;
 end;
 
-function TAlcher.HandleWarning: Boolean;
+function TAlcher.HandleWarning(): Boolean;
 begin
   if Chat.HasContinue then
     Chat.ClickContinue();
@@ -232,15 +198,15 @@ begin
 end;
 
 
-function TAlcher.Terminate: Boolean; override;
+function TAlcher.Terminate(): Boolean; override;
 begin
   Result := False;
 end;
 
 
-function TAlcher.GetState: EAlcherState;
+function TAlcher.GetState(): EAlcherState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(EAlcherState.END_SCRIPT1);
   if ChooseOption.IsOpen then
     Exit(EAlcherState.CLOSE_CONTEXT);
@@ -270,7 +236,7 @@ begin
 
   if InVarrock and not InGE then
   begin
-    InGE := RSW.AtTile(ScriptBank.TileArray, 30);
+    InGE := RSW.AtTile(RSObjects.GEBank.Coordinates, 30);
     if not InGE then
       Exit(EAlcherState.WALK_ALCH);
   end;
@@ -320,24 +286,22 @@ end;
 
 procedure TAlcher.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
 
     case State of
-      EAlcherState.WALK_ALCH: InGe := RSW.WebWalk(ScriptBank.TileArray, 10, 0.2);
+      EAlcherState.WALK_ALCH: InGe := RSW.WebWalk(RSObjects.GEBank.Coordinates, 10, 0.2);
 
-      EAlcherState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      EAlcherState.WITHDRAW_NATS: Self.Withdraw('Nature rune');
-      EAlcherState.WITHDRAW_MONEY: Self.Withdraw('Coins');
+      EAlcherState.OPEN_BANK: Bank.WalkOpen();
+      EAlcherState.WITHDRAW_NATS: Self.Withdraw(['Nature rune', -1, False]);
+      EAlcherState.WITHDRAW_MONEY: Self.Withdraw(['Coins', -1, False]);
 
-      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface;
+      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
+      EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       EAlcherState.CHOOSE_SPELL: Self.ChooseSpell;
       EAlcherState.CHOOSE_ITEM: Self.ChooseItem;
@@ -359,7 +323,7 @@ begin
     end;
 
     Self.DoAntiban;
-  until Self.ShouldStop;
+  until Self.ShouldStop();
 
   if not Self.Terminate then
     Self.Fatal('Didn''t terminate properly. Stopping execution.');

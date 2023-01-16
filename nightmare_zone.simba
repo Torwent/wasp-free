@@ -143,15 +143,6 @@ end;
 
 procedure TNMZFighter.SetupBarrels();
 begin
-  RSObjects.NMZChest.WalkerIndex := 1;
-  RSObjects.NMZPotion.WalkerIndex := 1;
-  RSObjects.NMZCoffer.WalkerIndex := 1;
-  RSObjects.NMZOverloadBarrel.WalkerIndex := 1;
-  RSObjects.NMZSuperMagicBarrel.WalkerIndex := 1;
-  RSObjects.NMZSuperRangingBarrel.WalkerIndex := 1;
-  RSObjects.NMZAbsorptionBarrel.WalkerIndex := 1;
-  RSNPCs.DominicOnion.WalkerIndex := 1;
-
   if Potion.Contains('Overload') then
     BoostBarrel := RSObjects.NMZOverloadBarrel
   else if Potion.Contains('magic') then
@@ -200,45 +191,41 @@ end;
 
 procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Nightmare Zone';
+  'Nightmare Zone';
 
   inherited;
 
-  RSWDream.Setup('x5284y280');
-  RSWReal.Setup('x5631y3844');
+  RSWDream.Setup([RSRegions.YANILLE, RSRegions.KBD_AND_NMZ]);
 
-  Self.SetupPotions;
-  Self.SetupBarrels;
-  Self.SetupPowerUps;
+  Self.SetupPotions();
+  Self.SetupBarrels();
+  Self.SetupPowerUps();
 
   RSNPCS.AnyNPC.UpText := ['Attack'];
   MinAbsPoints := 250;
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
-
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
-  CombatHandler.Setup(True, @RSMonsters.AnyMonster, 25000 - Round(15000 * BioHash));
+  CombatHandler.Setup(True, RSMonsters.AnyMonster, 25000 - Round(15000 * BioHash));
   Combat.SetAutoRetaliate(True);
 
-  Self.SetupDamageItem;
+  Self.SetupDamageItem();
 
   PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
-  Self.SetupTimers;
+  Self.SetupTimers();
 
   if WLSettings.RemoteInput.ScriptDebug then
   begin
-    DebugObjectArray += @BoostBarrel;
-    DebugObjectArray += @AbsBarrel;
-    DebugObjectArray += @RSObjects.NMZChest;
-    DebugObjectArray += @RSObjects.NMZPotion;
+    DebugObjectArray += BoostBarrel;
+    DebugObjectArray += AbsBarrel;
+    DebugObjectArray += RSObjects.NMZChest;
+    DebugObjectArray += RSObjects.NMZPotion;
 
-    DebugObjectArray += @RSObjects.NMZZapper;
-    DebugObjectArray += @RSObjects.NMZPowerSurge;
-    DebugObjectArray += @RSObjects.NMZRecurrentDamage;
+    DebugObjectArray += RSObjects.NMZZapper;
+    DebugObjectArray += RSObjects.NMZPowerSurge;
+    DebugObjectArray += RSObjects.NMZRecurrentDamage;
 
-    DebugNPCArray += @RSNPCs.DominicOnion;
+    DebugNPCArray += RSNPCs.DominicOnion;
   end;
 end;
 
@@ -428,7 +415,7 @@ begin
   if not Self.HasBoostPot then
     Exit;
 
-  if BoostTimer.IsFinished then
+  if BoostTimer.IsFinished() then
     Boosted := False;
 
   if PotStr.Contains('Overload') then
@@ -570,7 +557,7 @@ function TNMZFighter.PowerUpAvailable(): Boolean;
 begin
   Result := RSObjects.NMZRecurrentDamage.Find or
             RSObjects.NMZPowerSurge.Find or
-            (ZapperTimer.IsFinished and RSObjects.NMZZapper.Find);
+            (ZapperTimer.IsFinished() and RSObjects.NMZZapper.Find);
 end;
 
 function TNMZFighter.GetPowerUp(): Boolean;
@@ -584,12 +571,12 @@ begin
   begin
     Minimap.WaitMoving;
     if Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000) then
-      PowerSurgeTimer.Restart;
+      PowerSurgeTimer.Restart();
   end
   else if Result := RSObjects.NMZZapper.Click then
   begin
     Minimap.WaitMoving;
-    ZapperTimer.Restart;
+    ZapperTimer.Restart();
   end;
 end;
 
@@ -613,7 +600,7 @@ begin
   if Self.NeedLowerHP then
     Exit(LOWER_HEALTH);
 
-  if PrayFlick and PrayFlickTimer.IsFinished then
+  if PrayFlick and PrayFlickTimer.IsFinished() then
     Exit(FLICK_PRAYER);
 
   if not MainScreen.WaitInCombat(600) then
@@ -628,7 +615,7 @@ begin
   if CombatHandler.NeedRegear then
     Exit(REEQUIP_GEAR);
 
-  if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished then
+  if RSWDream.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished() then
   begin
     if Self.PowerUpAvailable then
       Exit(USE_POWER);
@@ -638,7 +625,7 @@ begin
     Exit(WAIT_CENTER);
   end;
 
-  if WalkMiddleTimer.IsFinished then
+  if WalkMiddleTimer.IsFinished() then
     Exit(WALK_MIDDLE);
 
   Exit(WAIT_STATE);
@@ -749,15 +736,14 @@ begin
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState;
-    Action := ToStr(State);
-    ExtraInfo := ' InDream: ' + ToStr(InDream) +
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
+    ' InDream: ' + ToStr(InDream) +
                  ' DreamSetup: ' + ToStr(DreamSetup) +
                  ' BoostTimer: ' + ToStr(BoostTimer.TimeRemaining) +
                    STR_NEW_LINE +
-                 ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished) +
+                 ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished()) +
                  ' NeedBoost: ' + ToSTR(Self.NeedBoost) + ' Boosted: ' + ToStr(Boosted);
-    Self.ProcessWhileWaiting;
 
     case State of
       END_SCRIPT: Break;
@@ -900,7 +886,7 @@ begin
   if not ManageGear or not GearIsSetup then
     Exit;
 
-  if not NMZFighter.PowerSurgeTimer.IsFinished or (Minimap.GetSpecLevel >= WeaponSpec) then
+  if not NMZFighter.PowerSurgeTimer.IsFinished() or (Minimap.GetSpecLevel >= WeaponSpec) then
     Exit;
 
   Result := ((Weapon <> 'Null') and Inventory.ContainsItem(Weapon)) or
@@ -934,7 +920,7 @@ begin
       Wait(300, 400);
   end;
 
-  if Result and NMZFighter.PowerSurgeTimer.IsFinished and (Minimap.GetSpecLevel < WeaponSpec) then
+  if Result and NMZFighter.PowerSurgeTimer.IsFinished() and (Minimap.GetSpecLevel < WeaponSpec) then
     Self.Regear;
 end;
 

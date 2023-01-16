@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '7c40c4ac-0009-4a08-ab61-4887d9456420'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '9'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -23,7 +25,7 @@ type
     FillingBellows: Boolean;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -34,36 +36,31 @@ end;
 
 procedure TChompyHunter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Chompy Hunter';
-
   inherited;
 
   ItemFinder.Similarity := 0.9999;
-  RSW.Setup('x4595y3834');
+  RSW.Setup([RSRegions.CASTLE_WARS]);
 
-  CombatHandler.Setup(@RSMonsters.Chompy, 2000);
+  CombatHandler.Setup(RSMonsters.Chompy, 2000);
   Toad := RSNPCs.SwampToad;
 
   OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
-
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
   if WLSettings.RemoteInput.ScriptDebug then
-    DebugNPCArray += @Toad;
+    DebugNPCArray += Toad;
 end;
 
 
-function TChompyHunter.CountBellows: Int32;
+function TChompyHunter.CountBellows(): Int32;
 begin
   Result := Inventory.CountItem('Ogre bellows (3)') +
             Inventory.CountItem('Ogre bellows (2)') +
             Inventory.CountItem('Ogre bellows (1)');
 end;
 
-function TChompyHunter.FillBellows: Boolean;
+function TChompyHunter.FillBellows(): Boolean;
 var
   InvCount: Int32 := Self.CountBellows;
   TempCount: Int32;
@@ -85,7 +82,7 @@ begin
 end;
 
 
-function TChompyHunter.MoveAround: Boolean;
+function TChompyHunter.MoveAround(): Boolean;
 var
   MinimapTPA: TPointArray;
   SwampTPA: TPointArray;
@@ -114,7 +111,7 @@ begin
   Result := not Minimap.HasDotUnder;
 end;
 
-function TChompyHunter.PlaceToad: Boolean;
+function TChompyHunter.PlaceToad(): Boolean;
 begin
   if Minimap.HasDotUnder then
     Self.MoveAround;
@@ -126,7 +123,7 @@ begin
   end;
 end;
 
-function TChompyHunter.FillToad: Boolean;
+function TChompyHunter.FillToad(): Boolean;
 var
   InvCount := Inventory.Count;
 begin
@@ -146,11 +143,11 @@ begin
   Result := MainScreen.InCombat or (FeatherCount < Inventory.CountItemStack('Feather'));
 end;
 
-function TChompyHunter.ClickChompy: Boolean;
+function TChompyHunter.ClickChompy(): Boolean;
 var
   FeatherCount: Int32;
 begin
-  if CombatHandler.Monster^.SelectOption(['Attack', 'Pluck']) then
+  if CombatHandler.Monster.SelectOption(['Attack', 'Pluck']) then
   begin
     FeatherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving;
@@ -163,7 +160,7 @@ end;
 
 
 
-function TChompyHunter.GetState: EState;
+function TChompyHunter.GetState(): EState;
 begin
   if FillingBellows then
   begin
@@ -176,10 +173,10 @@ begin
   if Inventory.ContainsItem('Bloated toad') then
     Exit(PLACE_TOAD);
 
-  if MainScreen.InCombat then
+  if MainScreen.InCombat() then
     Exit(WAIT_STATE);
 
-  if CombatHandler.Monster^.Find then
+  if CombatHandler.Monster.Find() then
     Exit(CLICK_CHOMPY);
 
   if Inventory.ContainsAny(OgreBellows) then
@@ -190,37 +187,34 @@ end;
 
 procedure TChompyHunter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+  repeat
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
 
     case State of
       WAIT_STATE: Wait(800, 1200);
-      FILL_TOAD: Self.FillToad;
-      FILL_BELLOWS: Self.FillBellows;
-      PLACE_TOAD: Self.PlaceToad;
-      CLICK_CHOMPY: Self.ClickChompy;
+      FILL_TOAD: Self.FillToad();
+      FILL_BELLOWS: Self.FillBellows();
+      PLACE_TOAD: Self.PlaceToad();
+      CLICK_CHOMPY: Self.ClickChompy();
     end;
 
-    Self.DoAntiban;
-  end;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 
 var
   ChompyHunter: TChompyHunter;
 
-function TRSMainScreen.InCombat: Boolean; override;
+function TRSMainScreen.InCombat(): Boolean; override;
 begin
   if Self.FindDepletedHPBar then
     Exit(False);
 
-  Result := (CombatHandler.IsSetup and not CombatHandler.InCombatTimer.IsFinished)
+  Result := (CombatHandler.IsSetup and not CombatHandler.InCombatTimer.IsFinished())
             or XPBar.EarnedXP or (Self.FindHitsplats <> []);
 end;
 

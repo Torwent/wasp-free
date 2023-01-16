@@ -123,16 +123,14 @@ begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
       begin
-        RSW.Setup('x1916y1841');
-        ScriptBank := RSObjects.HosidiusKitchenBank;
+        RSW.Setup([RSRegions.HOSIDIUS_KITCHEN]);
         CookingObj := RSObjects.HosidiusKitchenOven;
       end;
 
     ERSLocation.ROGUES_DEN:
       begin
-        RSW.Setup('x9921y310');
+        RSW.Setup([RSRegions.ROGUES_DEN]);
         RSNPCs.EmeraldBenedict.Filter.Finder := False;
-        ScriptBanker := RSNPCs.EmeraldBenedict;
 
         RSObjects.EternalFire.Filter.Finder := False;
         RSObjects.EternalFire.Filter.UpText := False;
@@ -152,23 +150,13 @@ end;
 
 procedure TCooker.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'AIO Cooker';
-
   inherited;
 
-  Self.SetupItems;
-  Self.SetupLocation;
-
-  if not RSClient.IsLoggedIn then Login.LoginPlayer;
+  Self.SetupItems();
+  Self.SetupLocation();
 
   if WLSettings.RemoteInput.ScriptDebug then
-  begin
-    case CurrentLocation of
-      ERSLocation.HOSIDIUS:   DebugObjectArray += @ScriptBank;
-      ERSLocation.ROGUES_DEN: DebugNPCArray += @ScriptBanker;
-    end;
-    DebugObjectArray += @CookingObj;
-  end;
+    DebugObjectArray += CookingObj;
 end;
 
 
@@ -187,26 +175,11 @@ end;
 function TCooker.OpenBank(): Boolean;
 begin
   case CurrentLocation of
-    ERSLocation.HOSIDIUS:   Result := Bank.WalkOpen(ScriptBank);
-    ERSLocation.ROGUES_DEN: Result := Bank.WalkOpen(ScriptBanker);
+    ERSLocation.HOSIDIUS:   Result := Bank.WalkOpen();
+    ERSLocation.ROGUES_DEN: Result := Bank.WalkOpen(RSNPCs.EmeraldBenedict);
   end;
 end;
 
-function TCooker.Withdraw(): Boolean;
-var
-  InvCount: Int32;
-begin
-  if BankTab = -1 then
-    BankTab := Bank.FindItemTab(Ingredient.Item);
-
-  InvCount := Inventory.Count;
-  if Result := Bank.WithdrawItem(BankTab, Ingredient, True) then
-    WaitUntil(Inventory.Count > InvCount, 100, 3000);
-
-  if BankEmpty := (not Result and not Bank.ContainsItem(BankTab, Ingredient)) then
-    if CollectEmpty and CollectTimer.IsFinished then
-      CollectEmpty := False;
-end;
 
 function TCooker.Deposit(): Boolean;
 var
@@ -224,22 +197,6 @@ begin
   end;
 
   Result := True;
-end;
-
-function TCooker.HandleCollectBox(): Boolean;
-var
-  Slots: TIntegerArray;
-begin
-  if CollectBox.FindItem(Ingredient.Item, Slots) then
-  begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.FindItem(Ingredient.Item, Slots), 100, 2000);
-    BankEmpty := not CollectEmpty;
-  end
-  else
-    CollectEmpty := True;
-
-  CollectTimer.Restart;
 end;
 
 
@@ -275,7 +232,7 @@ begin
   if ItemCount = 0 then Exit;
 
   if Result := WaitUntil(ItemCount > Inventory.CountItem(Ingredient.Item), 100, WaitTime) then
-    WL.Activity.Restart;
+    WL.Activity.Restart();
 end;
 
 function TCooker.WaitCooking(): Boolean;
@@ -360,16 +317,15 @@ begin
 
   repeat
     State := Self.GetState();
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting();
+    Self.SetAction(ToStr(State));
 
     case State of
       ECookerState.OPEN_BANK: Self.OpenBank();
-      ECookerState.WITHDRAW_ITEMS: Self.Withdraw();
+      ECookerState.WITHDRAW_ITEMS: Self.Withdraw(Ingredient);
       ECookerState.DEPOSIT_ITEMS: Self.Deposit();
 
-      ECookerState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      ECookerState.HANDLE_COLLECT: Self.HandleCollectBox();
+      ECookerState.OPEN_COLLECT: CollectBox.WalkOpen();
+      ECookerState.HANDLE_COLLECT: Self.HandleCollectBox([Ingredient.Item]);
       ECookerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       ECookerState.LEVEL_UP: Chat.HandleLevelUp();

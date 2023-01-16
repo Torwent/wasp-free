@@ -1,3 +1,5 @@
+{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '003b8e09-e988-42ca-b261-b2b76d131800'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '10'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -58,7 +60,7 @@ type
     UseShadowVeil: Boolean;
     UseRedemption: Boolean;
 
-    CurrentNPC: PRSNPC;
+    CurrentNPC: TRSNPC;
 
     CoinPouch: TRSItem;
     Necklace: TRSItem;
@@ -87,7 +89,7 @@ type
   end;
 
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -96,15 +98,15 @@ begin
   Antiban.MaxZoom := 50;
 end;
 
-procedure TThiever.SetupNPC;
+procedure TThiever.SetupNPC();
 begin
   FoodHandler.Amount := FoodAmount;
 
   case PickedNPC of
     MAN:
       begin
-        RSW.Setup('x7617y3214');
-        CurrentNPC := @RSNPCs.Man;
+        RSW.Setup([RSRegions.LUMBRIDGE]);
+        CurrentNPC := RSNPCs.Man;
 
         LootArray += CoinPouch;
         LootArray += 'Coins';
@@ -121,8 +123,8 @@ begin
 
     MASTER_FARMER:
       begin
-        RSW.Setup('x7617y3214');
-        CurrentNPC := @RSNPCs.MasterFarmer;
+        RSW.Setup([RSRegions.DRAYNOR_VILLAGE]);
+        CurrentNPC := RSNPCs.MasterFarmer;
         LootArray := [
           'Potato seed', 'Onion seed', 'Cabbage seed', 'Tomato seed',
           'Sweetcorn seed', 'Strawberry seed', 'Watermelon seed',
@@ -162,16 +164,14 @@ begin
 
         NPCMaxHit := 3;
 
-        ScriptBank := RSObjects.DraynorBank;
-
         if SuicideMode then
           SuicideMode := False;
       end;
 
     GUARD:
       begin
-        RSW.Setup('x7051y2796');
-        CurrentNPC := @RSNPCs.Guard;
+        RSW.Setup([RSRegions.FALADOR]);
+        CurrentNPC := RSNPCs.Guard;
 
         LootArray += CoinPouch;
         LootArray += 'Coins';
@@ -180,15 +180,12 @@ begin
 
         NPCMaxHit := 2;
         ActionProfit := 30;
-
-        ScriptBank := RSObjects.FaladorWestBank;
       end;
 
     ELF:
       begin
-        RSW.Setup('x3583y1905');
-        CurrentNPC := @RSNPCs.Elf;
-        ScriptBank := RSObjects.PrifddinasBank;
+        RSW.Setup([RSRegions.PRIFDDINAS]);
+        CurrentNPC := RSNPCs.Elf;
 
         LootArray := [
           CoinPouch, 'Coins', 'Death rune', 'Jug of wine', 'Nature rune',
@@ -211,8 +208,8 @@ begin
 
     TZHAAR_CITY:
       begin
-        RSW.Setup('x4333y310');
-        CurrentNPC := @RSNPCs.TzhaarHur;
+        RSW.Setup([RSRegions.TZHAAR]);
+        CurrentNPC := RSNPCs.TzhaarHur;
         LootArray := [
           'Tokkul', 'Uncut sapphire', 'Uncut emerald',
           'Uncut ruby', 'Uncut diamond'
@@ -221,8 +218,6 @@ begin
         StackableArray := LootArray;
 
         NPCMaxHit := 4;
-
-        ScriptBank := RSObjects.TzhaarBank;
 
         if SuicideMode then
           SuicideMode := False;
@@ -235,10 +230,10 @@ begin
   StackableArray += Necklace; //not stackable but this array is used to not bank items
   StackableArray += 'Cosmic rune';
 
-  CurrentNPC^.Filter.Walker := False;
+  CurrentNPC.Filter.Walker := False;
 end;
 
-procedure TThiever.CheckRogueEquipment;
+procedure TThiever.CheckRogueEquipment();
 var
   ProfitMultiplier: Double;
   Item: TRSItem;
@@ -396,7 +391,6 @@ begin
 
   if WLSettings.RemoteInput.ScriptDebug then
   begin
-    DebugObjectArray += @ScriptBank;
     DebugNPCArray += CurrentNPC;
   end;
 end;
@@ -434,12 +428,12 @@ begin
 end;
 
 
-function TThiever.HasRogue: Boolean;
+function TThiever.HasRogue(): Boolean;
 begin
   Result := Inventory.ContainsAny(RogueEquipment);
 end;
 
-function TThiever.EquipRogue: Boolean;
+function TThiever.EquipRogue(): Boolean;
 var
   Item: TRSItem;
 begin
@@ -464,7 +458,7 @@ begin
   Result := Length(Slots) <> Length(UsedSlots);
 end;
 
-function TThiever.HasSpace: Boolean;
+function TThiever.HasSpace(): Boolean;
 begin
   if SuicideMode then //Makes sure we always have space to loot
   begin               //everything from the gravestone on suicide mode.
@@ -489,7 +483,7 @@ begin
 end;
 
 
-function TThiever.IsLowHP: Boolean;
+function TThiever.IsLowHP(): Boolean;
 var
   CurrentHP: Int32 := Minimap.GetHPLevel;
 begin
@@ -501,7 +495,7 @@ begin
   Result := (CurrentHP <= NextHeal) or (CurrentHP <= NPCMaxHit);
 end;
 
-function TThiever.IsPouchFull: Boolean;
+function TThiever.IsPouchFull(): Boolean;
 begin
   if CoinPouchLimit < 1 then
     CoinPouchLimit := SRL.TruncatedGauss(28, 1);
@@ -531,13 +525,13 @@ begin
   end;
 end;
 
-function TThiever.NecklaceExpired: Boolean;
+function TThiever.NecklaceExpired(): Boolean;
 begin
   Result := Chat.FindMessage('crumbles', [CHAT_COLOR_LIGHT_RED]);
   HasNeck := not Result;
 end;
 
-function TThiever.Dodged: Boolean;
+function TThiever.Dodged(): Boolean;
 begin
   Result := Chat.FindMessage('dodgy');
 end;
@@ -558,14 +552,14 @@ begin
   begin
     CoinPouchLimit := SRL.TruncatedGauss(28, 1);
     TotalActions += PouchCount;
-    WL.Activity.Restart;
+    WL.Activity.Restart();
   end;
 
   if not Result then
     Self.OpenCoinPouch;
 end;
 
-function TThiever.Heal: Boolean;
+function TThiever.Heal(): Boolean;
 begin
   repeat
     if not Inventory.Consume(FOOD_CONSUMABLE) then
@@ -578,14 +572,14 @@ begin
     NextHeal := Round(Antiban.GetUniqueNumber(NPCMaxHit * 7));
 end;
 
-function TThiever.EquipNeck: Boolean;
+function TThiever.EquipNeck(): Boolean;
 begin
   if Result := Inventory.ClickItem(Necklace) then Wait(300, 400);
 
   FreshNeck := HasNeck := Result;
 end;
 
-function TThiever.CheckNeck: Boolean;
+function TThiever.CheckNeck(): Boolean;
 begin
   Result := HasNeck := Equipment.ContainsItem(Necklace);
 
@@ -593,7 +587,7 @@ begin
 end;
 
 
-function TThiever.CastShadowVeil: Boolean;
+function TThiever.CastShadowVeil(): Boolean;
 begin
   if not UseShadowVeil or not Magic.Open then
     Exit;
@@ -608,30 +602,30 @@ begin
   ShadowVeilTimer.Restart(Random(-5000, 5000));
 end;
 
-function TThiever.PickNPC: Boolean;
+function TThiever.PickNPC(): Boolean;
 var
   Slot: Int32 := Inventory.GetSelectedSlot;
   CurrentHP: Int32 := Minimap.GetHPLevel;
 begin
   if Slot > -1 then Inventory.ClickSlot(Slot);
 
-  if Result := CurrentNPC^.SelectOption(['Pick', 'pocket']) then
+  if Result := CurrentNPC.SelectOption(['Pick', 'pocket']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
 
-    RSObjects.Gravestone.TileArray.Insert(RSW.GetMyPos, 0);
-    if Length(RSObjects.Gravestone.TileArray) > 4 then
-      RSObjects.Gravestone.TileArray.Pop;
+    RSObjects.Gravestone.Coordinates.Insert(RSW.GetMyPos, 0);
+    if Length(RSObjects.Gravestone.Coordinates) > 4 then
+      RSObjects.Gravestone.Coordinates.Pop;
 
     if not Self.NecklaceExpired then
       FreshNeck := False;
 
     Self.CheckFailed(CurrentHP);
-    WL.Activity.Restart;
+    WL.Activity.Restart();
   end;
 end;
 
-function TThiever.Deposit: Boolean;
+function TThiever.Deposit(): Boolean;
 var
   ItemCount: Int32;
 begin
@@ -645,20 +639,6 @@ begin
   end;
 end;
 
-function TThiever.Withdraw(Item: TRSItem; Quantity: Int32): Boolean;
-var
-  ItemCount: Int32 := Inventory.CountItem(Item);
-  QuantityNeeded: Int32 := Quantity - ItemCount;
-  InvCount: Int32;
-begin
-  InvCount := Inventory.Count;
-  if Result := Bank.WithdrawItem(BankTab, [Item, QuantityNeeded, False], False) then
-    WaitUntil(Inventory.Count > InvCount, 100, 3000);
-
-  if not Result and (Item = Necklace) and (PickedNPC = GUARD) then
-    NeckAmount := 0;
-end;
-
 function TThiever.WithdrawAny(Items: TRSItemArray; Quantity: Int32): Boolean;
 var
   Item: TRSItem;
@@ -667,7 +647,7 @@ var
   InvCount: Int32;
 begin
   for Item in Items do
-    if Bank.ContainsItem(Item) then Exit(Self.Withdraw(Item, Quantity));
+    if Bank.ContainsItem(Item) then Exit(Self.Withdraw([Item, Quantity, False]));
 
   for Item in Items do
   begin
@@ -685,7 +665,7 @@ begin
   FoodHandler.Amount := 0;
 end;
 
-function TThiever.LootGrave: Boolean;
+function TThiever.LootGrave(): Boolean;
 var
   TPA, GraveTPA: TPointArray;
   P: TPoint;
@@ -719,16 +699,17 @@ begin
 
   Result := ChooseOption.Select('Loot');
 
-  if Result then RSObjects.Gravestone.TileArray := [];
+  if Result then RSObjects.Gravestone.Coordinates := [];
 end;
 
-function TThiever.EnableRedemption: Boolean;
+function TThiever.EnableRedemption(): Boolean;
 begin
   Result := Prayer.ActivatePrayer(ERSPrayer.REDEMPTION);
   UseRedemption := RedemptionEnabled := Result;
 end;
 
-function TThiever.GetState: EThieverState;
+
+function TThiever.GetState(): EThieverState;
 begin
   if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
@@ -793,7 +774,7 @@ begin
       Exit(EAT_FOOD);
     if not SuicideMode then
       Exit(OPEN_BANK);
-    if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
+    if not RSW.AtTile(CurrentNPC.Coordinates, 40) then
       Exit(WALK_TO_NPC);
     if UseRedemption and not RedemptionEnabled then
       Exit(ENABLE_REDEMPTION);
@@ -803,7 +784,7 @@ begin
     Exit(PICKPOCKET);
   end;
 
-  if not RSW.AtTile(CurrentNPC^.TileArray, 40) then
+  if not RSW.AtTile(CurrentNPC.Coordinates, 40) then
     Exit(WALK_TO_NPC);
 
   if UseShadowVeil and ShadowVeilTimer.IsFinished() then
@@ -814,14 +795,12 @@ end;
 
 procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
-    State := Self.GetState;
-    Action := ToStr(State);
-    ExtraInfo := ' FreshNeck: ' + ToStr(FreshNeck) +
+  repeat
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
+    ' FreshNeck: ' + ToStr(FreshNeck) +
                  ',   HasNeck: ' + ToStr(HasNeck) +
                  STR_NEW_LINE +
                   ' UseRedemption: ' + ToStr(UseRedemption) +
@@ -830,37 +809,36 @@ begin
                   STR_NEW_LINE +
                   ' SuicideMode: ' + ToStr(SuicideMode) +
                   ',   UseShadowVeil: ' + ToStr(UseShadowVeil);
-    Self.ProcessWhileWaiting;
 
     case State of
-      OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      DEPOSIT_LOOT: Self.Deposit;
+      OPEN_BANK: Bank.WalkOpen();
+      DEPOSIT_LOOT: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
-      WITHDRAW_NECKLACES: Self.Withdraw(Necklace, NeckAmount);
-      CLOSE_INTERFACE: MainScreen.CloseInterface;
+      WITHDRAW_NECKLACES: Self.Withdraw([Necklace, NeckAmount, False]);
+      CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
       CHANGE_CHAT_FILTER: ChatButtons.ChangeState(ERSChatButton.GAME_CHAT, ERSChatButtonState.ENABLED);
 
-      CAST_SHADOW_VEIL: Self.CastShadowVeil;
-      PICKPOCKET: Self.PickNPC;
-      OPEN_POUCH: Self.OpenCoinPouch;
+      CAST_SHADOW_VEIL: Self.CastShadowVeil();
+      PICKPOCKET: Self.PickNPC();
+      OPEN_POUCH: Self.OpenCoinPouch();
 
-      EAT_FOOD: Self.Heal;
-      EQUIP_NECKLACE: Self.EquipNeck;
-      CHECK_NECKLACE: Self.CheckNeck;
-      CLOSE_CONTEXT: ChooseOption.Close;
+      EAT_FOOD: Self.Heal();
+      EQUIP_NECKLACE: Self.EquipNeck();
+      CHECK_NECKLACE: Self.CheckNeck();
+      CLOSE_CONTEXT: ChooseOption.Close();
       DROP_ITEMS: Inventory.ShiftDrop(DropArray, Inventory.RandomPattern);
-      WALK_TO_NPC: RSW.WebWalk(CurrentNPC^.TileArray, 30, 0.2);
-      EQUIP_ROGUE: Self.EquipRogue;
-      LOOT_GRAVE: Self.LootGrave;
-      ENABLE_REDEMPTION: Self.EnableRedemption;
+      WALK_TO_NPC: RSW.WebWalk(CurrentNPC.Coordinates, 30, 0.2);
+      EQUIP_ROGUE: Self.EquipRogue();
+      LOOT_GRAVE: Self.LootGrave();
+      ENABLE_REDEMPTION: Self.EnableRedemption();
 
       END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
-  end;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 var

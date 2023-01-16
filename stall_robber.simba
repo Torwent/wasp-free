@@ -52,7 +52,7 @@ begin
   case CurrentStall of
     ERSStall.TEA_STALL:
       begin
-        RSW.Setup('x7536y2363');
+        RSW.Setup([RSRegions.VARROCK_EAST]);
         Stall := RSObjects.TeaStall;
         StallCooldown.Init(7000);
         SafeSpot := [8465, 2808];
@@ -61,7 +61,7 @@ begin
 
     ERSStall.SILK_STALL:
       begin
-        RSW.Setup('x5723y3038');
+        RSW.Setup([RSRegions.ARDOUGNE]);
         Stall := RSObjects.SilkStall;
         StallCooldown.Init(5000);
         SafeSpot := [6042, 3182];
@@ -70,7 +70,7 @@ begin
 
     ERSStall.FRUIT_STALL:
       begin
-        RSW.Setup('x2468y1912');
+        RSW.Setup([RSRegions.HOSIDIUS_FRUIT_STALL_HOUSE]);
         Stall := RSObjects.FruitStall;
         StallCooldown.Init(2000);
         DropList := [
@@ -81,22 +81,17 @@ begin
       end;
   end;
 
-  StallCooldown.Timeout := GetTickCount;
+  StallCooldown.Timeout := GetTickCount();
 end;
 
 procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'Stall robber';
-
   inherited;
 
   Self.SetupStall();
 
-  if not RSClient.IsLoggedIn() then
-    Login.LoginPlayer();
-
   if WLSettings.RemoteInput.ScriptDebug then
-    DebugObjectArray += @Stall;
+    DebugObjectArray += Stall;
 end;
 
 
@@ -151,7 +146,7 @@ begin
   if (SafeSpot <> []) and not RSW.AtTile(SafeSpot, 5) then
     Exit(WALK_SPOT);
 
-  if RSW.AtTile(Stall.TileArray) then
+  if RSW.AtTile(Stall.Coordinates) then
     Exit(FIND_STALL);
 end;
 
@@ -161,8 +156,7 @@ begin
 
   repeat
     State := Self.GetState();
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting();
+    Self.SetAction(ToStr(State));
 
     case State of
       LEVELED_UP: Chat.HandleLevelUp();
@@ -203,11 +197,11 @@ begin
     SetCaption('Stall:');
     SetLeft(5);
     SetTop(35);
-    SetWidth(200);
+    SetWidth(300);
     Combobox.setStyle(csDropDownList);
-    Combobox.getItems.Add('Tea stall');
-    Combobox.getItems.Add('Silk stall');
-    Combobox.getItems.Add('Fruit stall');
+    Combobox.getItems.Add('Tea stall (East Varrock)');
+    Combobox.getItems.Add('Silk stall (Ardougne market, safe spot knights!)');
+    Combobox.getItems.Add('Fruit stall (Hosidius east of the market)');
     Combobox.setItemIndex(Ord(CurrentStall));
   end;
 

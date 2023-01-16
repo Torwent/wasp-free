@@ -60,7 +60,7 @@ type
     Enchanting: Boolean;
   end;
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
   inherited;
 
@@ -70,15 +70,15 @@ begin
 end;
 
 
-procedure TEnchanter.SetSpell;
+procedure TEnchanter.SetSpell();
 var
   ItemString: String := ToStr(RegularJewel);
 begin
-  if ItemString.Contains(['Opal', 'Sapphire']) then
+  if ItemString.ContainsAny(['Opal', 'Sapphire']) then
     Spell := ERSSpell.LVL1_ENCHANT
-  else if ItemString.Contains(['Jade', 'Emerald']) then
+  else if ItemString.ContainsAny(['Jade', 'Emerald']) then
     Spell := ERSSpell.LVL2_ENCHANT
-  else if ItemString.Contains(['Topaz', 'Ruby']) then
+  else if ItemString.ContainsAny(['Topaz', 'Ruby']) then
     Spell := ERSSpell.LVL3_ENCHANT
   else if ItemString.Contains('Diamond') then
     Spell := ERSSpell.LVL4_ENCHANT
@@ -90,7 +90,7 @@ begin
     Spell := ERSSpell.LVL7_ENCHANT
 end;
 
-procedure TEnchanter.SetEnchantedJewel;
+procedure TEnchanter.SetEnchantedJewel();
 var
   ItemString: String := ToStr(RegularJewel);
 begin
@@ -220,39 +220,21 @@ end;
 
 procedure TEnchanter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name := 'AIO Enchanter';
-
   inherited;
-  Self.SetupWLBanks;
+  Self.RSW.SetupNamedRegion();
 
-  ExtraInfo := ' Currently enchanting: ' + RegularJewel + '.';
+  Self.CosmicRune := 'Cosmic rune';
+  Self.SetSpell();
+  Self.SetEnchantedJewel();
 
-  CosmicRune := 'Cosmic rune';
-  Self.SetSpell;
-  Self.SetEnchantedJewel;
-
-  ActionProfit := (
-    ItemData.GetAverage(EnchantedJewel) -
-    ItemData.GetAverage(CosmicRune) + ItemData.GetAverage(RegularJewel)
+  Self.ActionProfit := (
+    ItemData.GetAverage(Self.EnchantedJewel) -
+    ItemData.GetAverage(Self.CosmicRune) + ItemData.GetAverage(RegularJewel)
   );
-
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
-
-  if WLSettings.RemoteInput.ScriptDebug then
-    DebugObjectArray += @ScriptBank;
 end;
 
 
-function TEnchanter.HasProduct: Boolean
-var
-  Slots: TIntegerArray;
-begin
-  Result := Inventory.FindItem(EnchantedJewel, Slots);
-end;
-
-
-function TEnchanter.EnchantJewel: Boolean;
+function TEnchanter.EnchantJewel(): Boolean;
 begin
   if Result := Inventory.ClickItem(RegularJewel) then
   begin
@@ -261,7 +243,7 @@ begin
   end;
 end;
 
-function TEnchanter.WaitEnchanting: Boolean;
+function TEnchanter.WaitEnchanting(): Boolean;
 begin
   if Enchanting then
     Result := Enchanting := Inventory.ContainsItem(CosmicRune) and Inventory.ContainsItem(RegularJewel) and XPBar.WaitXP(2000)
@@ -269,7 +251,7 @@ begin
     Result := Enchanting := XPBar.WaitXP(2000);
 end;
 
-function TEnchanter.DeselectSpell: Boolean;
+function TEnchanter.DeselectSpell(): Boolean;
 var
   Selected: ERSSpell;
 begin
@@ -289,19 +271,7 @@ begin
 end;
 
 
-function TEnchanter.Withdraw(Item: TRSItem): Boolean;
-begin
-  Result := Bank.WithdrawItem(BankTab, [Item, BANK_WITHDRAW_ALL, False], True);
-
-  if Result then
-    WaitUntil(Inventory.ContainsItem(Item), 100, 3000);
-
-  if BankEmpty := (not Result and not Bank.ContainsItem(BankTab, Item)) then
-    if CollectEmpty and CollectTimer.IsFinished then
-      CollectEmpty := False;
-end;
-
-function TEnchanter.Deposit: Boolean;
+function TEnchanter.Deposit(): Boolean;
 var
   ItemCount: Int32 := Inventory.CountItem(EnchantedJewel);
 begin
@@ -311,26 +281,10 @@ begin
 end;
 
 
-function TEnchanter.HandleCollectBox: Boolean;
-var
-  Slots: TIntegerArray;
+
+function TEnchanter.GetState(): EEnchanterState;
 begin
-  if CollectBox.FindItems([RegularJewel, CosmicRune], Slots) then
-  begin
-    if Result := CollectEmpty := CollectBox.CollectToBank then
-      WaitUntil(not CollectBox.FindItems([RegularJewel, CosmicRune], Slots), 100, 3000);
-    BankEmpty := not CollectEmpty;
-  end
-  else
-    CollectEmpty := True;
-
-  CollectTimer.Restart;
-end;
-
-
-function TEnchanter.GetState: EEnchanterState;
-begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(EEnchanterState.END_SCRIPT);
 
   if Chat.LeveledUp then
@@ -341,9 +295,9 @@ begin
 
   if MainScreen.HasInterface then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
-      if Self.HasProduct then
+      if Inventory.ContainsItem(Self.EnchantedJewel) then
         Exit(EEnchanterState.DEPOSIT_PRODUCT);
 
       if BankEmpty or Inventory.ContainsAll([CosmicRune, RegularJewel]) then
@@ -356,7 +310,7 @@ begin
         Exit(EEnchanterState.WITHDRAW_MATERIAL);
     end;
 
-    if CollectBox.IsOpen then
+    if CollectBox.IsOpen() then
     begin
       if CollectEmpty or Inventory.ContainsAll([CosmicRune, RegularJewel]) then
         Exit(EEnchanterState.CLOSE_INTERFACE);
@@ -366,7 +320,7 @@ begin
     Exit(EEnchanterState.CLOSE_INTERFACE);
   end;
 
-  if Inventory.IsOpen then
+  if Inventory.IsOpen() then
   begin
     if Inventory.ContainsAll([CosmicRune, RegularJewel]) then
     begin
@@ -389,7 +343,7 @@ begin
     Exit(EEnchanterState.OPEN_BANK);
   end;
 
-  if Magic.IsOpen then
+  if Magic.IsOpen() then
   begin
     if Enchanting or Magic.IsSpellSelected(SPELL) then
       Exit(OPEN_INVENTORY);
@@ -399,7 +353,7 @@ begin
   Exit(EEnchanterState.OPEN_MAGIC);
 end;
 
-function TEnchanter.Terminate: Boolean; override;
+function TEnchanter.Terminate(): Boolean; override;
 begin
   if inherited then
     for 0 to 5 do
@@ -409,42 +363,39 @@ end;
 
 procedure TEnchanter.Run(MaxActions: Int32; MaxTime: Int64);
 begin
-  ClearDebug;
   Self.Init(MaxActions, MaxTime);
 
-  while not Self.ShouldStop do
-  begin
-    State := Self.GetState;
-    Action := ToStr(State);
-    Self.ProcessWhileWaiting;
+  repeat
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
 
     case State of
-      EEnchanterState.OPEN_BANK: Bank.WalkOpen(ScriptBank);
-      EEnchanterState.WITHDRAW_TOOL: Self.Withdraw(CosmicRune);
-      EEnchanterState.WITHDRAW_MATERIAL: Self.Withdraw(RegularJewel);
-      EEnchanterState.DEPOSIT_PRODUCT: Self.Deposit;
+      EEnchanterState.OPEN_BANK: Bank.WalkOpen();
+      EEnchanterState.WITHDRAW_TOOL: Self.Withdraw([CosmicRune, -1, False]);
+      EEnchanterState.WITHDRAW_MATERIAL: Self.Withdraw([RegularJewel, -1, False]);
+      EEnchanterState.DEPOSIT_PRODUCT: Self.Deposit();
 
-      EEnchanterState.OPEN_COLLECT: CollectBox.WalkOpen(ScriptBank);
-      EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox;
-      EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface;
+      EEnchanterState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox([RegularJewel, CosmicRune]);
+      EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       EEnchanterState.WAIT_ENCHANT: Enchanting := XPBar.WaitXP(2000);
       EEnchanterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(75));
 
-      EEnchanterState.OPEN_MAGIC: Magic.Open;
-      EEnchanterState.OPEN_INVENTORY: Inventory.Open;
+      EEnchanterState.OPEN_MAGIC: Magic.Open();
+      EEnchanterState.OPEN_INVENTORY: Inventory.Open();
       EEnchanterState.CAST_SPELL: Magic.CastSpell(SPELL);
-      EEnchanterState.ENCHANT_JEWEL: Self.EnchantJewel;
-      EEnchanterState.CANCEL_SPELL: Self.DeselectSpell;
+      EEnchanterState.ENCHANT_JEWEL: Self.EnchantJewel();
+      EEnchanterState.CANCEL_SPELL: Self.DeselectSpell();
 
       EEnchanterState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
-  end;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 
-  if not Self.Terminate then
-    TerminateScript('aio_enchanter didn''t terminate properly. Stopping execution.');
+  if not Self.Terminate() then
+    TerminateScript(Self.Name + ' didn''t terminate properly. Stopping execution.');
 end;
 
 var
