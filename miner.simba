@@ -70,6 +70,9 @@ end;
 
 procedure TMiner.SetupRock();
 begin
+  if not Self.UseBank then
+    RSObjects.Setup();
+
   case CurrentRock of
     ERSRock.CLAY:
       begin
@@ -138,6 +141,12 @@ begin
       end;
   end;
 
+  if not Self.UseBank then
+  begin
+    Self.RSRock.Filter.Skip := False;
+    Self.RSRock.Setup(['Mine', 'Rocks']);
+  end;
+
   RSRock.Filter.UpText := False;
 
   DropList := [
@@ -172,8 +181,6 @@ end;
 
 procedure TMiner.SetupBank();
 begin
-  RSRock.Filter.Walker := False;
-
   case BankLocation of
     MINE_GUILD:
       begin
@@ -205,12 +212,10 @@ end;
 
 procedure TMiner.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  'AIO Miner';
-
   inherited;
 
-  Self.SetupRock;
-  Self.SetupBank;
+  Self.SetupBank();
+  Self.SetupRock();
 
   ProspectorOutfit := [
     'Prospector helmet',
@@ -231,12 +236,9 @@ begin
     'Celestial signet'
   ];
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
-
   Options.SetZoomLevel(40);
 
-  if Antiban.BioDice then
+  if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
@@ -248,7 +250,7 @@ end;
 
 function TMiner.MineRock(): Boolean;
 begin
-  Result := Mining := RSRock.Click or RSRock.WalkClick;
+  Result := Mining := RSRock.Click() or RSRock.WalkClick();
   if Result then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
