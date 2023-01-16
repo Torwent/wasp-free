@@ -1,3 +1,12 @@
+## [2.2.2](https://github.com/Torwent/wasp-free/compare/v2.2.1...v2.2.2) (2023-01-16)
+
+
+### Bug Fixes
+
+* **miner:** miner wasn't working ([ef30b9a](https://github.com/Torwent/wasp-free/commit/ef30b9a620799f0e59ae62fe699bdbf96f45ea8a))
+
+
+
 ## [2.2.1](https://github.com/Torwent/wasp-free/compare/v2.2.0...v2.2.1) (2023-01-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** fixed wasp-stats ([0124a3d](https://github.com/Torwent/wasp-free/commit/0124a3d84140821cd0729d5ea2cc98fb703ba34a))
-
-
-
-## [2.1.6](https://github.com/Torwent/wasp-free/compare/v2.1.5...v2.1.6) (2023-01-06)
-
-
-### Bug Fixes
-
-* **larder builder:** fixed typos (buttler > butler) ([d1935b8](https://github.com/Torwent/wasp-free/commit/d1935b85b06d9d9a446bad32fa045cc8eb03fce1))
 
 
 
