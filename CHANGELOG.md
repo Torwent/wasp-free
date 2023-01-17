@@ -1,3 +1,12 @@
+## [2.2.7](https://github.com/Torwent/wasp-free/compare/v2.2.6...v2.2.7) (2023-01-17)
+
+
+### Bug Fixes
+
+* **ardy knights:** improved antiban ([39a6819](https://github.com/Torwent/wasp-free/commit/39a68190cbfc7d85ee184379e3f116620728716a))
+
+
+
 ## [2.2.6](https://github.com/Torwent/wasp-free/compare/v2.2.5...v2.2.6) (2023-01-17)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** fixed larder builder issues with the latest update ([acb2606](https://github.com/Torwent/wasp-free/commit/acb2606ccd5bf1d4ed3fa7e89218c18b54613817))
-
-
-
-## [2.2.2](https://github.com/Torwent/wasp-free/compare/v2.2.1...v2.2.2) (2023-01-16)
-
-
-### Bug Fixes
-
-* **miner:** miner wasn't working ([ef30b9a](https://github.com/Torwent/wasp-free/commit/ef30b9a620799f0e59ae62fe699bdbf96f45ea8a))
 
 
 
