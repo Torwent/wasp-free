@@ -36,6 +36,7 @@ type
     CAST_SPELL,
     WAIT_STATE,
 
+    OUT_OF_SUPPLIES,
     END_SCRIPT
   );
 
@@ -128,7 +129,7 @@ function TRemainOfferer.CastSpell(): Boolean;
 begin
   if Result := Magic.CastSpell(Self.OfferSpell) then
   begin
-    SpellCooldown.Restart(Random(-100,500));
+    SpellCooldown.Restart(RandomLeft(0, 2500));
     Self.RemainsLeft -= 3;
     TotalActions += 1;
   end
@@ -176,9 +177,9 @@ begin
   if WL.Activity.IsFinished() then
     Exit(EOffererState.END_SCRIPT);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
       if not Inventory.ContainsItem(WrathRune) then
         Exit(EOffererState.WITHDRAW_WRATH);
@@ -190,25 +191,25 @@ begin
       RemainsLeft := Inventory.CountItem(Remains);
     end;
 
-    if CollectBox.IsOpen and not CollectEmpty then
+    if CollectBox.IsOpen() and not CollectEmpty then
       Exit(EOffererState.HANDLE_COLLECT);
 
     Exit(EOffererState.CLOSE_INTERFACE);
   end;
 
-  if (RemainsLeft < 3) or not Self.CanCast then
+  if (RemainsLeft < 3) or not Self.CanCast() then
   begin
     if not BankEmpty then
       Exit(EOffererState.OPEN_BANK);
     if not CollectEmpty then
       Exit(EOffererState.OPEN_COLLECT);
 
-    Exit(EOffererState.END_SCRIPT);
+    Exit(EOffererState.OUT_OF_SUPPLIES);
   end;
 
-  if SpellCooldown.IsFinished() then
+  if Self.SpellCooldown.IsFinished() then
   begin
-    if Magic.IsOpen then
+    if Magic.IsOpen() then
     begin
       if Magic.CanActivate(OfferSpell) then
         Exit(EOffererState.CAST_SPELL)
@@ -219,7 +220,7 @@ begin
       if not CollectEmpty then
         Exit(EOffererState.OPEN_COLLECT);
 
-      Exit(EOffererState.END_SCRIPT);
+      Exit(EOffererState.OUT_OF_SUPPLIES);
     end;
 
     Exit(EOffererState.OPEN_MAGIC);
@@ -251,7 +252,7 @@ begin
       CAST_SPELL: Self.CastSpell();
       WAIT_STATE: Self.WaitCoolDown();
 
-      END_SCRIPT: Break;
+      OUT_OF_SUPPLIES, END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();
