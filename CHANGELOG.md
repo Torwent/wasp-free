@@ -1,3 +1,12 @@
+## [2.2.6](https://github.com/Torwent/wasp-free/compare/v2.2.5...v2.2.6) (2023-01-17)
+
+
+### Bug Fixes
+
+* **chompy hunter:** several tiny improvements ([e1cfb72](https://github.com/Torwent/wasp-free/commit/e1cfb72f00fdc89793eb7f864700990f94b2da73))
+
+
+
 ## [2.2.5](https://github.com/Torwent/wasp-free/compare/v2.2.4...v2.2.5) (2023-01-17)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **miner:** miner wasn't working ([ef30b9a](https://github.com/Torwent/wasp-free/commit/ef30b9a620799f0e59ae62fe699bdbf96f45ea8a))
-
-
-
-## [2.2.1](https://github.com/Torwent/wasp-free/compare/v2.2.0...v2.2.1) (2023-01-16)
-
-
-### Bug Fixes
-
-* **nmz:** nmz should now work again ([f9336a5](https://github.com/Torwent/wasp-free/commit/f9336a5e5b71d79bba354835878dda4438a44588))
 
 
 
