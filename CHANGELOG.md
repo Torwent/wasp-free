@@ -1,3 +1,12 @@
+## [2.2.4](https://github.com/Torwent/wasp-free/compare/v2.2.3...v2.2.4) (2023-01-17)
+
+
+### Bug Fixes
+
+* **woodcutter:** should now work again with the latest updated ([a6f3945](https://github.com/Torwent/wasp-free/commit/a6f394518af0d9512a103ff24af7c5772325f8d5))
+
+
+
 ## [2.2.3](https://github.com/Torwent/wasp-free/compare/v2.2.2...v2.2.3) (2023-01-16)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * fix compatibility with latest SRL and WaspLib ([d255762](https://github.com/Torwent/wasp-free/commit/d25576206dd8e7c6a043e3a322e90ff1628b6c06))
-
-
-
-## [2.1.8](https://github.com/Torwent/wasp-free/compare/v2.1.7...v2.1.8) (2023-01-11)
-
-
-### Bug Fixes
-
-* **stall_robber:** should now steal properly from all supported stalls ([49808ce](https://github.com/Torwent/wasp-free/commit/49808ce6987e115f639a4284dd71b9a3592fe592))
 
 
 
