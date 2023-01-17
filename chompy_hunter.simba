@@ -12,6 +12,7 @@ end;
 type
   EState = (
     WAIT_STATE,
+    WAIT_COMBAT,
     FILL_TOAD,
     FILL_BELLOWS,
     PLACE_TOAD,
@@ -27,11 +28,11 @@ type
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
-
   Antiban.Skills := [ERSSkill.TOTAL];
   Antiban.MinZoom := 5;
   Antiban.MaxZoom := 35;
+
+  inherited;
 end;
 
 procedure TChompyHunter.Init(MaxActions: Int32; MaxTime: Int64); override;
@@ -62,12 +63,12 @@ end;
 
 function TChompyHunter.FillBellows(): Boolean;
 var
-  InvCount: Int32 := Self.CountBellows;
+  InvCount: Int32 := Self.CountBellows();
   TempCount: Int32;
 begin
-  if RSObjects.SwampBubbles.WalkClick then
+  if RSObjects.SwampBubbles.WalkClick() then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000);
   end;
 
@@ -90,8 +91,8 @@ var
   FinalTPA: TPointArray;
   MMDots: TPointArray;
 begin
-  MinimapTPA := Minimap.GetPolygon.Connect;
-  MinimapTPA.Fill;
+  MinimapTPA := Minimap.GetPolygon.Connect();
+  MinimapTPA.Fill();
   MinimapTPA := MinimapTPA.Erode(3);
 
   SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds);
@@ -107,14 +108,14 @@ begin
 
   Mouse.Click(FinalTPA.RandomValue(), MOUSE_LEFT);
 
-  Minimap.WaitMoving;
+  Minimap.WaitMoving();
   Result := not Minimap.HasDotUnder;
 end;
 
 function TChompyHunter.PlaceToad(): Boolean;
 begin
-  if Minimap.HasDotUnder then
-    Self.MoveAround;
+  if Minimap.HasDotUnder() then
+    Self.MoveAround();
 
   if Inventory.ClickItem('Bloated toad') then
   begin
@@ -129,29 +130,29 @@ var
 begin
   if Toad.Click(True, 10) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(InvCount < Inventory.Count, 100, 5000);
   end;
 
   if Result then
-    Self.PlaceToad;
+    Self.PlaceToad();
 end;
 
 
-function TChompyHunter.ClickedChompy(FeatherCount: Int32): Boolean;
+function TChompyHunter.ClickedChompy(featherCount: Int32): Boolean;
 begin
-  Result := MainScreen.InCombat or (FeatherCount < Inventory.CountItemStack('Feather'));
+  Result := MainScreen.InCombat() or (featherCount < Inventory.CountItemStack('Feather'));
 end;
 
 function TChompyHunter.ClickChompy(): Boolean;
 var
-  FeatherCount: Int32;
+  featherCount: Int32;
 begin
   if CombatHandler.Monster.SelectOption(['Attack', 'Pluck']) then
   begin
-    FeatherCount := Inventory.CountItemStack('Feather');
-    Minimap.WaitMoving;
-    Result := WaitUntil(Self.ClickedChompy(FeatherCount) or MainScreen.InCombat, 100, 3000);
+    featherCount := Inventory.CountItemStack('Feather');
+    Minimap.WaitMoving();
+    Result := WaitUntil(Self.ClickedChompy(featherCount) or MainScreen.InCombat(), 100, 3000);
   end;
 
   if Result then
@@ -174,7 +175,7 @@ begin
     Exit(PLACE_TOAD);
 
   if MainScreen.InCombat() then
-    Exit(WAIT_STATE);
+    Exit(WAIT_COMBAT);
 
   if CombatHandler.Monster.Find() then
     Exit(CLICK_CHOMPY);
@@ -194,7 +195,8 @@ begin
     Self.SetAction(ToStr(State));
 
     case State of
-      WAIT_STATE: Wait(800, 1200);
+      WAIT_STATE: Wait(1200, 2400);
+      WAIT_COMBAT: WaitUntil(not MainScreen.WaitInCombat(2400), 100, 5000);
       FILL_TOAD: Self.FillToad();
       FILL_BELLOWS: Self.FillBellows();
       PLACE_TOAD: Self.PlaceToad();
