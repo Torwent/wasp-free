@@ -949,7 +949,6 @@ begin
     Combobox.getItems.Add('Men and women (Lumbridge only)');
     Combobox.getItems.Add('Master farmers (Draynor only)');
     Combobox.getItems.Add('Guards (Falador only)');
-    Combobox.getItems.Add('Knights of Ardougne');
     Combobox.getItems.Add('Elves (Prifddinas only)');
     Combobox.getItems.Add('Tzhaars');
     Combobox.setItemIndex(Ord(PickedNPC));
