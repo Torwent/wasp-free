@@ -1,3 +1,12 @@
+## [2.2.8](https://github.com/Torwent/wasp-free/compare/v2.2.7...v2.2.8) (2023-01-17)
+
+
+### Bug Fixes
+
+* **pickpocketer:** should now work with the latest updates ([02e5546](https://github.com/Torwent/wasp-free/commit/02e554621a2fa04b214e8432488efdbc57484bcb))
+
+
+
 ## [2.2.7](https://github.com/Torwent/wasp-free/compare/v2.2.6...v2.2.7) (2023-01-17)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** should now work again with the latest updated ([a6f3945](https://github.com/Torwent/wasp-free/commit/a6f394518af0d9512a103ff24af7c5772325f8d5))
-
-
-
-## [2.2.3](https://github.com/Torwent/wasp-free/compare/v2.2.2...v2.2.3) (2023-01-16)
-
-
-### Bug Fixes
-
-* **larder builder:** fixed larder builder issues with the latest update ([acb2606](https://github.com/Torwent/wasp-free/commit/acb2606ccd5bf1d4ed3fa7e89218c18b54613817))
 
 
 
