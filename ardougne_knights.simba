@@ -74,17 +74,19 @@ type
     CoinPouchLimit: Int32;
     MaxHit: Int32;
     NextHeal: Int32;
+    Pattern: Int32;
   end;
 
 
 //Extra antiban specifically for this script.
+
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
-
   Antiban.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
   Antiban.MinZoom := 15;
   Antiban.MaxZoom := 60;
+
+  inherited;
 end;
 
 procedure TThiever.CheckRogueEquipment();
@@ -201,7 +203,6 @@ begin
   Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
 end;
 
-
 procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   inherited;
@@ -308,7 +309,6 @@ begin
 end;
 
 
-
 function TThiever.CheckFailed(StartingHP: Int32): Boolean;
 var
   HasHitSplat: Boolean;
@@ -400,15 +400,48 @@ function TThiever.StealKnight(): Boolean;
 var
   Slot: Int32 := Inventory.GetSelectedSlot();
   CurrentHP: Int32 := Minimap.GetHPLevel();
+  circle: TCircle;
 begin
   if Slot > -1 then Inventory.ClickSlot(Slot);
 
   if Result := Self.HoverKnight() then
   begin
+    case Self.Pattern of
+      2, 3, 4: Wait(200, 300);
+      5, 6: Wait(600, 800);
+    end;
+
+    Self.Pattern := RandomLeft(0, 6);
+
     Mouse.Click(MOUSE_LEFT);
 
     if MainScreen.DidYellowClick() then
       Exit(False);
+
+    Wait(50, 100);
+    case Self.Pattern of
+      4:
+      for 1 to RandomLeft(0, 2) do
+      begin
+        circle.X := Mouse.Position().X;
+        circle.Y := Mouse.Position().Y;
+        circle.Radius := 5;
+
+        Mouse.Click(circle, MOUSE_LEFT, True);
+        Wait(200, 350);
+      end;
+      6:
+      for 1 to RandomLeft(0, 3) do
+      begin
+        circle.X := Mouse.Position().X;
+        circle.Y := Mouse.Position().Y;
+        circle.Radius := 5;
+
+        Mouse.Click(circle, MOUSE_LEFT, True);
+        Wait(10, 50);
+      end;
+    end;
+
 
     if not Self.NecklaceExpired() then
       Self.FreshNeck := False;
@@ -576,10 +609,11 @@ var
 
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override
 var
-  consumableHandler: PConsumableHandler := GetHandler(ConsumableType);
+  consumableHandler: PConsumableHandler := TConsumableHandler.GetHandler(ConsumableType);
 begin
   Result := Self.CountPoints(ConsumableType) >= consumableHandler^.Amount;
 end;
+
 
 {$IFDEF SCRIPT_GUI}
 type
