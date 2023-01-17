@@ -81,6 +81,30 @@ end;
 
 procedure TWoodcutter.SetupTree();
 begin
+  if not Self.UseBank then
+  begin
+    RSObjects.Setup();
+    RSObjects.RegularTree.Filter.Skip := False;
+    RSObjects.OakTree.Filter.Skip := False;
+    RSObjects.WillowTree.Filter.Skip := False;
+    RSObjects.TeakTree.Filter.Skip := False;
+    RSObjects.MapleTree.Filter.Skip := False;
+    RSObjects.MahoganyTree.Filter.Skip := False;
+    RSObjects.YewTree.Filter.Skip := False;
+    RSObjects.BlisterwoodTree.Filter.Skip := False;
+    RSObjects.MagicTree.Filter.Skip := False;
+
+    RSObjects.RegularTree.Setup(['own Tree']);
+    RSObjects.OakTree.Setup(['own Oak']);
+    RSObjects.WillowTree.Setup(['own Wil']);
+    RSObjects.TeakTree.Setup(['own Tea']);
+    RSObjects.MapleTree.Setup(['own Map']);
+    RSObjects.MahoganyTree.Setup(['own Maho']);
+    RSObjects.YewTree.Setup(['own Yew']);
+    RSObjects.BlisterwoodTree.Setup(['Chop Blister']);
+    RSObjects.MagicTree.Setup(['own Magi']);
+  end;
+
   TreeTimerMultiplier := 1;
 
   case CurrentTree of
@@ -285,8 +309,8 @@ procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   inherited;
 
-  Self.SetupTree();
   Self.SetupBank();
+  Self.SetupTree();
 
   GearOutfit := [
     'Lumberjack hat',
