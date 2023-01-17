@@ -1,3 +1,12 @@
+## [2.2.5](https://github.com/Torwent/wasp-free/compare/v2.2.4...v2.2.5) (2023-01-17)
+
+
+### Bug Fixes
+
+* **offerer:** small fixes for offerer ([1c76684](https://github.com/Torwent/wasp-free/commit/1c76684cbd861a09e5858f05adcd750afdf9da2c))
+
+
+
 ## [2.2.4](https://github.com/Torwent/wasp-free/compare/v2.2.3...v2.2.4) (2023-01-17)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** nmz should now work again ([f9336a5](https://github.com/Torwent/wasp-free/commit/f9336a5e5b71d79bba354835878dda4438a44588))
-
-
-
-# [2.2.0](https://github.com/Torwent/wasp-free/compare/v2.1.8...v2.2.0) (2023-01-16)
-
-
-### Features
-
-* fix compatibility with latest SRL and WaspLib ([d255762](https://github.com/Torwent/wasp-free/commit/d25576206dd8e7c6a043e3a322e90ff1628b6c06))
 
 
 
