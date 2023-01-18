@@ -54,11 +54,11 @@ type
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.PRAYER, ERSSkill.TOTAL];
+  Self.MinZoom := 10;
+  Self.MaxZoom := 90;
 
-  Antiban.Skills := [ERSSkill.PRAYER, ERSSkill.TOTAL];
-  Antiban.MinZoom := 10;
-  Antiban.MaxZoom := 90;
+  inherited;
 end;
 
 procedure TRemainOfferer.SetupSpell();

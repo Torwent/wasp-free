@@ -109,11 +109,11 @@ end;
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.CONSTRUCTION, ERSSkill.TOTAL];
+  Self.MinZoom := 0;
+  Self.MaxZoom := 35;
 
-  Antiban.Skills := [ERSSkill.CONSTRUCTION, ERSSkill.TOTAL];
-  Antiban.MinZoom := 0;
-  Antiban.MaxZoom := 35;
+  inherited;
 end;
 
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;

@@ -72,11 +72,11 @@ type
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.WOODCUTTING, ERSSkill.TOTAL];
+  Self.MinZoom := 30;
+  Self.MaxZoom := 60;
 
-  Antiban.Skills := [ERSSkill.WOODCUTTING, ERSSkill.TOTAL];
-  Antiban.MinZoom := 30;
-  Antiban.MaxZoom := 60;
+  inherited;
 end;
 
 procedure TWoodcutter.SetupTree();

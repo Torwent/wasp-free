@@ -103,11 +103,11 @@ type
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.TOTAL];
+  Self.MinZoom := 15;
+  Self.MaxZoom := 40;
 
-  Antiban.Skills := [ERSSkill.TOTAL];
-  Antiban.MinZoom := 15;
-  Antiban.MaxZoom := 40;
+  inherited;
 end;
 
 procedure TNMZFighter.SetupPotions();

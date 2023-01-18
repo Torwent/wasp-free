@@ -68,16 +68,16 @@ type
   end;
 
 
-procedure TAntiban.Setup; override;
+procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.Smithing, ERSSkill.TOTAL];
+  Self.MinZoom := 0;
+  Self.MaxZoom := 40;
 
-  Antiban.Skills := [ERSSkill.Smithing, ERSSkill.TOTAL];
-  Antiban.MinZoom := 0;
-  Antiban.MaxZoom := 40;
+  inherited;
 end;
 
-procedure TSmelter.SetupFurnaces;
+procedure TSmelter.SetupFurnaces();
 begin
   case CurrentFurnace of
     ERSFurnace.EDGEVILLE_FURNACE:
@@ -157,12 +157,12 @@ begin
         Bar.Item := 'Molten glass';
         Ore1 := ['Soda ash', 14, False];
         Ore2 := ['Bucket of sand', 14, False];
-        Antiban.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
+        Self.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
       end;
   end;
 
-  Materials += Ore1.Item;
-  ActionProfit := (ItemData.GetAverage(Bar.Item)) -
+  Self.Materials += Ore1.Item;
+  Self.ActionProfit := (ItemData.GetAverage(Bar.Item)) -
                   (ItemData.GetAverage(Ore1.Item) * Ore1.Quantity);
 
   if Ore2 <> [] then
@@ -192,27 +192,27 @@ var
   Item: TRSBankWithdrawItem;
   Find1, Find2: Boolean;
 begin
-  Find1 := Inventory.ContainsItem(Ore1.Item);
-  Find2 := (Ore2 = []) or Inventory.ContainsItem(Ore2.Item);
+  Find1 := Inventory.ContainsItem(Self.Ore1.Item);
+  Find2 := (Self.Ore2 = []) or Inventory.ContainsItem(Self.Ore2.Item);
 
   if Find1 then
   begin
     if Find2 then
       Exit;
-    Item := Ore2;
-    Item.Quantity := Ore1.Quantity;
+    Item := Self.Ore2;
+    Item.Quantity := Self.Ore1.Quantity;
   end
-  else if Find2 or (Ore1.Quantity > Ore2.Quantity) or
-          ((Ore1.Quantity = Ore2.Quantity) and Antiban.BioDice) then
+  else if Find2 or (Self.Ore1.Quantity > Self.Ore2.Quantity) or
+          ((Self.Ore1.Quantity = Self.Ore2.Quantity) and Antiban.BioDice) then
   begin
-    Item := Ore1
-    if Ore2 <> [] then
-      Item.Quantity := Ore2.Quantity;
+    Item := Self.Ore1
+    if Self.Ore2 <> [] then
+      Item.Quantity := Self.Ore2.Quantity;
   end
   else
-    Item := Ore2;
+    Item := Self.Ore2;
 
-  InvCount := Inventory.Count;
+  Self.InvCount := Inventory.Count();
   if Result := Bank.WithdrawItem(BankTab, Item, True) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
@@ -224,11 +224,11 @@ end;
 
 function TSmelter.Deposit(): Boolean;
 var
-  ItemCount: Int32 := Inventory.Count;
+  ItemCount: Int32 := Inventory.Count();
 begin
   if Result := Bank.DepositAll() then
-    if WaitUntil(Inventory.Count = 0, 100, 3000) then
-      TotalActions += ItemCount;
+    if WaitUntil(Inventory.Count() = 0, 100, 3000) then
+      Self.TotalActions += ItemCount;
 end;
 
 
@@ -253,18 +253,18 @@ end;
 
 function TSmelter.IsMakingItem(WaitTime: Int32 = 3200): Boolean;
 var
-  ItemCount: Int32 := Inventory.CountItem(Bar.Item);
+  ItemCount: Int32 := Inventory.CountItem(Self.Bar.Item);
 begin
-  if Result := WaitUntil(ItemCount < Inventory.CountItem(Bar.Item), 100, WaitTime) then
+  if Result := WaitUntil(ItemCount < Inventory.CountItem(Self.Bar.Item), 100, WaitTime) then
     WL.Activity.Restart();
 end;
 
 function TSmelter.WaitSmelt(): Boolean;
 begin
   if Smelting then
-    Result := Smelting := (Inventory.ContainsAll(Materials) and Self.IsMakingItem)
+    Result := Smelting := (Inventory.ContainsAll(Materials) and Self.IsMakingItem())
   else
-    Result := Smelting := Self.IsMakingItem;
+    Result := Smelting := Self.IsMakingItem();
 
   if Result then
     WL.Activity.Restart();
@@ -284,20 +284,20 @@ begin
 
   if MainScreen.HasInterface() then
   begin
-    HoveringBank := False;
+    Self.HoveringBank := False;
     if Bank.IsOpen() then
     begin
-      if Inventory.ContainsItem(Bar.Item) then
+      if Inventory.ContainsItem(Self.Bar.Item) then
         Exit(ESmelterState.DEPOSIT_BAR);
 
       if Inventory.HasRandomItem(Materials) then
         Exit(ESmelterState.DEPOSIT_RANDOM_ITEM);
 
-      if not BankEmpty and not Inventory.ContainsAll(Materials) then
+      if not Self.BankEmpty and not Inventory.ContainsAll(Materials) then
         Exit(ESmelterState.WITHDRAW_MATERIALS);
     end;
 
-    if not CollectEmpty and CollectBox.IsOpen() then
+    if not Self.CollectEmpty and CollectBox.IsOpen() then
       Exit(ESmelterState.HANDLE_COLLECT);
 
     Exit(ESmelterState.CLOSE_INTERFACE);
@@ -305,11 +305,11 @@ begin
 
   if Inventory.ContainsAll(Materials) then
   begin
-    if Smelting then
+    if Self.Smelting then
     begin
-      if not HoveringBank then
+      if not Self.HoveringBank then
       begin
-        Self.CountItemsLeft(Ore1.Item);
+        Self.CountItemsLeft(Self.Ore1.Item);
 
         if Self.ShouldHoverBank() then
           Exit(ESmelterState.HOVER_BANK);
@@ -318,21 +318,21 @@ begin
       Exit(ESmelterState.WAIT_SMELT);
     end;
 
-    if Make.IsOpen then
+    if Make.IsOpen() then
       Exit(ESmelterState.SMELT_BAR);
 
     Exit(ESmelterState.OPEN_FURNACE);
   end;
 
-  if BankEmpty then
+  if Self.BankEmpty then
   begin
-    if CollectEmpty then
+    if Self.CollectEmpty then
       Exit(ESmelterState.OUT_OF_SUPPLIES);
 
     Exit(ESmelterState.OPEN_COLLECT);
   end;
 
-  if BankEmpty then
+  if Self.BankEmpty then
     Exit(ESmelterState.OPEN_COLLECT);
 
   Exit(ESmelterState.OPEN_BANK);

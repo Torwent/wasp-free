@@ -62,11 +62,11 @@ type
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
+  Self.MinZoom := 15;
+  Self.MaxZoom := 85;
 
-  Antiban.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
-  Antiban.MinZoom := 15;
-  Antiban.MaxZoom := 85;
+  inherited;
 end;
 
 

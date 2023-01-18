@@ -91,11 +91,11 @@ type
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
+  Self.MinZoom := 30;
+  Self.MaxZoom := 50;
 
-  Antiban.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
-  Antiban.MinZoom := 30;
-  Antiban.MaxZoom := 50;
+  inherited;
 end;
 
 procedure TThiever.SetupNPC();

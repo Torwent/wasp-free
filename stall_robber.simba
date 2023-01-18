@@ -40,11 +40,11 @@ type
 
 procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
+  Self.MinZoom := 5;
+  Self.MaxZoom := 85;
 
-  Antiban.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
-  Antiban.MinZoom := 5;
-  Antiban.MaxZoom := 85;
+  inherited;
 end;
 
 procedure TStallRobber.SetupStall();

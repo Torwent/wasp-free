@@ -54,13 +54,13 @@ const
     [7941, 2831], [7941, 2363], [8337, 2370], [8341, 2837]
   ];
 
-procedure Antiban.Setup(); override;
+procedure TAntiban.Setup(); override;
 begin
-  inherited;
+  Self.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
+  Self.MinZoom := 10;
+  Self.MaxZoom := 90;
 
-  Antiban.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
-  Antiban.MinZoom := 10;
-  Antiban.MaxZoom := 90;
+  inherited;
 end;
 
 procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
