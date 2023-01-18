@@ -1,3 +1,12 @@
+## [2.2.9](https://github.com/Torwent/wasp-free/compare/v2.2.8...v2.2.9) (2023-01-18)
+
+
+### Bug Fixes
+
+* updated all scripts to properly set zoom when the script starts ([afe0260](https://github.com/Torwent/wasp-free/commit/afe02608761056c95fa704602c3918b8188b3c34))
+
+
+
 ## [2.2.8](https://github.com/Torwent/wasp-free/compare/v2.2.7...v2.2.8) (2023-01-17)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **offerer:** small fixes for offerer ([1c76684](https://github.com/Torwent/wasp-free/commit/1c76684cbd861a09e5858f05adcd750afdf9da2c))
-
-
-
-## [2.2.4](https://github.com/Torwent/wasp-free/compare/v2.2.3...v2.2.4) (2023-01-17)
-
-
-### Bug Fixes
-
-* **woodcutter:** should now work again with the latest updated ([a6f3945](https://github.com/Torwent/wasp-free/commit/a6f394518af0d9512a103ff24af7c5772325f8d5))
 
 
 
