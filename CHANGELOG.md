@@ -1,3 +1,12 @@
+## [2.2.10](https://github.com/Torwent/wasp-free/compare/v2.2.9...v2.2.10) (2023-01-19)
+
+
+### Bug Fixes
+
+* **smelter:** typo that prevented the script to run ([5d93430](https://github.com/Torwent/wasp-free/commit/5d93430c973e6ae1d9eed67acfc06dbc11a1bb12))
+
+
+
 ## [2.2.9](https://github.com/Torwent/wasp-free/compare/v2.2.8...v2.2.9) (2023-01-18)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **chompy hunter:** several tiny improvements ([e1cfb72](https://github.com/Torwent/wasp-free/commit/e1cfb72f00fdc89793eb7f864700990f94b2da73))
-
-
-
-## [2.2.5](https://github.com/Torwent/wasp-free/compare/v2.2.4...v2.2.5) (2023-01-17)
-
-
-### Bug Fixes
-
-* **offerer:** small fixes for offerer ([1c76684](https://github.com/Torwent/wasp-free/commit/1c76684cbd861a09e5858f05adcd750afdf9da2c))
 
 
 
