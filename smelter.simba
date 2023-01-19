@@ -157,7 +157,7 @@ begin
         Bar.Item := 'Molten glass';
         Ore1 := ['Soda ash', 14, False];
         Ore2 := ['Bucket of sand', 14, False];
-        Self.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
+        Antiban.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
       end;
   end;
 
@@ -212,7 +212,7 @@ begin
   else
     Item := Self.Ore2;
 
-  Self.InvCount := Inventory.Count();
+  InvCount := Inventory.Count();
   if Result := Bank.WithdrawItem(BankTab, Item, True) then
     WaitUntil(Inventory.Count > InvCount, 100, 3000);
 
