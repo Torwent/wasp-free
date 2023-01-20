@@ -1,3 +1,12 @@
+## [2.2.11](https://github.com/Torwent/wasp-free/compare/v2.2.10...v2.2.11) (2023-01-20)
+
+
+### Bug Fixes
+
+* all scripts now use the new StatsPayload.SetUsername('') ([f9c8c26](https://github.com/Torwent/wasp-free/commit/f9c8c26036976cc54d9aab49075f13f90f647ab1))
+
+
+
 ## [2.2.10](https://github.com/Torwent/wasp-free/compare/v2.2.9...v2.2.10) (2023-01-19)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** improved antiban ([39a6819](https://github.com/Torwent/wasp-free/commit/39a68190cbfc7d85ee184379e3f116620728716a))
-
-
-
-## [2.2.6](https://github.com/Torwent/wasp-free/compare/v2.2.5...v2.2.6) (2023-01-17)
-
-
-### Bug Fixes
-
-* **chompy hunter:** several tiny improvements ([e1cfb72](https://github.com/Torwent/wasp-free/commit/e1cfb72f00fdc89793eb7f864700990f94b2da73))
 
 
 
