@@ -7,7 +7,7 @@
 
 begin
   Login.PlayerIndex := 0;
-  StatsPayload.Username := '';
+  StatsPayload.SetUsername('');
 end;
 {$ENDIF}
 
