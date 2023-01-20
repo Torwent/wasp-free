@@ -1,3 +1,12 @@
+## [2.2.12](https://github.com/Torwent/wasp-free/compare/v2.2.11...v2.2.12) (2023-01-20)
+
+
+### Bug Fixes
+
+* **larder builder:** servant should work now ([f857e8e](https://github.com/Torwent/wasp-free/commit/f857e8e9b4c10a4f38fa7c331ebbcc43e72c6f34))
+
+
+
 ## [2.2.11](https://github.com/Torwent/wasp-free/compare/v2.2.10...v2.2.11) (2023-01-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** should now work with the latest updates ([02e5546](https://github.com/Torwent/wasp-free/commit/02e554621a2fa04b214e8432488efdbc57484bcb))
-
-
-
-## [2.2.7](https://github.com/Torwent/wasp-free/compare/v2.2.6...v2.2.7) (2023-01-17)
-
-
-### Bug Fixes
-
-* **ardy knights:** improved antiban ([39a6819](https://github.com/Torwent/wasp-free/commit/39a68190cbfc7d85ee184379e3f116620728716a))
 
 
 
