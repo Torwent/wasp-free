@@ -70,7 +70,7 @@ begin
         ServantNPC.Filter.Walker := False;
         ServantNPC.Filter.MinimapDot := True;
 
-        ServantNPC.ShapeArray.SetShape([1, 1, 7]);
+        ServantNPC.ShapeArray += [[1, 1, 7], 0];
         ServantNPC.Setup(['Talk-to']);
       end;
   end;

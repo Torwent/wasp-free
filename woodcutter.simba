@@ -177,7 +177,6 @@ end;
 
 procedure TWoodcutter.SetupBank();
 begin
-
   case BankLocation of
     WOODCUT_GUILD:
       begin
