@@ -1,3 +1,12 @@
+## [2.2.13](https://github.com/Torwent/wasp-free/compare/v2.2.12...v2.2.13) (2023-01-20)
+
+
+### Bug Fixes
+
+* **woodcutter:** bird nests should work again ([6809b17](https://github.com/Torwent/wasp-free/commit/6809b17325cf425abff0598431df4783cee6240e))
+
+
+
 ## [2.2.12](https://github.com/Torwent/wasp-free/compare/v2.2.11...v2.2.12) (2023-01-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * updated all scripts to properly set zoom when the script starts ([afe0260](https://github.com/Torwent/wasp-free/commit/afe02608761056c95fa704602c3918b8188b3c34))
-
-
-
-## [2.2.8](https://github.com/Torwent/wasp-free/compare/v2.2.7...v2.2.8) (2023-01-17)
-
-
-### Bug Fixes
-
-* **pickpocketer:** should now work with the latest updates ([02e5546](https://github.com/Torwent/wasp-free/commit/02e554621a2fa04b214e8432488efdbc57484bcb))
 
 
 
