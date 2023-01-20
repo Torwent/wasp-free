@@ -61,16 +61,17 @@ type
 procedure TBuilder.SetupNPC();
 begin
   case CurrentNPC of
-    PHIALS:
-      UsePhials := True;
+    PHIALS: Self.UsePhials := True;
 
     SERVANT:
       begin
-        UsePhials := False;
-
-        ServantNPC.Setup(['Talk-to']);
+        ServantNPC.Filter.Skip := False;
         ServantNPC.Filter.Finder := False;
+        ServantNPC.Filter.Walker := False;
         ServantNPC.Filter.MinimapDot := True;
+
+        ServantNPC.ShapeArray.SetShape([1, 1, 7]);
+        ServantNPC.Setup(['Talk-to']);
       end;
   end;
 end;
