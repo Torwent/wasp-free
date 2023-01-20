@@ -1,3 +1,12 @@
+## [2.2.14](https://github.com/Torwent/wasp-free/compare/v2.2.13...v2.2.14) (2023-01-20)
+
+
+### Bug Fixes
+
+* **larder builder:** servant fix ([528c5c3](https://github.com/Torwent/wasp-free/commit/528c5c3dcb16b85233c4c0677e3f1edea19f3ea9))
+
+
+
 ## [2.2.13](https://github.com/Torwent/wasp-free/compare/v2.2.12...v2.2.13) (2023-01-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **smelter:** typo that prevented the script to run ([5d93430](https://github.com/Torwent/wasp-free/commit/5d93430c973e6ae1d9eed67acfc06dbc11a1bb12))
-
-
-
-## [2.2.9](https://github.com/Torwent/wasp-free/compare/v2.2.8...v2.2.9) (2023-01-18)
-
-
-### Bug Fixes
-
-* updated all scripts to properly set zoom when the script starts ([afe0260](https://github.com/Torwent/wasp-free/commit/afe02608761056c95fa704602c3918b8188b3c34))
 
 
 
