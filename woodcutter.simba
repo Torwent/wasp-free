@@ -215,10 +215,13 @@ begin
         UseBank := True;
       end;
 
-    POWER_WC: UseBank := False;
+    POWER_WC:
+      begin
+        UseBank := False;
+        RSGroundItems.Setup();
+      end;
   end;
 end;
-
 
 procedure TWoodcutter.SetupTool();
 begin
@@ -305,6 +308,7 @@ begin
   end;
 end;
 
+
 procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   inherited;
@@ -378,7 +382,7 @@ end;
 
 function TWoodcutter.CheckNest(): Boolean;
 begin
-  Result := PickNests and RSGroundItems.BirdNest.Find;
+  Result := PickNests and RSGroundItems.BirdNest.Find();
 end;
 
 function TWoodcutter.PickNest(): Boolean;
@@ -477,7 +481,7 @@ begin
     Exit(EWoodcutterState.OPEN_BANK);
   end;
 
-  if Woodcutting then
+  if Self.Woodcutting then
     Exit(EWoodcutterState.WAIT_STATE);
 
   if UseBank and not RSW.AtTile(RSTree.Coordinates, 15) then
@@ -499,8 +503,6 @@ begin
   repeat
     State := Self.GetState();
     Self.SetAction(ToStr(State));
-    ' Bank: ' + ToStr(UseBank) + ' Sawmill: ' + ToStr(UseSawmill)  +
-                 ' Plank: ' + ToStr(Plank);
 
     case State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen();
