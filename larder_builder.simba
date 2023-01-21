@@ -324,7 +324,7 @@ begin
     Self.SetAction(ToStr(State));
 
     case State of
-      EState.LEVEL_UP: Chat.HandleLevelUp(True);
+      EState.LEVEL_UP: Chat.HandleLevelUp();
 
       EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat();
       EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
