@@ -11,7 +11,7 @@ end;
 
 var
   FoodAmount: Int32 := 20;
-  NeckAmount: Int32 := 0;
+  NeckAmount: Int32 := 3;
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
@@ -226,7 +226,7 @@ begin
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
-
+  Wait(5000);
   Self.CheckRogueEquipment();
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
@@ -384,8 +384,15 @@ begin
     TPA := ATPA[0];
     P := TPA.Mean();
     P.X += MainScreen.NormalizeDistance(7);
-    P.Y += MainScreen.NormalizeDistance(18);
-    B := Box(P, MainScreen.NormalizeDistance(12), MainScreen.NormalizeDistance(20));
+    P.Y += MainScreen.NormalizeDistance(22);
+    B := Box(P, MainScreen.NormalizeDistance(10), MainScreen.NormalizeDistance(16));
+
+    if WLSettings.RemoteInput.ScriptDebug then
+    begin
+      RSClient.Image().Clear();
+      RSClient.Image().DrawBox(B, $FFFFFF);
+    end;
+
     Mouse.Move(B);
     Result := MainScreen.IsUpText(Self.Knight.UpText);
   end
