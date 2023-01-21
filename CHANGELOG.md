@@ -1,3 +1,12 @@
+## [2.2.16](https://github.com/Torwent/wasp-free/compare/v2.2.15...v2.2.16) (2023-01-21)
+
+
+### Bug Fixes
+
+* **larder builder:** update for wasplib compatibility ([1c6d922](https://github.com/Torwent/wasp-free/commit/1c6d922d2d658695c794832fd982684b95f2844d))
+
+
+
 ## [2.2.15](https://github.com/Torwent/wasp-free/compare/v2.2.14...v2.2.15) (2023-01-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** servant should work now ([f857e8e](https://github.com/Torwent/wasp-free/commit/f857e8e9b4c10a4f38fa7c331ebbcc43e72c6f34))
-
-
-
-## [2.2.11](https://github.com/Torwent/wasp-free/compare/v2.2.10...v2.2.11) (2023-01-20)
-
-
-### Bug Fixes
-
-* all scripts now use the new StatsPayload.SetUsername('') ([f9c8c26](https://github.com/Torwent/wasp-free/commit/f9c8c26036976cc54d9aab49075f13f90f647ab1))
 
 
 
