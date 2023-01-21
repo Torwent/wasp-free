@@ -1,3 +1,12 @@
+## [2.2.15](https://github.com/Torwent/wasp-free/compare/v2.2.14...v2.2.15) (2023-01-21)
+
+
+### Bug Fixes
+
+* **ardy knights:** better knight detection ([b4dde79](https://github.com/Torwent/wasp-free/commit/b4dde7928bd8be0e5bc9269eb6eb7afb3ce3cb54))
+
+
+
 ## [2.2.14](https://github.com/Torwent/wasp-free/compare/v2.2.13...v2.2.14) (2023-01-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * all scripts now use the new StatsPayload.SetUsername('') ([f9c8c26](https://github.com/Torwent/wasp-free/commit/f9c8c26036976cc54d9aab49075f13f90f647ab1))
-
-
-
-## [2.2.10](https://github.com/Torwent/wasp-free/compare/v2.2.9...v2.2.10) (2023-01-19)
-
-
-### Bug Fixes
-
-* **smelter:** typo that prevented the script to run ([5d93430](https://github.com/Torwent/wasp-free/commit/5d93430c973e6ae1d9eed67acfc06dbc11a1bb12))
 
 
 
