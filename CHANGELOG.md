@@ -1,3 +1,12 @@
+## [2.2.19](https://github.com/Torwent/wasp-free/compare/v2.2.18...v2.2.19) (2023-01-22)
+
+
+### Bug Fixes
+
+* **larder builder:** add extra debugging ([971723d](https://github.com/Torwent/wasp-free/commit/971723d133b21fe4534a8d17887b61d10b38a034))
+
+
+
 ## [2.2.18](https://github.com/Torwent/wasp-free/compare/v2.2.17...v2.2.18) (2023-01-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** better knight detection ([b4dde79](https://github.com/Torwent/wasp-free/commit/b4dde7928bd8be0e5bc9269eb6eb7afb3ce3cb54))
-
-
-
-## [2.2.14](https://github.com/Torwent/wasp-free/compare/v2.2.13...v2.2.14) (2023-01-20)
-
-
-### Bug Fixes
-
-* **larder builder:** servant fix ([528c5c3](https://github.com/Torwent/wasp-free/commit/528c5c3dcb16b85233c4c0677e3f1edea19f3ea9))
 
 
 
