@@ -1,3 +1,12 @@
+## [2.2.18](https://github.com/Torwent/wasp-free/compare/v2.2.17...v2.2.18) (2023-01-22)
+
+
+### Bug Fixes
+
+* **glassblower:** improved information in case of script shutdown ([bd0ff29](https://github.com/Torwent/wasp-free/commit/bd0ff29dd60cc9810899ea2ed27a911674990e39))
+
+
+
 ## [2.2.17](https://github.com/Torwent/wasp-free/compare/v2.2.16...v2.2.17) (2023-01-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** servant fix ([528c5c3](https://github.com/Torwent/wasp-free/commit/528c5c3dcb16b85233c4c0677e3f1edea19f3ea9))
-
-
-
-## [2.2.13](https://github.com/Torwent/wasp-free/compare/v2.2.12...v2.2.13) (2023-01-20)
-
-
-### Bug Fixes
-
-* **woodcutter:** bird nests should work again ([6809b17](https://github.com/Torwent/wasp-free/commit/6809b17325cf425abff0598431df4783cee6240e))
 
 
 
