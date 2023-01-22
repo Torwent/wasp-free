@@ -1,3 +1,12 @@
+## [2.2.17](https://github.com/Torwent/wasp-free/compare/v2.2.16...v2.2.17) (2023-01-22)
+
+
+### Bug Fixes
+
+* **kraken:** updated antiban to match latest versions of WaspLib ([9c78ea0](https://github.com/Torwent/wasp-free/commit/9c78ea0eda06ff5b36a463c5035bc1a9c5a178bd))
+
+
+
 ## [2.2.16](https://github.com/Torwent/wasp-free/compare/v2.2.15...v2.2.16) (2023-01-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** bird nests should work again ([6809b17](https://github.com/Torwent/wasp-free/commit/6809b17325cf425abff0598431df4783cee6240e))
-
-
-
-## [2.2.12](https://github.com/Torwent/wasp-free/compare/v2.2.11...v2.2.12) (2023-01-20)
-
-
-### Bug Fixes
-
-* **larder builder:** servant should work now ([f857e8e](https://github.com/Torwent/wasp-free/commit/f857e8e9b4c10a4f38fa7c331ebbcc43e72c6f34))
 
 
 
