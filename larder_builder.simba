@@ -128,9 +128,6 @@ begin
 
   ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
 
-  if not RSClient.IsLoggedIn() then
-    Login.LoginPlayer();
-
   if CurrentNPC = PHIALS then
     case CurrentLarder of
       REGULAR_LARDER: Inventory.FindItem('noted Plank', NotedPlanksSlot);
@@ -426,6 +423,13 @@ begin
     ChooseOption.Select('Cancel');
 
   inherited;
+end;
+
+procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+begin
+  inherited;
+
+  Builder.RSW.Draw(Bitmap);
 end;
 
 {$IFDEF SCRIPT_GUI}
