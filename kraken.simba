@@ -57,11 +57,13 @@ begin
 
   Self.AddBreak(30 * ONE_MINUTE, 2 * ONE_MINUTE, 0.33, 0.01);
   Self.AddBreak(45 * ONE_MINUTE, 4 * ONE_MINUTE, 0.33, 0.15);
+
+  Self.OnBreaking := @OnBreakingTask;
 end;
 
 procedure TAntiban.Setup(); override;
 begin
-  Self.Skills := [ERSSkill.TOTAL];
+  Self.Skills := [ERSSkill.TOTAL, ERSSkill.MAGIC, ERSSkill.HITPOINTS];
   Self.MinZoom := 0;
   Self.MaxZoom := 40;
 
@@ -90,20 +92,16 @@ begin
   KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
   KrakenFinder.MinShortSide := 70;
   
-  UseImbuedHeart := True;
-  ImbuedHeart.Setup(7 * ONE_MINUTE);
-
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
+  Self.UseImbuedHeart := True;
+  Self.ImbuedHeart.Setup(7 * ONE_MINUTE);
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
   CombatHandler.Setup(4000);
   CombatHandler.ManageGear := True;
-  CombatHandler._SetupGear;
+  CombatHandler._SetupGear();
 
   CombatHandler.LootHandler.Setup(RSMonsters.Kraken, 5000);
-
 
   if not Equipment.ContainsItem('Sanguinesti staff') then
   begin
@@ -115,7 +113,7 @@ end;
 
 function TScript.InsideBossRoom(): Boolean;
 begin
-  Result := MainScreen.InMultiCombat;
+  Result := MainScreen.InMultiCombat();
 end;
 
 function TScript.EnterCrevice(): Boolean;
