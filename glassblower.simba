@@ -38,6 +38,7 @@ type
     LEVEL_UP,
     CLOSE_CONTEXT,
 
+    OUT_OF_ITEMS,
     END_SCRIPT
   );
 
@@ -236,24 +237,24 @@ end;
 
 function TBlower.GetState(): EBlowerState;
 begin
-  if WL.Activity.IsFinished then
+  if WL.Activity.IsFinished() then
     Exit(EBlowerState.END_SCRIPT);
 
-  if XPBar.EarnedXP then
+  if XPBar.EarnedXP() then
     Exit(EBlowerState.WAIT_GLASS);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
   begin
     Blowing := False;
     Exit(EBlowerState.LEVEL_UP);
   end;
 
-  if Make.IsOpen then
+  if Make.IsOpen() then
     Exit(EBlowerState.HANDLE_MAKE);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
       if Inventory.ContainsItem(Product.Item) then
         Exit(EBlowerState.DEPOSIT_PRODUCT);
@@ -261,7 +262,7 @@ begin
       if Inventory.HasRandomItem([Tool.Item, Material.Item]) then
         Exit(EBlowerState.DEPOSIT_RANDOM_ITEM);
 
-      if BankEmpty or Inventory.ContainsAll([Tool.Item, Material.Item]) then
+      if Self.BankEmpty or Inventory.ContainsAll([Tool.Item, Material.Item]) then
         Exit(EBlowerState.CLOSE_INTERFACE);
 
       if not Inventory.ContainsItem(Tool.Item) then
@@ -271,9 +272,9 @@ begin
         Exit(EBlowerState.WITHDRAW_MATERIAL);
     end;
 
-    if CollectBox.IsOpen then
+    if CollectBox.IsOpen() then
     begin
-      if CollectEmpty then
+      if Self.CollectEmpty then
         Exit(EBlowerState.CLOSE_INTERFACE);
 
       Exit(EBlowerState.HANDLE_COLLECT);
@@ -284,26 +285,30 @@ begin
 
   if Inventory.ContainsAll([Tool.Item, Material.Item]) then
   begin
-    if Blowing then
+    if Self.Blowing then
       Exit(EBlowerState.WAIT_GLASS);
 
     Exit(EBlowerState.DO_GLASS);
   end;
 
-  if BankEmpty and CollectEmpty then
-    Exit(EBlowerState.END_SCRIPT);
+  if Self.BankEmpty and Self.CollectEmpty then
+    Exit(EBlowerState.OUT_OF_ITEMS);
 
-  if BankEmpty then
+  if Self.BankEmpty then
     Exit(EBlowerState.OPEN_COLLECT);
 
   Exit(EBlowerState.OPEN_BANK);
 end;
 
 function TBlower.Terminate(): Boolean; override;
+var
+  i: Int32;
 begin
-  if inherited then
-    for 0 to 3 do
-      if Result := Bank.WithdrawItem(BankTab, [Product.Item, BANK_WITHDRAW_ALL, True], True) then
+  Result := inherited;
+
+  if Result then
+    for i := 0 to 3 do
+      if Result := Bank.WithdrawItem(Self.BankTab, [Product.Item, BANK_WITHDRAW_ALL, True], True) then
         Break;
 end;
 
@@ -312,13 +317,13 @@ begin
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    if UseBestItem then
+    if Self.UseBestItem then
       Self.SetupProduct();
 
     Self.SetupItems();
 
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case State of
       EBlowerState.OPEN_BANK: Bank.WalkOpen();
@@ -338,6 +343,7 @@ begin
       EBlowerState.LEVEL_UP: Chat.HandleLevelUp();
       EBlowerState.CLOSE_CONTEXT: ChooseOption.Close();
 
+      EBlowerState.OUT_OF_ITEMS,
       EBlowerState.END_SCRIPT: Break;
     end;
 
