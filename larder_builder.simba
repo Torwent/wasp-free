@@ -120,7 +120,7 @@ end;
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   inherited;
-  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH]);
+  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH], 5);
 
   Self.SetupNPC();
   Self.SetupObjects();
