@@ -1,3 +1,12 @@
+## [2.2.21](https://github.com/Torwent/wasp-free/compare/v2.2.20...v2.2.21) (2023-01-23)
+
+
+### Bug Fixes
+
+* **ardy knights:** added a failsafe to over withdrawing dodgy necks ([0082f41](https://github.com/Torwent/wasp-free/commit/0082f41a261a3b00913d412a64c5806d81c67863))
+
+
+
 ## [2.2.20](https://github.com/Torwent/wasp-free/compare/v2.2.19...v2.2.20) (2023-01-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **kraken:** updated antiban to match latest versions of WaspLib ([9c78ea0](https://github.com/Torwent/wasp-free/commit/9c78ea0eda06ff5b36a463c5035bc1a9c5a178bd))
-
-
-
-## [2.2.16](https://github.com/Torwent/wasp-free/compare/v2.2.15...v2.2.16) (2023-01-21)
-
-
-### Bug Fixes
-
-* **larder builder:** update for wasplib compatibility ([1c6d922](https://github.com/Torwent/wasp-free/commit/1c6d922d2d658695c794832fd982684b95f2844d))
 
 
 
