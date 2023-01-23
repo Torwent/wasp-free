@@ -11,7 +11,7 @@ end;
 
 var
   FoodAmount: Int32 := 20;
-  NeckAmount: Int32 := 3;
+  NeckAmount: Int32 := 4;
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
@@ -29,6 +29,7 @@ type
     OPEN_COLLECT,
     DEPOSIT_ITEMS,
     WITHDRAW_NECK,
+    DEPOSIT_NECK,
     WITHDRAW_FOOD,
     HANDLE_COLLECT,
     CLOSE_INTERFACE,
@@ -83,8 +84,8 @@ type
 procedure TAntiban.Setup(); override;
 begin
   Self.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
-  Self.MinZoom := 15;
-  Self.MaxZoom := 60;
+  Self.MinZoom := 5;
+  Self.MaxZoom := 50;
 
   inherited;
 end;
@@ -266,8 +267,9 @@ end;
 
 function TThiever.IsLowHP(): Boolean;
 var
-  CurrentHP: Int32 := Minimap.GetHPLevel();
+  CurrentHP: Int32;
 begin
+  CurrentHP := Minimap.GetHPLevel();
   if Self.NextHeal < 1 then
     Self.NextHeal := Round(Antiban.GetUniqueNumber(Self.MaxHit * 4, Self.MaxHit + 1, Self.MaxHit * 15)) + Random(-Self.MaxHit, Self.MaxHit);
 
@@ -385,7 +387,7 @@ begin
     P := TPA.Mean();
     P.X += MainScreen.NormalizeDistance(7);
     P.Y += MainScreen.NormalizeDistance(22);
-    B := Box(P, MainScreen.NormalizeDistance(10), MainScreen.NormalizeDistance(16));
+    B := Box(P, MainScreen.NormalizeDistance(10), MainScreen.NormalizeDistance(14));
 
     if WLSettings.RemoteInput.ScriptDebug then
     begin
@@ -513,6 +515,10 @@ begin
 
       if Inventory.CountItem(Self.Necklace) < NeckAmount then
         Exit(WITHDRAW_NECK);
+
+      if not InRange(Inventory.CountItem(Self.Necklace), NeckAmount - 2, NeckAmount + 2) then
+        Exit(DEPOSIT_NECK);
+
       if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
     end;
@@ -587,6 +593,7 @@ begin
       DEPOSIT_ITEMS: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
       WITHDRAW_NECK: Self.Withdraw([Self.Necklace, NeckAmount, False]);
+      DEPOSIT_NECK: Bank.DepositItem(Self.BankTab, [Necklace, -1], False);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
@@ -613,6 +620,11 @@ end;
 
 var
   Thiever: TThiever;
+
+procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+begin
+  { overriden so it doesn't show so much stuff }
+end;
 
 function TRSInventory.HasEnoughConsumable(ConsumableType: ERSConsumable): Boolean; override
 var
