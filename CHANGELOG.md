@@ -1,3 +1,12 @@
+## [2.2.23](https://github.com/Torwent/wasp-free/compare/v2.2.22...v2.2.23) (2023-01-24)
+
+
+### Bug Fixes
+
+* **larder builder:** downscaling walker further for more accuracy ([ef2bf7c](https://github.com/Torwent/wasp-free/commit/ef2bf7c1ecda46b13a46d9bbdfaadbe1a7086be4))
+
+
+
 ## [2.2.22](https://github.com/Torwent/wasp-free/compare/v2.2.21...v2.2.22) (2023-01-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** add extra debugging ([971723d](https://github.com/Torwent/wasp-free/commit/971723d133b21fe4534a8d17887b61d10b38a034))
-
-
-
-## [2.2.18](https://github.com/Torwent/wasp-free/compare/v2.2.17...v2.2.18) (2023-01-22)
-
-
-### Bug Fixes
-
-* **glassblower:** improved information in case of script shutdown ([bd0ff29](https://github.com/Torwent/wasp-free/commit/bd0ff29dd60cc9810899ea2ed27a911674990e39))
 
 
 
