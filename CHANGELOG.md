@@ -1,3 +1,12 @@
+## [2.2.22](https://github.com/Torwent/wasp-free/compare/v2.2.21...v2.2.22) (2023-01-24)
+
+
+### Bug Fixes
+
+* **nmz:** cleaned up some old stuff that could cause issues ([c77291d](https://github.com/Torwent/wasp-free/commit/c77291d5bc3ddf5be2c554bcb5f12ac04c24d17f))
+
+
+
 ## [2.2.21](https://github.com/Torwent/wasp-free/compare/v2.2.20...v2.2.21) (2023-01-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **glassblower:** improved information in case of script shutdown ([bd0ff29](https://github.com/Torwent/wasp-free/commit/bd0ff29dd60cc9810899ea2ed27a911674990e39))
-
-
-
-## [2.2.17](https://github.com/Torwent/wasp-free/compare/v2.2.16...v2.2.17) (2023-01-22)
-
-
-### Bug Fixes
-
-* **kraken:** updated antiban to match latest versions of WaspLib ([9c78ea0](https://github.com/Torwent/wasp-free/commit/9c78ea0eda06ff5b36a463c5035bc1a9c5a178bd))
 
 
 
