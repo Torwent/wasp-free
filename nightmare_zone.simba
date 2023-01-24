@@ -113,30 +113,37 @@ end;
 procedure TNMZFighter.SetupPotions();
 var
   i: Int32;
+  str: String;
 begin
   case CurrentPotion of
-    OVERLOAD_POTION:      Potion := 'Overload';
-    SUPER_RANGING_POTION: Potion := 'Super ranging';
-    SUPER_MAGIC_POTION:   Potion := 'Super magic potion';
+    OVERLOAD_POTION:      Self.Potion := 'Overload';
+    SUPER_RANGING_POTION: Self.Potion := 'Super ranging';
+    SUPER_MAGIC_POTION:   Self.Potion := 'Super magic potion';
   end;
 
-  SetLength(BoostPotion, 4);
+  SetLength(Self.BoostPotion, 4);
   for i := 1 to 4 do
-    BoostPotion[i-1] := Potion + ' (' + ToStr(i) + ')';
+  begin
+    str := Self.Potion + ' (' + ToStr(i) + ')';
+    Self.BoostPotion[i-1] := str;
+  end;
 
   if Potion.Contains('Overload') then
-    BoostTimer.Init(300000)
+    Self.BoostTimer.Init(300000)
   else
-    BoostTimer.Init(420000);
+    Self.BoostTimer.Init(420000);
 
-  BoostTimer.Timeout := GetTickCount;
-  BoostAmount := 8;
+  Self.BoostTimer.Timeout := GetTickCount;
+  Self.BoostAmount := 8;
 
-  SetLength(AbsPotion, 4);
+  SetLength(Self.AbsPotion, 4);
   for i := 1 to 4 do
-    AbsPotion[i-1] := 'Absorption' + ' (' + ToStr(i) + ')';
+  begin
+    str := 'Absorption' + ' (' + ToStr(i) + ')';
+    Self.AbsPotion[i-1] := str;
+  end;
 
-  AbsAmount := 15;
+  Self.AbsAmount := 15;
 end;
 
 procedure TNMZFighter.SetupBarrels();
@@ -189,18 +196,16 @@ end;
 
 procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  'Nightmare Zone';
-
   inherited;
 
-  RSW.Setup([RSRegions.YANILLE, RSRegions.KBD_AND_NMZ]);
+  Self.RSW.Setup([RSRegions.YANILLE, RSRegions.KBD_AND_NMZ]);
 
   Self.SetupPotions();
   Self.SetupBarrels();
   Self.SetupPowerUps();
 
   RSNPCS.AnyNPC.UpText := ['Attack'];
-  MinAbsPoints := 250;
+  Self.MinAbsPoints := 250;
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
@@ -209,7 +214,7 @@ begin
 
   Self.SetupDamageItem();
 
-  PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
+  Self.PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers();
 
   if WLSettings.RemoteInput.ScriptDebug then
@@ -583,47 +588,47 @@ function TNMZFighter.GetDreamState(): ENMZState;
 begin
   Self.DreamSetup := False;
 
-  if CombatHandler.NeedAntiPoison then
+  if CombatHandler.NeedAntiPoison() then
     Exit(DRINK_ANTIPOISON);
 
-  if Self.NeedAbsorption then
+  if Self.NeedAbsorption() then
     Exit(DRINK_ABSORPTION);
 
   if Chat.LeveledUp() then
     Exit(WAIT_LEVEL);
 
-  if Self.NeedBoost then
+  if Self.NeedBoost() then
     Exit(DRINK_BOOST);
 
-  if Self.NeedLowerHP then
+  if Self.NeedLowerHP() then
     Exit(LOWER_HEALTH);
 
-  if PrayFlick and PrayFlickTimer.IsFinished() then
+  if Self.PrayFlick and Self.PrayFlickTimer.IsFinished() then
     Exit(FLICK_PRAYER);
 
   if not MainScreen.WaitInCombat(600) then
     Exit(ATTACK_NPC);
 
-  if CombatHandler.CanSpec then
+  if CombatHandler.CanSpec() then
     Exit(USE_SPEC);
 
-  if Minimap.IsSpecEnabled then
+  if Minimap.IsSpecEnabled() then
     Exit(WAIT_SPEC);
 
-  if CombatHandler.NeedRegear then
+  if CombatHandler.NeedRegear() then
     Exit(REEQUIP_GEAR);
 
-  if RSW.AtTile(DreamMiddle, 30) or not WalkMiddleTimer.IsFinished() then
+  if Self.RSW.AtTile(Self.DreamMiddle, 30) or not Self.WalkMiddleTimer.IsFinished() then
   begin
-    if Self.PowerUpAvailable then
+    if Self.PowerUpAvailable() then
       Exit(USE_POWER);
-    if not MainScreen.InCombat then
+    if not MainScreen.InCombat() then
       Exit(ATTACK_NPC);
 
     Exit(WAIT_CENTER);
   end;
 
-  if WalkMiddleTimer.IsFinished() then
+  if Self.WalkMiddleTimer.IsFinished() then
     Exit(WALK_MIDDLE);
 
   Exit(WAIT_STATE);
@@ -643,10 +648,10 @@ begin
   if CombatHandler.NeedRegear() then
     Exit(REEQUIP_GEAR);
 
-  if not CofferChecked then
+  if not Self.CofferChecked then
     Exit(CHECK_COFFER);
 
-  if CofferLocked then
+  if Self.CofferLocked then
     Exit(OPEN_COFFER);
 
   if MainScreen.IsClassicOpen() then
@@ -661,7 +666,7 @@ begin
   begin
     if not Self.HasEnoughBoost() then
     begin
-      if Potion.Lower in query then
+      if LowerCase(Self.Potion) in query then
         Exit(ANSWER_BOOST);
 
       Exit(WITHDRAW_BOOST);
@@ -734,14 +739,8 @@ begin
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
-    ' InDream: ' + ToStr(InDream) +
-                 ' DreamSetup: ' + ToStr(DreamSetup) +
-                 ' BoostTimer: ' + ToStr(BoostTimer.TimeRemaining) +
-                   STR_NEW_LINE +
-                 ' Boostsfinished: ' + ToStr(BoostTimer.IsFinished()) +
-                 ' NeedBoost: ' + ToSTR(Self.NeedBoost) + ' Boosted: ' + ToStr(Boosted);
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case State of
       END_SCRIPT: Break;
@@ -774,11 +773,11 @@ begin
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       //Inside Dream.
-      DRINK_BOOST: Self.DrinkPotion(BoostPotion);
-      DRINK_ABSORPTION: Self.DrinkPotion(AbsPotion);
+      DRINK_BOOST: Self.DrinkPotion(Self.BoostPotion);
+      DRINK_ABSORPTION: Self.DrinkPotion(Self.AbsPotion);
       DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON_CONSUMABLE);
 
-      WALK_MIDDLE: if RSW.WebWalk(DreamMiddle, 5, 0.2) then WalkMiddleTimer.Restart();
+      WALK_MIDDLE: if RSW.WebWalk(Self.DreamMiddle, 5, 0.2) then Self.WalkMiddleTimer.Restart();
       ATTACK_NPC: CombatHandler.AttackMonster();
       WAIT_LEVEL, WAIT_SPEC, WAIT_CENTER, WAIT_STATE : XPBar.WaitXP(1200);
 
@@ -831,18 +830,18 @@ begin
       Wait(1000, 2000, wdLeft);
     end;
 
-    if WaitUntil(not BankPin.IsOpen, 100, 3000) then
+    if WaitUntil(not BankPin.IsOpen(), 100, 3000) then
     begin
       NMZFighter.CofferLocked := False;
       Exit(True);
     end;
   end;
 
-  Result := WaitUntil(not BankPin.IsOpen, 100, 3000); // wait 3 extra seconds before failing.
+  Result := WaitUntil(not BankPin.IsOpen(), 100, 3000); // wait 3 extra seconds before failing.
   NMZFighter.CofferLocked := not Result;
 end;
 
-function TRSLogin.LoginPlayer: Boolean; override;
+function TRSLogin.LoginPlayer(): Boolean; override;
 begin
   Result := inherited;
 
@@ -879,7 +878,7 @@ begin
   end;
 end;
 
-function TCombatHandler.NeedRegear: Boolean; override;
+function TCombatHandler.NeedRegear(): Boolean; override;
 begin
   if not ManageGear or not GearIsSetup then
     Exit;
@@ -891,35 +890,35 @@ begin
             ((Shield <> 'Null') and Inventory.ContainsItem(Shield));
 end;
 
-function TCombatHandler.DoSpec: Boolean; override;
+function TCombatHandler.DoSpec(): Boolean; override;
 begin
-  if ManageGear and not GearIsSetup then
+  if Self.ManageGear and not Self.GearIsSetup then
   begin
-    Self._SetupGear;
-    ManageGear := GearIsSetup;
-    if not GearIsSetup then
+    Self._SetupGear();
+    Self.ManageGear := Self.GearIsSetup;
+    if not Self.GearIsSetup then
       Exit;
   end;
 
-  if (SpecWeapon <> Weapon) and Inventory.ClickItem(SpecWeapon) then
-    if not WaitUntil(Inventory.ContainsItem(Weapon), 100, 4000) then
+  if (Self.SpecWeapon <> Self.Weapon) and Inventory.ClickItem(Self.SpecWeapon) then
+    if not WaitUntil(Inventory.ContainsItem(Self.Weapon), 100, 4000) then
       Exit;
 
-  InCombatTimer.Timeout := GetTickCount;
-  Result := DoingSpec := Minimap.EnableSpec(WeaponSpec);
+  Self.InCombatTimer.Timeout := GetTickCount();
+  Result := Self.DoingSpec := Minimap.EnableSpec(Self.WeaponSpec);
 
-  case SpecWeapon of
+  case Self.SpecWeapon of
     'Granite maul', '4153', '12848':
       begin
-        Result := DoingSpec := True;
+        Result := Self.DoingSpec := True;
         Wait(50, 100);
       end;
     else
       Wait(300, 400);
   end;
 
-  if Result and NMZFighter.PowerSurgeTimer.IsFinished() and (Minimap.GetSpecLevel < WeaponSpec) then
-    Self.Regear;
+  if Result and NMZFighter.PowerSurgeTimer.IsFinished() and (Minimap.GetSpecLevel() < Self.WeaponSpec) then
+    Self.Regear();
 end;
 
 {$IFDEF SCRIPT_GUI}
