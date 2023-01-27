@@ -1,3 +1,12 @@
+## [2.2.24](https://github.com/Torwent/wasp-free/compare/v2.2.23...v2.2.24) (2023-01-27)
+
+
+### Bug Fixes
+
+* **pickpocketer:** fix attempt at bank withdraw/deposit food loop ([a661fed](https://github.com/Torwent/wasp-free/commit/a661fede8cae92fe22b4d26d196a896b52afbbc3))
+
+
+
 ## [2.2.23](https://github.com/Torwent/wasp-free/compare/v2.2.22...v2.2.23) (2023-01-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** decreased downscaling of the maps for better accuracy ([753b579](https://github.com/Torwent/wasp-free/commit/753b5795ed1eae21a61d62a01cc6b950b2e53ebc))
-
-
-
-## [2.2.19](https://github.com/Torwent/wasp-free/compare/v2.2.18...v2.2.19) (2023-01-22)
-
-
-### Bug Fixes
-
-* **larder builder:** add extra debugging ([971723d](https://github.com/Torwent/wasp-free/commit/971723d133b21fe4534a8d17887b61d10b38a034))
 
 
 
