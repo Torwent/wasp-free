@@ -238,7 +238,7 @@ var
   ProfitMultiplier: Double;
   Item: TRSItem;
 begin
-  if Inventory.Open then
+  if Inventory.Open() then
   begin
     if Inventory.ContainsItem('Rogue mask') then
     begin
@@ -287,7 +287,7 @@ begin
       RogueEquipment += 21200;
   end;
 
-  if Equipment.Open then
+  if Equipment.Open() then
   begin
     if Equipment.ContainsItem('Rogue mask') then
     begin
@@ -336,7 +336,7 @@ begin
 
   end;
 
-  GearAmount := Equipment.CountGear;
+  GearAmount := Equipment.CountGear();
   if not Equipment.IsSlotUsed(ERSEquipmentButton.AMULET) then
     GearAmount += 1;
 
@@ -348,8 +348,6 @@ end;
 
 procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
-  Name    := 'AIO Pickpocketer';
-
   inherited;
 
   UseRedemption := SuicideMode;
@@ -357,20 +355,17 @@ begin
   CoinPouch := 'Coin pouch';
   Necklace := 'Dodgy necklace';
 
-  Self.SetupNPC;
+  Self.SetupNPC();
 
   //NeckTimer to recheck necklace in case the script messes up.
   NeckTimer.Init(140000);
 
-  if not RSClient.IsLoggedIn then
-    Login.LoginPlayer;
-
-  if Antiban.BioDice then
+  if Antiban.BioDice() then
     Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
-  Self.CheckRogueEquipment;
+  Self.CheckRogueEquipment();
   HasNeck := Equipment.ContainsItem(Necklace);
   if Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
   begin
@@ -390,9 +385,7 @@ begin
     FoodHandler.Amount := 28 - NeckAmount - 2 - Length(Self.StackableArray);
 
   if WLSettings.RemoteInput.ScriptDebug then
-  begin
     DebugNPCArray += CurrentNPC;
-  end;
 end;
 
 
@@ -447,16 +440,6 @@ begin
   Result := not Self.HasRogue and not Inventory.ContainsItem('Lava battlestaff');
 end;
 
-
-function TThiever.HasDepositItems: Boolean;
-var
-  Slots: TIntegerArray;
-  UsedSlots: TIntegerArray := Inventory.GetUsedSlots;
-begin
-  Inventory.FindItems(StackableArray, Slots);
-
-  Result := Length(Slots) <> Length(UsedSlots);
-end;
 
 function TThiever.HasSpace(): Boolean;
 begin
@@ -724,7 +707,7 @@ begin
   begin
     if Bank.IsOpen() then
     begin
-      if Self.HasDepositItems() then
+      if Inventory.HasRandomItem(Self.StackableArray) then
         Exit(DEPOSIT_LOOT);
       if Inventory.CountItem(Necklace) < NeckAmount then
         Exit(WITHDRAW_NECKLACES);
@@ -800,15 +783,6 @@ begin
   repeat
     State := Self.GetState();
     Self.SetAction(ToStr(State));
-    ' FreshNeck: ' + ToStr(FreshNeck) +
-                 ',   HasNeck: ' + ToStr(HasNeck) +
-                 STR_NEW_LINE +
-                  ' UseRedemption: ' + ToStr(UseRedemption) +
-                  ',   RedemptionEnabled: ' + ToStr(RedemptionEnabled) +
-                  ',   NextHeal: ' + ToStr(NextHeal) +
-                  STR_NEW_LINE +
-                  ' SuicideMode: ' + ToStr(SuicideMode) +
-                  ',   UseShadowVeil: ' + ToStr(UseShadowVeil);
 
     case State of
       OPEN_BANK: Bank.WalkOpen();
@@ -828,7 +802,7 @@ begin
       EQUIP_NECKLACE: Self.EquipNeck();
       CHECK_NECKLACE: Self.CheckNeck();
       CLOSE_CONTEXT: ChooseOption.Close();
-      DROP_ITEMS: Inventory.ShiftDrop(DropArray, Inventory.RandomPattern);
+      DROP_ITEMS: Inventory.ShiftDrop(Self.DropArray, Inventory.RandomPattern);
       WALK_TO_NPC: RSW.WebWalk(CurrentNPC.Coordinates, 30, 0.2);
       EQUIP_ROGUE: Self.EquipRogue();
       LOOT_GRAVE: Self.LootGrave();
@@ -844,6 +818,50 @@ end;
 var
   Thiever: TThiever;
 
+function TConsumableHandler.FindInBank(): TRSConsumableArray; override;
+var
+  consumable: TRSConsumable;
+  item: TRSItem;
+begin
+  Self.DebugLn('Setting up consumable of type: ' + ToStr(Self.ConsumableType));
+
+  for item in GetConsumableArray(Self.ConsumableType) do
+  begin
+    if Self.ConsumableArray.Contains(item) then //avoid resetting items.
+      Continue;
+
+    if Bank.ContainsItem(item.Reorder(False)) then
+    begin
+      Self.DebugLn('Consumable found: ' + ToStr(item));
+      consumable := Self.Setup(item);
+      consumable.BankTab := Bank.GetCurrentTab(); //TODO: Search parent maybe?
+      Thiever.StackableArray += item;
+      Result += consumable;
+    end;
+  end;
+end;
+
+function TConsumableHandler.FindInInventory(): TRSConsumableArray; override;
+var
+  consumable: TRSConsumable;
+  item: TRSItem;
+begin
+  Self.DebugLn('Setting up consumable of type: ' + ToStr(Self.ConsumableType));
+
+  for item in GetConsumableArray(Self.ConsumableType) do
+  begin
+    if Self.ConsumableArray.Contains(item) then //avoid resetting leftover items.
+      Continue;
+
+    if Inventory.ContainsItem(item) then
+    begin
+      Self.DebugLn('Consumable found: ' + ToStr(item));
+      consumable := Self.Setup(item);
+      Thiever.StackableArray += item;
+      Result += consumable;
+    end;
+  end;
+end;
 
 function TRSChooseOption.Select(Text: TStringArray; MouseAction: Int32 = MOUSE_LEFT; CaseSensitive: Boolean = True; CloseIfNotFound: Boolean = True): Boolean; override;
 var
