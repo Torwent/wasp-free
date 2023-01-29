@@ -120,7 +120,7 @@ end;
 procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   inherited;
-  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH], 4);
+  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH]);
 
   Self.SetupNPC();
   Self.SetupObjects();
@@ -349,6 +349,22 @@ end;
 
 var
   Builder: TBuilder;
+
+function TRSWalker.GetCleanMinimap(): TMufasaBitmap; override;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Bitmap := GetMufasaBitmap(BitmapFromClient(Minimap.Bounds));
+  Bitmap.ReplaceColor(0, 1); // We need zero to be unique
+
+  Self.CleanMinimap(Bitmap);
+  Bitmap.ReplaceColor(1, $32A072);
+
+  Result.Init();
+
+  Bitmap.RotateBitmapEx(Minimap.GetCompassAngle(False), False, True, Result);
+  Bitmap.Free();
+end;
 
 function TRSWalkerObject._SelectHelper(action: TStringArray): Boolean; override;
 begin
