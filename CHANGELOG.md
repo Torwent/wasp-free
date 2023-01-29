@@ -1,3 +1,12 @@
+## [2.2.25](https://github.com/Torwent/wasp-free/compare/v2.2.24...v2.2.25) (2023-01-29)
+
+
+### Bug Fixes
+
+* **larder builder:** fix wrong positions ([41b508e](https://github.com/Torwent/wasp-free/commit/41b508ee7844fd44159a018077f66d129d3ae063))
+
+
+
 ## [2.2.24](https://github.com/Torwent/wasp-free/compare/v2.2.23...v2.2.24) (2023-01-27)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** added a failsafe to over withdrawing dodgy necks ([0082f41](https://github.com/Torwent/wasp-free/commit/0082f41a261a3b00913d412a64c5806d81c67863))
-
-
-
-## [2.2.20](https://github.com/Torwent/wasp-free/compare/v2.2.19...v2.2.20) (2023-01-23)
-
-
-### Bug Fixes
-
-* **larder builder:** decreased downscaling of the maps for better accuracy ([753b579](https://github.com/Torwent/wasp-free/commit/753b5795ed1eae21a61d62a01cc6b950b2e53ebc))
 
 
 
