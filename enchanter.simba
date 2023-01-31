@@ -238,8 +238,8 @@ function TEnchanter.EnchantJewel(): Boolean;
 begin
   if Result := Inventory.ClickItem(RegularJewel) then
   begin
-    Enchanting := SRL.Dice(20 * BioHash);
-    WaitUntil(Magic.IsOpen, 50, 2000);
+    Enchanting := Antiban.BioDice(20);
+    WaitUntil(Magic.IsOpen(), 50, 2000);
   end;
 end;
 
@@ -253,19 +253,20 @@ end;
 
 function TEnchanter.DeselectSpell(): Boolean;
 var
-  Selected: ERSSpell;
+  selected: ERSSpell;
 begin
-  if Magic.IsOpen then
+  if Magic.IsOpen() then
   begin
-    if (Selected := Magic.GetSelectedSpell) <> ERSSpell.UNKNOWN then
+    selected := Magic.GetSelectedSpell();
+    if selected <> ERSSpell.UNKNOWN then
     begin
-      Magic.MouseSpell(Selected, MOUSE_LEFT);
-      Result := Magic.GetSelectedSpell = ERSSpell.UNKNOWN;
+      Magic.MouseSpell(selected, MOUSE_LEFT);
+      Result := Magic.GetSelectedSpell() = ERSSpell.UNKNOWN;
     end;
   end
   else if MainScreen.IsUpText('Cast') then
   begin
-    ChooseOption.Open;
+    ChooseOption.Open();
     ChooseOption.Select('Cancel');
   end;
 end;
@@ -273,11 +274,11 @@ end;
 
 function TEnchanter.Deposit(): Boolean;
 var
-  ItemCount: Int32 := Inventory.CountItem(EnchantedJewel);
+  itemCount: Int32 := Inventory.CountItem(EnchantedJewel);
 begin
   if Result := Bank.DepositItem(BankTab, [EnchantedJewel, BANK_DEPOSIT_ALL], True) then
     if WaitUntil(Inventory.CountItem(EnchantedJewel) = 0, 100, 3000) then
-      TotalActions += ItemCount;
+      Self.TotalActions += itemCount;
 end;
 
 
@@ -380,7 +381,7 @@ begin
       EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       EEnchanterState.WAIT_ENCHANT: Enchanting := XPBar.WaitXP(2000);
-      EEnchanterState.LEVEL_UP: Chat.HandleLevelUp(SRL.Dice(75));
+      EEnchanterState.LEVEL_UP: Chat.HandleLevelUp();
 
       EEnchanterState.OPEN_MAGIC: Magic.Open();
       EEnchanterState.OPEN_INVENTORY: Inventory.Open();
