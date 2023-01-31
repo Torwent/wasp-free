@@ -1,3 +1,12 @@
+## [2.2.26](https://github.com/Torwent/wasp-free/compare/v2.2.25...v2.2.26) (2023-01-31)
+
+
+### Bug Fixes
+
+* **enchanter:** fix compatibility with latest WaspLib versions ([dba189f](https://github.com/Torwent/wasp-free/commit/dba189f4408936fc85ca2a8f96c385afcd9b86d4))
+
+
+
 ## [2.2.25](https://github.com/Torwent/wasp-free/compare/v2.2.24...v2.2.25) (2023-01-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** cleaned up some old stuff that could cause issues ([c77291d](https://github.com/Torwent/wasp-free/commit/c77291d5bc3ddf5be2c554bcb5f12ac04c24d17f))
-
-
-
-## [2.2.21](https://github.com/Torwent/wasp-free/compare/v2.2.20...v2.2.21) (2023-01-23)
-
-
-### Bug Fixes
-
-* **ardy knights:** added a failsafe to over withdrawing dodgy necks ([0082f41](https://github.com/Torwent/wasp-free/commit/0082f41a261a3b00913d412a64c5806d81c67863))
 
 
 
