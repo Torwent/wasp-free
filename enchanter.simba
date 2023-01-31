@@ -288,13 +288,13 @@ begin
   if WL.Activity.IsFinished() then
     Exit(EEnchanterState.END_SCRIPT);
 
-  if Chat.LeveledUp then
+  if Chat.LeveledUp() then
   begin
-    Enchanting := False;
+    Self.Enchanting := False;
     Exit(EEnchanterState.LEVEL_UP);
   end;
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
     if Bank.IsOpen() then
     begin
@@ -313,7 +313,7 @@ begin
 
     if CollectBox.IsOpen() then
     begin
-      if CollectEmpty or Inventory.ContainsAll([CosmicRune, RegularJewel]) then
+      if Self.CollectEmpty or Inventory.ContainsAll([Self.CosmicRune, RegularJewel]) then
         Exit(EEnchanterState.CLOSE_INTERFACE);
       Exit(EEnchanterState.HANDLE_COLLECT);
     end;
@@ -323,7 +323,7 @@ begin
 
   if Inventory.IsOpen() then
   begin
-    if Inventory.ContainsAll([CosmicRune, RegularJewel]) then
+    if Inventory.ContainsAll([Self.CosmicRune, RegularJewel]) then
     begin
       if MainScreen.IsUpText('>') then
         Exit(EEnchanterState.ENCHANT_JEWEL);
@@ -335,10 +335,10 @@ begin
     if MainScreen.IsUpText('>') then
       Exit(EEnchanterState.CANCEL_SPELL);
 
-    if BankEmpty and CollectEmpty then
+    if Self.BankEmpty and Self.CollectEmpty then
       Exit(EEnchanterState.END_SCRIPT);
 
-    if BankEmpty then
+    if Self.BankEmpty then
       Exit(EEnchanterState.OPEN_COLLECT);
 
     Exit(EEnchanterState.OPEN_BANK);
@@ -346,7 +346,7 @@ begin
 
   if Magic.IsOpen() then
   begin
-    if Enchanting or Magic.IsSpellSelected(SPELL) then
+    if Self.Enchanting or Magic.IsSpellSelected(SPELL) then
       Exit(OPEN_INVENTORY);
     Exit(CAST_SPELL);
   end;
