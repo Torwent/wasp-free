@@ -105,7 +105,7 @@ begin
   case PickedNPC of
     MAN:
       begin
-        RSW.Setup([RSRegions.LUMBRIDGE]);
+        Self.RSW.Setup([RSRegions.LUMBRIDGE]);
         CurrentNPC := RSNPCs.Man;
 
         LootArray += CoinPouch;
@@ -123,7 +123,7 @@ begin
 
     MASTER_FARMER:
       begin
-        RSW.Setup([RSRegions.DRAYNOR_VILLAGE]);
+        Self.RSW.Setup([RSRegions.DRAYNOR_VILLAGE]);
         CurrentNPC := RSNPCs.MasterFarmer;
         LootArray := [
           'Potato seed', 'Onion seed', 'Cabbage seed', 'Tomato seed',
@@ -170,7 +170,7 @@ begin
 
     GUARD:
       begin
-        RSW.Setup([RSRegions.FALADOR]);
+        Self.RSW.Setup([RSRegions.FALADOR]);
         CurrentNPC := RSNPCs.Guard;
 
         LootArray += CoinPouch;
@@ -184,7 +184,7 @@ begin
 
     ELF:
       begin
-        RSW.Setup([RSRegions.PRIFDDINAS]);
+        Self.RSW.Setup([RSRegions.PRIFDDINAS]);
         CurrentNPC := RSNPCs.Elf;
 
         LootArray := [
@@ -208,7 +208,7 @@ begin
 
     TZHAAR_CITY:
       begin
-        RSW.Setup([RSRegions.TZHAAR]);
+        Self.RSW.Setup([RSRegions.MOR_UL_REK]);
         CurrentNPC := RSNPCs.TzhaarHur;
         LootArray := [
           'Tokkul', 'Uncut sapphire', 'Uncut emerald',
@@ -596,7 +596,7 @@ begin
   begin
     Minimap.WaitPlayerMoving(300, 10000);
 
-    RSObjects.Gravestone.Coordinates.Insert(RSW.GetMyPos, 0);
+    RSObjects.Gravestone.Coordinates.Insert(Self.RSW.GetMyPos, 0);
     if Length(RSObjects.Gravestone.Coordinates) > 4 then
       RSObjects.Gravestone.Coordinates.Pop;
 
@@ -757,7 +757,7 @@ begin
       Exit(EAT_FOOD);
     if not SuicideMode then
       Exit(OPEN_BANK);
-    if not RSW.AtTile(CurrentNPC.Coordinates, 40) then
+    if not Self.RSW.AtTile(CurrentNPC.Coordinates, 40) then
       Exit(WALK_TO_NPC);
     if UseRedemption and not RedemptionEnabled then
       Exit(ENABLE_REDEMPTION);
@@ -767,7 +767,7 @@ begin
     Exit(PICKPOCKET);
   end;
 
-  if not RSW.AtTile(CurrentNPC.Coordinates, 40) then
+  if not Self.RSW.AtTile(CurrentNPC.Coordinates, 40) then
     Exit(WALK_TO_NPC);
 
   if UseShadowVeil and ShadowVeilTimer.IsFinished() then
@@ -803,7 +803,7 @@ begin
       CHECK_NECKLACE: Self.CheckNeck();
       CLOSE_CONTEXT: ChooseOption.Close();
       DROP_ITEMS: Inventory.ShiftDrop(Self.DropArray, Inventory.RandomPattern);
-      WALK_TO_NPC: RSW.WebWalk(CurrentNPC.Coordinates, 30, 0.2);
+      WALK_TO_NPC: Self.RSW.WebWalk(CurrentNPC.Coordinates, 30, 0.2);
       EQUIP_ROGUE: Self.EquipRogue();
       LOOT_GRAVE: Self.LootGrave();
       ENABLE_REDEMPTION: Self.EnableRedemption();
