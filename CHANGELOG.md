@@ -1,3 +1,12 @@
+## [2.2.27](https://github.com/Torwent/wasp-free/compare/v2.2.26...v2.2.27) (2023-02-02)
+
+
+### Bug Fixes
+
+* **pickpocketer:** should compile again ([099876d](https://github.com/Torwent/wasp-free/commit/099876d67e1401d61a55c5899c3bb769806a2229))
+
+
+
 ## [2.2.26](https://github.com/Torwent/wasp-free/compare/v2.2.25...v2.2.26) (2023-01-31)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** downscaling walker further for more accuracy ([ef2bf7c](https://github.com/Torwent/wasp-free/commit/ef2bf7c1ecda46b13a46d9bbdfaadbe1a7086be4))
-
-
-
-## [2.2.22](https://github.com/Torwent/wasp-free/compare/v2.2.21...v2.2.22) (2023-01-24)
-
-
-### Bug Fixes
-
-* **nmz:** cleaned up some old stuff that could cause issues ([c77291d](https://github.com/Torwent/wasp-free/commit/c77291d5bc3ddf5be2c554bcb5f12ac04c24d17f))
 
 
 
