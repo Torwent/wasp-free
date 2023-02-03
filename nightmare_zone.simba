@@ -418,7 +418,7 @@ begin
   if not Self.HasBoostPot then
     Exit;
 
-  if BoostTimer.IsFinished() then
+  if BoostTimer.IsFinished() and not PotStr.Contains('Overload') then
     Boosted := False;
 
   if PotStr.Contains('Overload') then
