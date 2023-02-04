@@ -418,13 +418,12 @@ begin
   if not Self.HasBoostPot then
     Exit;
 
-  if BoostTimer.IsFinished() then
-    Boosted := False;
-
   if PotStr.Contains('Overload') then
-    Result := (Minimap.GetHPLevel > 50)
-  else
-    Result := not Boosted;
+    Self.Boosted := Minimap.GetHPLevel() <= 50
+  else if BoostTimer.IsFinished() then
+    Self.Boosted := False;
+  
+  Result := not Self.Boosted;
 end;
 
 function TNMZFighter.GetAbsorptionPoints(): Int32;
