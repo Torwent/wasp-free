@@ -249,7 +249,7 @@ begin
   begin
     Self.TotalActions += 1;
     WL.Activity.Restart();
-    Wait(250, 300);
+    Wait(600, 800);
   end else
     MainScreen.CloseInterface();
 end;
