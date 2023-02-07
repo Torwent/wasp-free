@@ -1,3 +1,12 @@
+## [2.2.28](https://github.com/Torwent/wasp-free/compare/v2.2.27...v2.2.28) (2023-02-07)
+
+
+### Bug Fixes
+
+* **larder builder:** increased the timer when you build a larder ([da82ba7](https://github.com/Torwent/wasp-free/commit/da82ba7e81b5c17524a505ad7d1b477c58ce6d1f))
+
+
+
 ## [2.2.27](https://github.com/Torwent/wasp-free/compare/v2.2.26...v2.2.27) (2023-02-02)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** fix attempt at bank withdraw/deposit food loop ([a661fed](https://github.com/Torwent/wasp-free/commit/a661fede8cae92fe22b4d26d196a896b52afbbc3))
-
-
-
-## [2.2.23](https://github.com/Torwent/wasp-free/compare/v2.2.22...v2.2.23) (2023-01-24)
-
-
-### Bug Fixes
-
-* **larder builder:** downscaling walker further for more accuracy ([ef2bf7c](https://github.com/Torwent/wasp-free/commit/ef2bf7c1ecda46b13a46d9bbdfaadbe1a7086be4))
 
 
 
