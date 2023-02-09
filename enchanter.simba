@@ -48,6 +48,7 @@ type
     CANCEL_SPELL,
     WAIT_ENCHANT,
 
+    OUT_OF_SUPPLIES,
     END_SCRIPT
   );
 
@@ -336,7 +337,7 @@ begin
       Exit(EEnchanterState.CANCEL_SPELL);
 
     if Self.BankEmpty and Self.CollectEmpty then
-      Exit(EEnchanterState.END_SCRIPT);
+      Exit(EEnchanterState.OUT_OF_SUPPLIES);
 
     if Self.BankEmpty then
       Exit(EEnchanterState.OPEN_COLLECT);
@@ -389,7 +390,7 @@ begin
       EEnchanterState.ENCHANT_JEWEL: Self.EnchantJewel();
       EEnchanterState.CANCEL_SPELL: Self.DeselectSpell();
 
-      EEnchanterState.END_SCRIPT: Break;
+      EEnchanterState.OUT_OF_SUPPLIES, EEnchanterState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();
