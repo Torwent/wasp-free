@@ -1,3 +1,12 @@
+## [2.2.29](https://github.com/Torwent/wasp-free/compare/v2.2.28...v2.2.29) (2023-02-09)
+
+
+### Bug Fixes
+
+* **enchanter:** now gives more information if the reason it stops is due to not finding supplies ([6ebf57a](https://github.com/Torwent/wasp-free/commit/6ebf57a7161249311d07a5179eb99a530b041824))
+
+
+
 ## [2.2.28](https://github.com/Torwent/wasp-free/compare/v2.2.27...v2.2.28) (2023-02-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** fix wrong positions ([41b508e](https://github.com/Torwent/wasp-free/commit/41b508ee7844fd44159a018077f66d129d3ae063))
-
-
-
-## [2.2.24](https://github.com/Torwent/wasp-free/compare/v2.2.23...v2.2.24) (2023-01-27)
-
-
-### Bug Fixes
-
-* **pickpocketer:** fix attempt at bank withdraw/deposit food loop ([a661fed](https://github.com/Torwent/wasp-free/commit/a661fede8cae92fe22b4d26d196a896b52afbbc3))
 
 
 
