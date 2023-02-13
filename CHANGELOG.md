@@ -1,3 +1,12 @@
+## [2.2.30](https://github.com/Torwent/wasp-free/compare/v2.2.29...v2.2.30) (2023-02-13)
+
+
+### Bug Fixes
+
+* **larder builder:** fix phials ([5feb7d0](https://github.com/Torwent/wasp-free/commit/5feb7d03e61fe3cbe1111dd10fd6afa5f19b38de))
+
+
+
 ## [2.2.29](https://github.com/Torwent/wasp-free/compare/v2.2.28...v2.2.29) (2023-02-09)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** fix compatibility with latest WaspLib versions ([dba189f](https://github.com/Torwent/wasp-free/commit/dba189f4408936fc85ca2a8f96c385afcd9b86d4))
-
-
-
-## [2.2.25](https://github.com/Torwent/wasp-free/compare/v2.2.24...v2.2.25) (2023-01-29)
-
-
-### Bug Fixes
-
-* **larder builder:** fix wrong positions ([41b508e](https://github.com/Torwent/wasp-free/commit/41b508ee7844fd44159a018077f66d129d3ae063))
 
 
 
