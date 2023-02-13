@@ -200,7 +200,8 @@ begin
   if not RSNPCs.Phials.Find() and not RSW.AtTile(RSNPCs.Phials.Coordinates, 8) then
     RSW.WebWalk(RSNPCs.Phials.Coordinates, 15, 0.2);
 
-  if (Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and RSNPCs.Phials.Click()) then
+  if Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and
+     RSNPCs.Phials.SelectOption(['Use']) then
   begin
     Minimap.WaitFlag();
     Result := WaitUntil(Chat.GetChatTitle() = 'Select an Option', 100, 15000);
