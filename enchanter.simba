@@ -187,9 +187,9 @@ begin
     else if ItemString.Contains('necklace') then
       EnchantedJewel := 'Skills necklace'
     else if ItemString.Contains('bracelet') then
-      EnchantedJewel := 'Combat bracelet(4)'
+      EnchantedJewel := 'Combat bracelet'
     else if ItemString.Contains('amulet') then
-      EnchantedJewel := 'Amulet of glory(4)';
+      EnchantedJewel := 'Amulet of glory';
   end
 
   else if ItemString.Contains('Onyx') then
