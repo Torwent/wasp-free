@@ -1,3 +1,12 @@
+## [2.2.31](https://github.com/Torwent/wasp-free/compare/v2.2.30...v2.2.31) (2023-02-14)
+
+
+### Bug Fixes
+
+* **enchanter:** dragonstone jewelry ([0ceed0f](https://github.com/Torwent/wasp-free/commit/0ceed0fc8b59944bce7976e175c2f4a13488a908))
+
+
+
 ## [2.2.30](https://github.com/Torwent/wasp-free/compare/v2.2.29...v2.2.30) (2023-02-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** should compile again ([099876d](https://github.com/Torwent/wasp-free/commit/099876d67e1401d61a55c5899c3bb769806a2229))
-
-
-
-## [2.2.26](https://github.com/Torwent/wasp-free/compare/v2.2.25...v2.2.26) (2023-01-31)
-
-
-### Bug Fixes
-
-* **enchanter:** fix compatibility with latest WaspLib versions ([dba189f](https://github.com/Torwent/wasp-free/commit/dba189f4408936fc85ca2a8f96c385afcd9b86d4))
 
 
 
