@@ -237,19 +237,20 @@ end;
 
 function TEnchanter.EnchantJewel(): Boolean;
 begin
-  if Result := Inventory.ClickItem(RegularJewel) then
-  begin
-    Enchanting := Antiban.BioDice(20);
-    WaitUntil(Magic.IsOpen(), 50, 2000);
-  end;
+  if Inventory.ClickItem(RegularJewel) then
+    Result := WaitUntil(Magic.IsOpen(), 50, 2000);
+
+  Self.Enchanting := Result;
 end;
 
 function TEnchanter.WaitEnchanting(): Boolean;
 begin
   if Enchanting then
-    Result := Enchanting := Inventory.ContainsItem(CosmicRune) and Inventory.ContainsItem(RegularJewel) and XPBar.WaitXP(2000)
+    Result := Inventory.ContainsItem(CosmicRune) and Inventory.ContainsItem(RegularJewel) and XPBar.WaitXP(5000)
   else
-    Result := Enchanting := XPBar.WaitXP(2000);
+    Result := XPBar.WaitXP(5000);
+
+  Self.Enchanting := Result;
 end;
 
 function TEnchanter.DeselectSpell(): Boolean;
@@ -328,7 +329,7 @@ begin
     begin
       if MainScreen.IsUpText('>') then
         Exit(EEnchanterState.ENCHANT_JEWEL);
-      if Enchanting then
+      if Self.Enchanting then
         Exit(EEnchanterState.WAIT_ENCHANT);
       Exit(EEnchanterState.OPEN_MAGIC);
     end;
@@ -381,7 +382,7 @@ begin
       EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox([RegularJewel, CosmicRune]);
       EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      EEnchanterState.WAIT_ENCHANT: Enchanting := XPBar.WaitXP(2000);
+      EEnchanterState.WAIT_ENCHANT: Self.Enchanting := XPBar.WaitXP(5000);
       EEnchanterState.LEVEL_UP: Chat.HandleLevelUp();
 
       EEnchanterState.OPEN_MAGIC: Magic.Open();
