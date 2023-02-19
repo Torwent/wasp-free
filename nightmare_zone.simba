@@ -382,8 +382,8 @@ function TNMZFighter.CheckCoffer(): Boolean;
 begin
   if RSObjects.NMZCoffer.WalkHover then
   begin
-    Result := CofferLocked := MainScreen.IsUpText('Unlock');
-    CofferChecked := True;
+    Result := Self.CofferLocked := MainScreen.IsUpText('Unlock');
+    Self.CofferChecked := True;
   end;
 end;
 
@@ -391,8 +391,8 @@ function TNMZFighter.OpenCoffer(): Boolean;
 begin
   if RSObjects.NMZCoffer.WalkClick then
   begin
-    Minimap.WaitMoving;
-    Result := CofferLocked := BankPin.IsOpen(10000);
+    Minimap.WaitMoving();
+    Result := Self.CofferLocked := BankPin.IsOpen(10000);
   end;
 end;
 
@@ -510,7 +510,7 @@ begin
   end;
 
   if PotStr.Contains('Overload') then
-    CurrentHP := Minimap.GetHPLevel;
+    CurrentHP := Minimap.GetHPLevel();
 
   if Inventory.ClickSlot(Slot) then
     Result := WaitUntil(
@@ -650,9 +650,6 @@ begin
   if not Self.CofferChecked then
     Exit(CHECK_COFFER);
 
-  if Self.CofferLocked then
-    Exit(OPEN_COFFER);
-
   if MainScreen.IsClassicOpen() then
   begin
     if BankPin.IsOpen() then
@@ -660,6 +657,9 @@ begin
 
     Exit(HANDLE_NMZSETUP);
   end;
+
+  if Self.CofferLocked then
+    Exit(OPEN_COFFER);
 
   if 'How many doses' in query then
   begin
