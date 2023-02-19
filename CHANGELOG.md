@@ -1,3 +1,12 @@
+## [2.2.33](https://github.com/Torwent/wasp-free/compare/v2.2.32...v2.2.33) (2023-02-19)
+
+
+### Bug Fixes
+
+* **nmz:** should now enter the bankpin again on startup ([3555b81](https://github.com/Torwent/wasp-free/commit/3555b81f0a023d484320f83ac14126fbda05b91a))
+
+
+
 ## [2.2.32](https://github.com/Torwent/wasp-free/compare/v2.2.31...v2.2.32) (2023-02-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** now gives more information if the reason it stops is due to not finding supplies ([6ebf57a](https://github.com/Torwent/wasp-free/commit/6ebf57a7161249311d07a5179eb99a530b041824))
-
-
-
-## [2.2.28](https://github.com/Torwent/wasp-free/compare/v2.2.27...v2.2.28) (2023-02-07)
-
-
-### Bug Fixes
-
-* **larder builder:** increased the timer when you build a larder ([da82ba7](https://github.com/Torwent/wasp-free/commit/da82ba7e81b5c17524a505ad7d1b477c58ce6d1f))
 
 
 
