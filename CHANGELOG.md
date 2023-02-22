@@ -1,3 +1,12 @@
+## [2.2.35](https://github.com/Torwent/wasp-free/compare/v2.2.34...v2.2.35) (2023-02-22)
+
+
+### Bug Fixes
+
+* **nmz:** added failsafe to running out of money in the coffer ([9132e93](https://github.com/Torwent/wasp-free/commit/9132e933cd555de71d273fe7f797797ff85b7969))
+
+
+
 ## [2.2.34](https://github.com/Torwent/wasp-free/compare/v2.2.33...v2.2.34) (2023-02-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** dragonstone jewelry ([0ceed0f](https://github.com/Torwent/wasp-free/commit/0ceed0fc8b59944bce7976e175c2f4a13488a908))
-
-
-
-## [2.2.30](https://github.com/Torwent/wasp-free/compare/v2.2.29...v2.2.30) (2023-02-13)
-
-
-### Bug Fixes
-
-* **larder builder:** fix phials ([5feb7d0](https://github.com/Torwent/wasp-free/commit/5feb7d03e61fe3cbe1111dd10fd6afa5f19b38de))
 
 
 
