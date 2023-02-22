@@ -38,8 +38,8 @@ type
 
     CLOSE_CONTEXT,
 
-    END_SCRIPT1,
-    END_SCRIPT2
+    OUT_OF_SUPPLIES,
+    END_SCRIPT
   );
 
   TAlcher = record(TBaseBankScript)
@@ -84,7 +84,7 @@ var
   Slot: Int32;
   ItemString: String;
 begin
-  if not Inventory.Open and not Inventory.SetSelectedItem(-1) then
+  if not Inventory.Open() and not Inventory.SetSelectedItem(-1) then
     Exit;
 
   for Item in AlchItemArray do
@@ -98,13 +98,12 @@ begin
       if ItemString.Contains('noted ') then
         ItemString := ItemString.After('noted ');
 
-      ActionProfit := ItemData.GetHighAlchProfit(ItemString);
-      Writeln('Profit per alch: ', ActionProfit, '.');
+      Self.ActionProfit := ItemData.GetHighAlchProfit(ItemString);
+      Writeln('Profit per alch: ', Self.ActionProfit, '.');
 
-      if not LossProtection or (ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
+      if not LossProtection or (Self.ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
       begin
-        ' Current Item: ' +  ItemString + ' for ' + ToStr(ActionProfit) + ' each alch.';
-        AlchItem := Item;
+        Self.AlchItem := Item;
         Exit;
       end;
 
@@ -207,13 +206,14 @@ end;
 function TAlcher.GetState(): EAlcherState;
 begin
   if WL.Activity.IsFinished() then
-    Exit(EAlcherState.END_SCRIPT1);
-  if ChooseOption.IsOpen then
+    Exit(EAlcherState.END_SCRIPT);
+
+  if ChooseOption.IsOpen() then
     Exit(EAlcherState.CLOSE_CONTEXT);
 
-  if MainScreen.HasInterface then
+  if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen then
+    if Bank.IsOpen() then
     begin
       if not Inventory.ContainsItem('Nature rune') then
         Exit(EAlcherState.WITHDRAW_NATS);
@@ -224,9 +224,9 @@ begin
       Exit(EAlcherState.CLOSE_INTERFACE);
     end;
 
-    if CollectBox.IsOpen then
+    if CollectBox.IsOpen() then
     begin
-      if CollectEmpty then
+      if Self.CollectEmpty then
         Exit(EAlcherState.CLOSE_INTERFACE);
       Exit(EAlcherState.HANDLE_COLLECT);
     end;
@@ -234,17 +234,17 @@ begin
     Exit(EAlcherState.CLOSE_INTERFACE);
   end;
 
-  if InVarrock and not InGE then
+  if Self.InVarrock and not Self.InGE then
   begin
-    InGE := RSW.AtTile(RSObjects.GEBank.Coordinates, 30);
-    if not InGE then
+    Self.InGE := RSW.AtTile(RSObjects.GEBank.Coordinates, 30);
+    if not Self.InGE then
       Exit(EAlcherState.WALK_ALCH);
   end;
 
-  if Chat.HasContinue then
+  if Chat.HasContinue() then
     Exit(EAlcherState.HANDLE_WARNING);
 
-  if Magic.IsOpen then
+  if Magic.IsOpen() then
   begin
     if Magic.IsSpellSelected(AlchSpell) then
       Exit(EAlcherState.OPEN_INV_TAB);
@@ -253,7 +253,7 @@ begin
        not Inventory.ContainsItem('Nature rune') then
     begin
       if BankEmpty and CollectEmpty then
-        Exit(EAlcherState.END_SCRIPT2);
+        Exit(EAlcherState.OUT_OF_SUPPLIES);
 
       if BankEmpty then
         Exit(EAlcherState.OPEN_COLLECT);
@@ -264,17 +264,17 @@ begin
     Exit(EAlcherState.CHOOSE_SPELL);
   end;
 
-  if Inventory.IsOpen then
+  if Inventory.IsOpen() then
   begin
     if ToStr(AlchItem) = '' then
-      Self.SetupAlchItems;
+      Self.SetupAlchItems();
 
-    if not Inventory.ContainsItem(AlchItem) then
+    if not Inventory.ContainsItem(Self.AlchItem) then
     begin
-      if Inventory.GetSelectedSlot > -1 then
+      if Inventory.GetSelectedSlot() > -1 then
         Exit(EAlcherState.DESELECT_ITEM);
 
-      Exit(EAlcherState.END_SCRIPT2);
+      Exit(EAlcherState.OUT_OF_SUPPLIES);
     end;
       
     if MainScreen.IsUpText('Alchemy ->') then
@@ -303,11 +303,11 @@ begin
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
       EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      EAlcherState.CHOOSE_SPELL: Self.ChooseSpell;
-      EAlcherState.CHOOSE_ITEM: Self.ChooseItem;
-      EAlcherState.OPEN_MAGIC_TAB: Magic.Open;
-      EAlcherState.OPEN_INV_TAB: Inventory.Open;
-      EAlcherState.HANDLE_WARNING: Self.HandleWarning;
+      EAlcherState.CHOOSE_SPELL: Self.ChooseSpell();
+      EAlcherState.CHOOSE_ITEM: Self.ChooseItem();
+      EAlcherState.OPEN_MAGIC_TAB: Magic.Open();
+      EAlcherState.OPEN_INV_TAB: Inventory.Open();
+      EAlcherState.HANDLE_WARNING: Self.HandleWarning();
       EAlcherState.DESELECT_ITEM: //todo: make this cleaner.
       begin
         if Inventory.SetSelectedSlot(-1) then 
@@ -316,16 +316,15 @@ begin
           WaitUntil(Inventory.ContainsItem(AlchItem), 100, 2000);
         end;
       end;
-      EAlcherState.CLOSE_CONTEXT: ChooseOption.Close;
+      EAlcherState.CLOSE_CONTEXT: ChooseOption.Close();
 
-      EAlcherState.END_SCRIPT1, EAlcherState.END_SCRIPT2:
-        Break;
+      EAlcherState.OUT_OF_SUPPLIES, EAlcherState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban;
+    Self.DoAntiban();
   until Self.ShouldStop();
 
-  if not Self.Terminate then
+  if not Self.Terminate() then
     Self.Fatal('Didn''t terminate properly. Stopping execution.');
 end;
 
@@ -342,6 +341,8 @@ type
   end;
 
 procedure TAlcherConfig.StartScript(Sender: TObject);
+var
+  str: String;
 begin
   Self.Init(Sender);
 
@@ -350,8 +351,11 @@ begin
     1: AlchSpell := ERSSpell.LOW_LEVEL_ALCHEMY;
   end;
 
-  LossProtection := Self.IgnoreProfit.IsChecked;
-  CustomItem := Self.CustomItemSelector.getText();
+  LossProtection := Self.IgnoreProfit.IsChecked();
+  str := Self.CustomItemSelector.getText();
+  if str = '' then
+    str := 'noted Rune 2h sword';
+  CustomItem := str;
 end;
 
 procedure TAlcherConfig.Setup(); override;
@@ -376,6 +380,7 @@ begin
   with Self.IgnoreProfit do
   begin
     Init(Self.SSPanel.Panel);
+    SetParent(Self.SSPanel.Panel);
     SetCaption('Prevent loss:');
     SetLeft(Self.AlchSelector.GetLeft() + Self.AlchSelector.GetWidth() + 20);
     SetTop(Self.AlchSelector.GetTop() + 20);
