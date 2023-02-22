@@ -65,6 +65,7 @@ type
     LOWER_HEALTH,
     FLICK_PRAYER,
 
+    OUT_OF_MONEY,
     END_SCRIPT
   );
 
@@ -170,11 +171,8 @@ end;
 
 procedure TNMZFighter.SetupPowerUps();
 begin
-  PowerSurgeTimer.Init(45000);
-  PowerSurgeTimer.Timeout := GetTickCount;
-
-  ZapperTimer.Init(65000);  //5 extra seconds for margin.
-  ZapperTimer.Timeout := GetTickCount;
+  Self.PowerSurgeTimer.Setup(45000);
+  Self.ZapperTimer.Setup(65000);  //5 extra seconds for margin.
 end;
 
 procedure TNMZFighter.SetupDamageItem();
@@ -268,7 +266,7 @@ function TNMZFighter.OpenChest(): Boolean;
 begin
   if RSObjects.NMZChest.WalkClick then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(MainScreen.IsClassicOpen, 100, 5000);
   end;
 end;
@@ -289,8 +287,8 @@ end;
 
 function TNMZFighter.PotAmountNeeded(Potion: TRSItemArray): Int32;
 begin
-  if Potion = BoostPotion then
-    Result := BoostAmount * 4 - Self.CountDoses(BoostPotion)
+  if Potion = Self.BoostPotion then
+    Result := BoostAmount * 4 - Self.CountDoses(Self.BoostPotion)
   else
     Result := Random(80, 999);
 end;
@@ -298,7 +296,7 @@ end;
 
 function TNMZFighter.HasEnoughBoost(): Boolean;
 begin
-  Result := Inventory.CountItem(BoostPotion[3]) = BoostAmount;
+  Result := Inventory.CountItem(Self.BoostPotion[3]) = BoostAmount;
 end;
 
 function TNMZFighter.HasEnoughAbs(): Boolean;
@@ -318,7 +316,7 @@ begin
 
   if Barrel.WalkSelectOption([Str]) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := Chat.FindQuery('How many doses', 5000, 100);
   end;
 end;
@@ -327,7 +325,7 @@ function TNMZFighter.DepositPotion(Barrel: TRSObject): Boolean;
 begin
   if Barrel.WalkSelectOption(['Store']) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
   end;
 end;
@@ -344,7 +342,7 @@ function TNMZFighter.TalkWithDominic(): Boolean;
 begin
   if RSNPCs.DominicOnion.WalkSelectOption(['Dream']) then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
   end;
 end;
@@ -359,7 +357,7 @@ function TNMZFighter.OpenNMZSetup(): Boolean;
 begin
   if RSObjects.NMZPotion.WalkClick then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     Result := WaitUntil(MainScreen.IsClassicOpen, 100, 5000);
   end;
 end;
@@ -405,7 +403,7 @@ var
 begin
   if not Inventory.Open then Exit;
 
-  for PotDose in BoostPotion do
+  for PotDose in Self.BoostPotion do
     Inventory.FindItem(PotDose, Slots);
 
   Result := Slots <> [];
@@ -413,7 +411,7 @@ end;
 
 function TNMZFighter.NeedBoost(): Boolean;
 var
-  PotStr: String := ToStr(BoostPotion[0]);
+  PotStr: String := ToStr(Self.BoostPotion[0]);
 begin
   if not Self.HasBoostPot then
     Exit;
@@ -441,25 +439,25 @@ end;
 
 function TNMZFighter.NeedAbsorption(): Boolean;
 begin
-  Result := (Self.GetAbsorptionPoints < MinAbsPoints) and Inventory.ContainsAny(AbsPotion);
+  Result := (Self.GetAbsorptionPoints() < Self.MinAbsPoints) and Inventory.ContainsAny(Self.AbsPotion);
 end;
 
-function TNMZFighter.NeedLowerHP(HPLevel: Int32 = -1): Boolean;
+function TNMZFighter.NeedLowerHP(hpLevel: Int32 = -1): Boolean;
 var
-  Str: String;
+  str: String;
 begin
-  if not Self.InDream then
+  if not Self.InDream() then
     Exit;
 
-  if HPLevel = -1 then
-    HPLevel := Minimap.GetHPLevel; //if we don't pass a value in, set it.
+  if hpLevel = -1 then
+    hpLevel := Minimap.GetHPLevel(); //if we don't pass a value in, set it.
 
-  if HPLevel = 1 then
+  if hpLevel = 1 then
     Exit(False);
 
-  Str := ToStr(BoostPotion[0]);
-  if (Str.Contains('Overload') and Self.HasBoostPot) then
-    Result := (Boosted or (HPLevel < 51))
+  str := ToStr(Self.BoostPotion[0]);
+  if (str.Contains('Overload') and Self.HasBoostPot()) then
+    Result := (Self.Boosted or (hpLevel < 51))
   else
     Result := True;
 end;
@@ -467,76 +465,80 @@ end;
 
 function TNMZFighter.LowerHealth(): Boolean;
 var
-  Slot: Int32;
-  SlotOption: String;
-  CurrentHP, NewHP: Int32;
+  slot: Int32;
+  slotOption: String;
+  currentHP, newHP: Int32;
 begin
-  if not Inventory.Open then
+  if not Inventory.Open() then
     Exit;
 
-  if ToStr(DamageItem) <> 'Locator orb' then
-    SlotOption := 'Guzzle';
+  if ToStr(Self.DamageItem) <> 'Locator orb' then
+    slotOption := 'Guzzle';
 
-  if Inventory.FindItem(DamageItem, Slot) then
+  if Inventory.FindItem(Self.DamageItem, slot) then
   begin
-    CurrentHP := Minimap.GetHPLevel;
-    while Self.NeedLowerHP(CurrentHP) do
+    currentHP := Minimap.GetHPLevel();
+    while Self.NeedLowerHP(currentHP) do
     begin
-      Inventory.ClickSlot(Slot, SlotOption);
-      Wait(150);
+      Inventory.ClickSlot(slot, slotOption);
+      Wait(100);
 
-      if not WaitUntil(CurrentHP > (NewHP := Minimap.GetHPLevel), 100, 1500) then
-        Antiban.SmallRandomMouse;
+      if not WaitUntil(currentHP > (newHP := Minimap.GetHPLevel()), 100, 1500) then
+        Antiban.SmallRandomMouse();
 
       CurrentHP := NewHP;
     end;
   end;
 
-  Result := CurrentHP = 1;
+  Result := currentHP = 1;
 end;
 
-function TNMZFighter.DrinkPotion(PotionArray: TRSItemArray): Boolean;
+function TNMZFighter.DrinkPotion(potionArray: TRSItemArray): Boolean;
 var
-  DoseCount: Int32 := Self.CountDoses(PotionArray);
-  i, Slot, CurrentHP: Int32;
-  PotStr: String := ToStr(PotionArray[0]);
+  doseCount: Int32 := Self.CountDoses(potionArray);
+  i, slot, currentHP: Int32;
+  PotStr: String := ToStr(potionArray[0]);
 begin
-  if not Inventory.Open then Exit;
+  if not Inventory.Open then
+    Exit;
 
-  for i := 0 to High(PotionArray) do
+  for i := 0 to High(potionArray) do
   begin
-    if Inventory.FindItem(PotionArray[i], Slot) then Break
-    else if i = High(PotionArray) then Exit;
+    if Inventory.FindItem(potionArray[i], slot) then
+      Break
+    else if i = High(potionArray) then
+      Exit;
   end;
 
   if PotStr.Contains('Overload') then
-    CurrentHP := Minimap.GetHPLevel();
+    currentHP := Minimap.GetHPLevel();
 
-  if Inventory.ClickSlot(Slot) then
+  if Inventory.ClickSlot(slot) then
     Result := WaitUntil(
-                Self.CountDoses(PotionArray) < DoseCount, 100, 2000);
+                Self.CountDoses(potionArray) < doseCount, 100, 2000);
 
-  if (PotionArray = BoostPotion) then
+  if (potionArray = Self.BoostPotion) then
   begin
     if PotStr.Contains('Overload') then
-      Result := WaitUntil(Minimap.GetHPLevel < CurrentHP, 100, 4000)
+      Result := WaitUntil(Minimap.GetHPLevel() < currentHP, 100, 4000)
     else
       Wait(1200, 1600);
   end;
 
   if Result then
   begin
-    if (PotionArray = BoostPotion) then
+    if (potionArray = Self.BoostPotion) then
     begin
       if PotStr.Contains('Overload') then
-        if not WaitUntil(Minimap.GetHPLevel <= (CurrentHP - 45), 100, 12000) then
+        if not WaitUntil(Minimap.GetHPLevel() <= (currentHP - 45), 100, 12000) then
           Exit(False);
 
       Boosted := True;
       BoostTimer.Restart(Random(1000, 15000));
     end
 
-    else MinAbsPoints := Random(300, 940);
+    else
+      MinAbsPoints := Random(300, 940);
   end;
 end;
 
@@ -564,20 +566,20 @@ end;
 
 function TNMZFighter.GetPowerUp(): Boolean;
 begin
-  if RSObjects.NMZRecurrentDamage.Click then
+  if RSObjects.NMZRecurrentDamage.Click() then
   begin
-    Minimap.WaitMoving;
-    Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000);
+    Minimap.WaitMoving();
+    Result := WaitUntil(not Self.PowerUpAvailable(), 100, 6000);
   end
-  else if RSObjects.NMZPowerSurge.Click then
+  else if RSObjects.NMZPowerSurge.Click() then
   begin
-    Minimap.WaitMoving;
-    if Result := WaitUntil(not Self.PowerUpAvailable, 100, 6000) then
+    Minimap.WaitMoving();
+    if Result := WaitUntil(not Self.PowerUpAvailable(), 100, 6000) then
       PowerSurgeTimer.Restart();
   end
-  else if Result := RSObjects.NMZZapper.Click then
+  else if Result := RSObjects.NMZZapper.Click() then
   begin
-    Minimap.WaitMoving;
+    Minimap.WaitMoving();
     ZapperTimer.Restart();
   end;
 end;
@@ -637,6 +639,7 @@ function TNMZFighter.GetRealLifeState(): ENMZState;
 var
   query: String; //to cache the query and title.
   title: String; //not doing multiple checks improves performance.
+  chatCache: String;
 begin
   if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
@@ -687,7 +690,7 @@ begin
 
   if not Self.HasEnoughBoost() then
   begin
-    if Inventory.CountItem(BoostPotion[3]) > BoostAmount then
+    if Inventory.CountItem(Self.BoostPotion[3]) > BoostAmount then
     begin
       if Potion.Lower() in title then
         Exit(HANDLE_DEPOSIT);
@@ -695,7 +698,7 @@ begin
       Exit(DEPOSIT_BOOST);
     end;
 
-    if Inventory.CountItem(BoostPotion[3]) < BoostAmount then
+    if Inventory.CountItem(Self.BoostPotion[3]) < BoostAmount then
       Exit(WITHDRAW_BOOST);
   end;
 
@@ -716,8 +719,18 @@ begin
   if 'dream would' in title then
     Exit(CHOOSE_DREAM);
 
-  if ('Dominic' in title) and ('deduct the money' in Chat.GetChat()) then
-    Exit(HANDLE_DOMINIC);
+  if ('Dominic' in title) then
+  begin
+    chatCache := Chat.GetChat();
+
+    if 'Ill want' in chatCache then
+    begin
+      if 'deduct the money' in chatCache then
+        Exit(HANDLE_DOMINIC);
+
+      Exit(OUT_OF_MONEY);
+    end;
+  end;
 
   if 'Agree' in title then
     Exit(PAY_DOMINIC);
@@ -742,8 +755,6 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case State of
-      END_SCRIPT: Break;
-
       //Outside Dream.
       CHECK_COFFER: Self.CheckCoffer();
       OPEN_COFFER: Self.OpenCoffer();
@@ -755,7 +766,7 @@ begin
       WITHDRAW_BOOST: Self.WithdrawPotion(BoostBarrel);
       WITHDRAW_ABSORPTION: Self.WithdrawPotion(AbsBarrel);
 
-      ANSWER_BOOST: Self.HandleQuery(Self.PotAmountNeeded(BoostPotion));
+      ANSWER_BOOST: Self.HandleQuery(Self.PotAmountNeeded(Self.BoostPotion));
       ANSWER_ABSORPTION: Self.HandleQuery(Self.PotAmountNeeded(AbsPotion));
 
       DEPOSIT_BOOST: Self.DepositPotion(BoostBarrel);
@@ -786,6 +797,8 @@ begin
 
       LOWER_HEALTH: Self.LowerHealth();
       FLICK_PRAYER: Self.FlickPrayer();
+
+      OUT_OF_MONEY, END_SCRIPT: Break;
     end;
 
     if Self.InsideDream then
@@ -879,14 +892,14 @@ end;
 
 function TCombatHandler.NeedRegear(): Boolean; override;
 begin
-  if not ManageGear or not GearIsSetup then
+  if not Self.ManageGear or not Self.GearIsSetup then
     Exit;
 
-  if not NMZFighter.PowerSurgeTimer.IsFinished() or (Minimap.GetSpecLevel >= WeaponSpec) then
+  if not NMZFighter.PowerSurgeTimer.IsFinished() or (Minimap.GetSpecLevel() >= Self.WeaponSpec) then
     Exit;
 
-  Result := ((Weapon <> 'Null') and Inventory.ContainsItem(Weapon)) or
-            ((Shield <> 'Null') and Inventory.ContainsItem(Shield));
+  Result := ((Self.Weapon <> 'Null') and Inventory.ContainsItem(Self.Weapon)) or
+            ((Self.Shield <> 'Null') and Inventory.ContainsItem(Self.Shield));
 end;
 
 function TCombatHandler.DoSpec(): Boolean; override;
