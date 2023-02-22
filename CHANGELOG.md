@@ -1,3 +1,12 @@
+## [2.2.34](https://github.com/Torwent/wasp-free/compare/v2.2.33...v2.2.34) (2023-02-22)
+
+
+### Bug Fixes
+
+* **alcher:** fix empty item and loss prevention not visible ([e5eaeee](https://github.com/Torwent/wasp-free/commit/e5eaeeeb8042d45b69fc15f526754a1af3e9e699))
+
+
+
 ## [2.2.33](https://github.com/Torwent/wasp-free/compare/v2.2.32...v2.2.33) (2023-02-19)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** fix phials ([5feb7d0](https://github.com/Torwent/wasp-free/commit/5feb7d03e61fe3cbe1111dd10fd6afa5f19b38de))
-
-
-
-## [2.2.29](https://github.com/Torwent/wasp-free/compare/v2.2.28...v2.2.29) (2023-02-09)
-
-
-### Bug Fixes
-
-* **enchanter:** now gives more information if the reason it stops is due to not finding supplies ([6ebf57a](https://github.com/Torwent/wasp-free/commit/6ebf57a7161249311d07a5179eb99a530b041824))
 
 
 
