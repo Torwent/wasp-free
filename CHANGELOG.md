@@ -1,3 +1,12 @@
+## [2.2.36](https://github.com/Torwent/wasp-free/compare/v2.2.35...v2.2.36) (2023-02-26)
+
+
+### Bug Fixes
+
+* **gh actions:** read notes ([8f75b14](https://github.com/Torwent/wasp-free/commit/8f75b148e49d72688b72dd7cf6650fa9177b8dd1))
+
+
+
 ## [2.2.35](https://github.com/Torwent/wasp-free/compare/v2.2.34...v2.2.35) (2023-02-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** now will only work with the afk mode ([9dbc0de](https://github.com/Torwent/wasp-free/commit/9dbc0de8154aa3800e2bfe78985f4203d1930e46))
-
-
-
-## [2.2.31](https://github.com/Torwent/wasp-free/compare/v2.2.30...v2.2.31) (2023-02-14)
-
-
-### Bug Fixes
-
-* **enchanter:** dragonstone jewelry ([0ceed0f](https://github.com/Torwent/wasp-free/commit/0ceed0fc8b59944bce7976e175c2f4a13488a908))
 
 
 

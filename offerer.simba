@@ -5,10 +5,9 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex := 0;
-  StatsPayload.SetUsername('');
+  Login.PlayerIndex     := 0;
+  StatsPayload.Username := '';
 end;
-
 type
   ERSRemains = (
     FIENDISH_ASHES, VILE_ASHES, MALICIOUS_ASHES, ABYSSAL_ASHES, INFERNAL_ASHES,

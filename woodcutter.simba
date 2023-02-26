@@ -5,10 +5,9 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex := 0;
-  StatsPayload.SetUsername('');
+  Login.PlayerIndex     := 0;
+  StatsPayload.Username := '';
 end;
-
 type
   ERSBank = (
     POWER_WC, GE, VARROCK_E, VARROCK_W,

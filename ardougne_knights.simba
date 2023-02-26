@@ -5,10 +5,9 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex := 0;
-  StatsPayload.SetUsername('');
+  Login.PlayerIndex     := 0;
+  StatsPayload.Username := '';
 end;
-
 var
   FoodAmount: Int32 := 20;
   NeckAmount: Int32 := 4;
