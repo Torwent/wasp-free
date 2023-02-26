@@ -1,3 +1,12 @@
+## [2.2.39](https://github.com/Torwent/wasp-free/compare/v2.2.38...v2.2.39) (2023-02-26)
+
+
+### Bug Fixes
+
+* **nmz:** now works with normal rumble dream too ([2938080](https://github.com/Torwent/wasp-free/commit/2938080c019ed67190e668f96357f89f5cb06e36))
+
+
+
 ## [2.2.38](https://github.com/Torwent/wasp-free/compare/v2.2.37...v2.2.38) (2023-02-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** added failsafe to running out of money in the coffer ([9132e93](https://github.com/Torwent/wasp-free/commit/9132e933cd555de71d273fe7f797797ff85b7969))
-
-
-
-## [2.2.34](https://github.com/Torwent/wasp-free/compare/v2.2.33...v2.2.34) (2023-02-22)
-
-
-### Bug Fixes
-
-* **alcher:** fix empty item and loss prevention not visible ([e5eaeee](https://github.com/Torwent/wasp-free/commit/e5eaeeeb8042d45b69fc15f526754a1af3e9e699))
 
 
 
