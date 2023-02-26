@@ -5,9 +5,10 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
+  Login.PlayerIndex := 0;
+  StatsPayload.SetUsername('');
 end;
+
 type
   ERSNMZPotion = (
     OVERLOAD_POTION,
@@ -71,10 +72,7 @@ type
   TNMZFighter = record(TBaseWalkerScript)
     State: ENMZState;
 
-    InsideDream: Boolean;
-    DreamSetup: Boolean;
-    Boosted: Boolean;
-    PrayFlick: Boolean;
+    InsideDream, WasInDream, DreamSetup, Boosted, PrayFlick: Boolean;
 
     DreamMiddle: TPoint;
 
@@ -82,12 +80,9 @@ type
     BoostPotion: TRSItemArray;
     AbsPotion: TRSItemArray;
 
-    BoostBarrel: TRSObject;
-    AbsBarrel: TRSObject;
+    BoostBarrel, AbsBarrel: TRSObject;
 
-    BoostAmount: Int32;
-    AbsAmount: Int32;
-    MinAbsPoints: Int32;
+    BoostAmount, AbsAmount, MinAbsPoints: Int32;
 
     DamageItem: TRSItem;
 
@@ -133,7 +128,7 @@ begin
   else
     Self.BoostTimer.Init(420000);
 
-  Self.BoostTimer.Timeout := GetTickCount;
+  Self.BoostTimer.Timeout := GetTickCount();
   Self.BoostAmount := 8;
 
   SetLength(Self.AbsPotion, 4);
@@ -232,31 +227,38 @@ end;
 
 function TNMZFighter.InDream(): Boolean;
 begin
-  Result := InsideDream := MainScreen.InMultiCombat;
+  Self.InsideDream := MainScreen.InMultiCombat();
+  Result := Self.InsideDream;
 
   if Result then
   begin
-    BoostTimer.Resume();
-    if PrayFlick then
-      PrayFlickTimer.Resume();
-    CombatHandler.InCombatTimer.Resume();
-    WalkMiddleTimer.Resume();
-    PowerSurgeTimer.Resume();
-    ZapperTimer.Resume();
-    WL.Activity.Restart();
-  end
-  else
-  begin
-    Boosted := False;
+    Self.WasInDream := True;
 
-    BoostTimer.Timeout := GetTickCount;
-    if PrayFlick then
-      PrayFlickTimer.Timeout := GetTickCount;
-    CombatHandler.InCombatTimer.Timeout := GetTickCount;
-    WalkMiddleTimer.Timeout := GetTickCount;
-    PowerSurgeTimer.Timeout := GetTickCount;
-    ZapperTimer.Timeout := GetTickCount;
+    Self.BoostTimer.Resume();
+    if Self.PrayFlick then
+      Self.PrayFlickTimer.Resume();
+    CombatHandler.InCombatTimer.Resume();
+    Self.WalkMiddleTimer.Resume();
+    Self.PowerSurgeTimer.Resume();
+    Self.ZapperTimer.Resume();
+    WL.Activity.Restart();
+    Exit;
   end;
+
+  if Self.WasInDream then
+  begin
+    Self.WasInDream := False;
+    Self.TotalActions += 1;
+  end;
+
+  Self.Boosted := False;
+  Self.BoostTimer.Timeout := GetTickCount();
+  if Self.PrayFlick then
+    Self.PrayFlickTimer.Timeout := GetTickCount();
+  CombatHandler.InCombatTimer.Timeout := GetTickCount();
+  Self.WalkMiddleTimer.Timeout := GetTickCount();
+  Self.PowerSurgeTimer.Timeout := GetTickCount();
+  Self.ZapperTimer.Timeout := GetTickCount();
 end;
 
 
@@ -349,7 +351,9 @@ end;
 function TNMZFighter.HandlePayment(): Boolean;
 begin
   if Chat.ClickOption('Yes') then
-    Result := DreamSetup := WaitUntil(not ('Agree' in Chat.GetChatTitle), 100, 3000);
+    Self.DreamSetup := WaitUntil(not ('Agree' in Chat.GetChatTitle), 100, 3000);
+
+  Result := Self.DreamSetup;
 end;
 
 function TNMZFighter.OpenNMZSetup(): Boolean;
