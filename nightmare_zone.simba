@@ -8,6 +8,7 @@ begin
   Login.PlayerIndex     := 0;
   StatsPayload.Username := '';
 end;
+
 type
   ERSNMZPotion = (
     OVERLOAD_POTION,
@@ -724,8 +725,8 @@ begin
   if ('Dominic' in title) then
   begin
     chatCache := Chat.GetChat();
-
-    if 'Ill want' in chatCache then
+    WriteLn chatCache;
+    if chatCache.ContainsAll(['Ill', 'want', 'coins']) then
     begin
       if 'deduct the money' in chatCache then
         Exit(HANDLE_DOMINIC);

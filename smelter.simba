@@ -8,7 +8,8 @@
 begin
   Login.PlayerIndex     := 0;
   StatsPayload.Username := '';
-end;{$ENDIF}
+end;
+{$ENDIF}
 
 type
   ERSBarType = (
@@ -182,7 +183,6 @@ begin
   if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += Furnace;
 end;
-
 
 
 function TSmelter.Withdraw(): Boolean; overload;
