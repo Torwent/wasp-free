@@ -231,7 +231,7 @@ begin
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
   if WLSettings.RemoteInput.ScriptDebug then
-    DebugNPCArray += Self.Knight;
+    DebugMMDotArray += Self.Knight;
 end;
 
 

@@ -219,7 +219,7 @@ begin
     DebugObjectArray += RSObjects.NMZPowerSurge;
     DebugObjectArray += RSObjects.NMZRecurrentDamage;
 
-    DebugNPCArray += RSNPCs.DominicOnion;
+    DebugMMDotArray += RSNPCs.DominicOnion;
   end;
 end;
 

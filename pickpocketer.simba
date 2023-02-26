@@ -384,7 +384,7 @@ begin
     FoodHandler.Amount := 28 - NeckAmount - 2 - Length(Self.StackableArray);
 
   if WLSettings.RemoteInput.ScriptDebug then
-    DebugNPCArray += CurrentNPC;
+    DebugMMDotArray += CurrentNPC;
 end;
 
 

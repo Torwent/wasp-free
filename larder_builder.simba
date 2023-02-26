@@ -138,8 +138,8 @@ begin
     DebugObjectArray += BuiltLarder;
     DebugObjectArray += LarderSpace;
     DebugObjectArray += RSObjects.POHPortal;
-    DebugNPCArray += RSNPCs.Phials;
-    DebugNPCArray += ServantNPC;
+    DebugMMDotArray += RSNPCs.Phials;
+    DebugMMDotArray += ServantNPC;
   end;
 end;
 

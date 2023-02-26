@@ -332,7 +332,7 @@ begin
   if WLSettings.RemoteInput.ScriptDebug then
   begin
     DebugObjectArray += RSTree;
-    DebugNPCArray += RSNPCs.SawmillOperator;
+    DebugMMDotArray += RSNPCs.SawmillOperator;
   end;
 end;
 

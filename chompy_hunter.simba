@@ -49,7 +49,7 @@ begin
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
   if WLSettings.RemoteInput.ScriptDebug then
-    DebugNPCArray += Toad;
+    DebugMMDotArray += Toad;
 end;
 
 
