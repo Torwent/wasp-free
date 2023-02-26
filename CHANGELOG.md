@@ -1,3 +1,12 @@
+## [2.2.37](https://github.com/Torwent/wasp-free/compare/v2.2.36...v2.2.37) (2023-02-26)
+
+
+### Bug Fixes
+
+* **nmz:** can now be set to a to stop after a certain number of dreams with the GUI ([ba59557](https://github.com/Torwent/wasp-free/commit/ba59557fd8f8a69b6df01c73304e3e47ae61a2e1))
+
+
+
 ## [2.2.36](https://github.com/Torwent/wasp-free/compare/v2.2.35...v2.2.36) (2023-02-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** should now enter the bankpin again on startup ([3555b81](https://github.com/Torwent/wasp-free/commit/3555b81f0a023d484320f83ac14126fbda05b91a))
-
-
-
-## [2.2.32](https://github.com/Torwent/wasp-free/compare/v2.2.31...v2.2.32) (2023-02-15)
-
-
-### Bug Fixes
-
-* **enchanter:** now will only work with the afk mode ([9dbc0de](https://github.com/Torwent/wasp-free/commit/9dbc0de8154aa3800e2bfe78985f4203d1930e46))
 
 
 
