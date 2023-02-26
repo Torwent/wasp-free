@@ -82,7 +82,7 @@ type
 
     BoostBarrel, AbsBarrel: TRSObject;
 
-    BoostAmount, AbsAmount, MinAbsPoints: Int32;
+    BoostAmount, AbsAmount, MinAbsPoints, WithdrawFails: Int32;
 
     DamageItem: TRSItem;
 
@@ -331,12 +331,26 @@ begin
   end;
 end;
 
-function TNMZFighter.HandleQuery(Amount: Int32): Boolean;
+function TNMZFighter.HandleQuery(amount: Int32): Boolean;
 var
-  InvCount: Int32 := Inventory.Count;
+  invCount: Int32;
 begin
-  Chat.AnswerQuery('How many', ToStr(Amount), 2000, 100);
+  invCount := Inventory.Count();
+
+  if invCount = 28 then
+    Self.Fatal('Inventory is full and we can''t withdraw more potions.');
+
+  Chat.AnswerQuery('How many', ToStr(amount), 2000, 100);
   Result := WaitUntil(InvCount <> Inventory.Count, 100, 3000);
+
+
+  if Result then
+    Self.WithdrawFails := 0
+  else
+    Self.WithdrawFails += 1;
+
+  if Self.WithdrawFails > 2 then
+    Self.Fatal('We failed to withdraw potions 3 times. Did we run out?');
 end;
 
 function TNMZFighter.TalkWithDominic(): Boolean;
@@ -757,7 +771,7 @@ begin
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
 
-    case State of
+    case Self.State of
       //Outside Dream.
       CHECK_COFFER: Self.CheckCoffer();
       OPEN_COFFER: Self.OpenCoffer();
