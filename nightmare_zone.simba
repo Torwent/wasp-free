@@ -473,10 +473,10 @@ begin
     Exit(False);
 
   str := ToStr(Self.BoostPotion[0]);
-  if (str.Contains('Overload') and Self.HasBoostPot()) then
-    Result := (Self.Boosted or (hpLevel < 51))
-  else
-    Result := True;
+  if str.Contains('Overload') and Self.HasBoostPot() then
+    Exit(Self.Boosted and (hpLevel < 51));
+
+  Result := True;
 end;
 
 
