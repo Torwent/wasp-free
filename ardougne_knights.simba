@@ -6,8 +6,9 @@
 
 begin
   Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
+  StatsPayload.SetUsername('');
 end;
+
 var
   FoodAmount: Int32 := 20;
   NeckAmount: Int32 := 4;
@@ -232,6 +233,8 @@ begin
 
   if WLSettings.RemoteInput.ScriptDebug then
     DebugMMDotArray += Self.Knight;
+
+  XPBar.EarnedXP();
 end;
 
 
@@ -292,9 +295,9 @@ end;
 
 function TThiever.OpenCoinPouch(): Boolean;
 var
-  PouchCount: Int32;
+  pouchCount: Int32;
 begin
-  PouchCount := Inventory.CountItemStack(Self.CoinPouch);
+  pouchCount := Inventory.CountItemStack(Self.CoinPouch);
   if Inventory.ClickItem(Self.CoinPouch) then
   begin
     Wait(600);
@@ -304,7 +307,8 @@ begin
   if Result then
   begin
     Self.CoinPouchLimit := SRL.TruncatedGauss(28, 1);
-    Self.TotalActions += PouchCount;
+    Self.TotalActions += pouchCount;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
     WL.Activity.Restart();
   end;
 end;
@@ -319,7 +323,10 @@ begin
   Result := (Minimap.GetHPLevel() < StartingHP) or HasHitSplat;
 
   if Result then
+  begin
+    XPBar.EarnedXP();
     Self.OpenCoinPouch();
+  end;
 end;
 
 function TThiever.NecklaceExpired(): Boolean;
@@ -489,7 +496,6 @@ begin
   until Minimap.OnGroundLevel();
 end;
 
-//GetState() is responsible for figuring out what we are doing and what we will be doing next.
 function TThiever.GetState(): EThieverState;
 begin
   if WL.Activity.IsFinished() then
@@ -507,16 +513,17 @@ begin
 
       if Inventory.IsFull() then
       begin
-        if (Inventory.CountItem(Self.Necklace) < NeckAmount) or
+        if (Inventory.CountItem(Self.Necklace) < (NeckAmount-2)) or
            not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
-        Bank.DepositAll();
+          Bank.DepositAll();
+
+        Exit(WAIT_STATE);
       end;
 
-      if Inventory.CountItem(Self.Necklace) < NeckAmount then
-        Exit(WITHDRAW_NECK);
-
-      if not InRange(Inventory.CountItem(Self.Necklace), NeckAmount - 2, NeckAmount + 2) then
-        Exit(DEPOSIT_NECK);
+      case Inventory.CountItem(Self.Necklace) of
+        0..(NeckAmount-2): Exit(WITHDRAW_NECK);
+        (NeckAmount-2)..(NeckAmount+2): Exit(DEPOSIT_NECK);
+      end;
 
       if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
@@ -578,19 +585,18 @@ begin
   Exit(PICKPOCKET);
 end;
 
-//Main loop.
 procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case Self.State of
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_ITEMS: Self.Deposit();
-      WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
+      WITHDRAW_FOOD: if not Bank.WithdrawConsumable(FOOD_CONSUMABLE) then Break;
       WITHDRAW_NECK: Self.Withdraw([Self.Necklace, NeckAmount, False]);
       DEPOSIT_NECK: Bank.DepositItem(Self.BankTab, [Necklace, -1], False);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
