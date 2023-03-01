@@ -47,6 +47,7 @@ type
 
     WAIT_STATE,
 
+    OUT_OF_SUPPLIES,
     END_SCRIPT
   );
 
@@ -508,6 +509,9 @@ begin
   begin
     if Bank.IsOpen() then
     begin
+      if Self.BankEmpty then
+        Exit(OUT_OF_SUPPLIES);
+
       if Inventory.ContainsAny(Self.BankArray) then
         Exit(DEPOSIT_ITEMS);
 
@@ -597,7 +601,7 @@ begin
     case Self.State of
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_ITEMS: Self.Deposit();
-      WITHDRAW_FOOD: if not Bank.WithdrawConsumable(FOOD_CONSUMABLE) then Break;
+      WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(FOOD_CONSUMABLE);
       WITHDRAW_NECK: Self.Withdraw([Self.Necklace, NeckAmount, False]);
       DEPOSIT_NECK: Bank.DepositItem(Self.BankTab, [Necklace, -1], False);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
@@ -617,7 +621,8 @@ begin
       WALK_TO_BANK: Self.RSW.WebWalk(Self.Knight.Coordinates, 30, 0.2);
       EQUIP_ROGUE: Self.EquipRogue();
 
-      END_SCRIPT: Break;
+
+      OUT_OF_SUPPLIES, END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();       //Checks for due antiban
