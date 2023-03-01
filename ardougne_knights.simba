@@ -5,8 +5,8 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
+  Login.PlayerIndex := 0;
+  StatsPayload.SetUsername('');
 end;
 
 var
@@ -522,7 +522,8 @@ begin
 
       case Inventory.CountItem(Self.Necklace) of
         0..(NeckAmount-2): Exit(WITHDRAW_NECK);
-        (NeckAmount-2)..(NeckAmount+2): Exit(DEPOSIT_NECK);
+        (NeckAmount-2)..(NeckAmount+2): ;
+        else Exit(DEPOSIT_NECK);
       end;
 
       if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then

@@ -5,9 +5,10 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
+  Login.PlayerIndex := 0;
+  StatsPayload.SetUsername('');
 end;
+
 type
   ERSRemains = (
     FIENDISH_ASHES, VILE_ASHES, MALICIOUS_ASHES, ABYSSAL_ASHES, INFERNAL_ASHES,
@@ -126,13 +127,17 @@ end;
 
 function TRemainOfferer.CastSpell(): Boolean;
 begin
-  if Result := Magic.CastSpell(Self.OfferSpell) then
+  Result := Magic.CastSpell(Self.OfferSpell);
+  if Result then
   begin
     SpellCooldown.Restart(RandomLeft(0, 2500));
     Self.RemainsLeft -= 3;
-    TotalActions += 1;
-  end
-  else if Inventory.Open then
+    Self.TotalActions += 1;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+    Exit;
+  end;
+
+  if Inventory.Open() then
     Self.RemainsLeft := Inventory.CountItem(Self.Remains);
 end;
 

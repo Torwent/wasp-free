@@ -5,9 +5,10 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
+  Login.PlayerIndex := 0;
+  StatsPayload.SetUsername('');
 end;
+
 type
   ERSNPC = (PHIALS, SERVANT);
   ERSLarder = (REGULAR_LARDER, OAK_LARDER);
@@ -245,9 +246,11 @@ begin
   end;
 
   Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
+
   if Result then
   begin
     Self.TotalActions += 1;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
     WL.Activity.Restart();
     Wait(600, 800);
   end else

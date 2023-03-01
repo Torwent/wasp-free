@@ -6,9 +6,10 @@
   {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
-end;{$ENDIF}
+  Login.PlayerIndex := 0;
+  StatsPayload.SetUsername('');
+end;
+{$ENDIF}
 
 const
   GEM_TYPE: TStringArray = [
@@ -275,11 +276,18 @@ end;
 
 function TEnchanter.Deposit(): Boolean;
 var
-  itemCount: Int32 := Inventory.CountItem(EnchantedJewel);
+  itemCount: Int32;
 begin
-  if Result := Bank.DepositItem(BankTab, [EnchantedJewel, BANK_DEPOSIT_ALL], True) then
-    if WaitUntil(Inventory.CountItem(EnchantedJewel) = 0, 100, 3000) then
-      Self.TotalActions += itemCount;
+  itemCount := Inventory.CountItem(EnchantedJewel);
+
+  if Bank.DepositItem(BankTab, [EnchantedJewel, BANK_DEPOSIT_ALL], True) then
+    Result := WaitUntil(Inventory.CountItem(EnchantedJewel) = 0, 100, 3000);
+
+  if Result then
+  begin
+    Self.TotalActions += itemCount;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+  end;
 end;
 
 

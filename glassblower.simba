@@ -6,9 +6,10 @@
   {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
-end;{$ENDIF}
+  Login.PlayerIndex := 0;
+  StatsPayload.SetUsername('');
+end;
+{$ENDIF}
 
 type
   ERSGlassItem = (BEER, LANTERN, LAMP, VIAL,

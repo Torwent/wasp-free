@@ -6,9 +6,10 @@
   {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex     := 0;
-  StatsPayload.Username := '';
-end;{$ENDIF}
+  Login.PlayerIndex := 0;
+  StatsPayload.SetUsername('');
+end;
+{$ENDIF}
 
 type
   ERSLocation = (HOSIDIUS, ROGUES_DEN);
@@ -186,7 +187,8 @@ var
   InvCount: Int32 := Inventory.Count;
   Product: TRSBankDepositItem;
 begin
-  TotalActions += InvCount;
+  Self.TotalActions += InvCount;
+  Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
 
   for Product in Products do
   begin
