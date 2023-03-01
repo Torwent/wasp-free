@@ -1,3 +1,12 @@
+## [2.2.43](https://github.com/Torwent/wasp-free/compare/v2.2.42...v2.2.43) (2023-03-01)
+
+
+### Bug Fixes
+
+* **ardy knights:** fixed logic ([bb032cc](https://github.com/Torwent/wasp-free/commit/bb032cc8ecd8a7a0be042493a23e00a8adaa1053))
+
+
+
 ## [2.2.42](https://github.com/Torwent/wasp-free/compare/v2.2.41...v2.2.42) (2023-03-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** now works with normal rumble dream too ([2938080](https://github.com/Torwent/wasp-free/commit/2938080c019ed67190e668f96357f89f5cb06e36))
-
-
-
-## [2.2.38](https://github.com/Torwent/wasp-free/compare/v2.2.37...v2.2.38) (2023-02-26)
-
-
-### Bug Fixes
-
-* compatibility with latest WaspLib ([26b0a36](https://github.com/Torwent/wasp-free/commit/26b0a367fa8238838c10f660ff71bb7f005bbb1b))
 
 
 
