@@ -1,3 +1,12 @@
+## [2.2.44](https://github.com/Torwent/wasp-free/compare/v2.2.43...v2.2.44) (2023-03-01)
+
+
+### Bug Fixes
+
+* **ardy knights:** add failsafe ([3fbaf69](https://github.com/Torwent/wasp-free/commit/3fbaf696d86f73e4f4f7ebf946ac0fbcd9b74a70))
+
+
+
 ## [2.2.43](https://github.com/Torwent/wasp-free/compare/v2.2.42...v2.2.43) (2023-03-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** added fail safe for when you run out of potions in barrels ([54ebf90](https://github.com/Torwent/wasp-free/commit/54ebf9083ce0f5f5235dfe54738a831f2108d378))
-
-
-
-## [2.2.39](https://github.com/Torwent/wasp-free/compare/v2.2.38...v2.2.39) (2023-02-26)
-
-
-### Bug Fixes
-
-* **nmz:** now works with normal rumble dream too ([2938080](https://github.com/Torwent/wasp-free/commit/2938080c019ed67190e668f96357f89f5cb06e36))
 
 
 
