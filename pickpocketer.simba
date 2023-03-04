@@ -671,6 +671,8 @@ begin
     Exit;
 
   repeat
+    if not Minimap.WaitArrow(TPA, 3000) then
+      Exit;  
     GraveTPA.SortByY(False);
     P := GraveTPA[0];
     P.Y += 5;
