@@ -1,3 +1,12 @@
+## [2.2.45](https://github.com/Torwent/wasp-free/compare/v2.2.44...v2.2.45) (2023-03-07)
+
+
+### Bug Fixes
+
+* all files renamed to "wasp_" ([e28b837](https://github.com/Torwent/wasp-free/commit/e28b8376dfcda14187a70f26bc0d2d2b6616f9c9))
+
+
+
 ## [2.2.44](https://github.com/Torwent/wasp-free/compare/v2.2.43...v2.2.44) (2023-03-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** trying to fix lowering hp before overload ([0b0f4b7](https://github.com/Torwent/wasp-free/commit/0b0f4b7b4aee20d5c37d0b20f46a7585adb4c1d0))
-
-
-
-## [2.2.40](https://github.com/Torwent/wasp-free/compare/v2.2.39...v2.2.40) (2023-02-26)
-
-
-### Bug Fixes
-
-* **nmz:** added fail safe for when you run out of potions in barrels ([54ebf90](https://github.com/Torwent/wasp-free/commit/54ebf9083ce0f5f5235dfe54738a831f2108d378))
 
 
 
