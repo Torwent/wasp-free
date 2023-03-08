@@ -1,5 +1,5 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '003b8e09-e988-42ca-b261-b2b76d131800'}
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '10'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '19'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -385,7 +385,7 @@ begin
     FoodHandler.Amount := 28 - NeckAmount - 2 - Length(Self.StackableArray);
 
   if WLSettings.RemoteInput.ScriptDebug then
-    DebugNPCArray += CurrentNPC;
+    DebugMMDotArray += CurrentNPC;
 end;
 
 
@@ -671,6 +671,8 @@ begin
     Exit;
 
   repeat
+    if not Minimap.WaitArrow(TPA, 3000) then
+      Exit;  
     GraveTPA.SortByY(False);
     P := GraveTPA[0];
     P.Y += 5;

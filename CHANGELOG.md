@@ -1,45 +1,45 @@
-## [2.2.29](https://github.com/Torwent/wasp-free/compare/v2.2.28...v2.2.29) (2023-02-09)
+## [2.2.45](https://github.com/Torwent/wasp-free/compare/v2.2.44...v2.2.45) (2023-03-07)
 
 
 ### Bug Fixes
 
-* **enchanter:** now gives more information if the reason it stops is due to not finding supplies ([6ebf57a](https://github.com/Torwent/wasp-free/commit/6ebf57a7161249311d07a5179eb99a530b041824))
+* all files renamed to "wasp_" ([e28b837](https://github.com/Torwent/wasp-free/commit/e28b8376dfcda14187a70f26bc0d2d2b6616f9c9))
 
 
 
-## [2.2.28](https://github.com/Torwent/wasp-free/compare/v2.2.27...v2.2.28) (2023-02-07)
-
-
-### Bug Fixes
-
-* **larder builder:** increased the timer when you build a larder ([da82ba7](https://github.com/Torwent/wasp-free/commit/da82ba7e81b5c17524a505ad7d1b477c58ce6d1f))
-
-
-
-## [2.2.27](https://github.com/Torwent/wasp-free/compare/v2.2.26...v2.2.27) (2023-02-02)
+## [2.2.44](https://github.com/Torwent/wasp-free/compare/v2.2.43...v2.2.44) (2023-03-01)
 
 
 ### Bug Fixes
 
-* **pickpocketer:** should compile again ([099876d](https://github.com/Torwent/wasp-free/commit/099876d67e1401d61a55c5899c3bb769806a2229))
+* **ardy knights:** add failsafe ([3fbaf69](https://github.com/Torwent/wasp-free/commit/3fbaf696d86f73e4f4f7ebf946ac0fbcd9b74a70))
 
 
 
-## [2.2.26](https://github.com/Torwent/wasp-free/compare/v2.2.25...v2.2.26) (2023-01-31)
-
-
-### Bug Fixes
-
-* **enchanter:** fix compatibility with latest WaspLib versions ([dba189f](https://github.com/Torwent/wasp-free/commit/dba189f4408936fc85ca2a8f96c385afcd9b86d4))
-
-
-
-## [2.2.25](https://github.com/Torwent/wasp-free/compare/v2.2.24...v2.2.25) (2023-01-29)
+## [2.2.43](https://github.com/Torwent/wasp-free/compare/v2.2.42...v2.2.43) (2023-03-01)
 
 
 ### Bug Fixes
 
-* **larder builder:** fix wrong positions ([41b508e](https://github.com/Torwent/wasp-free/commit/41b508ee7844fd44159a018077f66d129d3ae063))
+* **ardy knights:** fixed logic ([bb032cc](https://github.com/Torwent/wasp-free/commit/bb032cc8ecd8a7a0be042493a23e00a8adaa1053))
+
+
+
+## [2.2.42](https://github.com/Torwent/wasp-free/compare/v2.2.41...v2.2.42) (2023-03-01)
+
+
+### Bug Fixes
+
+* **ardy knights:** fix xp and gp tracking ([cf49d7e](https://github.com/Torwent/wasp-free/commit/cf49d7e8920edfe935506d2dd07516ac6b0c0f81))
+
+
+
+## [2.2.41](https://github.com/Torwent/wasp-free/compare/v2.2.40...v2.2.41) (2023-02-27)
+
+
+### Bug Fixes
+
+* **nmz:** trying to fix lowering hp before overload ([0b0f4b7](https://github.com/Torwent/wasp-free/commit/0b0f4b7b4aee20d5c37d0b20f46a7585adb4c1d0))
 
 
 

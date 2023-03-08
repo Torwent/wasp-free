@@ -1,5 +1,5 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '242c8d26-e9c9-4de5-945b-5f0288307dfc'}
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '10'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '21'}
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
@@ -187,9 +187,9 @@ begin
     else if ItemString.Contains('necklace') then
       EnchantedJewel := 'Skills necklace'
     else if ItemString.Contains('bracelet') then
-      EnchantedJewel := 'Combat bracelet(4)'
+      EnchantedJewel := 'Combat bracelet'
     else if ItemString.Contains('amulet') then
-      EnchantedJewel := 'Amulet of glory(4)';
+      EnchantedJewel := 'Amulet of glory';
   end
 
   else if ItemString.Contains('Onyx') then
@@ -237,19 +237,20 @@ end;
 
 function TEnchanter.EnchantJewel(): Boolean;
 begin
-  if Result := Inventory.ClickItem(RegularJewel) then
-  begin
-    Enchanting := Antiban.BioDice(20);
-    WaitUntil(Magic.IsOpen(), 50, 2000);
-  end;
+  if Inventory.ClickItem(RegularJewel) then
+    Result := WaitUntil(Magic.IsOpen(), 50, 2000);
+
+  Self.Enchanting := Result;
 end;
 
 function TEnchanter.WaitEnchanting(): Boolean;
 begin
   if Enchanting then
-    Result := Enchanting := Inventory.ContainsItem(CosmicRune) and Inventory.ContainsItem(RegularJewel) and XPBar.WaitXP(2000)
+    Result := Inventory.ContainsItem(CosmicRune) and Inventory.ContainsItem(RegularJewel) and XPBar.WaitXP(5000)
   else
-    Result := Enchanting := XPBar.WaitXP(2000);
+    Result := XPBar.WaitXP(5000);
+
+  Self.Enchanting := Result;
 end;
 
 function TEnchanter.DeselectSpell(): Boolean;
@@ -275,11 +276,18 @@ end;
 
 function TEnchanter.Deposit(): Boolean;
 var
-  itemCount: Int32 := Inventory.CountItem(EnchantedJewel);
+  itemCount: Int32;
 begin
-  if Result := Bank.DepositItem(BankTab, [EnchantedJewel, BANK_DEPOSIT_ALL], True) then
-    if WaitUntil(Inventory.CountItem(EnchantedJewel) = 0, 100, 3000) then
-      Self.TotalActions += itemCount;
+  itemCount := Inventory.CountItem(EnchantedJewel);
+
+  if Bank.DepositItem(BankTab, [EnchantedJewel, BANK_DEPOSIT_ALL], True) then
+    Result := WaitUntil(Inventory.CountItem(EnchantedJewel) = 0, 100, 3000);
+
+  if Result then
+  begin
+    Self.TotalActions += itemCount;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+  end;
 end;
 
 
@@ -328,7 +336,7 @@ begin
     begin
       if MainScreen.IsUpText('>') then
         Exit(EEnchanterState.ENCHANT_JEWEL);
-      if Enchanting then
+      if Self.Enchanting then
         Exit(EEnchanterState.WAIT_ENCHANT);
       Exit(EEnchanterState.OPEN_MAGIC);
     end;
@@ -381,7 +389,7 @@ begin
       EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox([RegularJewel, CosmicRune]);
       EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      EEnchanterState.WAIT_ENCHANT: Enchanting := XPBar.WaitXP(2000);
+      EEnchanterState.WAIT_ENCHANT: Self.Enchanting := XPBar.WaitXP(5000);
       EEnchanterState.LEVEL_UP: Chat.HandleLevelUp();
 
       EEnchanterState.OPEN_MAGIC: Magic.Open();

@@ -1,5 +1,5 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '4e797d2f-966c-4ef2-bba5-febe1c1b7284'}
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '9'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '14'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -127,13 +127,17 @@ end;
 
 function TRemainOfferer.CastSpell(): Boolean;
 begin
-  if Result := Magic.CastSpell(Self.OfferSpell) then
+  Result := Magic.CastSpell(Self.OfferSpell);
+  if Result then
   begin
     SpellCooldown.Restart(RandomLeft(0, 2500));
     Self.RemainsLeft -= 3;
-    TotalActions += 1;
-  end
-  else if Inventory.Open then
+    Self.TotalActions += 1;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+    Exit;
+  end;
+
+  if Inventory.Open() then
     Self.RemainsLeft := Inventory.CountItem(Self.Remains);
 end;
 

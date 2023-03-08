@@ -1,5 +1,5 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '0fb23f9b-3bc2-41cd-8670-3fec0eb256f1'}
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '15'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '26'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -47,6 +47,7 @@ type
 
     WAIT_STATE,
 
+    OUT_OF_SUPPLIES,
     END_SCRIPT
   );
 
@@ -232,7 +233,9 @@ begin
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
   if WLSettings.RemoteInput.ScriptDebug then
-    DebugNPCArray += Self.Knight;
+    DebugMMDotArray += Self.Knight;
+
+  XPBar.EarnedXP();
 end;
 
 
@@ -293,9 +296,9 @@ end;
 
 function TThiever.OpenCoinPouch(): Boolean;
 var
-  PouchCount: Int32;
+  pouchCount: Int32;
 begin
-  PouchCount := Inventory.CountItemStack(Self.CoinPouch);
+  pouchCount := Inventory.CountItemStack(Self.CoinPouch);
   if Inventory.ClickItem(Self.CoinPouch) then
   begin
     Wait(600);
@@ -305,7 +308,8 @@ begin
   if Result then
   begin
     Self.CoinPouchLimit := SRL.TruncatedGauss(28, 1);
-    Self.TotalActions += PouchCount;
+    Self.TotalActions += pouchCount;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
     WL.Activity.Restart();
   end;
 end;
@@ -320,7 +324,10 @@ begin
   Result := (Minimap.GetHPLevel() < StartingHP) or HasHitSplat;
 
   if Result then
+  begin
+    XPBar.EarnedXP();
     Self.OpenCoinPouch();
+  end;
 end;
 
 function TThiever.NecklaceExpired(): Boolean;
@@ -490,7 +497,6 @@ begin
   until Minimap.OnGroundLevel();
 end;
 
-//GetState() is responsible for figuring out what we are doing and what we will be doing next.
 function TThiever.GetState(): EThieverState;
 begin
   if WL.Activity.IsFinished() then
@@ -503,21 +509,26 @@ begin
   begin
     if Bank.IsOpen() then
     begin
+      if Self.BankEmpty then
+        Exit(OUT_OF_SUPPLIES);
+
       if Inventory.ContainsAny(Self.BankArray) then
         Exit(DEPOSIT_ITEMS);
 
       if Inventory.IsFull() then
       begin
-        if (Inventory.CountItem(Self.Necklace) < NeckAmount) or
+        if (Inventory.CountItem(Self.Necklace) < (NeckAmount-2)) or
            not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
-        Bank.DepositAll();
+          Bank.DepositAll();
+
+        Exit(WAIT_STATE);
       end;
 
-      if Inventory.CountItem(Self.Necklace) < NeckAmount then
-        Exit(WITHDRAW_NECK);
-
-      if not InRange(Inventory.CountItem(Self.Necklace), NeckAmount - 2, NeckAmount + 2) then
-        Exit(DEPOSIT_NECK);
+      case Inventory.CountItem(Self.Necklace) of
+        0..(NeckAmount-2): Exit(WITHDRAW_NECK);
+        (NeckAmount-2)..(NeckAmount+2): ;
+        else Exit(DEPOSIT_NECK);
+      end;
 
       if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         Exit(WITHDRAW_FOOD);
@@ -579,19 +590,18 @@ begin
   Exit(PICKPOCKET);
 end;
 
-//Main loop.
 procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
 begin
   Self.Init(MaxActions, MaxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case Self.State of
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_ITEMS: Self.Deposit();
-      WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
+      WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(FOOD_CONSUMABLE);
       WITHDRAW_NECK: Self.Withdraw([Self.Necklace, NeckAmount, False]);
       DEPOSIT_NECK: Bank.DepositItem(Self.BankTab, [Necklace, -1], False);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
@@ -611,7 +621,8 @@ begin
       WALK_TO_BANK: Self.RSW.WebWalk(Self.Knight.Coordinates, 30, 0.2);
       EQUIP_ROGUE: Self.EquipRogue();
 
-      END_SCRIPT: Break;
+
+      OUT_OF_SUPPLIES, END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();       //Checks for due antiban

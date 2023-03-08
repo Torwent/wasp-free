@@ -1,5 +1,5 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'e8df872a-afaf-44b8-9fc5-eef079ada50b'}
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '9'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '16'}
 {$IFNDEF SCRIPT_CHAIN}
   {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
@@ -9,6 +9,7 @@ begin
   Login.PlayerIndex := 0;
   StatsPayload.SetUsername('');
 end;
+
 {$ENDIF}
 
 type
@@ -167,7 +168,7 @@ begin
 
   if Ore2 <> [] then
   begin
-    ActionProfit -= (ItemData.GetAverage(Ore2.Item) * Round(Ore2.Quantity / Ore1.Quantity));
+    Self.ActionProfit -= (ItemData.GetAverage(Ore2.Item) * Round(Ore2.Quantity / Ore1.Quantity));
     Materials += Ore2.Item;
   end;
 end;
@@ -183,7 +184,6 @@ begin
   if WLSettings.RemoteInput.ScriptDebug then
     DebugObjectArray += Furnace;
 end;
-
 
 
 function TSmelter.Withdraw(): Boolean; overload;
@@ -224,11 +224,18 @@ end;
 
 function TSmelter.Deposit(): Boolean;
 var
-  ItemCount: Int32 := Inventory.Count();
+  itemCount: Int32;
 begin
-  if Result := Bank.DepositAll() then
-    if WaitUntil(Inventory.Count() = 0, 100, 3000) then
-      Self.TotalActions += ItemCount;
+  itemCount := Inventory.Count();
+
+  if Bank.DepositAll() then
+    Result := WaitUntil(Inventory.Count() = 0, 100, 3000);
+
+  if Result then
+  begin
+    Self.TotalActions += itemCount;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+  end;
 end;
 
 
