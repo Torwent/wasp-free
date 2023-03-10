@@ -601,7 +601,7 @@ begin
         Self.BankSelector.Clear;
         Self.BankSelector.AddItem('Power WC (cut and drop)');
         Self.BankSelector.AddItem('Seers'' village');
-        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.BankSelector.AddItem('Woodcutting guild');
         Self.SawmillState.setEnabled(False);
       end;
 
@@ -617,7 +617,7 @@ begin
         Self.BankSelector.Clear;
         Self.BankSelector.AddItem('Seers'' village');
         Self.BankSelector.AddItem('Edgeville');
-        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.BankSelector.AddItem('Woodcutting guild');
         Self.SawmillState.setEnabled(False);
       end;
 
@@ -631,7 +631,7 @@ begin
     MAGIC_TREE:
       begin
         Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Self.Woodcutting guild');
+        Self.BankSelector.AddItem('Woodcutting guild');
         Self.BankSelector.AddItem('Prifddinas');
         Self.SawmillState.setEnabled(False);
       end;
@@ -643,7 +643,7 @@ end;
 procedure TCutterConfig.BankSelectorOnChange(Sender: TObject);
 begin
   case Self.BankSelector.Combobox.getText() of
-    'Varrock east', 'Self.Woodcutting guild', 'Prifddinas':
+    'Varrock east', 'Woodcutting guild', 'Prifddinas':
       begin
         case ERSTree(Self.TreeSelector.Combobox.getItemIndex()) of
           REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
