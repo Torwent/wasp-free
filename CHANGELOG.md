@@ -1,3 +1,12 @@
+## [2.2.46](https://github.com/Torwent/wasp-free/compare/v2.2.45...v2.2.46) (2023-03-11)
+
+
+### Bug Fixes
+
+* compatibility with newest wasplib. All scripts were updated. ([1f02424](https://github.com/Torwent/wasp-free/commit/1f02424d24f1a9f00771ef4453bc8a8d99c5f9e0))
+
+
+
 ## [2.2.45](https://github.com/Torwent/wasp-free/compare/v2.2.44...v2.2.45) (2023-03-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** fix xp and gp tracking ([cf49d7e](https://github.com/Torwent/wasp-free/commit/cf49d7e8920edfe935506d2dd07516ac6b0c0f81))
-
-
-
-## [2.2.41](https://github.com/Torwent/wasp-free/compare/v2.2.40...v2.2.41) (2023-02-27)
-
-
-### Bug Fixes
-
-* **nmz:** trying to fix lowering hp before overload ([0b0f4b7](https://github.com/Torwent/wasp-free/commit/0b0f4b7b4aee20d5c37d0b20f46a7585adb4c1d0))
 
 
 
