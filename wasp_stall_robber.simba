@@ -193,7 +193,7 @@ begin
 
   with Self.StallSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Stall:');
     SetLeft(5);
     SetTop(35);

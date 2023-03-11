@@ -677,7 +677,7 @@ begin
 
   with Self.TreeSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Tree type:');
     SetLeft(5);
     SetTop(35);
@@ -698,7 +698,7 @@ begin
 
   with Self.BankSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Bank location:');
     SetLeft(5);
     SetTop(Self.TreeSelector.GetTop() + Self.TreeSelector.GetHeight());
@@ -709,8 +709,7 @@ begin
 
   with Self.SawmillState do
   begin
-    Init(Self.SSPanel.Panel);
-    SetParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Sawmill:');
     SetLeft(Self.TreeSelector.GetLeft() + Self.TreeSelector.GetWidth() + 25);
     SetTop(Self.TreeSelector.GetTop() + 20);
@@ -719,8 +718,7 @@ begin
 
   with Self.PickNestsState do
   begin
-    Init(Self.SSPanel.Panel);
-    SetParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Pick nests:');
     SetLeft(Self.SawmillState.GetLeft());
     SetTop(Self.BankSelector.GetTop() + 20);

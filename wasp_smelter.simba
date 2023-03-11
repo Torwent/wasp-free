@@ -415,7 +415,7 @@ begin
 
   with Self.BarTypeSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Bar type:');
     SetLeft(5);
     SetTop(35);
@@ -435,7 +435,7 @@ begin
 
   with Self.FurnaceSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Furnace:');
     SetLeft(Self.BarTypeSelector.GetLeft() + Self.BarTypeSelector.GetWidth() + 5);
     SetTop(Self.BarTypeSelector.GetTop());

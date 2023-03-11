@@ -358,8 +358,7 @@ begin
 
   with Self.InfoText do
   begin
-    Init(Self.SSPanel.Panel);
-    setParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption(
       'Keep in mind this script doesn''t bank so Sang Staff is highly recommended.'
       + LineEnding +

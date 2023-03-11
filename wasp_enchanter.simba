@@ -434,7 +434,7 @@ begin
 
   with Self.GemSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Gem type:');
     SetLeft(5);
     SetTop(35);
@@ -447,7 +447,7 @@ begin
 
   with Self.JewelSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Jewel type:');
     SetLeft(Self.GemSelector.GetLeft() + Self.GemSelector.GetWidth() + 5);
     SetTop(Self.GemSelector.GetTop());

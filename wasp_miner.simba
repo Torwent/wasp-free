@@ -505,7 +505,7 @@ begin
 
   with Self.RockSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Rock type:');
     SetLeft(15);
     SetTop(35);
@@ -528,7 +528,7 @@ begin
 
   with Self.BankSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Bank location:');
     SetLeft(15);
     SetTop(Self.RockSelector.GetTop() + Self.RockSelector.GetHeight() - 5);

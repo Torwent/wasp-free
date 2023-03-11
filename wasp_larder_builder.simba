@@ -477,7 +477,7 @@ begin
 
   with Self.NPCSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Method:');
     SetLeft(5);
     SetTop(35);
@@ -490,7 +490,7 @@ begin
 
   with Self.LarderSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Larder:');
     SetLeft(Self.NPCSelector.GetLeft() + Self.NPCSelector.GetWidth() + 10);
     SetTop(Self.NPCSelector.GetTop());
@@ -503,8 +503,7 @@ begin
 
   with Self.BuilderInfo do
   begin
-    Init(Self.SSPanel.Panel);
-    setParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
 
     SetCaption('For Phials method make sure you have noted planks with you.' +
                LineEnding +
@@ -523,8 +522,7 @@ begin
 
   with Self.ImagePanel do
   begin
-    Init(Self.SSPanel.Panel);
-    SetParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetTop(Self.BuilderInfo.GetTop() + 65);
     SetLeft(Self.BuilderInfo.GetLeft() + 80);
     setWidth(195);

@@ -384,7 +384,7 @@ begin
 
   with Self.GlassSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Glass item:');
     SetLeft(5);
     SetTop(35);

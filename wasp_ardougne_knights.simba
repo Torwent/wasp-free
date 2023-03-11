@@ -665,7 +665,7 @@ begin
 
   with Self.NeckAmountEdit do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Necklaces amount:');
     SetLeft(150);
     SetTop(50);

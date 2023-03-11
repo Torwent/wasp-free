@@ -237,8 +237,7 @@ begin
 
   with Self.ChompyHunterInfo do
   begin
-    Init(Self.SSPanel.Panel);
-    setParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
 
     SetCaption('Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
                LineEnding +

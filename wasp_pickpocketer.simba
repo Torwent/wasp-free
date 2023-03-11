@@ -960,10 +960,10 @@ begin
 
   with Self.NPCSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('NPC:');
     SetLeft(5);
-    SetTop(30);
+    SetTop(50);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('Men and women (Lumbridge only)');
@@ -977,20 +977,20 @@ begin
 
   with Self.NeckAmountEdit do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Necklaces amount:');
     SetLeft(250);
-    SetTop(30);
+    SetTop(Self.NPCSelector.GetTop());
     SetWidth(110);
     SetText(ToStr(NeckAmount));
   end;
 
   with Self.SuicideState do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Suicide mode:');
     SetLeft(5);
-    SetTop(15);
+    SetTop(Self.NPCSelector.GetBottom() + 15);
     SetEnabled(True);
     Self.NPCSelectorOnChange(@Self.SuicideState);
   end;

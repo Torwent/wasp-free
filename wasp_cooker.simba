@@ -396,7 +396,7 @@ begin
 
   with Self.LocSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Location:');
     SetLeft(5);
     SetTop(35);
@@ -409,7 +409,7 @@ begin
 
   with Self.FoodSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Food type:');
     SetLeft(Self.LocSelector.GetLeft() + Self.LocSelector.GetWidth() + 20);
     SetTop(Self.LocSelector.GetTop());
@@ -425,7 +425,7 @@ begin
 
   with Self.CustomFoodName do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Food name (must be the exact name):');
     SetLeft(Self.FoodSelector.GetLeft());
     SetTop(Self.LocSelector.GetTop() + Self.LocSelector.GetHeight() - 15);

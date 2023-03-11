@@ -285,7 +285,7 @@ begin
 
   with Self.RemainSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Task:');
     SetLeft(15);
     SetTop(35);

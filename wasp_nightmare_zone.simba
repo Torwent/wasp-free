@@ -970,10 +970,10 @@ begin
 
   with Self.PotionSelector do
   begin
-    Init(Self.SSPanel.Panel);
-    SetCaption('NMZ Self.Potion:');
+    Create(Self.SSPanel.Panel);
+    SetCaption('NMZ Potion:');
     SetLeft(5);
-    SetTop(35);
+    SetTop(75);
     SetWidth(200);
     Combobox.setStyle(csDropDownList);
     AddItem('Overload');
@@ -984,8 +984,7 @@ begin
 
   with Self.NMZInfo do
   begin
-    Init(Self.SSPanel.Panel);
-    setParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
 
     SetCaption('Should work with most setups.' +
                 LineEnding +

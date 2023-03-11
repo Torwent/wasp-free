@@ -366,7 +366,7 @@ begin
 
   with Self.AlchSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Alchemy spell:');
     SetLeft(5);
     SetTop(35);
@@ -379,8 +379,7 @@ begin
 
   with Self.IgnoreProfit do
   begin
-    Init(Self.SSPanel.Panel);
-    SetParent(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Prevent loss:');
     SetLeft(Self.AlchSelector.GetLeft() + Self.AlchSelector.GetWidth() + 20);
     SetTop(Self.AlchSelector.GetTop() + 20);
@@ -389,7 +388,7 @@ begin
 
   with Self.CustomItemSelector do
   begin
-    Init(Self.SSPanel.Panel);
+    Create(Self.SSPanel.Panel);
     SetCaption('Custom item to alch:');
     SetLeft(5);
     SetTop(Self.AlchSelector.GetTop() + Self.AlchSelector.GetHeight());
