@@ -1,3 +1,12 @@
+## [2.2.48](https://github.com/Torwent/wasp-free/compare/v2.2.47...v2.2.48) (2023-03-21)
+
+
+### Bug Fixes
+
+* **ardy knights:** now will listen to the hp you set ([a0698a6](https://github.com/Torwent/wasp-free/commit/a0698a6c13b4a4798b9bb77895f2097cc76179bf))
+
+
+
 ## [2.2.47](https://github.com/Torwent/wasp-free/compare/v2.2.46...v2.2.47) (2023-03-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** add failsafe ([3fbaf69](https://github.com/Torwent/wasp-free/commit/3fbaf696d86f73e4f4f7ebf946ac0fbcd9b74a70))
-
-
-
-## [2.2.43](https://github.com/Torwent/wasp-free/compare/v2.2.42...v2.2.43) (2023-03-01)
-
-
-### Bug Fixes
-
-* **ardy knights:** fixed logic ([bb032cc](https://github.com/Torwent/wasp-free/commit/bb032cc8ecd8a7a0be042493a23e00a8adaa1053))
 
 
 
