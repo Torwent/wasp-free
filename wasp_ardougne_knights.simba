@@ -12,6 +12,7 @@ end;
 var
   FoodAmount: Int32 := 20;
   NeckAmount: Int32 := 4;
+  MinHealth: Int32 := 20;
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
@@ -220,6 +221,8 @@ begin
   Self.BankArray := ['Jug', 'Pie dish'];
 
   Self.MaxHit := 3;
+  MinHealth := Max(Self.MaxHit, MinHealth);
+
   Self.ActionProfit := 50;
 
   Self.NeckTimer.Init(140000);
@@ -269,20 +272,14 @@ end;
 
 
 function TThiever.IsLowHP(): Boolean;
-var
-  CurrentHP: Int32;
 begin
-  CurrentHP := Minimap.GetHPLevel();
   if Self.NextHeal < 1 then
-    Self.NextHeal := Round(Antiban.GetUniqueNumber(Self.MaxHit * 4, Self.MaxHit + 1, Self.MaxHit * 15)) + Random(-Self.MaxHit, Self.MaxHit);
+  begin
+    Self.NextHeal := MinHealth + Random(-Self.MaxHit, Self.MaxHit) * Round(Antiban.GetUniqueNumber(2, 0, 4));
+    Self.NextHeal := EnsureRange(Self.NextHeal, Self.MaxHit, Round(BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) * 0.8));
+  end;
 
-  if Self.NextHeal >= BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) then
-    Self.NextHeal := Round(BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) / 2) + Random(0, Self.MaxHit);
-
-  if Self.NextHeal <= Self.MaxHit then
-    Self.NextHeal += Random(0, Self.MaxHit);
-
-  Result := (CurrentHP <= Self.NextHeal) or (CurrentHP <= Self.MaxHit);
+  Result := Minimap.GetHPLevel() <= Self.NextHeal;
 end;
 
 function TThiever.IsPouchFull(): Boolean;
@@ -344,13 +341,16 @@ end;
 
 
 function TThiever.Heal(): Boolean;
+var
+  oldHP, newHP: Int32;
 begin
+  newHP := Minimap.GetHPLevel();
   repeat
+    oldHP := newHP;
     if not Inventory.Consume(FOOD_CONSUMABLE) then
       Exit;
-
-    Wait(300, 500);
-  until Result := (Minimap.GetHPPercent() >= (50 + Antiban.GetUniqueNumber(20)));
+    Result := newHP > Random(oldHP, BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) - 1);
+  until Result;
 
   if Result then
     Self.NextHeal := 0; //This will be reset when TThiever.IsLowHP() is called.
@@ -657,6 +657,7 @@ begin
 
   FoodAmount := StrToInt(Self.WLPanel.FoodPanel.ConsumableAmount.GetText());
   NeckAmount := StrToInt(Self.NeckAmountEdit.getText());
+  MinHealth  := StrToint(Self.WLPanel.FoodPanel.MinPoints.GetText());
 end;
 
 procedure TThieverConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
@@ -675,6 +676,7 @@ begin
 
   Self.WLPanel.FoodPanel.ConsumableAmount.SetText(ToStr(FoodAmount));
   Self.WLPanel.FoodPanel.ConsumableAmount.SetVisible(True);
+  Self.WLPanel.FoodPanel.MinPoints.SetText(ToStr(MinHealth));
   Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
