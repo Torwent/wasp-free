@@ -1,3 +1,12 @@
+## [2.2.47](https://github.com/Torwent/wasp-free/compare/v2.2.46...v2.2.47) (2023-03-21)
+
+
+### Bug Fixes
+
+* **cooker:** fixed gui ([82417d5](https://github.com/Torwent/wasp-free/commit/82417d5b3b9aac235cc5359337b29766d1ec42bc))
+
+
+
 ## [2.2.46](https://github.com/Torwent/wasp-free/compare/v2.2.45...v2.2.46) (2023-03-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** fixed logic ([bb032cc](https://github.com/Torwent/wasp-free/commit/bb032cc8ecd8a7a0be042493a23e00a8adaa1053))
-
-
-
-## [2.2.42](https://github.com/Torwent/wasp-free/compare/v2.2.41...v2.2.42) (2023-03-01)
-
-
-### Bug Fixes
-
-* **ardy knights:** fix xp and gp tracking ([cf49d7e](https://github.com/Torwent/wasp-free/commit/cf49d7e8920edfe935506d2dd07516ac6b0c0f81))
 
 
 
