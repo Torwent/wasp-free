@@ -411,7 +411,7 @@ begin
   begin
     Create(Self.SSPanel.Panel);
     SetCaption('Food type:');
-    SetLeft(Self.LocSelector.GetLeft() + Self.LocSelector.GetWidth() + 20);
+    SetLeft(Self.LocSelector.GetRight() + 20);
     SetTop(Self.LocSelector.GetTop());
     SetWidth(200);
     SetStyle(csDropDownList);
@@ -428,7 +428,7 @@ begin
     Create(Self.SSPanel.Panel);
     SetCaption('Food name (must be the exact name):');
     SetLeft(Self.FoodSelector.GetLeft());
-    SetTop(Self.LocSelector.GetTop() + Self.LocSelector.GetHeight() - 15);
+    SetTop(Self.LocSelector.GetBottom() + 15);
     SetWidth(200);
     SetText(CurrentFood);
   end;
