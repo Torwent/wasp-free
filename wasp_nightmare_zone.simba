@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '26'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -576,9 +576,9 @@ end;
 
 function TNMZFighter.PowerUpAvailable(): Boolean;
 begin
-  Result := RSObjects.NMZRecurrentDamage.Find or
-            RSObjects.NMZPowerSurge.Find or
-            (ZapperTimer.IsFinished() and RSObjects.NMZZapper.Find);
+  Result := RSObjects.NMZRecurrentDamage.IsVisible() or
+            RSObjects.NMZPowerSurge.IsVisible() or
+            (ZapperTimer.IsFinished() and RSObjects.NMZZapper.IsVisible());
 end;
 
 function TNMZFighter.GetPowerUp(): Boolean;
@@ -957,49 +957,49 @@ type
     NMZInfo: TLabel;
   end;
 
-procedure TNMZConfig.StartScript(Sender: TObject);
-begin
-  Self.Init(Sender);
-
-  CurrentPotion := ERSNMZPotion(Self.PotionSelector.Combobox.getItemIndex())
-end;
-
-procedure TNMZConfig.Setup(); override;
+procedure TNMZConfig.StartScript(Sender: TObject); override;
 begin
   inherited;
+  CurrentPotion := ERSNMZPotion(Self.PotionSelector.GetItemIndex());
+end;
+
+procedure TNMZConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Superglass Maker');
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.PotionSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('NMZ Potion:');
-    SetLeft(5);
-    SetTop(75);
-    SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    AddItem('Overload');
-    AddItem('Super ranging');
-    AddItem('Super magic');
-    Combobox.setItemIndex(Ord(CurrentPotion));
+    SetLeft(TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(170));
+    SetStyle(csDropDownList);
+    AddItemArray(['Overload', 'Super ranging', 'Super magic']);
+    SetItemIndex(Ord(CurrentPotion));
   end;
 
   with Self.NMZInfo do
   begin
-    Create(Self.SSPanel.Panel);
-
-    SetCaption('Should work with most setups.' +
-                LineEnding +
+    Create(tab);
+    SetCaption('Should work with most setups.' + LineEnding +
                'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
 
-    SetLeft(5);
-    SetTop(Self.PotionSelector.Combobox.GetTop() + Self.PotionSelector.Combobox.GetHeight() + 2);
+    SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(170));
   end;
 
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
+  Self.CreateVersionPanel(tab);
 
-procedure TNMZConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
