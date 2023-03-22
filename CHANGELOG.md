@@ -1,3 +1,12 @@
+## [2.2.49](https://github.com/Torwent/wasp-free/compare/v2.2.48...v2.2.49) (2023-03-22)
+
+
+### Bug Fixes
+
+* **nmz:** add support to the new TScriptForm ([c2096f4](https://github.com/Torwent/wasp-free/commit/c2096f434cd786953c76f8e633e9ee9b277c5383))
+
+
+
 ## [2.2.48](https://github.com/Torwent/wasp-free/compare/v2.2.47...v2.2.48) (2023-03-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * all files renamed to "wasp_" ([e28b837](https://github.com/Torwent/wasp-free/commit/e28b8376dfcda14187a70f26bc0d2d2b6616f9c9))
-
-
-
-## [2.2.44](https://github.com/Torwent/wasp-free/compare/v2.2.43...v2.2.44) (2023-03-01)
-
-
-### Bug Fixes
-
-* **ardy knights:** add failsafe ([3fbaf69](https://github.com/Torwent/wasp-free/commit/3fbaf696d86f73e4f4f7ebf946ac0fbcd9b74a70))
 
 
 
