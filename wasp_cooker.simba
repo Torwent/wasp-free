@@ -392,6 +392,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Cooker');
+  Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
