@@ -1,3 +1,12 @@
+## [2.2.52](https://github.com/Torwent/wasp-free/compare/v2.2.51...v2.2.52) (2023-03-24)
+
+
+### Bug Fixes
+
+* **cooker:** Added TScriptFormV2 ([4ad3993](https://github.com/Torwent/wasp-free/commit/4ad399374c415cbf36ec89570a23f8db5420523c))
+
+
+
 ## [2.2.51](https://github.com/Torwent/wasp-free/compare/v2.2.50...v2.2.51) (2023-03-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** now will listen to the hp you set ([a0698a6](https://github.com/Torwent/wasp-free/commit/a0698a6c13b4a4798b9bb77895f2097cc76179bf))
-
-
-
-## [2.2.47](https://github.com/Torwent/wasp-free/compare/v2.2.46...v2.2.47) (2023-03-21)
-
-
-### Bug Fixes
-
-* **cooker:** fixed gui ([82417d5](https://github.com/Torwent/wasp-free/commit/82417d5b3b9aac235cc5359337b29766d1ec42bc))
 
 
 
