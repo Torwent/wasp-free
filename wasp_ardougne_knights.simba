@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '0fb23f9b-3bc2-41cd-8670-3fec0eb256f1'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '28'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -11,7 +11,7 @@ end;
 
 var
   FoodAmount: Int32 := 20;
-  NeckAmount: Int32 := 4;
+  NeckAmount: Int32 := 0;
   MinHealth: Int32 := 20;
 
 const
@@ -651,38 +651,95 @@ type
     NeckAmountEdit: TLabeledEdit;
   end;
 
-procedure TThieverConfig.StartScript(Sender: TObject);
+procedure TThieverConfig.StartScript(sender: TObject); override;
+var
+  foodAmountEdit, minHealthEdit: TEdit;
 begin
-  Self.Init(Sender);
+  foodAmountEdit := Self.Form.GetChild('cm_food_amount_edit');
+  minHealthEdit  := Self.Form.GetChild('cm_food_minimum_edit');
 
-  FoodAmount := StrToInt(Self.WLPanel.FoodPanel.ConsumableAmount.GetText());
-  NeckAmount := StrToInt(Self.NeckAmountEdit.getText());
-  MinHealth  := StrToint(Self.WLPanel.FoodPanel.MinPoints.GetText());
+  FoodAmount := StrToInt(foodAmountEdit.GetText());
+  NeckAmount := StrToInt(Self.NeckAmountEdit.GetText());
+  MinHealth  := StrToint(minHealthEdit.GetText());
+
+  inherited;
 end;
 
-procedure TThieverConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
+function TScriptForm.CreateConsumableSettings(owner: TControl; consumableType: ERSConsumable; addInfo: Boolean = True): TPanel; override;
+var
+  typeStr: String;
+  consumableAmount: TLabeledEdit;
+  fullWidth, w, space, y: Int32;
 begin
-  inherited;
+  fullWidth := Floor(Self.Size.X/3);
+  space := Floor(fullWidth * 0.1);
+  w := Floor(fullWidth - space * 2);
+  if addInfo then
+    y := Floor(Self.Size.Y/2.5)
+  else
+    y := TControl.AdjustToDPI(15);
 
-  with Self.NeckAmountEdit do
-  begin
-    Create(Self.SSPanel.Panel);
-    SetCaption('Necklaces amount:');
-    SetLeft(150);
-    SetTop(50);
-    SetWidth(110);
-    SetText(ToStr(NeckAmount));
+  case consumableType of
+    FOOD_CONSUMABLE:   typeStr := 'Food';
+    PRAYER_CONSUMABLE: typeStr := 'Prayer';
+    ENERGY_CONSUMABLE: typeStr := 'Energy';
+    BOOST_CONSUMABLE:  typeStr := 'Boost';
   end;
 
-  Self.WLPanel.FoodPanel.ConsumableAmount.SetText(ToStr(FoodAmount));
-  Self.WLPanel.FoodPanel.ConsumableAmount.SetVisible(True);
-  Self.WLPanel.FoodPanel.MinPoints.SetText(ToStr(MinHealth));
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
+  Result := inherited;
+
+  with consumableAmount do
+  begin
+    Create(Result);
+    SetCaption('Withdraw ' + LowerCase(typeStr) + ' amount:');
+    SetName('cm_' + typeStr + '_amount');
+    SetLeft(fullWidth * 2 + space);
+    SetTop(y);
+    SetWidth(w);
+    SetText('8');
+    Edit.setOnKeyPress(@Edit.NumberField);
+  end;
 end;
 
 procedure TThieverConfig.Run(); override;
+var
+  tab: TTabSheet;
+  panel: TPanel;
+  foodAmountEdit, minHealthEdit: TEdit;
 begin
-  Self.Setup(True, False, False);
+  Self.Setup('Wasp Ardougne Knights');
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.NeckAmountEdit do
+  begin
+    Create(tab);
+    SetCaption('Necklaces amount:');
+    SetLeft(TControl.AdjustToDPI(30));
+    SetTop(TControl.AdjustToDPI(180));
+    SetWidth(TControl.AdjustToDPI(120));
+    SetText(ToStr(NeckAmount));
+  end;
+
+  panel := Self.CreateConsumableSettings(tab, FOOD_CONSUMABLE, False);
+
+  panel.SetTop(TControl.AdjustToDPI(230));
+
+  foodAmountEdit := panel.GetChild('cm_food_amount_edit');
+  minHealthEdit  := panel.GetChild('cm_food_minimum_edit');
+
+  foodAmountEdit.SetText(ToStr(FoodAmount));
+  foodAmountEdit.SetVisible(True);
+  minHealthEdit.SetText(ToStr(MinHealth));
+
+  Self.CreateVersionPanel(tab);
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -693,7 +750,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@ThieverConfig.Run);
+  ThieverConfig.Run();
   {$ENDIF}
   Thiever.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
