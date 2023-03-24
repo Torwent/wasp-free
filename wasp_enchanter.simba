@@ -421,9 +421,8 @@ type
 
 procedure TEnchanterConfig.StartScript(sender: TObject); override;
 begin
-  inherited;
-
   RegularJewel := Self.GemSelector.getText() + ' ' + Self.JewelSelector.getText().ToLower();
+  inherited;
 end;
 
 procedure TEnchanterConfig.Run(); override;
@@ -431,6 +430,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Enchanter');
+  Self.Start.SetOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
