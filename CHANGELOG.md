@@ -1,3 +1,12 @@
+## [2.2.51](https://github.com/Torwent/wasp-free/compare/v2.2.50...v2.2.51) (2023-03-24)
+
+
+### Bug Fixes
+
+* **enchanter:** Added TScriptFormV2 ([7a62365](https://github.com/Torwent/wasp-free/commit/7a6236507b0708bcc4e985246c22fc6f1d01a92d))
+
+
+
 ## [2.2.50](https://github.com/Torwent/wasp-free/compare/v2.2.49...v2.2.50) (2023-03-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** fixed gui ([82417d5](https://github.com/Torwent/wasp-free/commit/82417d5b3b9aac235cc5359337b29766d1ec42bc))
-
-
-
-## [2.2.46](https://github.com/Torwent/wasp-free/compare/v2.2.45...v2.2.46) (2023-03-11)
-
-
-### Bug Fixes
-
-* compatibility with newest wasplib. All scripts were updated. ([1f02424](https://github.com/Torwent/wasp-free/commit/1f02424d24f1a9f00771ef4453bc8a8d99c5f9e0))
 
 
 
