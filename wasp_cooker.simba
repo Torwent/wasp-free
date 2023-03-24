@@ -1,7 +1,7 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'de957f22-8a37-4660-a7a3-9bef52cadd70'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '17'}
 {$IFNDEF SCRIPT_CHAIN}
-  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
 
@@ -368,39 +368,43 @@ type
     FoodSelector: TLabeledCombobox;
   end;
 
-procedure TCookerConfig.StartScript(Sender: TObject);
-begin
-  Self.Init(Sender);
-
-  CurrentLocation := ERSLocation(Self.LocSelector.Combobox.getItemIndex());
-  if Self.FoodSelector.getText() = 'Custom' then
-    CurrentFood := Self.CustomFoodName.getText()
-  else
-    CurrentFood := Self.FoodSelector.getText();
-end;
-
-{$H-}
-procedure TCookerConfig.FoodSelectorOnChange(Sender: TObject);
-begin
-  Self.CustomFoodName.SetVisible(Self.FoodSelector.getText() = 'Custom');
-end;
-{$H+}
-
-procedure TCookerConfig.Setup(); override;
-var
-  Str: String;
+procedure TCookerConfig.StartScript(sender: TObject); override;
 begin
   inherited;
 
-  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 30);
+  CurrentLocation := ERSLocation(Self.LocSelector.GetItemIndex());
+  if Self.FoodSelector.GetText() = 'Custom' then
+    CurrentFood := Self.CustomFoodName.getText()
+  else
+    CurrentFood := Self.FoodSelector.GetText();
+end;
+
+procedure TCookerConfig.FoodSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+  Self.CustomFoodName.SetVisible(combobox.getText() = 'Custom');
+end;
+
+procedure TCookerConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Cooker');
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.LocSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Location:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(200);
+    SetLeft(TControl.AdjustToDPI(20));
+    SetTop(TControl.AdjustToDPI(200));
+    SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
     AddItem('Hosidius kitchen');
     AddItem('Rogues den');
@@ -409,38 +413,32 @@ begin
 
   with Self.FoodSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Food type:');
-    SetLeft(Self.LocSelector.GetRight() + 20);
+    SetLeft(Self.LocSelector.GetRight() + TControl.AdjustToDPI(20));
     SetTop(Self.LocSelector.GetTop());
-    SetWidth(200);
+    SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
-
-    for Str in RawFood do
-      AddItem(Str);
-
+    AddItemArray(RawFood);
     SetItemIndex(0);
     Combobox.setOnChange(@Self.FoodSelectorOnChange);
   end;
 
   with Self.CustomFoodName do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Food name (must be the exact name):');
-    SetLeft(Self.FoodSelector.GetLeft());
-    SetTop(Self.LocSelector.GetBottom() + 15);
-    SetWidth(200);
+    SetLeft(Self.FoodSelector.GetRight() + TControl.AdjustToDPI(20));
+    SetTop(Self.LocSelector.GetTop());
+    SetWidth(TControl.AdjustToDPI(200));
     SetText(CurrentFood);
+    SetVisible(Self.FoodSelector.GetText() = 'Custom');
   end;
 
-  Self.FoodSelectorOnChange(Self.FoodSelector.Combobox);
-
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
-
-procedure TCookerConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -453,7 +451,7 @@ var
 {$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@CookerConfig.Run);
+  CookerConfig.Run();
   {$ENDIF}
   Cooker.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
