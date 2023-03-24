@@ -1,3 +1,12 @@
+## [2.2.53](https://github.com/Torwent/wasp-free/compare/v2.2.52...v2.2.53) (2023-03-24)
+
+
+### Bug Fixes
+
+* **ardy knights:** Added TScriptFormV2 ([e3c0266](https://github.com/Torwent/wasp-free/commit/e3c02660f4d1cfc8a5039db957e56cb6b3b106da))
+
+
+
 ## [2.2.52](https://github.com/Torwent/wasp-free/compare/v2.2.51...v2.2.52) (2023-03-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** add support to the new TScriptForm ([c2096f4](https://github.com/Torwent/wasp-free/commit/c2096f434cd786953c76f8e633e9ee9b277c5383))
-
-
-
-## [2.2.48](https://github.com/Torwent/wasp-free/compare/v2.2.47...v2.2.48) (2023-03-21)
-
-
-### Bug Fixes
-
-* **ardy knights:** now will listen to the hp you set ([a0698a6](https://github.com/Torwent/wasp-free/commit/a0698a6c13b4a4798b9bb77895f2097cc76179bf))
 
 
 
