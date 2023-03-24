@@ -1,3 +1,12 @@
+## [2.2.57](https://github.com/Torwent/wasp-free/compare/v2.2.56...v2.2.57) (2023-03-24)
+
+
+### Bug Fixes
+
+* **enchanter:** TScriptForm settings are now read properly ([9d7a0f0](https://github.com/Torwent/wasp-free/commit/9d7a0f058c9d679752351cb5d7e011f1e97938e4))
+
+
+
 ## [2.2.56](https://github.com/Torwent/wasp-free/compare/v2.2.55...v2.2.56) (2023-03-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** Added TScriptFormV2 ([e3c0266](https://github.com/Torwent/wasp-free/commit/e3c02660f4d1cfc8a5039db957e56cb6b3b106da))
-
-
-
-## [2.2.52](https://github.com/Torwent/wasp-free/compare/v2.2.51...v2.2.52) (2023-03-24)
-
-
-### Bug Fixes
-
-* **cooker:** Added TScriptFormV2 ([4ad3993](https://github.com/Torwent/wasp-free/commit/4ad399374c415cbf36ec89570a23f8db5420523c))
 
 
 
