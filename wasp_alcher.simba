@@ -284,9 +284,9 @@ begin
   Exit(EAlcherState.OPEN_MAGIC_TAB);
 end;
 
-procedure TAlcher.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TAlcher.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();

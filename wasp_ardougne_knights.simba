@@ -708,6 +708,7 @@ var
   foodAmountEdit, minHealthEdit: TEdit;
 begin
   Self.Setup('Wasp Ardougne Knights');
+  Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
