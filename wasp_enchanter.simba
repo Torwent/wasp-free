@@ -1,7 +1,7 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '242c8d26-e9c9-4de5-945b-5f0288307dfc'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '22'}
 {$IFNDEF SCRIPT_CHAIN}
-  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
 
@@ -419,51 +419,54 @@ type
     JewelSelector: TLabeledCombobox;
   end;
 
-procedure TEnchanterConfig.StartScript(Sender: TObject);
+procedure TEnchanterConfig.StartScript(sender: TObject); override;
 begin
-  Self.Init(Sender);
+  inherited;
 
   RegularJewel := Self.GemSelector.getText() + ' ' + Self.JewelSelector.getText().ToLower();
 end;
 
-procedure TEnchanterConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
+procedure TEnchanterConfig.Run(); override;
 var
-  Str: String
+  tab: TTabSheet;
 begin
-  inherited;
+  Self.Setup('Wasp Enchanter');
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.GemSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Gem type:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(200);
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(200));
+    SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
-    for Str in GEM_TYPE do
-      AddItem(Str);
+    AddItemArray(GEM_TYPE);
     SetItemIndex(3);
   end;
 
   with Self.JewelSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Jewel type:');
-    SetLeft(Self.GemSelector.GetLeft() + Self.GemSelector.GetWidth() + 5);
+    SetLeft(Self.GemSelector.GetRight() + TControl.AdjustToDPI(20));
     SetTop(Self.GemSelector.GetTop());
-    SetWidth(200);
+    SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
-    for Str in JEWELRY_TYPE do
-      AddItem(Str);
+    AddItemArray(JEWELRY_TYPE);
     SetItemIndex(0);
   end;
 
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
+  Self.CreateVersionPanel(tab);
 
-procedure TEnchanterConfig.Run(); override;
-begin
-  Self.Setup(False, False, True);
+  Self.CreateAntibanManager();
+  Self.CreateBankSettings();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -476,7 +479,7 @@ var
 {$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@EnchanterConfig.Run);
+  EnchanterConfig.Run();
   {$ENDIF}
   Enchanter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
