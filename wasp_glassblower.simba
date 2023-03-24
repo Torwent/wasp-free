@@ -373,9 +373,9 @@ type
 
 procedure TBlowerConfig.StartScript(sender: TObject); override;
 begin
-  inherited;
-
   CurrentGlass := ERSGlassItem(Self.GlassSelector.GetItemIndex());
+
+  inherited;
 end;
 
 
@@ -384,6 +384,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Glassblower');
+  Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
