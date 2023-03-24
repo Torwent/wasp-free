@@ -1,3 +1,12 @@
+## [2.2.50](https://github.com/Torwent/wasp-free/compare/v2.2.49...v2.2.50) (2023-03-24)
+
+
+### Bug Fixes
+
+* **glassblower:** Added TScriptFormV2 ([f81da11](https://github.com/Torwent/wasp-free/commit/f81da110782cf4154cdf7fcb69f0e0dd364ac4f3))
+
+
+
 ## [2.2.49](https://github.com/Torwent/wasp-free/compare/v2.2.48...v2.2.49) (2023-03-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility with newest wasplib. All scripts were updated. ([1f02424](https://github.com/Torwent/wasp-free/commit/1f02424d24f1a9f00771ef4453bc8a8d99c5f9e0))
-
-
-
-## [2.2.45](https://github.com/Torwent/wasp-free/compare/v2.2.44...v2.2.45) (2023-03-07)
-
-
-### Bug Fixes
-
-* all files renamed to "wasp_" ([e28b837](https://github.com/Torwent/wasp-free/commit/e28b8376dfcda14187a70f26bc0d2d2b6616f9c9))
 
 
 
