@@ -1,7 +1,7 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '6f619d33-4564-4650-95fe-db2f7e0925cd'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '15'}
 {$IFNDEF SCRIPT_CHAIN}
-  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
 
@@ -12,8 +12,7 @@ end;
 {$ENDIF}
 
 type
-  ERSGlassItem = (BEER, LANTERN, LAMP, VIAL,
-                  FISHBOWL, ORB, LENS, BULB, BEST);
+  ERSGlassItem = (BEER, LANTERN, LAMP, VIAL, FISHBOWL, ORB, LENS, BULB, BEST);
 
 var
   CurrentGlass: ERSGlassItem = ERSGlassItem.BEST;
@@ -91,11 +90,15 @@ var
   ProductCost: Int32;
   X_Number: Int32;
 begin
-  if not ItemChanged then Exit;
+  if not ItemChanged then
+    Exit;
 
   Tool := ['Glassblowing pipe', 1, False];
-  if SRL.Dice(70) then X_Number := BANK_WITHDRAW_ALL
-  else X_Number := Random(27, 9999);
+  if SRL.Dice(70) then
+    X_Number := BANK_WITHDRAW_ALL
+  else
+    X_Number := Random(27, 9999);
+
   Material := ['Molten glass', X_Number, False];
 
   case CurrentGlass of
@@ -109,14 +112,8 @@ begin
     ERSGlassItem.BULB:     Product := ['Empty light orb', X_Number];
   end;
 
-  'Blowing item: ' + Product.Item + '.';
   ProductCost := ItemData.GetAverage(Material.Item);
-
-  ActionProfit := (
-    ItemData.GetAverage(Product.Item) -
-    ProductCost
-  );
-
+  ActionProfit := ItemData.GetAverage(Product.Item) - ProductCost;
   ItemChanged := False;
 end;
 
@@ -187,7 +184,10 @@ var
   Buttons: TRSButtonArray;
 begin
   if Amount <> MAKE_QUANTITY_ALL then
-    Exit(inherited);
+  begin
+    Result := inherited;
+    Exit;
+  end;
 
   Buttons := GetQuantityButtons;
 
@@ -371,43 +371,47 @@ type
     GlassSelector: TLabeledCombobox;
   end;
 
-procedure TBlowerConfig.StartScript(Sender: TObject);
-begin
-  Self.Init(Sender);
-
-  CurrentGlass := ERSGlassItem(Self.GlassSelector.Combobox.getItemIndex());
-end;
-
-procedure TBlowerConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
+procedure TBlowerConfig.StartScript(sender: TObject); override;
 begin
   inherited;
 
-  with Self.GlassSelector do
-  begin
-    Create(Self.SSPanel.Panel);
-    SetCaption('Glass item:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    AddItem('Beer glass');
-    AddItem('Candle lantern');
-    AddItem('Oil lamp');
-    AddItem('Vial');
-    AddItem('Fishbowl');
-    AddItem('Unpowered orb');
-    AddItem('Lantern lens');
-    AddItem('Light orb');
-    AddItem('Best available');
-    Combobox.setItemIndex(Ord(CurrentGlass));
-  end;
-
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
+  CurrentGlass := ERSGlassItem(Self.GlassSelector.GetItemIndex());
 end;
 
+
 procedure TBlowerConfig.Run(); override;
+var
+  tab: TTabSheet;
 begin
-  Self.Setup(False, False, True);
+  Self.Setup('Wasp Glassblower');
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.GlassSelector do
+  begin
+    Create(tab);
+    SetCaption('Glass item:');
+    SetLeft(TControl.AdjustToDPI(30));
+    SetTop(TControl.AdjustToDPI(200));
+    SetWidth(TControl.AdjustToDPI(200));
+    SetStyle(csDropDownList);
+    AddItemArray(['Beer glass', 'Candle lantern', 'Oil lamp', 'Vial',
+                  'Fishbowl', 'Unpowered orb', 'Lantern lens',
+                  'Light orb', 'Best available']);
+    SetItemIndex(Ord(CurrentGlass));
+  end;
+
+  Self.CreateVersionPanel(tab);
+
+  Self.CreateConsumableSettings(ERSConsumable.FOOD_CONSUMABLE);
+  Self.CreateConsumableSettings(ERSConsumable.PRAYER_CONSUMABLE);
+  Self.CreateAntibanManager();
+  Self.CreateBankSettings();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
