@@ -197,7 +197,7 @@ end;
 
 function TBuilder.PhialsGetPlanks(): Boolean;
 begin
-  if not RSNPCs.Phials.Find() and not RSW.AtTile(RSNPCs.Phials.Coordinates, 8) then
+  if not RSNPCs.Phials.IsVisible() and not RSW.AtTile(RSNPCs.Phials.Coordinates, 8) then
     RSW.WebWalk(RSNPCs.Phials.Coordinates, 15, 0.2);
 
   if Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and
@@ -307,7 +307,7 @@ begin
 
   if WaitingServant then
   begin
-    if ServantNPC.Find() then
+    if ServantNPC.IsVisible() then
       Exit(EState.TALK_SERVANT);
     Exit(EState.WAIT_STATE);
   end;

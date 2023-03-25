@@ -177,7 +177,7 @@ begin
   if MainScreen.InCombat() then
     Exit(WAIT_COMBAT);
 
-  if CombatHandler.Monster.Find() then
+  if CombatHandler.Monster.IsVisible() then
     Exit(CLICK_CHOMPY);
 
   if Inventory.ContainsAny(OgreBellows) then

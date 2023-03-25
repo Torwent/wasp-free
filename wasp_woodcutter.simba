@@ -381,7 +381,7 @@ end;
 
 function TWoodcutter.CheckNest(): Boolean;
 begin
-  Result := PickNests and RSGroundItems.BirdNest.Find();
+  Result := PickNests and RSGroundItems.BirdNest.IsVisible();
 end;
 
 function TWoodcutter.PickNest(): Boolean;
