@@ -1,3 +1,12 @@
+## [2.2.58](https://github.com/Torwent/wasp-free/compare/v2.2.57...v2.2.58) (2023-03-25)
+
+
+### Bug Fixes
+
+* chompy hunter, larder builder, woodcutter compatibility fix for the latest wasplib ([31a7d08](https://github.com/Torwent/wasp-free/commit/31a7d0871872f3d221def486b061da6727d0fe21))
+
+
+
 ## [2.2.57](https://github.com/Torwent/wasp-free/compare/v2.2.56...v2.2.57) (2023-03-24)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** TScriptForm settings are now read properly ([54cbd7d](https://github.com/Torwent/wasp-free/commit/54cbd7d9ccf96890e850e1c9f65e59ee2358b63c))
-
-
-
-## [2.2.53](https://github.com/Torwent/wasp-free/compare/v2.2.52...v2.2.53) (2023-03-24)
-
-
-### Bug Fixes
-
-* **ardy knights:** Added TScriptFormV2 ([e3c0266](https://github.com/Torwent/wasp-free/commit/e3c02660f4d1cfc8a5039db957e56cb6b3b106da))
 
 
 
