@@ -384,7 +384,7 @@ begin
   else if ((FoodHandler.Amount + NeckAmount + 2 + Length(Self.StackableArray)) >= (28 - Length(Self.StackableArray))) then
     FoodHandler.Amount := 28 - NeckAmount - 2 - Length(Self.StackableArray);
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
     DebugMMDotArray += CurrentNPC;
 end;
 

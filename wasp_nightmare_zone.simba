@@ -209,7 +209,7 @@ begin
   Self.PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers();
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
   begin
     DebugObjectArray += BoostBarrel;
     DebugObjectArray += AbsBarrel;

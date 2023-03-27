@@ -235,7 +235,7 @@ begin
   Self.CheckRogueEquipment();
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
     DebugMMDotArray += Self.Knight;
 
   XPBar.EarnedXP();
@@ -396,7 +396,7 @@ begin
     P.Y += MainScreen.NormalizeDistance(22);
     B := Box(P, MainScreen.NormalizeDistance(10), MainScreen.NormalizeDistance(14));
 
-    if WLSettings.RemoteInput.ScriptDebug then
+    if WLSettings.RemoteInput.HUDDebug then
     begin
       RSClient.Image().Clear();
       RSClient.Image().DrawBox(B, $FFFFFF);

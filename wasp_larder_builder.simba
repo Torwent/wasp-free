@@ -134,7 +134,7 @@ begin
       OAK_LARDER: Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
     end;
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
   begin
     DebugObjectArray += BuiltLarder;
     DebugObjectArray += LarderSpace;

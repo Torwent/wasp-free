@@ -181,7 +181,7 @@ begin
   Self.SetupFurnaces();
   Self.SetupItems();
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
     DebugObjectArray += Furnace;
 end;
 

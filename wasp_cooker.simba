@@ -156,7 +156,7 @@ begin
   Self.SetupItems();
   Self.SetupLocation();
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
     DebugObjectArray += CookingObj;
 end;
 

@@ -330,7 +330,7 @@ begin
 
   Self.SetupTool();
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
   begin
     DebugObjectArray += RSTree;
     DebugMMDotArray += RSNPCs.SawmillOperator;

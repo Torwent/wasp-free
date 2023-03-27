@@ -90,7 +90,7 @@ begin
 
   Self.SetupStall();
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
     DebugObjectArray += Stall;
 end;
 

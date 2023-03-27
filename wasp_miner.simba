@@ -243,7 +243,7 @@ begin
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
-  if WLSettings.RemoteInput.ScriptDebug then
+  if WLSettings.RemoteInput.HUDDebug then
     DebugObjectArray += RSRock;
 end;
 
