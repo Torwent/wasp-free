@@ -1,3 +1,12 @@
+## [2.2.59](https://github.com/Torwent/wasp-free/compare/v2.2.58...v2.2.59) (2023-03-27)
+
+
+### Bug Fixes
+
+* several scripts compatibility with latest wasplib ([df8ad39](https://github.com/Torwent/wasp-free/commit/df8ad39d40a85a7492532c1146ba7ea6eec02ede))
+
+
+
 ## [2.2.58](https://github.com/Torwent/wasp-free/compare/v2.2.57...v2.2.58) (2023-03-25)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** TScriptForm settings are now read properly ([3e86b60](https://github.com/Torwent/wasp-free/commit/3e86b60ef8ef5f535cce52bb054562fcc4893e3d))
-
-
-
-## [2.2.54](https://github.com/Torwent/wasp-free/compare/v2.2.53...v2.2.54) (2023-03-24)
-
-
-### Bug Fixes
-
-* **ardy knights:** TScriptForm settings are now read properly ([54cbd7d](https://github.com/Torwent/wasp-free/commit/54cbd7d9ccf96890e850e1c9f65e59ee2358b63c))
 
 
 
