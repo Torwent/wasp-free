@@ -1,3 +1,12 @@
+## [2.2.60](https://github.com/Torwent/wasp-free/compare/v2.2.59...v2.2.60) (2023-03-28)
+
+
+### Bug Fixes
+
+* **nmz:** you can now set the boost amount from the GUI ([1070e4e](https://github.com/Torwent/wasp-free/commit/1070e4e7f753e61aa9c6ecb7976238f16fe270c8))
+
+
+
 ## [2.2.59](https://github.com/Torwent/wasp-free/compare/v2.2.58...v2.2.59) (2023-03-27)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **glassblower:** TScriptForm settings are now read properly ([aa1b4bf](https://github.com/Torwent/wasp-free/commit/aa1b4bfb67b629f910db7684e85db190504b24b6))
-
-
-
-## [2.2.55](https://github.com/Torwent/wasp-free/compare/v2.2.54...v2.2.55) (2023-03-24)
-
-
-### Bug Fixes
-
-* **cooker:** TScriptForm settings are now read properly ([3e86b60](https://github.com/Torwent/wasp-free/commit/3e86b60ef8ef5f535cce52bb054562fcc4893e3d))
 
 
 
