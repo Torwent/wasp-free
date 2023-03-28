@@ -18,6 +18,7 @@ type
 
 var
   CurrentPotion := ERSNMZPotion.OVERLOAD_POTION;
+  BoostAmount: Int32 = 8;
 
 type
   ENMZState = (
@@ -82,7 +83,7 @@ type
 
     BoostBarrel, AbsBarrel: TRSObject;
 
-    BoostAmount, AbsAmount, MinAbsPoints, WithdrawFails: Int32;
+    AbsAmount, MinAbsPoints, WithdrawFails: Int32;
 
     DamageItem: TRSItem;
 
@@ -129,7 +130,7 @@ begin
     Self.BoostTimer.Init(420000);
 
   Self.BoostTimer.Timeout := GetTickCount();
-  Self.BoostAmount := 8;
+  BoostAmount := 6;
 
   SetLength(Self.AbsPotion, 4);
   for i := 1 to 4 do
@@ -954,20 +955,23 @@ end;
 type
   TNMZConfig = record(TScriptForm)
     PotionSelector: TLabeledCombobox;
+    BoostAmountEdit: TLabeledEdit;
     NMZInfo: TLabel;
   end;
 
 procedure TNMZConfig.StartScript(Sender: TObject); override;
 begin
-  inherited;
   CurrentPotion := ERSNMZPotion(Self.PotionSelector.GetItemIndex());
+  BoostAmount := StrToInt(BoostAmountEdit.GetText());
+  inherited;
 end;
 
 procedure TNMZConfig.Run(); override;
 var
   tab: TTabSheet;
 begin
-  Self.Setup('Wasp Superglass Maker');
+  Self.Setup('Wasp Nightmare Zone');
+  Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
@@ -985,14 +989,23 @@ begin
     SetItemIndex(Ord(CurrentPotion));
   end;
 
+  with Self.BoostAmountEdit do
+  begin
+    Create(tab);
+    SetCaption('Boost amount (full pots):');
+    SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(170));
+    SetText(IntToStr(BoostAmount));
+  end;
+
   with Self.NMZInfo do
   begin
     Create(tab);
     SetCaption('Should work with most setups.' + LineEnding +
                'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
 
-    SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(40));
-    SetTop(TControl.AdjustToDPI(170));
+    SetLeft(Self.PotionSelector.GetLeft());
+    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(40));
   end;
 
   Self.CreateVersionPanel(tab);
