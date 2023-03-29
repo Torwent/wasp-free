@@ -130,7 +130,6 @@ begin
     Self.BoostTimer.Init(420000);
 
   Self.BoostTimer.Timeout := GetTickCount();
-  BoostAmount := 6;
 
   SetLength(Self.AbsPotion, 4);
   for i := 1 to 4 do
