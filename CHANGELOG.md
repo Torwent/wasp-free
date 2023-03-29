@@ -1,3 +1,12 @@
+## [2.2.61](https://github.com/Torwent/wasp-free/compare/v2.2.60...v2.2.61) (2023-03-29)
+
+
+### Bug Fixes
+
+* **nmz:** debug typo removed ([fbda10a](https://github.com/Torwent/wasp-free/commit/fbda10a18c0540da52de0c75adb656f1ed2b61e0))
+
+
+
 ## [2.2.60](https://github.com/Torwent/wasp-free/compare/v2.2.59...v2.2.60) (2023-03-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** TScriptForm settings are now read properly ([9d7a0f0](https://github.com/Torwent/wasp-free/commit/9d7a0f058c9d679752351cb5d7e011f1e97938e4))
-
-
-
-## [2.2.56](https://github.com/Torwent/wasp-free/compare/v2.2.55...v2.2.56) (2023-03-24)
-
-
-### Bug Fixes
-
-* **glassblower:** TScriptForm settings are now read properly ([aa1b4bf](https://github.com/Torwent/wasp-free/commit/aa1b4bfb67b629f910db7684e85db190504b24b6))
 
 
 
