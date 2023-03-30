@@ -739,7 +739,7 @@ begin
   if ('Dominic' in title) then
   begin
     chatCache := Chat.GetChat();
-    WriteLn chatCache;
+
     if chatCache.ContainsAll(['Ill', 'want', 'coins']) then
     begin
       if 'deduct the money' in chatCache then
