@@ -1,3 +1,12 @@
+## [2.2.64](https://github.com/Torwent/wasp-free/compare/v2.2.63...v2.2.64) (2023-04-01)
+
+
+### Bug Fixes
+
+* **smelter:** typo ([a108db3](https://github.com/Torwent/wasp-free/commit/a108db354f9b69f894f0e520a83050350e3cbfa3))
+
+
+
 ## [2.2.63](https://github.com/Torwent/wasp-free/compare/v2.2.62...v2.2.63) (2023-04-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** you can now set the boost amount from the GUI ([1070e4e](https://github.com/Torwent/wasp-free/commit/1070e4e7f753e61aa9c6ecb7976238f16fe270c8))
-
-
-
-## [2.2.59](https://github.com/Torwent/wasp-free/compare/v2.2.58...v2.2.59) (2023-03-27)
-
-
-### Bug Fixes
-
-* several scripts compatibility with latest wasplib ([df8ad39](https://github.com/Torwent/wasp-free/commit/df8ad39d40a85a7492532c1146ba7ea6eec02ede))
 
 
 
