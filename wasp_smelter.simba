@@ -1,7 +1,7 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'e8df872a-afaf-44b8-9fc5-eef079ada50b'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '18'}
 {$IFNDEF SCRIPT_CHAIN}
-  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
 
@@ -255,7 +255,7 @@ begin
     Exit;
 
   if Result := Make.Select(ToStr(Bar.Item), MAKE_QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
-    Smelting := XPBar.WaitXP(3500);
+    Smelting := XPBar.WaitXP(4000);
 end;
 
 function TSmelter.IsMakingItem(WaitTime: Int32 = 3200): Boolean;
@@ -401,57 +401,53 @@ type
     FurnaceSelector: TLabeledCombobox;
   end;
 
-procedure TSmelterConfig.StartScript(Sender: TObject);
+procedure TSmelterConfig.StartScript(sender: TObject); override;
 begin
-  Self.Init(Sender);
-
   CurrentBar := ERSBarType(Self.BarTypeSelector.getItemIndex());
   CurrentFurnace := ERSFurnace(Self.FurnaceSelector.getItemIndex());
+  inherited;
 end;
 
-procedure TSmelterConfig.Setup(); override;
+procedure TSmelterConfig.Run(); override;
+var
+  tab: TTabSheet;
 begin
-  inherited;
+  Self.Setup('Wasp Smelter');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.BarTypeSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Bar type:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(200);
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
-    AddItem('Bronze');
-    AddItem('Iron');
-    AddItem('Silver');
-    AddItem('Steel');
-    AddItem('Gold');
-    AddItem('Mithril');
-    AddItem('Adamantite');
-    AddItem('Runite');
-    AddItem('Molten glass');
+    AddItemArray(['Bronze', 'Iron', 'Silver', 'Steel', 'Gold', 'Mithril', 'Adamantite', 'Runite', 'Molten glass']);
     SetItemIndex(Ord(CurrentBar));
   end;
 
   with Self.FurnaceSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Furnace:');
-    SetLeft(Self.BarTypeSelector.GetLeft() + Self.BarTypeSelector.GetWidth() + 5);
+    SetLeft(Self.BarTypeSelector.GetRight() + TControl.AdjustToDPI(15));
     SetTop(Self.BarTypeSelector.GetTop());
-    SetWidth(200);
     SetStyle(csDropDownList);
-    AddItem('Edgeville');
-    AddItem('Falador');
+    AddItemArray(['Edgeville', 'Falador']);
     SetItemIndex(Ord(CurrentFurnace));
   end;
 
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
+  Self.CreateVersionPanel(tab);
 
-procedure TSmelterConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateAntibanManager();
+  Self.CreateBankSettings();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -464,7 +460,7 @@ var
 {$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@SmelterConfig.Run);
+  SmelterConfig.Run();
   {$ENDIF}
   Smelter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

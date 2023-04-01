@@ -443,7 +443,6 @@ begin
     SetCaption('Gem type:');
     SetLeft(TControl.AdjustToDPI(50));
     SetTop(TControl.AdjustToDPI(200));
-    SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
     AddItemArray(GEM_TYPE);
     SetItemIndex(3);
