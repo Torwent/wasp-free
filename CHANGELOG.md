@@ -1,3 +1,12 @@
+## [2.2.63](https://github.com/Torwent/wasp-free/compare/v2.2.62...v2.2.63) (2023-04-01)
+
+
+### Bug Fixes
+
+* **smelter:** now has a little bit more delay because gold is apparently slower than other ores. ([128dea4](https://github.com/Torwent/wasp-free/commit/128dea4239bd0549e8ee397c7d12fae8939b7a0e))
+
+
+
 ## [2.2.62](https://github.com/Torwent/wasp-free/compare/v2.2.61...v2.2.62) (2023-03-30)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * several scripts compatibility with latest wasplib ([df8ad39](https://github.com/Torwent/wasp-free/commit/df8ad39d40a85a7492532c1146ba7ea6eec02ede))
-
-
-
-## [2.2.58](https://github.com/Torwent/wasp-free/compare/v2.2.57...v2.2.58) (2023-03-25)
-
-
-### Bug Fixes
-
-* chompy hunter, larder builder, woodcutter compatibility fix for the latest wasplib ([31a7d08](https://github.com/Torwent/wasp-free/commit/31a7d0871872f3d221def486b061da6727d0fe21))
 
 
 
