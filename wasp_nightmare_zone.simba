@@ -907,47 +907,47 @@ begin
   end;
 end;
 
-function TCombatHandler.NeedRegear(): Boolean; override;
+function CombatHandler.NeedRegear(): Boolean; static; override;
 begin
-  if not Self.ManageGear or not Self.GearIsSetup then
+  if not CombatHandler.ManageGear or not CombatHandler.GearIsSetup then
     Exit;
 
-  if not NMZFighter.PowerSurgeTimer.IsFinished() or (Minimap.GetSpecLevel() >= Self.WeaponSpec) then
+  if not NMZFighter.PowerSurgeTimer.IsFinished() or (Minimap.GetSpecLevel() >= CombatHandler.WeaponSpec) then
     Exit;
 
-  Result := ((Self.Weapon <> 'Null') and Inventory.ContainsItem(Self.Weapon)) or
-            ((Self.Shield <> 'Null') and Inventory.ContainsItem(Self.Shield));
+  Result := ((CombatHandler.Weapon <> 'Null') and Inventory.ContainsItem(CombatHandler.Weapon)) or
+            ((CombatHandler.Shield <> 'Null') and Inventory.ContainsItem(CombatHandler.Shield));
 end;
 
-function TCombatHandler.DoSpec(): Boolean; override;
+function CombatHandler.DoSpec(): Boolean; static; override;
 begin
-  if Self.ManageGear and not Self.GearIsSetup then
+  if CombatHandler.ManageGear and not CombatHandler.GearIsSetup then
   begin
-    Self._SetupGear();
-    Self.ManageGear := Self.GearIsSetup;
-    if not Self.GearIsSetup then
+    CombatHandler._SetupGear();
+    CombatHandler.ManageGear := CombatHandler.GearIsSetup;
+    if not CombatHandler.GearIsSetup then
       Exit;
   end;
 
-  if (Self.SpecWeapon <> Self.Weapon) and Inventory.ClickItem(Self.SpecWeapon) then
-    if not WaitUntil(Inventory.ContainsItem(Self.Weapon), 100, 4000) then
+  if (CombatHandler.SpecWeapon <> CombatHandler.Weapon) and Inventory.ClickItem(CombatHandler.SpecWeapon) then
+    if not WaitUntil(Inventory.ContainsItem(CombatHandler.Weapon), 100, 4000) then
       Exit;
 
-  Self.InCombatTimer.Timeout := GetTickCount();
-  Result := Self.DoingSpec := Minimap.EnableSpec(Self.WeaponSpec);
+  CombatHandler.InCombatTimer.Timeout := GetTickCount();
+  Result := CombatHandler.DoingSpec := Minimap.EnableSpec(CombatHandler.WeaponSpec);
 
-  case Self.SpecWeapon of
+  case CombatHandler.SpecWeapon of
     'Granite maul', '4153', '12848':
       begin
-        Result := Self.DoingSpec := True;
+        Result := CombatHandler.DoingSpec := True;
         Wait(50, 100);
       end;
     else
       Wait(300, 400);
   end;
 
-  if Result and NMZFighter.PowerSurgeTimer.IsFinished() and (Minimap.GetSpecLevel() < Self.WeaponSpec) then
-    Self.Regear();
+  if Result and NMZFighter.PowerSurgeTimer.IsFinished() and (Minimap.GetSpecLevel() < CombatHandler.WeaponSpec) then
+    CombatHandler.Regear();
 end;
 
 {$IFDEF SCRIPT_GUI}

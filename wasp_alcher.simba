@@ -67,14 +67,14 @@ procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
 begin
   inherited;
 
-  RSW.Setup([RSRegions.GRAND_EXCHANGE]);
+  Self.RSW.Setup([RSRegions.GRAND_EXCHANGE]);
 
   AlchItemArray += CustomItem;
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');
 
-  InVarrock := RSW.InPoly(VARROCK_BOUNDS);
+  Self.InVarrock := Self.RSW.InPoly(VARROCK_BOUNDS);
 end;
 
 
@@ -236,7 +236,7 @@ begin
 
   if Self.InVarrock and not Self.InGE then
   begin
-    Self.InGE := RSW.AtTile(RSObjects.GEBank.Coordinates, 30);
+    Self.InGE := Self.RSW.AtTile(RSObjects.GEBank.Coordinates, 30);
     if not Self.InGE then
       Exit(EAlcherState.WALK_ALCH);
   end;
@@ -293,7 +293,7 @@ begin
     Self.SetAction(ToStr(State));
 
     case State of
-      EAlcherState.WALK_ALCH: InGe := RSW.WebWalk(RSObjects.GEBank.Coordinates, 10, 0.2);
+      EAlcherState.WALK_ALCH: InGe := Self.RSW.WebWalk(RSObjects.GEBank.Coordinates, 10, 0.2);
 
       EAlcherState.OPEN_BANK: Bank.WalkOpen();
       EAlcherState.WITHDRAW_NATS: Self.Withdraw(['Nature rune', -1, False]);

@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'bffb9ec8-588b-406d-9872-9ab274b5c934'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '16'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -425,10 +425,8 @@ type
     BankSelector: TLabeledCombobox;
   end;
 
-procedure TMinerConfig.StartScript(Sender: TObject);
+procedure TMinerConfig.StartScript(sender: TObject); override;
 begin
-  Self.Init(Sender);
-
   CurrentRock := ERSRock(Self.RockSelector.Combobox.getItemIndex());
 
   case Self.BankSelector.Combobox.getText() of
@@ -438,14 +436,14 @@ begin
     'Varrock west':               BankLocation := ERSBank.VARROCK_W;
     'Varrock east':               BankLocation := ERSBank.VARROCK_E;
   end;
+
+  inherited;
 end;
 
 
-procedure TMinerConfig.RockSelectorOnChange(Sender: TObject);
+procedure TMinerConfig.RockSelectorOnChange(sender: TObject);
 begin
-  Writeln(Sender, ' has changed');
-
-  Self.BankSelector.Clear;
+  Self.BankSelector.Clear();
 
   case ERSRock(Self.RockSelector.Combobox.getItemIndex()) of
     ERSRock.CLAY:
@@ -497,52 +495,49 @@ begin
   Self.BankSelector.SetItemIndex(0);
 end;
 
-procedure TMinerConfig.Setup(); override;
+procedure TMinerConfig.Run(); override;
+var
+  tab: TTabSheet;
 begin
-  inherited;
+  Self.Setup('Wasp Miner');
+  Self.Start.setOnClick(@Self.StartScript);
 
-  UpdateFormSize(Self.Form, Self.Form.GetWidth(), Self.Form.GetHeight() + 30);
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.RockSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Rock type:');
-    SetLeft(15);
-    SetTop(35);
-    SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    AddItem('Clay');
-    AddItem('Tin');
-    AddItem('Copper');
-    AddItem('Iron');
-    AddItem('Silver');
-    AddItem('Coal');
-    AddItem('Gold');
-    AddItem('Mithril');
-    AddItem('Adamantite');
-    AddItem('Runite (doesn''t hop worlds)');
-    AddItem('Amethyst');
-    Combobox.setItemIndex(Ord(CurrentRock));
+    SetLeft(TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(170));
+    SetStyle(csDropDownList);
+    AddItemArray(['Clay', 'Tin', 'Copper', 'Iron', 'Silver', 'Coal', 'Gold',
+                  'Mithril', 'Adamantite', 'Runite (doesn''t hop worlds)',
+                  'Amethyst']);
+    SetItemIndex(Ord(CurrentRock));
     Combobox.SetOnChange(@Self.RockSelectorOnChange);
   end;
 
   with Self.BankSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Bank location:');
-    SetLeft(15);
-    SetTop(Self.RockSelector.GetTop() + Self.RockSelector.GetHeight() - 5);
-    SetWidth(Self.RockSelector.GetWidth());
+    SetLeft(Self.RockSelector.GetRight() + TControl.AdjustToDPI(40));
+    SetTop(Self.RockSelector.GetTop());
+    SetWidth(TControl.AdjustToDPI(200));
     Combobox.setStyle(csDropDownList);
   end;
 
-  Self.RockSelectorOnChange(Self.BankSelector.Combobox);
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
+  Self.RockSelectorOnChange(Self.RockSelector.ComboBox);
 
-procedure TMinerConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateVersionPanel(tab);
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -553,7 +548,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-    Sync(@MinerConfig.Run);
+  MinerConfig.Run();
   {$ENDIF}
   Miner.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
