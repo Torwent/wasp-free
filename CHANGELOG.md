@@ -1,3 +1,12 @@
+## [2.2.65](https://github.com/Torwent/wasp-free/compare/v2.2.64...v2.2.65) (2023-04-08)
+
+
+### Bug Fixes
+
+* **nmz:** nmz compiles again ([21353c0](https://github.com/Torwent/wasp-free/commit/21353c04aa8e5b97cf3e076b1295ac3e19586ae5))
+
+
+
 ## [2.2.64](https://github.com/Torwent/wasp-free/compare/v2.2.63...v2.2.64) (2023-04-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** debug typo removed ([fbda10a](https://github.com/Torwent/wasp-free/commit/fbda10a18c0540da52de0c75adb656f1ed2b61e0))
-
-
-
-## [2.2.60](https://github.com/Torwent/wasp-free/compare/v2.2.59...v2.2.60) (2023-03-28)
-
-
-### Bug Fixes
-
-* **nmz:** you can now set the boost amount from the GUI ([1070e4e](https://github.com/Torwent/wasp-free/commit/1070e4e7f753e61aa9c6ecb7976238f16fe270c8))
 
 
 
