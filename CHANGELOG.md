@@ -1,3 +1,12 @@
+## [2.2.66](https://github.com/Torwent/wasp-free/compare/v2.2.65...v2.2.66) (2023-04-11)
+
+
+### Bug Fixes
+
+* **woodcutter:** should now stop tryign to open cooking guild bank when chopping in varrock west ([f4e9c18](https://github.com/Torwent/wasp-free/commit/f4e9c18f85fc432030db40e8a01141b9cb80bb2c))
+
+
+
 ## [2.2.65](https://github.com/Torwent/wasp-free/compare/v2.2.64...v2.2.65) (2023-04-08)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** removed forgotten debugging ([c2a9234](https://github.com/Torwent/wasp-free/commit/c2a9234b590acdb02294898b2036d8f203e1326b))
-
-
-
-## [2.2.61](https://github.com/Torwent/wasp-free/compare/v2.2.60...v2.2.61) (2023-03-29)
-
-
-### Bug Fixes
-
-* **nmz:** debug typo removed ([fbda10a](https://github.com/Torwent/wasp-free/commit/fbda10a18c0540da52de0c75adb656f1ed2b61e0))
 
 
 
