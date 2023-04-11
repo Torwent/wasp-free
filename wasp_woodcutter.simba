@@ -188,6 +188,8 @@ begin
       begin
         RSW.Setup([RSRegions.VARROCK_WEST]);
         UseBank := True;
+        RSObjects.BankWood3.Coordinates.Remove([7981, 2651], True);
+        RSObjects.BankWood3.Coordinates.Remove([7985, 2651], True);
       end;
 
     VARROCK_E:
