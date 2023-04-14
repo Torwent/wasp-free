@@ -190,20 +190,20 @@ function TSmelter.Withdraw(): Boolean; overload;
 var
   invCount: Int32;
   item: TRSBankWithdrawItem;
-  Find1, Find2: Boolean;
+  find1, find2: Boolean;
 begin
-  Find1 := Inventory.ContainsItem(Self.Ore1.Item);
-  Find2 := (Self.Ore2 = []) or Inventory.ContainsItem(Self.Ore2.Item);
+  find1 := Inventory.ContainsItem(Self.Ore1.Item);
+  find2 := (Self.Ore2 = []) or Inventory.ContainsItem(Self.Ore2.Item);
 
-  if Find1 then
+  if find1 then
   begin
-    if Find2 then
+    if find2 then
       Exit;
     item := Self.Ore2;
     item.Quantity := Self.Ore1.Quantity;
   end
-  else if Find2 or (Self.Ore1.Quantity > Self.Ore2.Quantity) or
-          ((Self.Ore1.Quantity = Self.Ore2.Quantity) and Antiban.BioDice) then
+  else if find2 or (Self.Ore1.Quantity > Self.Ore2.Quantity) or
+          ((Self.Ore1.Quantity = Self.Ore2.Quantity) and Antiban.BioDice()) then
   begin
     item := Self.Ore1;
     if Self.Ore2 <> [] then
@@ -213,13 +213,27 @@ begin
     item := Self.Ore2;
 
   invCount := Inventory.Count();
-  if Result := Bank.WithdrawItem(BankTab, item, True) then
-    WaitUntil(Inventory.Count > invCount, 100, 3000);
 
-  if Self.BankEmpty := ((not Result and Bank.IsOpen()) and
-                    not Bank.ContainsItem(Self.BankTab, item)) then
-    if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
-      Self.CollectEmpty := False;
+  if Bank.WithdrawItem(Self.BankTab, item, True) then
+    Result := WaitUntil(Inventory.Count() > invCount, 100, 3000);
+
+  if not Result then
+  begin
+    Bank.UnHoverIncinerator();
+    Self.BankEmpty := not Bank.IsSearchOpen() and
+                      not WaitUntil(Bank.ContainsItem(Self.BankTab, item), 300, 3000);
+
+    if Bank.IsSearchOpen() then
+      Bank.CloseSearch();
+  end;
+
+  Self.BankEmpty := Self.BankEmpty and Bank.IsOpen();
+
+  if Self.BankEmpty then
+    SaveScreenshot('bankempty' + DIRECTORYSEPARATOR + 'bankempty', MainScreen.Bounds());
+
+  if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
+    Self.CollectEmpty := False;
 end;
 
 function TSmelter.Deposit(): Boolean;
