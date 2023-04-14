@@ -1,3 +1,12 @@
+## [2.2.68](https://github.com/Torwent/wasp-free/compare/v2.2.67...v2.2.68) (2023-04-14)
+
+
+### Bug Fixes
+
+* **smelter:** improved withdrawing ([bd21a81](https://github.com/Torwent/wasp-free/commit/bd21a8106175787079bfe4edf3b856d16f4cfb91))
+
+
+
 ## [2.2.67](https://github.com/Torwent/wasp-free/compare/v2.2.66...v2.2.67) (2023-04-14)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **smelter:** typo ([a108db3](https://github.com/Torwent/wasp-free/commit/a108db354f9b69f894f0e520a83050350e3cbfa3))
-
-
-
-## [2.2.63](https://github.com/Torwent/wasp-free/compare/v2.2.62...v2.2.63) (2023-04-01)
-
-
-### Bug Fixes
-
-* **smelter:** now has a little bit more delay because gold is apparently slower than other ores. ([128dea4](https://github.com/Torwent/wasp-free/commit/128dea4239bd0549e8ee397c7d12fae8939b7a0e))
 
 
 
