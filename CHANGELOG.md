@@ -1,3 +1,12 @@
+## [2.2.67](https://github.com/Torwent/wasp-free/compare/v2.2.66...v2.2.67) (2023-04-14)
+
+
+### Bug Fixes
+
+* **smelter:** attempt to fix runite bars ([5fc530c](https://github.com/Torwent/wasp-free/commit/5fc530c40c468f37159e8b4dd3906c687e4e6970))
+
+
+
 ## [2.2.66](https://github.com/Torwent/wasp-free/compare/v2.2.65...v2.2.66) (2023-04-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **smelter:** now has a little bit more delay because gold is apparently slower than other ores. ([128dea4](https://github.com/Torwent/wasp-free/commit/128dea4239bd0549e8ee397c7d12fae8939b7a0e))
-
-
-
-## [2.2.62](https://github.com/Torwent/wasp-free/compare/v2.2.61...v2.2.62) (2023-03-30)
-
-
-### Bug Fixes
-
-* **nmz:** removed forgotten debugging ([c2a9234](https://github.com/Torwent/wasp-free/commit/c2a9234b590acdb02294898b2036d8f203e1326b))
 
 
 
