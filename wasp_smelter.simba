@@ -149,8 +149,8 @@ begin
     ERSBarType.RUNITE:
       begin
         Bar.Item := 'Runite bar';
-        Ore1 := ['Runite ore', 3, False];
-        Ore2 := ['Coal', 27, False];
+        Ore1 := ['Runite ore', 4, False];
+        Ore2 := ['Coal', 24, False];
       end;
 
     ERSBarType.MOLTEN_GLASS:
