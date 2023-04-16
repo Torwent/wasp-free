@@ -1,3 +1,12 @@
+## [2.2.69](https://github.com/Torwent/wasp-free/compare/v2.2.68...v2.2.69) (2023-04-16)
+
+
+### Bug Fixes
+
+* **larder builder:** doesn't crash with bankpin anymore ([c5ad867](https://github.com/Torwent/wasp-free/commit/c5ad8678078c0cbce04ce4a88242345a90825e99))
+
+
+
 ## [2.2.68](https://github.com/Torwent/wasp-free/compare/v2.2.67...v2.2.68) (2023-04-14)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** nmz compiles again ([21353c0](https://github.com/Torwent/wasp-free/commit/21353c04aa8e5b97cf3e076b1295ac3e19586ae5))
-
-
-
-## [2.2.64](https://github.com/Torwent/wasp-free/compare/v2.2.63...v2.2.64) (2023-04-01)
-
-
-### Bug Fixes
-
-* **smelter:** typo ([a108db3](https://github.com/Torwent/wasp-free/commit/a108db354f9b69f894f0e520a83050350e3cbfa3))
 
 
 
