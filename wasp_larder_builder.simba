@@ -330,7 +330,7 @@ begin
       EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
       EState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
       EState.HANDLE_SERVANT: Self.HandleServant();
-      EState.HANDLE_PIN: if BankPin.Enter(Login.GetPlayerPin()) then MainScreen.WaitLoadingPOH(10000);
+      EState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
 
       EState.CALL_SERVANT: Self.CallServant();
       EState.TALK_SERVANT: Self.TalkServant();
@@ -435,6 +435,48 @@ begin
   Mouse.Click(b, MOUSE_LEFT);
   Result := WaitUntil(not Self.IsHouseOptionsOpen(), RandomLeft(50, 1500), 5000);
 end;
+
+function TRSBankPin.Enter(pin: String): Boolean; override;
+
+  function GetDigitToEnter(): Char;
+  begin
+    if OCR.LocateText(Self.Bounds, 'FIRST',  RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(pin[1]);
+    if OCR.LocateText(Self.Bounds, 'SECOND', RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(pin[2]);
+    if OCR.LocateText(Self.Bounds, 'THIRD',  RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(pin[3]);
+    if OCR.LocateText(Self.Bounds, 'FOURTH', RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(pin[4]);
+  end;
+
+var
+  i: Int32;
+  digit: Char;
+begin
+  for 1 to 3 do // 3 Attempts
+  begin
+    for i := 1 to 4 do
+    begin
+      digit := GetDigitToEnter();
+      if digit = '' then
+        Break;
+
+      if not Self.ClickDigit(digit) then
+        Break;
+
+      Wait(1000, 2000, wdLeft);
+    end;
+
+    if 'try again' in Chat.GetChat() then
+    begin
+      Chat.ClickContinue(True);
+      Continue;
+    end;
+
+    if MainScreen.WaitLoadingPOH(5000) or Minimap.InPOH() then
+      Exit(True);
+  end;
+
+  Result := MainScreen.WaitLoadingPOH(5000) or Minimap.InPOH(); // wait 3 extra seconds before failing.
+end;
+
 
 procedure TRSMinimap.SetCompassAngle(Degrees: Double; Accuracy: Double = 5); override;
 begin
