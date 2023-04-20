@@ -1,3 +1,12 @@
+## [2.2.70](https://github.com/Torwent/wasp-free/compare/v2.2.69...v2.2.70) (2023-04-20)
+
+
+### Bug Fixes
+
+* **ardy knights:** now has the option to select the unlocked diary for extra pouches ([9f43443](https://github.com/Torwent/wasp-free/commit/9f434437d9116a8ef8f322f122d70e71d2e7389b))
+
+
+
 ## [2.2.69](https://github.com/Torwent/wasp-free/compare/v2.2.68...v2.2.69) (2023-04-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** should now stop tryign to open cooking guild bank when chopping in varrock west ([f4e9c18](https://github.com/Torwent/wasp-free/commit/f4e9c18f85fc432030db40e8a01141b9cb80bb2c))
-
-
-
-## [2.2.65](https://github.com/Torwent/wasp-free/compare/v2.2.64...v2.2.65) (2023-04-08)
-
-
-### Bug Fixes
-
-* **nmz:** nmz compiles again ([21353c0](https://github.com/Torwent/wasp-free/commit/21353c04aa8e5b97cf3e076b1295ac3e19586ae5))
 
 
 
