@@ -10,6 +10,7 @@ begin
 end;
 
 var
+  DiaryLevel: Int32 := 2;
   FoodAmount: Int32 := 20;
   NeckAmount: Int32 := 0;
   MinHealth: Int32 := 20;
@@ -213,6 +214,9 @@ begin
   Self.RSW.Setup([RSRegions.ARDOUGNE]);
   Self.SetupKnight();
 
+  if DiaryLevel = 4 then
+    DiaryLevel += 1;
+
   FoodHandler.Amount := FoodAmount;
 
   Self.CoinPouch := 'Coin pouch';
@@ -285,7 +289,7 @@ end;
 function TThiever.IsPouchFull(): Boolean;
 begin
   if Self.CoinPouchLimit < 1 then
-    Self.CoinPouchLimit := SRL.TruncatedGauss(28, 1);
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
 
   Result := Inventory.CountItemStack(Self.CoinPouch) >= Self.CoinPouchLimit;
 end;
@@ -304,7 +308,7 @@ begin
 
   if Result then
   begin
-    Self.CoinPouchLimit := SRL.TruncatedGauss(28, 1);
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
     Self.TotalActions += pouchCount;
     Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
     WL.Activity.Restart();
@@ -632,7 +636,7 @@ end;
 var
   Thiever: TThiever;
 
-procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+procedure TSRL.Debug({$H-}Bitmap: TMufasaBitmap){$H+}; override;
 begin
   { overriden so it doesn't show so much stuff }
 end;
@@ -648,6 +652,7 @@ end;
 {$IFDEF SCRIPT_GUI}
 type
   TThieverConfig = record(TScriptForm)
+    DiaryLevelSelector: TLabeledComboBox;
     NeckAmountEdit: TLabeledEdit;
   end;
 
@@ -658,6 +663,7 @@ begin
   foodAmountEdit := Self.Form.GetChild('cm_food_amount_edit');
   minHealthEdit  := Self.Form.GetChild('cm_food_minimum_edit');
 
+  DiaryLevel := Self.DiaryLevelSelector.GetItemIndex() + 1;
   FoodAmount := StrToInt(foodAmountEdit.GetText());
   NeckAmount := StrToInt(Self.NeckAmountEdit.GetText());
   MinHealth  := StrToint(minHealthEdit.GetText());
@@ -715,12 +721,23 @@ begin
 
   Self.CreateAccountManager(tab);
 
+  with Self.DiaryLevelSelector do
+  begin
+    Create(tab);
+    SetCaption('Ardougne diaries completed:');
+    SetLeft(TControl.AdjustToDPI(30));
+    SetTop(TControl.AdjustToDPI(180));
+    SetStyle(csDropDownList);
+    AddItemArray(['None/Easy diary', 'Medium diary', 'Hard diary', 'Elite diary']);
+    SetItemIndex(DiaryLevel - 1);
+  end;
+
   with Self.NeckAmountEdit do
   begin
     Create(tab);
     SetCaption('Necklaces amount:');
-    SetLeft(TControl.AdjustToDPI(30));
-    SetTop(TControl.AdjustToDPI(180));
+    SetLeft(Self.DiaryLevelSelector.GetRight() + TControl.AdjustToDPI(30));
+    SetTop(Self.DiaryLevelSelector.GetTop());
     SetWidth(TControl.AdjustToDPI(120));
     SetText(ToStr(NeckAmount));
   end;
