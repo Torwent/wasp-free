@@ -1,3 +1,12 @@
+## [2.2.72](https://github.com/Torwent/wasp-free/compare/v2.2.71...v2.2.72) (2023-04-21)
+
+
+### Bug Fixes
+
+* **smelter:** slightly increased the smelting timer ([6ed91a5](https://github.com/Torwent/wasp-free/commit/6ed91a55a217a8103f4e96b965d65faae2ed3a69))
+
+
+
 ## [2.2.71](https://github.com/Torwent/wasp-free/compare/v2.2.70...v2.2.71) (2023-04-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **smelter:** improved withdrawing ([bd21a81](https://github.com/Torwent/wasp-free/commit/bd21a8106175787079bfe4edf3b856d16f4cfb91))
-
-
-
-## [2.2.67](https://github.com/Torwent/wasp-free/compare/v2.2.66...v2.2.67) (2023-04-14)
-
-
-### Bug Fixes
-
-* **smelter:** attempt to fix runite bars ([5fc530c](https://github.com/Torwent/wasp-free/commit/5fc530c40c468f37159e8b4dd3906c687e4e6970))
 
 
 
