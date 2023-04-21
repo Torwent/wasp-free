@@ -97,11 +97,7 @@ begin
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
-  CombatHandler.Setup(4000);
-  CombatHandler.ManageGear := True;
-  CombatHandler._SetupGear();
-
-  CombatHandler.LootHandler.Setup(RSMonsters.Kraken, 5000);
+  CombatHandler.Setup(False, RSMonsters.Kraken, 5000, 4000);
 
   if not Equipment.ContainsItem('Sanguinesti staff') then
   begin
