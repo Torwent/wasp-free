@@ -1,3 +1,12 @@
+## [2.2.71](https://github.com/Torwent/wasp-free/compare/v2.2.70...v2.2.71) (2023-04-21)
+
+
+### Bug Fixes
+
+* **kraken:** fixed compile issues with recent wasplib changes ([95b087a](https://github.com/Torwent/wasp-free/commit/95b087afb71e9a624a5dac0ebac9de38d60c7413))
+
+
+
 ## [2.2.70](https://github.com/Torwent/wasp-free/compare/v2.2.69...v2.2.70) (2023-04-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **smelter:** attempt to fix runite bars ([5fc530c](https://github.com/Torwent/wasp-free/commit/5fc530c40c468f37159e8b4dd3906c687e4e6970))
-
-
-
-## [2.2.66](https://github.com/Torwent/wasp-free/compare/v2.2.65...v2.2.66) (2023-04-11)
-
-
-### Bug Fixes
-
-* **woodcutter:** should now stop tryign to open cooking guild bank when chopping in varrock west ([f4e9c18](https://github.com/Torwent/wasp-free/commit/f4e9c18f85fc432030db40e8a01141b9cb80bb2c))
 
 
 
