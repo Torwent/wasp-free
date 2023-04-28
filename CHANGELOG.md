@@ -1,3 +1,12 @@
+## [2.2.73](https://github.com/Torwent/wasp-free/compare/v2.2.72...v2.2.73) (2023-04-28)
+
+
+### Bug Fixes
+
+* **enchanter:** fix profit counting ([8ff6fc4](https://github.com/Torwent/wasp-free/commit/8ff6fc4419237f0134f274dd1f009708a24744cd))
+
+
+
 ## [2.2.72](https://github.com/Torwent/wasp-free/compare/v2.2.71...v2.2.72) (2023-04-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **larder builder:** doesn't crash with bankpin anymore ([c5ad867](https://github.com/Torwent/wasp-free/commit/c5ad8678078c0cbce04ce4a88242345a90825e99))
-
-
-
-## [2.2.68](https://github.com/Torwent/wasp-free/compare/v2.2.67...v2.2.68) (2023-04-14)
-
-
-### Bug Fixes
-
-* **smelter:** improved withdrawing ([bd21a81](https://github.com/Torwent/wasp-free/commit/bd21a8106175787079bfe4edf3b856d16f4cfb91))
 
 
 
