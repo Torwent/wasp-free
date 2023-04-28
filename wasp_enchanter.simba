@@ -230,7 +230,7 @@ begin
 
   Self.ActionProfit := (
     ItemData.GetAverage(Self.EnchantedJewel) -
-    ItemData.GetAverage(Self.CosmicRune) + ItemData.GetAverage(RegularJewel)
+    (ItemData.GetAverage(Self.CosmicRune) + ItemData.GetAverage(RegularJewel))
   );
 end;
 
