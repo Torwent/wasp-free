@@ -1,3 +1,12 @@
+## [2.2.74](https://github.com/Torwent/wasp-free/compare/v2.2.73...v2.2.74) (2023-05-04)
+
+
+### Bug Fixes
+
+* **nmz:** attacking monsters shouldn't fail anymore ([023cd06](https://github.com/Torwent/wasp-free/commit/023cd06bd1d933fbded06d94fbc3155b71b59512))
+
+
+
 ## [2.2.73](https://github.com/Torwent/wasp-free/compare/v2.2.72...v2.2.73) (2023-04-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** now has the option to select the unlocked diary for extra pouches ([9f43443](https://github.com/Torwent/wasp-free/commit/9f434437d9116a8ef8f322f122d70e71d2e7389b))
-
-
-
-## [2.2.69](https://github.com/Torwent/wasp-free/compare/v2.2.68...v2.2.69) (2023-04-16)
-
-
-### Bug Fixes
-
-* **larder builder:** doesn't crash with bankpin anymore ([c5ad867](https://github.com/Torwent/wasp-free/commit/c5ad8678078c0cbce04ce4a88242345a90825e99))
 
 
 
