@@ -186,7 +186,7 @@ begin
   DebugLn('Damage item is: ' + ToStr(DamageItem));
 end;
 
-procedure TNMZFighter.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TNMZFighter.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -196,7 +196,6 @@ begin
   Self.SetupBarrels();
   Self.SetupPowerUps();
 
-  RSNPCS.AnyNPC.UpText := ['Attack'];
   Self.MinAbsPoints := 250;
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
@@ -763,9 +762,9 @@ begin
   Result := Self.GetRealLifeState();
 end;
 
-procedure TNMZFighter.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TNMZFighter.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     Self.State := Self.GetState();
@@ -1022,7 +1021,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@NMZConfig.Run);
+  NMZConfig.Run();
   {$ENDIF}
   NMZFighter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

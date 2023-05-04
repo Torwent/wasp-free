@@ -207,7 +207,7 @@ begin
   Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
 end;
 
-procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TThiever.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -594,9 +594,9 @@ begin
   Exit(PICKPOCKET);
 end;
 
-procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TThiever.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     Self.State := Self.GetState();
