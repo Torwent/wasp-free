@@ -1,3 +1,12 @@
+## [2.2.75](https://github.com/Torwent/wasp-free/compare/v2.2.74...v2.2.75) (2023-05-24)
+
+
+### Bug Fixes
+
+* **smelter:** Shouldn't have issues with wait time anymore ([39ea38f](https://github.com/Torwent/wasp-free/commit/39ea38f91d18becfa6a936eba65cd4873429f8ce))
+
+
+
 ## [2.2.74](https://github.com/Torwent/wasp-free/compare/v2.2.73...v2.2.74) (2023-05-04)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **kraken:** fixed compile issues with recent wasplib changes ([95b087a](https://github.com/Torwent/wasp-free/commit/95b087afb71e9a624a5dac0ebac9de38d60c7413))
-
-
-
-## [2.2.70](https://github.com/Torwent/wasp-free/compare/v2.2.69...v2.2.70) (2023-04-20)
-
-
-### Bug Fixes
-
-* **ardy knights:** now has the option to select the unlocked diary for extra pouches ([9f43443](https://github.com/Torwent/wasp-free/commit/9f434437d9116a8ef8f322f122d70e71d2e7389b))
 
 
 
