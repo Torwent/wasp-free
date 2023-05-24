@@ -272,11 +272,11 @@ begin
     Smelting := XPBar.WaitXP(4000);
 end;
 
-function TSmelter.IsMakingItem(waitTime: Int32 = 3400): Boolean;
+function TSmelter.IsMakingItem(waitTime: Int32 = 6000): Boolean;
 var
-  ItemCount: Int32 := Inventory.CountItem(Self.Bar.Item);
+  itemCount: Int32 := Inventory.CountItem(Self.Bar.Item);
 begin
-  if Result := WaitUntil(ItemCount < Inventory.CountItem(Self.Bar.Item), 100, waitTime) then
+  if Result := WaitUntil((itemCount < Inventory.CountItem(Self.Bar.Item)) or not Inventory.ContainsAll(Materials), 100, waitTime) then
     WL.Activity.Restart();
 end;
 
