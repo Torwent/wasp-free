@@ -439,6 +439,7 @@ begin
       Exit(False);
 
     Wait(50, 100);
+
     case Self.Pattern of
       4:
       for 1 to RandomLeft(0, 2) do
