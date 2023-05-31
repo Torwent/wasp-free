@@ -237,7 +237,7 @@ end;
 
 function TEnchanter.EnchantJewel(): Boolean;
 begin
-  if Inventory.ClickItem(RegularJewel) then
+  if Inventory.ClickItem(RegularJewel, '>') then
     Result := WaitUntil(Magic.IsOpen(), 50, 2000);
 
   Self.Enchanting := Result;
