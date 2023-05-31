@@ -1,3 +1,12 @@
+## [2.2.77](https://github.com/Torwent/wasp-free/compare/v2.2.76...v2.2.77) (2023-05-31)
+
+
+### Bug Fixes
+
+* **enchanter:** the script should stop right clicking the jewels now ([d9ce22f](https://github.com/Torwent/wasp-free/commit/d9ce22f5e3d90d6987cad76a4db05d74c8d27578))
+
+
+
 ## [2.2.76](https://github.com/Torwent/wasp-free/compare/v2.2.75...v2.2.76) (2023-05-25)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** fix profit counting ([8ff6fc4](https://github.com/Torwent/wasp-free/commit/8ff6fc4419237f0134f274dd1f009708a24744cd))
-
-
-
-## [2.2.72](https://github.com/Torwent/wasp-free/compare/v2.2.71...v2.2.72) (2023-04-21)
-
-
-### Bug Fixes
-
-* **smelter:** slightly increased the smelting timer ([6ed91a5](https://github.com/Torwent/wasp-free/commit/6ed91a55a217a8103f4e96b965d65faae2ed3a69))
 
 
 
