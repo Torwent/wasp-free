@@ -1,3 +1,12 @@
+## [2.2.78](https://github.com/Torwent/wasp-free/compare/v2.2.77...v2.2.78) (2023-06-01)
+
+
+### Bug Fixes
+
+* **ardy knights:** fail safe attempt for withdraw quantity bug ([fd8ccbd](https://github.com/Torwent/wasp-free/commit/fd8ccbd34a493d7a97e2e42008e6dde7e3144b61))
+
+
+
 ## [2.2.77](https://github.com/Torwent/wasp-free/compare/v2.2.76...v2.2.77) (2023-05-31)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** attacking monsters shouldn't fail anymore ([023cd06](https://github.com/Torwent/wasp-free/commit/023cd06bd1d933fbded06d94fbc3155b71b59512))
-
-
-
-## [2.2.73](https://github.com/Torwent/wasp-free/compare/v2.2.72...v2.2.73) (2023-04-28)
-
-
-### Bug Fixes
-
-* **enchanter:** fix profit counting ([8ff6fc4](https://github.com/Torwent/wasp-free/commit/8ff6fc4419237f0134f274dd1f009708a24744cd))
 
 
 
