@@ -1,3 +1,12 @@
+## [2.2.79](https://github.com/Torwent/wasp-free/compare/v2.2.78...v2.2.79) (2023-06-01)
+
+
+### Bug Fixes
+
+* **offerer:** added bank selection panel that was missing ([85fecee](https://github.com/Torwent/wasp-free/commit/85feceea6a0e16294fdab8da49072359899f959b))
+
+
+
 ## [2.2.78](https://github.com/Torwent/wasp-free/compare/v2.2.77...v2.2.78) (2023-06-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **smelter:** Shouldn't have issues with wait time anymore ([39ea38f](https://github.com/Torwent/wasp-free/commit/39ea38f91d18becfa6a936eba65cd4873429f8ce))
-
-
-
-## [2.2.74](https://github.com/Torwent/wasp-free/compare/v2.2.73...v2.2.74) (2023-05-04)
-
-
-### Bug Fixes
-
-* **nmz:** attacking monsters shouldn't fail anymore ([023cd06](https://github.com/Torwent/wasp-free/commit/023cd06bd1d933fbded06d94fbc3155b71b59512))
 
 
 
