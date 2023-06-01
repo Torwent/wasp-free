@@ -105,7 +105,7 @@ begin
                     ItemData.GetAverage(Self.AltRune));
 end;
 
-procedure TRemainOfferer.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TRemainOfferer.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
   Self.RSW.SetupNamedRegion();
@@ -233,9 +233,9 @@ begin
   Exit(EOffererState.WAIT_STATE);
 end;
 
-procedure TRemainOfferer.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TRemainOfferer.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();
@@ -308,6 +308,7 @@ begin
 
   Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
+  Self.CreateBankSettings();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
 

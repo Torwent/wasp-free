@@ -219,7 +219,7 @@ begin
 
 end;
 
-procedure TEnchanter.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TEnchanter.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
   Self.RSW.SetupNamedRegion();
@@ -371,9 +371,9 @@ begin
         Break;
 end;
 
-procedure TEnchanter.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TEnchanter.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();
@@ -461,7 +461,6 @@ begin
   end;
 
   Self.CreateVersionPanel(tab);
-
   Self.CreateAntibanManager();
   Self.CreateBankSettings();
   Self.CreateWaspLibSettings();
