@@ -346,14 +346,17 @@ end;
 
 function TThiever.Heal(): Boolean;
 var
-  oldHP, newHP: Int32;
+  oldHP, newHP, hpLevel: Int32;
 begin
   newHP := Minimap.GetHPLevel();
+  hpLevel := BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) - 1;
   repeat
     oldHP := newHP;
     if not Inventory.Consume(FOOD_CONSUMABLE) then
       Exit;
-    Result := newHP > Random(oldHP, BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) - 1);
+
+    newHP := Minimap.GetHPLevel();
+    Result := newHP > RandomRight(oldHP, hpLevel);
   until Result;
 
   if Result then
