@@ -1,3 +1,12 @@
+## [2.2.80](https://github.com/Torwent/wasp-free/compare/v2.2.79...v2.2.80) (2023-06-02)
+
+
+### Bug Fixes
+
+* **ardy knights:** should now stop eating over the maximum hp ([a47a3e7](https://github.com/Torwent/wasp-free/commit/a47a3e7551434be80a807ef635b7aa819815df42))
+
+
+
 ## [2.2.79](https://github.com/Torwent/wasp-free/compare/v2.2.78...v2.2.79) (2023-06-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** should not right click items anymore ([d759673](https://github.com/Torwent/wasp-free/commit/d759673fe140f6824ff06510409b4f16564029aa))
-
-
-
-## [2.2.75](https://github.com/Torwent/wasp-free/compare/v2.2.74...v2.2.75) (2023-05-24)
-
-
-### Bug Fixes
-
-* **smelter:** Shouldn't have issues with wait time anymore ([39ea38f](https://github.com/Torwent/wasp-free/commit/39ea38f91d18becfa6a936eba65cd4873429f8ce))
 
 
 
