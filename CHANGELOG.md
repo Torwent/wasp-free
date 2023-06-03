@@ -1,3 +1,12 @@
+## [2.2.81](https://github.com/Torwent/wasp-free/compare/v2.2.80...v2.2.81) (2023-06-03)
+
+
+### Bug Fixes
+
+* **alcher:** now uses forms v2 ([4edb827](https://github.com/Torwent/wasp-free/commit/4edb827a6c26623f0cd219d8b6766ea214d35fe7))
+
+
+
 ## [2.2.80](https://github.com/Torwent/wasp-free/compare/v2.2.79...v2.2.80) (2023-06-02)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** the script should stop right clicking the jewels now ([d9ce22f](https://github.com/Torwent/wasp-free/commit/d9ce22f5e3d90d6987cad76a4db05d74c8d27578))
-
-
-
-## [2.2.76](https://github.com/Torwent/wasp-free/compare/v2.2.75...v2.2.76) (2023-05-25)
-
-
-### Bug Fixes
-
-* **alcher:** should not right click items anymore ([d759673](https://github.com/Torwent/wasp-free/commit/d759673fe140f6824ff06510409b4f16564029aa))
 
 
 
