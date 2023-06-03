@@ -370,13 +370,13 @@ type
 
 procedure TCookerConfig.StartScript(sender: TObject); override;
 begin
-  inherited;
-
   CurrentLocation := ERSLocation(Self.LocSelector.GetItemIndex());
   if Self.FoodSelector.GetText() = 'Custom' then
-    CurrentFood := Self.CustomFoodName.getText()
+    CurrentFood := Self.CustomFoodName.GetText()
   else
     CurrentFood := Self.FoodSelector.GetText();
+
+  inherited;
 end;
 
 procedure TCookerConfig.FoodSelectorOnChange(sender: TObject);

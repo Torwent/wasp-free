@@ -1,7 +1,7 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'f6fc217a-3b03-44e1-8fa7-662dfb48f6d7'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '19'}
 {$IFNDEF SCRIPT_CHAIN}
-  {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+  {$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
 
@@ -336,41 +336,46 @@ var
 type
   TAlcherConfig = record(TScriptForm)
     AlchSelector: TLabeledCombobox;
-    IgnoreProfit: TCheckbox;
+    IgnoreProfit: TLabeledCheckbox;
     CustomItemSelector: TLabeledEdit;
   end;
 
-procedure TAlcherConfig.StartScript(Sender: TObject);
+procedure TAlcherConfig.StartScript(sender: TObject); override;
 var
   str: String;
 begin
-  Self.Init(Sender);
-
-  case Self.AlchSelector.Combobox.getItemIndex() of
+  case Self.AlchSelector.GetItemIndex() of
     0: AlchSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
     1: AlchSpell := ERSSpell.LOW_LEVEL_ALCHEMY;
   end;
 
   LossProtection := Self.IgnoreProfit.IsChecked();
-  str := Self.CustomItemSelector.getText();
+  str := Self.CustomItemSelector.GetText();
   if str = '' then
     str := 'noted Rune 2h sword';
   CustomItem := str;
+
+  inherited;
 end;
 
-procedure TAlcherConfig.Setup(); override;
+procedure TAlcherConfig.Run(); override;
+var
+  tab: TTabSheet;
 begin
-  inherited;
+  Self.Setup('Wasp Alcher');
+  Self.Start.setOnClick(@Self.StartScript);
 
-  UpdateFormSize(Self.Form, Self.Form.GetWidth(), Self.Form.GetHeight() + 50);
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.AlchSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Alchemy spell:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(200);
+    SetLeft(TControl.AdjustToDPI(20));
+    SetTop(TControl.AdjustToDPI(200));
     Combobox.setStyle(csDropDownList);
     Combobox.getItems.Add('High alchemy');
     Combobox.getItems.Add('Low alchemy');
@@ -379,29 +384,26 @@ begin
 
   with Self.IgnoreProfit do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Prevent loss:');
-    SetLeft(Self.AlchSelector.GetLeft() + Self.AlchSelector.GetWidth() + 20);
-    SetTop(Self.AlchSelector.GetTop() + 20);
-    SetEnabled(LossProtection);
+    SetLeft(Self.AlchSelector.GetRight() + TControl.AdjustToDPI(20));
+    SetTop(Self.AlchSelector.GetTop() + TControl.AdjustToDPI(17));
+    SetChecked(LossProtection);
   end;
 
   with Self.CustomItemSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Custom item to alch:');
-    SetLeft(5);
-    SetTop(Self.AlchSelector.GetTop() + Self.AlchSelector.GetHeight());
-    SetWidth(200);
+    SetLeft(Self.AlchSelector.GetLeft());
+    SetTop(Self.AlchSelector.GetBottom() + TControl.AdjustToDPI(20));
     SetText(ToStr(CustomItem));
   end;
 
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
-
-procedure TAlcherConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -414,7 +416,7 @@ var
 {$IFNDEF SCRIPT_CHAIN}
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@AlcherConfig.Run);
+  AlcherConfig.Run();
   {$ENDIF}
   Alcher.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
