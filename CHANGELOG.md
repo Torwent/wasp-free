@@ -1,3 +1,12 @@
+## [2.2.82](https://github.com/Torwent/wasp-free/compare/v2.2.81...v2.2.82) (2023-06-03)
+
+
+### Bug Fixes
+
+* **ardy knights:** improved bank fail safes ([3c8c77d](https://github.com/Torwent/wasp-free/commit/3c8c77db78eca00357bb4ed28baf6f9e1f714d15))
+
+
+
 ## [2.2.81](https://github.com/Torwent/wasp-free/compare/v2.2.80...v2.2.81) (2023-06-03)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** fail safe attempt for withdraw quantity bug ([fd8ccbd](https://github.com/Torwent/wasp-free/commit/fd8ccbd34a493d7a97e2e42008e6dde7e3144b61))
-
-
-
-## [2.2.77](https://github.com/Torwent/wasp-free/compare/v2.2.76...v2.2.77) (2023-05-31)
-
-
-### Bug Fixes
-
-* **enchanter:** the script should stop right clicking the jewels now ([d9ce22f](https://github.com/Torwent/wasp-free/commit/d9ce22f5e3d90d6987cad76a4db05d74c8d27578))
 
 
 
