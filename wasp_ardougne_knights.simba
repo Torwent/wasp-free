@@ -10,9 +10,9 @@ begin
 end;
 
 var
-  DiaryLevel: Int32 := 2;
+  DiaryLevel: Int32 := 3;
   FoodAmount: Int32 := 20;
-  NeckAmount: Int32 := 0;
+  NeckAmount: Int32 := 5;
   MinHealth: Int32 := 20;
 
 const
@@ -531,6 +531,8 @@ begin
           WL.GameSettings.BankWithdrawX := 0;
           Bank.DepositAll();
         end;
+
+        Bank.DepositItem([Self.Necklace, 1], False);
 
         Exit(WAIT_STATE);
       end;
