@@ -1,3 +1,12 @@
+# [2.3.0](https://github.com/Torwent/wasp-free/compare/v2.2.82...v2.3.0) (2023-06-04)
+
+
+### Features
+
+* **sawmill:** added new script sawmill runner ([e28144a](https://github.com/Torwent/wasp-free/commit/e28144a38d677ed4639dd3fd05d749cf50a81383))
+
+
+
 ## [2.2.82](https://github.com/Torwent/wasp-free/compare/v2.2.81...v2.2.82) (2023-06-03)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **offerer:** added bank selection panel that was missing ([85fecee](https://github.com/Torwent/wasp-free/commit/85feceea6a0e16294fdab8da49072359899f959b))
-
-
-
-## [2.2.78](https://github.com/Torwent/wasp-free/compare/v2.2.77...v2.2.78) (2023-06-01)
-
-
-### Bug Fixes
-
-* **ardy knights:** fail safe attempt for withdraw quantity bug ([fd8ccbd](https://github.com/Torwent/wasp-free/commit/fd8ccbd34a493d7a97e2e42008e6dde7e3144b61))
 
 
 
