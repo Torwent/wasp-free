@@ -109,7 +109,7 @@ begin
                   ItemData.GetAverage('Earth rune');
 
   Self.NeededItems := [
-    Self.Coins, Self.Logs, Self.Ring, 'Law rune', 'Air rune', 'Fire rune'
+    Self.Coins, Self.Logs, Self.Ring, 'Law rune', 'Air rune', 'Fire rune', 'Rune pouch', 'Divine rune pouch'
   ];
 end;
 
