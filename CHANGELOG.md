@@ -1,3 +1,12 @@
+## [2.3.2](https://github.com/Torwent/wasp-free/compare/v2.3.1...v2.3.2) (2023-06-04)
+
+
+### Bug Fixes
+
+* **sawmill:** rune pouch and divine rune pouch shouldn't be deposited anymore ([e0abe2f](https://github.com/Torwent/wasp-free/commit/e0abe2fd771349769822d5280937e7078d8ab0e6))
+
+
+
 ## [2.3.1](https://github.com/Torwent/wasp-free/compare/v2.3.0...v2.3.1) (2023-06-04)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** now uses forms v2 ([4edb827](https://github.com/Torwent/wasp-free/commit/4edb827a6c26623f0cd219d8b6766ea214d35fe7))
-
-
-
-## [2.2.80](https://github.com/Torwent/wasp-free/compare/v2.2.79...v2.2.80) (2023-06-02)
-
-
-### Bug Fixes
-
-* **ardy knights:** should now stop eating over the maximum hp ([a47a3e7](https://github.com/Torwent/wasp-free/commit/a47a3e7551434be80a807ef635b7aa819815df42))
 
 
 
