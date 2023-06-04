@@ -1,3 +1,12 @@
+## [2.3.1](https://github.com/Torwent/wasp-free/compare/v2.3.0...v2.3.1) (2023-06-04)
+
+
+### Bug Fixes
+
+* README.md ([37396ec](https://github.com/Torwent/wasp-free/commit/37396ecc1dd99e2210f8ef6aaf989ee84a126547))
+
+
+
 # [2.3.0](https://github.com/Torwent/wasp-free/compare/v2.2.82...v2.3.0) (2023-06-04)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** should now stop eating over the maximum hp ([a47a3e7](https://github.com/Torwent/wasp-free/commit/a47a3e7551434be80a807ef635b7aa819815df42))
-
-
-
-## [2.2.79](https://github.com/Torwent/wasp-free/compare/v2.2.78...v2.2.79) (2023-06-01)
-
-
-### Bug Fixes
-
-* **offerer:** added bank selection panel that was missing ([85fecee](https://github.com/Torwent/wasp-free/commit/85feceea6a0e16294fdab8da49072359899f959b))
 
 
 
