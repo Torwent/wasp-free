@@ -63,7 +63,7 @@ begin
   inherited;
 end;
 
-procedure TAlcher.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TAlcher.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -170,7 +170,9 @@ begin
       Inventory.MouseSlot(Inventory.RandomSlotNearby(slot, slots), MOUSE_LEFT);
       Exit(False);
     end;
-  end;
+  end
+  else
+    Self.AlchItem := '';
 end;
 
 function TAlcher.HandleWarning(): Boolean;

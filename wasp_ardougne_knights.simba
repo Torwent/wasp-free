@@ -356,7 +356,7 @@ begin
       Exit;
 
     newHP := Minimap.GetHPLevel();
-    Result := newHP > RandomRight(oldHP, hpLevel);
+    Result := newHP > Random(oldHP, hpLevel);
   until Result;
 
   if Result then
