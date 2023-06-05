@@ -1,3 +1,12 @@
+## [2.3.3](https://github.com/Torwent/wasp-free/compare/v2.3.2...v2.3.3) (2023-06-05)
+
+
+### Bug Fixes
+
+* read notes ([5c55b2d](https://github.com/Torwent/wasp-free/commit/5c55b2d57f70ad3a0c0234577f88c83d46f236ba))
+
+
+
 ## [2.3.2](https://github.com/Torwent/wasp-free/compare/v2.3.1...v2.3.2) (2023-06-04)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** improved bank fail safes ([3c8c77d](https://github.com/Torwent/wasp-free/commit/3c8c77db78eca00357bb4ed28baf6f9e1f714d15))
-
-
-
-## [2.2.81](https://github.com/Torwent/wasp-free/compare/v2.2.80...v2.2.81) (2023-06-03)
-
-
-### Bug Fixes
-
-* **alcher:** now uses forms v2 ([4edb827](https://github.com/Torwent/wasp-free/commit/4edb827a6c26623f0cd219d8b6766ea214d35fe7))
 
 
 
