@@ -1,3 +1,12 @@
+## [2.3.4](https://github.com/Torwent/wasp-free/compare/v2.3.3...v2.3.4) (2023-06-09)
+
+
+### Bug Fixes
+
+* **enchanter:** tiny logic fixes ([8e5ec8a](https://github.com/Torwent/wasp-free/commit/8e5ec8abcf0df54a1a941c730f44df6ebbb61baf))
+
+
+
 ## [2.3.3](https://github.com/Torwent/wasp-free/compare/v2.3.2...v2.3.3) (2023-06-05)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **sawmill:** added new script sawmill runner ([e28144a](https://github.com/Torwent/wasp-free/commit/e28144a38d677ed4639dd3fd05d749cf50a81383))
-
-
-
-## [2.2.82](https://github.com/Torwent/wasp-free/compare/v2.2.81...v2.2.82) (2023-06-03)
-
-
-### Bug Fixes
-
-* **ardy knights:** improved bank fail safes ([3c8c77d](https://github.com/Torwent/wasp-free/commit/3c8c77db78eca00357bb4ed28baf6f9e1f714d15))
 
 
 
