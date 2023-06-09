@@ -237,16 +237,17 @@ end;
 
 function TEnchanter.EnchantJewel(): Boolean;
 begin
+  XPBar.EarnedXP();
   if Inventory.ClickItem(RegularJewel, '>') then
-    Result := WaitUntil(Magic.IsOpen(), 50, 2000);
+    Result := WaitUntil(Magic.IsOpen() or XPBar.EarnedXP(), 300, 6000);
 
   Self.Enchanting := Result;
 end;
 
 function TEnchanter.WaitEnchanting(): Boolean;
 begin
-  if Enchanting then
-    Result := Inventory.ContainsItem(CosmicRune) and Inventory.ContainsItem(RegularJewel) and XPBar.WaitXP(5000)
+  if Self.Enchanting then
+    Result := Inventory.ContainsAll([Self.CosmicRune, RegularJewel]) and XPBar.WaitXP(5000)
   else
     Result := XPBar.WaitXP(5000);
 
