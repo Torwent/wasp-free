@@ -1,3 +1,12 @@
+## [2.3.5](https://github.com/Torwent/wasp-free/compare/v2.3.4...v2.3.5) (2023-06-11)
+
+
+### Bug Fixes
+
+* **alcher:** read notes ([b5f457c](https://github.com/Torwent/wasp-free/commit/b5f457c9ee340cdb532594c3404033d1b9a4de5b))
+
+
+
 ## [2.3.4](https://github.com/Torwent/wasp-free/compare/v2.3.3...v2.3.4) (2023-06-09)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * README.md ([37396ec](https://github.com/Torwent/wasp-free/commit/37396ecc1dd99e2210f8ef6aaf989ee84a126547))
-
-
-
-# [2.3.0](https://github.com/Torwent/wasp-free/compare/v2.2.82...v2.3.0) (2023-06-04)
-
-
-### Features
-
-* **sawmill:** added new script sawmill runner ([e28144a](https://github.com/Torwent/wasp-free/commit/e28144a38d677ed4639dd3fd05d749cf50a81383))
 
 
 
