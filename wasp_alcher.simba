@@ -15,6 +15,7 @@ var
   CustomItem: TRSItem := 'noted Rune 2h sword';
   AlchSpell: ERSSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
   LossProtection: Boolean := True;
+  WalkGE: Boolean := True;
 
 type
   EAlcherState = (
@@ -38,14 +39,15 @@ type
 
     CLOSE_CONTEXT,
 
-    OUT_OF_SUPPLIES,
+    SWITCH_ITEM,
+    OUT_OF_ITEMS,
+    OUT_OF_NATURES,
     END_SCRIPT
   );
 
   TAlcher = record(TBaseBankScript)
     State: EAlcherState;
     AlchItem: TRSItem;
-    InVarrock: Boolean;
     InGE: Boolean;
   end;
 
@@ -73,8 +75,6 @@ begin
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');
-
-  Self.InVarrock := Self.RSW.InPoly(VARROCK_BOUNDS);
 end;
 
 
@@ -111,7 +111,7 @@ begin
     end;
   end;
 
-  TerminateScript('Can''t find items that are worth alching');
+  Self.AlchItem := 'null';
 end;
 
 
@@ -120,6 +120,15 @@ begin
   if not Magic.IsOpen and not Magic.CanActivate(AlchSpell) then
     Exit;
   Result := Magic.CastSpell(AlchSpell);
+end;
+
+function TAlcher.DeselectItem(): Boolean;
+begin
+  if Inventory.SetSelectedSlot(-1) then
+  begin
+    Wait(1200, 2000);
+    Result := WaitUntil(Inventory.ContainsItem(Self.AlchItem), 100, 2000);
+  end;
 end;
 
 function TAlcher.MoveItem(): Boolean;
@@ -201,7 +210,7 @@ end;
 
 function TAlcher.Terminate(): Boolean; override;
 begin
-  Result := False;
+  Result := True;
 end;
 
 
@@ -236,7 +245,7 @@ begin
     Exit(EAlcherState.CLOSE_INTERFACE);
   end;
 
-  if Self.InVarrock and not Self.InGE then
+  if WalkGE and not Self.InGE then
   begin
     Self.InGE := Self.RSW.AtTile(RSObjects.GEBank.Coordinates, 30);
     if not Self.InGE then
@@ -255,7 +264,7 @@ begin
        not Inventory.ContainsItem('Nature rune') then
     begin
       if BankEmpty and CollectEmpty then
-        Exit(EAlcherState.OUT_OF_SUPPLIES);
+        Exit(EAlcherState.OUT_OF_NATURES);
 
       if BankEmpty then
         Exit(EAlcherState.OPEN_COLLECT);
@@ -269,14 +278,16 @@ begin
   if Inventory.IsOpen() then
   begin
     if ToStr(Self.AlchItem) = '' then
-      Self.SetupAlchItems();
+      Exit(EAlcherState.SWITCH_ITEM);
+    if ToStr(Self.AlchItem) = 'null' then
+      Exit(EAlcherState.OUT_OF_ITEMS);
 
     if not Inventory.ContainsItem(Self.AlchItem) then
     begin
       if Inventory.GetSelectedSlot() > -1 then
         Exit(EAlcherState.DESELECT_ITEM);
 
-      Exit(EAlcherState.OUT_OF_SUPPLIES);
+      Exit(EAlcherState.SWITCH_ITEM);
     end;
       
     if MainScreen.IsUpText('Alchemy ->') then
@@ -310,17 +321,13 @@ begin
       EAlcherState.OPEN_MAGIC_TAB: Magic.Open();
       EAlcherState.OPEN_INV_TAB: Inventory.Open();
       EAlcherState.HANDLE_WARNING: Self.HandleWarning();
-      EAlcherState.DESELECT_ITEM: //todo: make this cleaner.
-      begin
-        if Inventory.SetSelectedSlot(-1) then 
-        begin
-          Wait(1200, 2000);
-          WaitUntil(Inventory.ContainsItem(Self.AlchItem), 100, 2000);
-        end;
-      end;
+      EAlcherState.DESELECT_ITEM: Self.DeselectItem();
+
       EAlcherState.CLOSE_CONTEXT: ChooseOption.Close();
 
-      EAlcherState.OUT_OF_SUPPLIES, EAlcherState.END_SCRIPT: Break;
+      EAlcherState.SWITCH_ITEM: Self.SetupAlchItems();
+      EAlcherState.OUT_OF_ITEMS, EAlcherState.OUT_OF_NATURES,
+      EAlcherState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();
@@ -339,6 +346,7 @@ type
   TAlcherConfig = record(TScriptForm)
     AlchSelector: TLabeledCombobox;
     IgnoreProfit: TLabeledCheckbox;
+    WalkGECheckbox: TLabeledCheckbox;
     CustomItemSelector: TLabeledEdit;
   end;
 
@@ -352,6 +360,8 @@ begin
   end;
 
   LossProtection := Self.IgnoreProfit.IsChecked();
+  WalkGE := Self.WalkGECheckbox.IsChecked();
+
   str := Self.CustomItemSelector.GetText();
   if str = '' then
     str := 'noted Rune 2h sword';
@@ -387,10 +397,19 @@ begin
   with Self.IgnoreProfit do
   begin
     Create(tab);
-    SetCaption('Prevent loss:');
+    SetCaption('Prevent loss');
     SetLeft(Self.AlchSelector.GetRight() + TControl.AdjustToDPI(20));
     SetTop(Self.AlchSelector.GetTop() + TControl.AdjustToDPI(17));
     SetChecked(LossProtection);
+  end;
+
+  with Self.WalkGECheckbox do
+  begin
+    Create(tab);
+    SetCaption('Walk to GE (Varrock only)');
+    SetLeft(Self.IgnoreProfit.GetRight() + TControl.AdjustToDPI(20));
+    SetTop(Self.IgnoreProfit.GetTop());
+    SetChecked(WalkGE);
   end;
 
   with Self.CustomItemSelector do
