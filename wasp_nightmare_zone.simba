@@ -117,14 +117,13 @@ begin
     SUPER_MAGIC_POTION:   Self.Potion := 'Super magic potion';
   end;
 
-  SetLength(Self.BoostPotion, 4);
   for i := 1 to 4 do
   begin
     str := Self.Potion + ' (' + ToStr(i) + ')';
-    Self.BoostPotion[i-1] := str;
+    Self.BoostPotion += str;
   end;
 
-  if Potion.Contains('Overload') then
+  if Self.Potion.Contains('Overload') then
     Self.BoostTimer.Init(300000)
   else
     Self.BoostTimer.Init(420000);
@@ -264,10 +263,10 @@ end;
 //Outside Dream.
 function TNMZFighter.OpenChest(): Boolean;
 begin
-  if RSObjects.NMZChest.WalkClick then
+  if RSObjects.NMZChest.WalkClick() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(MainScreen.IsClassicOpen, 100, 5000);
+    Result := WaitUntil(MainScreen.IsClassicOpen(), 100, 5000);
   end;
 end;
 
@@ -277,12 +276,12 @@ begin
 end;
 
 
-function TNMZFighter.CountDoses(PotionArray: TRSItemArray): Int32;
+function TNMZFighter.CountDoses(potionArray: TRSItemArray): Int32;
 var
   i: Int32;
 begin
-  for i := 0 to High(PotionArray) do
-    Result += Inventory.CountItem(PotionArray[i]) * (i + 1);
+  for i := 0 to High(potionArray) do
+    Result += Inventory.CountItem(potionArray[i]) * (i + 1);
 end;
 
 function TNMZFighter.PotAmountNeeded(Potion: TRSItemArray): Int32;
@@ -413,16 +412,8 @@ end;
 
 //Inside Dream.
 function TNMZFighter.HasBoostPot(): Boolean;
-var
-  PotDose: TRSItem;
-  Slots: TIntegerArray;
 begin
-  if not Inventory.Open then Exit;
-
-  for PotDose in Self.BoostPotion do
-    Inventory.FindItem(PotDose, Slots);
-
-  Result := Slots <> [];
+  Result := Inventory.ContainsAny(Self.BoostPotion);
 end;
 
 function TNMZFighter.NeedBoost(): Boolean;
@@ -459,8 +450,6 @@ begin
 end;
 
 function TNMZFighter.NeedLowerHP(hpLevel: Int32 = -1): Boolean;
-var
-  str: String;
 begin
   if not Self.InDream() then
     Exit;
@@ -469,15 +458,13 @@ begin
     hpLevel := Minimap.GetHPLevel(); //if we don't pass a value in, set it.
 
   if hpLevel = 1 then
-    Exit(False);
+    Exit;
 
-  str := ToStr(Self.BoostPotion[0]);
-  if str.Contains('Overload') and Self.HasBoostPot() then
-    Exit(Self.Boosted and (hpLevel < 51));
+  if (Self.Potion = 'Overload') and Self.HasBoostPot() then
+    Exit(hpLevel < 51);
 
   Result := True;
 end;
-
 
 function TNMZFighter.LowerHealth(): Boolean;
 var
@@ -491,19 +478,20 @@ begin
   if ToStr(Self.DamageItem) <> 'Locator orb' then
     slotOption := 'Guzzle';
 
-  if Inventory.FindItem(Self.DamageItem, slot) then
+  currentHP := Minimap.GetHPLevel();
+  slot := Inventory.FindItem(Self.DamageItem);
+  if slot = -1 then
+    Exit(currentHP = 1);
+
+  while Self.NeedLowerHP(currentHP) do
   begin
-    currentHP := Minimap.GetHPLevel();
-    while Self.NeedLowerHP(currentHP) do
-    begin
-      Inventory.ClickSlot(slot, slotOption);
-      Wait(100);
+    Inventory.ClickSlot(slot, slotOption);
+    Wait(100);
 
-      if not WaitUntil(currentHP > (newHP := Minimap.GetHPLevel()), 100, 1500) then
-        Antiban.SmallRandomMouse();
+    if not WaitUntil(currentHP > (newHP := Minimap.GetHPLevel()), 100, 1500) then
+      Antiban.SmallRandomMouse();
 
-      CurrentHP := NewHP;
-    end;
+    currentHP := newHP;
   end;
 
   Result := currentHP = 1;
@@ -511,51 +499,52 @@ end;
 
 function TNMZFighter.DrinkPotion(potionArray: TRSItemArray): Boolean;
 var
-  doseCount: Int32 := Self.CountDoses(potionArray);
-  i, slot, currentHP: Int32;
-  PotStr: String := ToStr(potionArray[0]);
+  isOvl, isBoost: Boolean;
+  doseCount, slot, currentHP: Int32;
+  slots: TIntegerArray;
 begin
-  if not Inventory.Open then
+  if not Inventory.Open() then
     Exit;
 
-  for i := 0 to High(potionArray) do
-  begin
-    if Inventory.FindItem(potionArray[i], slot) then
-      Break
-    else if i = High(potionArray) then
-      Exit;
-  end;
+  slots := Inventory.FindItems(potionArray);
+  if slots = [] then
+    Exit;
 
-  if PotStr.Contains('Overload') then
+  slot := slots[0];
+  isOvl := Self.Potion = 'Overload';
+
+  if isOvl then
     currentHP := Minimap.GetHPLevel();
 
+  doseCount := Self.CountDoses(potionArray);
   if Inventory.ClickSlot(slot) then
-    Result := WaitUntil(
-                Self.CountDoses(potionArray) < doseCount, 100, 2000);
+    Result := WaitUntil(Self.CountDoses(potionArray) < doseCount, 100, 2000);
 
-  if (potionArray = Self.BoostPotion) then
+  isBoost := isOvl or (potionArray = Self.BoostPotion);
+
+  if isBoost then
   begin
-    if PotStr.Contains('Overload') then
+    if isOvl then
       Result := WaitUntil(Minimap.GetHPLevel() < currentHP, 100, 4000)
     else
       Wait(1200, 1600);
   end;
 
-  if Result then
+  if not Result then
+    Exit;
+
+  if not isBoost then
   begin
-    if (potionArray = Self.BoostPotion) then
-    begin
-      if PotStr.Contains('Overload') then
-        if not WaitUntil(Minimap.GetHPLevel() <= (currentHP - 45), 100, 12000) then
-          Exit(False);
-
-      Boosted := True;
-      BoostTimer.Restart(Random(1000, 15000));
-    end
-
-    else
-      MinAbsPoints := Random(300, 940);
+    Self.MinAbsPoints := Random(300, 940);
+    Exit;
   end;
+
+  Self.Boosted := not isOvl or WaitUntil(Minimap.GetHPLevel() <= (currentHP - 45), 100, 12000);
+
+  if not Self.Boosted then
+    Exit(False);
+
+  Self.BoostTimer.Restart(1000, 15000);
 end;
 
 function TNMZFighter.FlickPrayer(): Boolean;
