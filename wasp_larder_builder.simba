@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '31'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -18,7 +18,7 @@ var
   CurrentLarder: ERSLarder := OAK_LARDER;
 
 type
-  EState = (
+  ELarderState = (
     LEVEL_UP,
     WAIT_STATE,
 
@@ -41,7 +41,7 @@ type
   );
 
   TBuilder = record(TBaseWalkerScript)
-    State: EState;
+    State: ELarderState;
     POH: TRSWalker;
 
     BuiltLarder: TRSObject;
@@ -117,7 +117,7 @@ begin
   inherited;
 end;
 
-procedure TBuilder.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TBuilder.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
   RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH]);
@@ -258,7 +258,7 @@ begin
 end;
 
 
-function TBuilder.GetState(): EState;
+function TBuilder.GetState(): ELarderState;
 var
   s: String;
 begin
@@ -266,82 +266,82 @@ begin
     Exit(END_SCRIPT);
 
   if Chat.LeveledUp() then
-    Exit(EState.LEVEL_UP);
+    Exit(ELarderState.LEVEL_UP);
 
   s := Chat.GetChatTitle();
 
   if s.Contains('remove') then
-    Exit(EState.HANDLE_LARDER_CHAT);
+    Exit(ELarderState.HANDLE_LARDER_CHAT);
 
   if s.Contains('Select') then
-    Exit(EState.HANDLE_PHIALS_CHAT);
+    Exit(ELarderState.HANDLE_PHIALS_CHAT);
 
   if s.Contains('Repeat') then
-    Exit(EState.HANDLE_SERVANT);
+    Exit(ELarderState.HANDLE_SERVANT);
 
   if MainScreen.IsClassicOpen() then
   begin
     if BankPin.IsOpen() then
-      Exit(EState.HANDLE_PIN);
-    Exit(EState.HANDLE_FURNITURE_UI);
+      Exit(ELarderState.HANDLE_PIN);
+    Exit(ELarderState.HANDLE_FURNITURE_UI);
   end;
 
   if not Minimap.InPOH() then
   begin
     if not UsePhials or Inventory.IsFull() then
-      Exit(EState.ENTER_HOUSE);
-    Exit(EState.GET_PLANKS);
+      Exit(ELarderState.ENTER_HOUSE);
+    Exit(ELarderState.GET_PLANKS);
   end;
 
   if Self.LarderIsBuilt then
-    Exit(EState.DESTROY_LARDER);
+    Exit(ELarderState.DESTROY_LARDER);
 
   if Inventory.Count() > Self.MinInvCount then
   begin
     WaitingServant := False;
-    Exit(EState.BUILD_LARDER);
+    Exit(ELarderState.BUILD_LARDER);
   end;
 
   if Self.UsePhials then
-    Exit(EState.EXIT_HOUSE);
+    Exit(ELarderState.EXIT_HOUSE);
 
   if WaitingServant then
   begin
     if ServantNPC.IsVisible() then
-      Exit(EState.TALK_SERVANT);
-    Exit(EState.WAIT_STATE);
+      Exit(ELarderState.TALK_SERVANT);
+    Exit(ELarderState.WAIT_STATE);
   end;
 
-  Exit(EState.CALL_SERVANT);
+  Exit(ELarderState.CALL_SERVANT);
 end;
 
-procedure TBuilder.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TBuilder.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
-    case State of
-      EState.LEVEL_UP: Chat.HandleLevelUp();
+    case Self.State of
+      ELarderState.LEVEL_UP: Chat.HandleLevelUp();
 
-      EState.HANDLE_LARDER_CHAT: Self.HandleLarderChat();
-      EState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
-      EState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
-      EState.HANDLE_SERVANT: Self.HandleServant();
-      EState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
+      ELarderState.HANDLE_LARDER_CHAT: Self.HandleLarderChat();
+      ELarderState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
+      ELarderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
+      ELarderState.HANDLE_SERVANT: Self.HandleServant();
+      ELarderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
 
-      EState.CALL_SERVANT: Self.CallServant();
-      EState.TALK_SERVANT: Self.TalkServant();
-      EState.EXIT_HOUSE: Options.LeaveHouse();
-      EState.GET_PLANKS: Self.PhialsGetPlanks();
+      ELarderState.CALL_SERVANT: Self.CallServant();
+      ELarderState.TALK_SERVANT: Self.TalkServant();
+      ELarderState.EXIT_HOUSE: Options.LeaveHouse();
+      ELarderState.GET_PLANKS: Self.PhialsGetPlanks();
 
-      EState.ENTER_HOUSE: Self.EnterHouse();
-      EState.BUILD_LARDER: Self.BuildLarder();
-      EState.DESTROY_LARDER: Self.DestroyLarder();
+      ELarderState.ENTER_HOUSE: Self.EnterHouse();
+      ELarderState.BUILD_LARDER: Self.BuildLarder();
+      ELarderState.DESTROY_LARDER: Self.DestroyLarder();
 
-      EState.WAIT_STATE: Wait(7000, 8000);
+      ELarderState.WAIT_STATE: Wait(7000, 8000);
 
       END_SCRIPT: Break;
     end;
@@ -500,85 +500,112 @@ type
     LarderSelector: TLabeledCombobox;
     BuilderInfo: TLabel;
     ImagePanel: TImage;
-    Pic: TPicture;
   end;
 
-procedure TBuilderConfig.StartScript(Sender: TObject);
+procedure TBuilderConfig.StartScript(sender: TObject); override;
 begin
-  Self.Init(Sender);
-
-  CurrentNPC := ERSNPC(Self.NPCSelector.Combobox.getItemIndex());
-  CurrentLarder := ERSLarder(Self.LarderSelector.Combobox.getItemIndex());
+  CurrentNPC := ERSNPC(Self.NPCSelector.GetItemIndex());
+  CurrentLarder := ERSLarder(Self.LarderSelector.GetItemIndex());
+  inherited;
 end;
 
-procedure TBuilderConfig.Setup(); override;
+procedure TBuilderConfig.NPCSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
 begin
-  inherited;
+  combobox := sender;
+  case combobox.getItemIndex() of
+    0: Self.BuilderInfo.SetCaption(
+       'Make sure you have noted planks with you.' +
 
-  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 250);
+       LineEnding + LineEnding +
+       'Your house layout must look exactly like the image to the right!' +
+       LineEnding +
+       'Looking close enough won''t do, it has to look exactly the same.' +
+       LineEnding +
+       'If you have more rooms, move them 3 squares away so they are never,' +
+       LineEnding +
+       'ever visible on the minimap.'
+       );
+
+    1: Self.BuilderInfo.SetCaption(
+       'Make sure you have planks in your bank and you have previously' +
+       LineEnding +
+       'asked the buttler to fetch you 24 planks.' +
+       LineEnding +
+       'You also need money in your servant''s money bag and you need to' +
+       LineEnding +
+       'replenish it manually once in a while.' +
+
+       LineEnding + LineEnding +
+       'Your house layout must look exactly like the image to the right!' +
+       LineEnding +
+       'Looking close enough won''t do, it has to look exactly the same.' +
+       LineEnding +
+       'If you have more rooms, move them 3 squares away so they are never,' +
+       LineEnding +
+       'ever visible on the minimap.'
+       );
+  end;
+end;
+
+procedure TBuilderConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Builder');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.NPCSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Method:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    AddItem('Phials');
-    AddItem('Demon butler');
-    Combobox.setItemIndex(Ord(CurrentNPC));
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(150));
+    SetStyle(csDropDownList);
+    AddItemArray(['Phials', 'Demon butler']);
+    SetItemIndex(Ord(CurrentNPC));
+    Combobox.SetOnChange(@Self.NPCSelectorOnChange);
   end;
 
   with Self.LarderSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Larder:');
-    SetLeft(Self.NPCSelector.GetLeft() + Self.NPCSelector.GetWidth() + 10);
     SetTop(Self.NPCSelector.GetTop());
-    SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    AddItem('Regular');
-    AddItem('Oak');
-    Combobox.setItemIndex(Ord(CurrentLarder));
+    SetLeft(Self.NPCSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetStyle(csDropDownList);
+    AddItemArray(['Regular', 'Oak']);
+    SetItemIndex(Ord(CurrentLarder));
   end;
 
   with Self.BuilderInfo do
   begin
-    Create(Self.SSPanel.Panel);
-
-    SetCaption('For Phials method make sure you have noted planks with you.' +
-               LineEnding +
-               'For Demon butler make sure you previously asked him for 24 planks and' +
-               LineEnding +
-               'you need to have money in the servant''s money bag.' +
-               LineEnding +
-               'You need a decoration that has green grass and the following layout:');
-
-    SetLeft(5);
-    SetTop(Self.NPCSelector.GetTop() + Self.NPCSelector.GetHeight() + 2);
+    Create(tab);
+    SetLeft(Self.NPCSelector.GetLeft());
+    SetTop(Self.NPCSelector.GetBottom() + TControl.AdjustToDPI(15));
   end;
-
-  Self.Pic.Init();
-  Self.Pic.LoadFromFile(IncludePath+'\WaspLib\docs\images\POH_layout.png');
 
   with Self.ImagePanel do
   begin
-    Create(Self.SSPanel.Panel);
-    SetTop(Self.BuilderInfo.GetTop() + 65);
-    SetLeft(Self.BuilderInfo.GetLeft() + 80);
-    setWidth(195);
-    SetHeight(194);
-    setPicture(Self.Pic);
+    Create(tab);
+    SetTop(Self.LarderSelector.GetTop() + TControl.AdjustToDPI(15));
+    SetLeft(Self.LarderSelector.GetRight() + TControl.AdjustToDPI(80));
+    LoadFromFile(IncludePath+'\WaspLib\docs\images\POH_layout.png');
+    SetWidth(TControl.AdjustToDPI(195));
+    SetHeight(TControl.AdjustToDPI(194));
   end;
 
-
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
-
-procedure TBuilderConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+  Self.NPCSelectorOnChange(Self.NPCSelector.ComboBox);
 
   inherited;
 end;
@@ -589,7 +616,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@BuilderConfig.Run);
+  BuilderConfig.Run();
   {$ENDIF}
   Builder.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

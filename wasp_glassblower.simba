@@ -117,7 +117,7 @@ begin
   ItemChanged := False;
 end;
 
-procedure TBlower.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TBlower.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
   Self.RSW.SetupNamedRegion();
@@ -312,9 +312,9 @@ begin
         Break;
 end;
 
-procedure TBlower.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TBlower.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     if Self.UseBestItem then

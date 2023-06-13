@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '207b1ab4-561d-4543-8467-705cdfce98ec'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '24'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -23,8 +23,8 @@ type
 
 var
   CurrentTree: ERSTree := ERSTree.TEAK_TREE;
-  BankLocation: ERSBank := ERSBank.POWER_WC;
-  UseSawmill: Boolean := False;
+  BankLocation: ERSBank := ERSBank.PRIFDDINAS;
+  UseSawmill: Boolean := True;
   PickNests: Boolean := True;
 
 type
@@ -46,7 +46,6 @@ type
     HANDLE_MAKE,
 
     DROP_ITEMS,
-
     END_SCRIPT
   );
 
@@ -59,21 +58,18 @@ type
     ToolType: TCTS2Color;
     ToolShift: Int32;
 
-    GearOutfit: TRSItemArray;
-    Plank: TRSItem;
-    PlankPrice: Int32;
+    Logs, Plank: TRSItem;
+    PlankSawmillPrice, PlankCost: Int32;
     SawmillString: String;
-    BankList: TRSItemArray;
-    DropList: TRSItemArray;
+    GearOutfit, BankList, DropList: TRSItemArray;
 
-    Woodcutting: Boolean;
-    UseBank: Boolean;
+    Woodcutting, UseBank: Boolean;
   end;
 
 procedure TAntiban.Setup(); override;
 begin
   Self.Skills := [ERSSkill.WOODCUTTING, ERSSkill.TOTAL];
-  Self.MinZoom := 30;
+  Self.MinZoom := 15;
   Self.MaxZoom := 60;
 
   inherited;
@@ -105,41 +101,44 @@ begin
     RSObjects.MagicTree.Setup(['own Magi']);
   end;
 
-  TreeTimerMultiplier := 1;
+  Self.TreeTimerMultiplier := 1;
 
   case CurrentTree of
     ERSTree.REGULAR_TREE:
       begin
-        RSTree := RSObjects.RegularTree;
-        Plank := 'Plank';
-        PlankPrice := 100;
-        SawmillString := 'Wood - 100gp';
+        Self.RSTree := RSObjects.RegularTree;
+        Self.Logs := 'Logs';
+        Self.Plank := 'Plank';
+        Self.PlankSawmillPrice := 100;
+        Self.SawmillString := 'Wood - 100gp';
       end;
 
     ERSTree.OAK_TREE:
       begin
-        RSTree := RSObjects.OakTree;
-        Plank := 'Oak plank';
-        PlankPrice := 250;
-        SawmillString := 'Oak - 250gp';
+        Self.RSTree := RSObjects.OakTree;
+        Self.Logs := 'Oak logs';
+        Self.Plank := 'Oak plank';
+        Self.PlankSawmillPrice := 250;
+        Self.SawmillString := 'Oak - 250gp';
       end;
 
     ERSTree.TEAK_TREE:
       begin
-        RSTree := RSObjects.TeakTree;
-        Plank := 'Teak plank';
-        PlankPrice := 500;
-        SawmillString := 'Teak - 500gp';
+        Self.RSTree := RSObjects.TeakTree;
+        Self.Logs := 'Teak logs';
+        Self.Plank := 'Teak plank';
+        Self.PlankSawmillPrice := 500;
+        Self.SawmillString := 'Teak - 500gp';
       end;
 
     ERSTree.MAHOGANY_TREE:
       begin
-        RSTree := RSObjects.MahoganyTree;
-        Plank := 'Mahogany plank';
-        PlankPrice := 1500;
-        SawmillString := 'Mahogany - 1,500gp';
+        Self.RSTree := RSObjects.MahoganyTree;
+        Self.Logs := 'Mahogany logs';
+        Self.Plank := 'Mahogany plank';
+        Self.PlankSawmillPrice := 1500;
+        Self.SawmillString := 'Mahogany - 1,500gp';
       end;
-
 
     ERSTree.WILLOW_TREE:      RSTree := RSObjects.WillowTree;
     ERSTree.MAPLE_TREE:       RSTree := RSObjects.MapleTree;
@@ -149,30 +148,34 @@ begin
   end;
 
   if Ord(CurrentTree) >= Ord(ERSTRee.MAPLE_TREE) then
-    TreeTimerMultiplier += 1;
+    Self.TreeTimerMultiplier += 1;
 
   if Ord(CurrentTree) >= Ord(ERSTRee.YEW_TREE) then
-    TreeTimerMultiplier += 2;
+    Self.TreeTimerMultiplier += 2;
 
   if Ord(CurrentTree) >= Ord(ERSTRee.MAGIC_TREE) then
-    TreeTimerMultiplier += 3;
+    Self.TreeTimerMultiplier += 3;
 
-  DropList := [
+  Self.DropList := [
     'Logs', 'Oak logs', 'Willow logs', 'Teak logs', 'Maple logs',
     'Mahogany logs', 'Yew logs', 'Blisterwood logs', 'Magic logs'
   ];
 
-  BankList := DropList;
+  Self.BankList := Self.DropList;
 
-  if ToStr(Plank) <> '' then
-    BankList += Plank;
+  if ToStr(Self.Plank) <> '' then
+  begin
+    Self.BankList += Self.Plank;
+    Self.PlankCost := ItemData.GetAverage(Self.Plank);
+  end;
 
-  BankList += 23866;
-  BankList += 23966;
-  BankList += 23967;
-  BankList += 23968;
-  BankList += 23969;
-  BankList += 23970;  //Crystal shards
+  Self.BankList += 'Bird nest';
+  Self.BankList += 23866;
+  Self.BankList += 23966;
+  Self.BankList += 23967;
+  Self.BankList += 23968;
+  Self.BankList += 23969;
+  Self.BankList += 23970;  //Crystal shards
 end;
 
 procedure TWoodcutter.SetupBank();
@@ -310,7 +313,7 @@ begin
 end;
 
 
-procedure TWoodcutter.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TWoodcutter.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -366,18 +369,16 @@ begin
 end;
 
 function TWoodcutter.DropItems(): Boolean;
-var
-  InvCount: Int32 := 28;
 begin
-  Result := Inventory.ShiftDrop(DropList, Inventory.RandomPattern);
+  Result := Inventory.ShiftDrop(Self.DropList, Inventory.RandomPattern());
 
-  TotalActions += (InvCount - Inventory.Count);
+  Self.TotalActions += (28 - Inventory.Count());
 end;
 
 
 function TWoodcutter.HasEnoughMoney(): Boolean;
 begin
-  Result := Inventory.CountItemStack('Coins') >= PlankPrice;
+  Result := Inventory.CountItemStack('Coins') >= PlankSawmillPrice;
 end;
 
 
@@ -404,6 +405,7 @@ begin
   begin
     if not Self.RSW.WebWalk([4103, 2075], 15, 0.2) then
       Exit;
+
     if not RSNPCs.SawmillOperator.SelectOption(['Buy', 'plank']) then
       Exit;
   end
@@ -415,9 +417,31 @@ begin
 end;
 
 function TWoodcutter.MakePlanks(): Boolean;
+var
+  logCount, profit: Int32;
 begin
+  logCount := Inventory.CountItem(Self.Logs);
   if Make.Select(SawmillString, MAKE_QUANTITY_ALL, SRL.Dice(95)) then
-    Result := WaitUntil(Inventory.ContainsItem(Plank), 200, 10000);
+    Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 10000);
+
+  if Result then
+  begin
+    profit := Self.PlankCost - Self.PlankSawmillPrice;
+    Self.TotalProfit += profit * logCount;
+  end;
+end;
+
+function TWoodcutter.Deposit(): Boolean;
+var
+  logCount: Int32;
+begin
+  logCount := Inventory.CountItem(Self.Logs);
+  Result := Bank.DepositItemArray(Self.BankTab, Self.BankList, True);
+
+  if Result then
+    Self.TotalActions += logCount
+  else
+    WriteLn 'Failed to deposit!';
 end;
 
 
@@ -432,9 +456,11 @@ end;
 
 function TWoodcutter.IsCutting(): Boolean;
 var
-  B: TBox := MainScreen.GetPlayerBox;
+  b: TBox;
 begin
-  Result := Woodcutting := SRL.IsAnimating(B, MainScreen.NormalizeDistance(600), 350, 10 * TreeTimerMultiplier);
+  b := MainScreen.GetPlayerBox();
+  Self.Woodcutting := SRL.IsAnimating(b, MainScreen.NormalizeDistance(600), 350, 10 * TreeTimerMultiplier);
+  Result := Self.Woodcutting;
 end;
 
 function TWoodcutter.WaitCutting(): Boolean;
@@ -452,7 +478,7 @@ begin
 
   if Chat.LeveledUp() then
   begin
-    Woodcutting := False;
+    Self.Woodcutting := False;
     Exit(EWoodcutterState.LEVEL_UP);
   end;
 
@@ -497,9 +523,9 @@ begin
   Exit(EWoodcutterState.CUT_TREE);
 end;
 
-procedure TWoodcutter.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TWoodcutter.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();
@@ -507,7 +533,7 @@ begin
 
     case State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen();
-      EWoodcutterState.DEPOSIT_ITEMS: Bank.DepositItemArray(BankTab, BankList, True);
+      EWoodcutterState.DEPOSIT_ITEMS: Self.Deposit();
       EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
       EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree.Coordinates, 10, 0.2);
       EWoodcutterState.WAIT_STATE: Self.WaitCutting();
@@ -534,17 +560,15 @@ type
   TCutterConfig = record(TScriptForm)
     TreeSelector: TLabeledCombobox;
     BankSelector: TLabeledCombobox;
-    SawmillState: TCheckbox;
-    PickNestsState: TCheckbox;
+    SawmillState: TLabeledCheckbox;
+    PickNestsState: TLabeledCheckbox;
   end;
 
-procedure TCutterConfig.StartScript(Sender: TObject);
+procedure TCutterConfig.StartScript(sender: TObject); override;
 begin
-  Self.Init(Sender);
-
   CurrentTree := ERSTree(Self.TreeSelector.Combobox.getItemIndex());
 
-  case Self.BankSelector.Combobox.getText() of
+  case Self.BankSelector.GetText() of
     'Power WC (cut and drop)': BankLocation := ERSBank.POWER_WC;
     'Grand Exchange':          BankLocation := ERSBank.GE;
     'Varrock east':            BankLocation := ERSBank.VARROCK_E;
@@ -558,182 +582,131 @@ begin
 
   UseSawmill := Self.SawmillState.IsChecked();
   PickNests := Self.PickNestsState.IsChecked();
+
+  inherited;
 end;
 
-{$H-}
-procedure TCutterConfig.TreeSelectorOnChange(Sender: TObject);
+
+procedure TCutterConfig.BankSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
 begin
-  case ERSTree(Self.TreeSelector.Combobox.getItemIndex()) of
+  combobox := sender;
+  Self.SawmillState.SetChecked(False);
+  Self.SawmillState.setEnabled(False);
+
+  case combobox.GetText() of
+    'Varrock east', 'Woodcutting guild', 'Prifddinas':
+        case ERSTree(Self.TreeSelector.GetItemIndex()) of
+          REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
+            Self.SawmillState.SetEnabled(True);
+        end;
+  end;
+end;
+
+procedure TCutterConfig.TreeSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+  Self.BankSelector.Clear();
+
+  case ERSTree(combobox.getItemIndex()) of
     REGULAR_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Power WC (cut and drop)');
-        Self.BankSelector.AddItem('Grand Exchange');
-        Self.BankSelector.AddItem('Varrock east (cuts close to sawmill)');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItemArray(['Power WC (cut and drop)',
+      'Grand Exchange', 'Varrock east (cuts close to sawmill)']);
 
     OAK_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Power WC (cut and drop)');
-        Self.BankSelector.AddItem('Varrock east (cuts close to sawmill)');
-        Self.BankSelector.AddItem('Varrock west');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItemArray(['Power WC (cut and drop)',
+      'Varrock east (cuts close to sawmill)', 'Varrock west']);
 
     WILLOW_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Power WC (cut and drop)');
-        Self.BankSelector.AddItem('Draynor');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItemArray(['Power WC (cut and drop)', 'Draynor']);
 
     TEAK_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Power WC (cut and drop)');
-        Self.BankSelector.AddItem('Prifddinas');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItemArray(['Power WC (cut and drop)', 'Prifddinas']);
 
     MAPLE_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Power WC (cut and drop)');
-        Self.BankSelector.AddItem('Seers'' village');
-        Self.BankSelector.AddItem('Woodcutting guild');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItemArray(['Power WC (cut and drop)',
+      'Seers'' village', 'Woodcutting guild']);
 
     MAHOGANY_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Prifddinas');
-        Self.SawmillState.setEnabled(True);
-      end;
+      Self.BankSelector.AddItem('Prifddinas');
 
     YEW_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Seers'' village');
-        Self.BankSelector.AddItem('Edgeville');
-        Self.BankSelector.AddItem('Woodcutting guild');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItemArray(['Seers'' village', 'Edgeville',
+      'Woodcutting guild']);
 
     BLISTERWOOD_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Power WC (cut and drop)');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItem('Power WC (cut and drop)');
 
     MAGIC_TREE:
-      begin
-        Self.BankSelector.Clear;
-        Self.BankSelector.AddItem('Woodcutting guild');
-        Self.BankSelector.AddItem('Prifddinas');
-        Self.SawmillState.setEnabled(False);
-      end;
+      Self.BankSelector.AddItemArray(['Woodcutting guild', 'Prifddinas']);
   end;
 
   Self.BankSelector.SetItemIndex(0);
+  Self.BankSelectorOnChange(Self.BankSelector.ComboBox);
 end;
 
-procedure TCutterConfig.BankSelectorOnChange(Sender: TObject);
+procedure TCutterConfig.Run(); override;
+var
+  tab: TTabSheet;
 begin
-  case Self.BankSelector.Combobox.getText() of
-    'Varrock east', 'Woodcutting guild', 'Prifddinas':
-      begin
-        case ERSTree(Self.TreeSelector.Combobox.getItemIndex()) of
-          REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
-            begin
-              Self.SawmillState.setState(cbUnchecked);
-              Self.SawmillState.setEnabled(True);
-            end;
+  Self.Setup('Wasp Woodcutter');
+  Self.Start.setOnClick(@Self.StartScript);
 
-          else
-            begin
-              Self.SawmillState.setState(cbUnchecked);
-              Self.SawmillState.setEnabled(False);
-            end;
-        end;
-      end;
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
 
-    else
-      begin
-        Self.SawmillState.setState(cbUnchecked);
-        Self.SawmillState.setEnabled(False);
-      end;
-  end;
-end;
-{$H+}
-
-procedure TCutterConfig.Setup(); override;
-begin
-  inherited;
-
-  UpdateFormSize(Self.Form, 0, Self.Form.GetHeight() + 30);
+  Self.CreateAccountManager(tab);
 
   with Self.TreeSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Tree type:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(200);
+    SetLeft(TControl.AdjustToDPI(15));
+    SetTop(TControl.AdjustToDPI(150));
     SetStyle(csDropDownList);
-    AddItem('Regular tree');
-    AddItem('Oak tree');
-    AddItem('Willow tree');
-    AddItem('Teak tree');
-    AddItem('Maple tree');
-    AddItem('Mahogany tree');
-    AddItem('Yew tree');
-    AddItem('Blisterwood tree');
-    AddItem('Magic tree');
+    AddItemArray(['Regular tree', 'Oak tree', 'Willow tree', 'Teak tree',
+                  'Maple tree', 'Mahogany tree', 'Yew tree', 'Blisterwood tree',
+                  'Magic tree']);
     SetItemIndex(Ord(CurrentTree));
     Combobox.SetOnChange(@Self.TreeSelectorOnChange);
   end;
 
   with Self.BankSelector do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Bank location:');
-    SetLeft(5);
-    SetTop(Self.TreeSelector.GetTop() + Self.TreeSelector.GetHeight());
-    SetWidth(Self.TreeSelector.GetWidth());
+    SetLeft(Self.TreeSelector.GetLeft());
+    SetTop(Self.TreeSelector.GetBottom() + TControl.AdjustToDPI(15));
     SetStyle(csDropDownList);
     Combobox.SetOnChange(@Self.BankSelectorOnChange);
   end;
 
-  with Self.SawmillState do
-  begin
-    Create(Self.SSPanel.Panel);
-    SetCaption('Sawmill:');
-    SetLeft(Self.TreeSelector.GetLeft() + Self.TreeSelector.GetWidth() + 25);
-    SetTop(Self.TreeSelector.GetTop() + 20);
-    SetEnabled(False);
-  end;
-
   with Self.PickNestsState do
   begin
-    Create(Self.SSPanel.Panel);
-    SetCaption('Pick nests:');
-    SetLeft(Self.SawmillState.GetLeft());
-    SetTop(Self.BankSelector.GetTop() + 20);
+    Create(tab);
+    SetCaption('Pick nests');
+    SetLeft(Self.TreeSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetTop(Self.TreeSelector.GetTop() + TControl.AdjustToDPI(15));
     SetChecked(True);
   end;
 
-  Self.TreeSelectorOnChange(Self.BankSelector.Combobox);
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
+  with Self.SawmillState do
+  begin
+    Create(tab);
+    SetCaption('Sawmill');
+    SetLeft(Self.PickNestsState.GetLeft());
+    SetTop(Self.BankSelector.GetTop() + TControl.AdjustToDPI(15));
+  end;
 
-procedure TCutterConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  Self.TreeSelectorOnChange(Self.TreeSelector.Combobox);
 
   inherited;
 end;
@@ -744,7 +717,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@CutterConfig.Run);
+  CutterConfig.Run();
   {$ENDIF}
   Woodcutter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

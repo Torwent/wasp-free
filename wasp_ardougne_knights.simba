@@ -54,7 +54,7 @@ type
   );
 
 //script record, all variables of the script should go here.
-  TThiever = record(TBaseBankScript)
+  TKnightsThiever = record(TBaseBankScript)
     //init variables (to be set while the script is initiates)
     State: EThieverState;
 
@@ -93,7 +93,7 @@ begin
   inherited;
 end;
 
-procedure TThiever.CheckRogueEquipment();
+procedure TKnightsThiever.CheckRogueEquipment();
 var
   ProfitMultiplier: Double;
 begin
@@ -195,7 +195,7 @@ begin
   Self.ActionProfit += Round(Self.ActionProfit * ProfitMultiplier);
 end;
 
-procedure TThiever.SetupKnight();
+procedure TKnightsThiever.SetupKnight();
 var
   p: TPoint;
 begin
@@ -207,7 +207,7 @@ begin
   Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
 end;
 
-procedure TThiever.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TKnightsThiever.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -246,12 +246,12 @@ begin
 end;
 
 
-function TThiever.HasRogue(): Boolean;
+function TKnightsThiever.HasRogue(): Boolean;
 begin
   Result := Inventory.ContainsAny(Self.RogueEquipment);
 end;
 
-function TThiever.EquipRogue(): Boolean;
+function TKnightsThiever.EquipRogue(): Boolean;
 var
   Item: TRSItem;
 begin
@@ -267,7 +267,7 @@ end;
 
 
 
-function TThiever.HasSpace(): Boolean;
+function TKnightsThiever.HasSpace(): Boolean;
 begin            //we need at least 2 spaces always.
   Result := (Inventory.CountEmptySlots() >= 2) or
             (Inventory.ContainsItem(Self.CoinPouch) and Inventory.ContainsItem('Coins')
@@ -275,7 +275,7 @@ begin            //we need at least 2 spaces always.
 end;
 
 
-function TThiever.IsLowHP(): Boolean;
+function TKnightsThiever.IsLowHP(): Boolean;
 begin
   if Self.NextHeal < 1 then
   begin
@@ -286,7 +286,7 @@ begin
   Result := Minimap.GetHPLevel() <= Self.NextHeal;
 end;
 
-function TThiever.IsPouchFull(): Boolean;
+function TKnightsThiever.IsPouchFull(): Boolean;
 begin
   if Self.CoinPouchLimit < 1 then
     Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
@@ -295,7 +295,7 @@ begin
 end;
 
 
-function TThiever.OpenCoinPouch(): Boolean;
+function TKnightsThiever.OpenCoinPouch(): Boolean;
 var
   pouchCount: Int32;
 begin
@@ -316,7 +316,7 @@ begin
 end;
 
 
-function TThiever.CheckFailed(StartingHP: Int32): Boolean;
+function TKnightsThiever.CheckFailed(StartingHP: Int32): Boolean;
 var
   HasHitSplat: Boolean;
 begin
@@ -331,20 +331,20 @@ begin
   end;
 end;
 
-function TThiever.NecklaceExpired(): Boolean;
+function TKnightsThiever.NecklaceExpired(): Boolean;
 begin
   Result := Chat.FindMessage('crumbles', [CHAT_COLOR_LIGHT_RED]);
   Self.HasNeck := not Result;
 end;
 
-function TThiever.Dodged(): Boolean;
+function TKnightsThiever.Dodged(): Boolean;
 begin
   Result := Chat.FindMessage('dodgy');
 end;
 
 
 
-function TThiever.Heal(): Boolean;
+function TKnightsThiever.Heal(): Boolean;
 var
   oldHP, newHP, hpLevel: Int32;
 begin
@@ -360,17 +360,17 @@ begin
   until Result;
 
   if Result then
-    Self.NextHeal := 0; //This will be reset when TThiever.IsLowHP() is called.
+    Self.NextHeal := 0; //This will be reset when TKnightsThiever.IsLowHP() is called.
 end;
 
-function TThiever.EquipNeck(): Boolean;
+function TKnightsThiever.EquipNeck(): Boolean;
 begin
   if Result := Inventory.ClickItem(Self.Necklace) then Wait(300, 400);
 
   Self.FreshNeck := Self.HasNeck := Result;
 end;
 
-function TThiever.CheckNeck(): Boolean;
+function TKnightsThiever.CheckNeck(): Boolean;
 begin
   Result := Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
 
@@ -378,7 +378,7 @@ begin
 end;
 
 
-function TThiever.HoverKnight(): Boolean;
+function TKnightsThiever.HoverKnight(): Boolean;
 var
   t: TCountDown;
   TPA: TPointArray;
@@ -419,7 +419,7 @@ begin
     Antiban.RandomRotate();
 end;
 
-function TThiever.StealKnight(): Boolean;
+function TKnightsThiever.StealKnight(): Boolean;
 var
   Slot: Int32 := Inventory.GetSelectedSlot();
   CurrentHP: Int32 := Minimap.GetHPLevel();
@@ -476,13 +476,13 @@ begin
 end;
 
 
-function TThiever.Deposit(): Boolean;
+function TKnightsThiever.Deposit(): Boolean;
 begin
   Result := Bank.DepositItemArray(Self.BankTab, Self.BankArray, False);
 end;
 
 
-procedure TThiever.HandleUpstairs();
+procedure TKnightsThiever.HandleUpstairs();
 const
   Finder: TRSObjectFinder = [[[5395288, 3, 0.95, 0.22]], [], 0, 0, 0, 0, 0, 0, 0];
 var
@@ -505,7 +505,7 @@ begin
   until Minimap.OnGroundLevel();
 end;
 
-function TThiever.GetState(): EThieverState;
+function TKnightsThiever.GetState(): EThieverState;
 begin
   if WL.Activity.IsFinished() then
     Exit(END_SCRIPT);
@@ -603,7 +603,7 @@ begin
   Exit(PICKPOCKET);
 end;
 
-procedure TThiever.Run(maxActions: Int32; maxTime: Int64);
+procedure TKnightsThiever.Run(maxActions: Int32; maxTime: Int64);
 begin
   Self.Init(maxActions, maxTime);
 
@@ -643,7 +643,7 @@ begin
 end;
 
 var
-  Thiever: TThiever;
+  KnightsThiever: TKnightsThiever;
 
 procedure TSRL.Debug({$H-}Bitmap: TMufasaBitmap){$H+}; override;
 begin
@@ -660,12 +660,12 @@ end;
 
 {$IFDEF SCRIPT_GUI}
 type
-  TThieverConfig = record(TScriptForm)
+  TKnightsForm = record(TScriptForm)
     DiaryLevelSelector: TLabeledComboBox;
     NeckAmountEdit: TLabeledEdit;
   end;
 
-procedure TThieverConfig.StartScript(sender: TObject); override;
+procedure TKnightsForm.StartScript(sender: TObject); override;
 var
   foodAmountEdit, minHealthEdit: TEdit;
 begin
@@ -716,7 +716,7 @@ begin
   end;
 end;
 
-procedure TThieverConfig.Run(); override;
+procedure TKnightsForm.Run(); override;
 var
   tab: TTabSheet;
   panel: TPanel;
@@ -763,7 +763,6 @@ begin
   minHealthEdit.SetText(ToStr(MinHealth));
 
   Self.CreateVersionPanel(tab);
-
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
@@ -772,12 +771,12 @@ begin
 end;
 
 var
-  ThieverConfig: TThieverConfig;
+  KnightsConfig: TKnightsForm;
 {$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}
-  ThieverConfig.Run();
+  KnightsConfig.Run();
   {$ENDIF}
-  Thiever.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+  KnightsThiever.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

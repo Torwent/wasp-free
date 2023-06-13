@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '2c9e42f7-cb23-4976-827f-9ffe112a0c3f'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '15'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -84,7 +84,7 @@ begin
   StallCooldown.Timeout := GetTickCount();
 end;
 
-procedure TStallRobber.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TStallRobber.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -150,9 +150,9 @@ begin
     Exit(FIND_STALL);
 end;
 
-procedure TStallRobber.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TStallRobber.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();
@@ -180,37 +180,42 @@ type
     StallSelector: TLabeledCombobox;
   end;
 
-procedure TStallRobberConfig.StartScript(Sender: TObject);
+procedure TStallRobberConfig.StartScript(sender: TObject); override;
 begin
-  Self.Init(Sender);
-
-  CurrentStall := ERSStall(Self.StallSelector.Combobox.getItemIndex());
-end;
-
-procedure TStallRobberConfig.Setup(); override;
-begin
+  CurrentStall := ERSStall(Self.StallSelector.GetItemIndex());
   inherited;
-
-  with Self.StallSelector do
-  begin
-    Create(Self.SSPanel.Panel);
-    SetCaption('Stall:');
-    SetLeft(5);
-    SetTop(35);
-    SetWidth(300);
-    Combobox.setStyle(csDropDownList);
-    Combobox.getItems.Add('Tea stall (East Varrock)');
-    Combobox.getItems.Add('Silk stall (Ardougne market, safe spot knights!)');
-    Combobox.getItems.Add('Fruit stall (Hosidius east of the market)');
-    Combobox.setItemIndex(Ord(CurrentStall));
-  end;
-
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
 end;
 
 procedure TStallRobberConfig.Run(); override;
+var
+  tab: TTabSheet;
 begin
-  Self.Setup();
+  Self.Setup('Wasp Stall Robber');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.StallSelector do
+  begin
+    Create(tab);
+    SetCaption('Stall:');
+    SetLeft(TControl.AdjustToDPI(20));
+    SetTop(TControl.AdjustToDPI(200));
+    SetWidth(TControl.AdjustToDPI(300));
+    SetStyle(csDropDownList);
+    AddItemArray(['Tea stall (East Varrock)',
+                  'Silk stall (Ardougne market, safe spot knights!)',
+                  'Fruit stall (Hosidius east of the market)']);
+    SetItemIndex(Ord(CurrentStall));
+  end;
+
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -221,7 +226,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@StallRobberConfig.Run);
+  StallRobberConfig.Run();
   {$ENDIF}
   StallRobber.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

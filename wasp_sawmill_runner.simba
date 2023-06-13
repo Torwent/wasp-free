@@ -249,7 +249,7 @@ begin
   Exit(WAIT_STATE);
 end;
 
-procedure TSawmillRunner.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TSawmillRunner.Run(maxActions: Int32; maxTime: Int64);
 begin
   Self.Init(maxActions, maxTime);
 

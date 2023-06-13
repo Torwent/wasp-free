@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '7c40c4ac-0009-4a08-ab61-4887d9456420'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '18'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -10,7 +10,7 @@ begin
 end;
 
 type
-  EState = (
+  EChompyState = (
     WAIT_STATE,
     WAIT_COMBAT,
     FILL_TOAD,
@@ -20,7 +20,7 @@ type
   );
 
   TChompyHunter = record(TBaseWalkerScript)
-    State: EState;
+    State: EChompyState;
     Toad: TRSNPC;
     OgreBellows: TRSItemArray;
     FillingBellows: Boolean;
@@ -35,7 +35,7 @@ begin
   inherited;
 end;
 
-procedure TChompyHunter.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TChompyHunter.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -161,7 +161,7 @@ end;
 
 
 
-function TChompyHunter.GetState(): EState;
+function TChompyHunter.GetState(): EChompyState;
 begin
   if FillingBellows then
   begin
@@ -186,9 +186,9 @@ begin
   Exit(FILL_BELLOWS);
 end;
 
-procedure TChompyHunter.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TChompyHunter.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();
@@ -226,35 +226,38 @@ type
     ChompyHunterInfo: TLabel;
   end;
 
-procedure TChompyHunterConfig.StartScript(Sender: TObject);
+procedure TChompyHunterConfig.Run(); override;
+var
+  tab: TTabSheet;
 begin
-  Self.Init(Sender);
-end;
+  Self.Setup('Wasp Chompy Hunter');
+  Self.Start.SetOnClick(@Self.StartScript);
 
-procedure TChompyHunterConfig.Setup(); override;
-begin
-  inherited;
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
 
   with Self.ChompyHunterInfo do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
 
     SetCaption('Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
-               LineEnding +
-               'Start south of castle wars, in the middle pools close to the smoke dungeon.' +
-               LineEnding +
-               'It''s probably a good idea to baby sit!');
+                LineEnding +
+                'Start south of castle wars, in the middle pools close to the smoke dungeon.' +
+                LineEnding + LineEnding +
+                'This is a simple script only meant to get the job done!' +
+                LineEnding +
+                'It''s probably a good idea to baby sit!');
 
-    SetLeft(5);
-    SetTop(45);
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(200));
   end;
 
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
-
-procedure TChompyHunterConfig.Run(); override;
-begin
-  Self.Setup();
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
 
   inherited;
 end;
@@ -265,7 +268,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@ChompyHunterConfig.Run);
+  ChompyHunterConfig.Run();
   {$ENDIF}
   ChompyHunter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

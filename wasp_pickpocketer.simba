@@ -1,6 +1,6 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '003b8e09-e988-42ca-b261-b2b76d131800'}
 {$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '21'}
-{$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
+{$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
@@ -18,9 +18,10 @@ type
 var
   PickedNPC: ENPC := ENPC.ELF;       //Use one of the above NPCs.
   SuicideMode: Boolean := True;      //Pickpocket until death. Useful if you respawn nearby.
-  FoodAmount: Int32 := 5;
+  DiaryLevel: Int32 := 3;
+  FoodAmount: Int32 := 10;
   NeckAmount: Int32 := 2;
-  NextHeal: Int32;
+  MinHealth: Int32 := 20;
 
 type
   EThieverState = (
@@ -66,13 +67,9 @@ type
     Necklace: TRSItem;
     ValuableItem: TRSItem;
 
-    LootArray: TRSItemArray;
-    StackableArray: TRSItemArray;
-    DropArray: TRSItemArray;
-    RogueEquipment: TRSItemArray;
+    LootArray, StackableArray, DropArray, RogueEquipment: TRSItemArray;
 
-    GearAmount: Int32;
-    ValuableItemValue: Int32;
+    GearAmount, ValuableItemValue: Int32;
 
     NeckTimer: TCountDown;
     ShadowVeilTimer: TCountDown;
@@ -84,8 +81,7 @@ type
     FreshNeck: Boolean;
     RedemptionEnabled: Boolean;
 
-    CoinPouchLimit: Int32;
-    NPCMaxHit: Int32;
+    CoinPouchLimit, MaxHit, NextHeal: Int32;
   end;
 
 
@@ -113,7 +109,7 @@ begin
 
         StackableArray := LootArray;
 
-        NPCMaxHit := 1;
+        MaxHit := 1;
 
         if not SuicideMode then
           SuicideMode := True;
@@ -162,7 +158,7 @@ begin
           'Potato cactus seed'
         ];
 
-        NPCMaxHit := 3;
+        MaxHit := 3;
 
         if SuicideMode then
           SuicideMode := False;
@@ -178,7 +174,7 @@ begin
 
         StackableArray := LootArray;
 
-        NPCMaxHit := 2;
+        MaxHit := 2;
         ActionProfit := 30;
       end;
 
@@ -203,7 +199,7 @@ begin
         StackableArray := [CoinPouch, 'Coins', 'Death rune', 'Nature rune',
                            'Crystal shards'];
 
-        NPCMaxHit := 5;
+        MaxHit := 5;
       end;
 
     TZHAAR_CITY:
@@ -217,7 +213,7 @@ begin
 
         StackableArray := LootArray;
 
-        NPCMaxHit := 4;
+        Self.MaxHit := 4;
 
         if SuicideMode then
           SuicideMode := False;
@@ -243,48 +239,53 @@ begin
     if Inventory.ContainsItem('Rogue mask') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue mask';
+      Self.RogueEquipment += 'Rogue mask';
     end;
 
     if Inventory.ContainsItem('Rogue top') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue top';
+      Self.RogueEquipment += 'Rogue top';
     end;
 
     if Inventory.ContainsItem('Rogue trousers') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue trousers';
+      Self.RogueEquipment += 'Rogue trousers';
     end;
 
     if Inventory.ContainsItem('Rogue gloves') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue gloves';
+      Self.RogueEquipment += 'Rogue gloves';
     end;
 
     if Inventory.ContainsItem('Rogue boots') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue boots';
+      Self.RogueEquipment += 'Rogue boots';
     end;
 
     //This are not part of rogue equipment but are useful while thieving
     if Inventory.ContainsItem('Thieving cape') then
-      RogueEquipment += 'Thieving cape'
+      Self.RogueEquipment += 'Thieving cape'
     else if Inventory.ContainsItem('Thieving cape(t)') then
-      RogueEquipment += 'Thieving cape(t)'
+      Self.RogueEquipment += 'Thieving cape(t)'
     else if Inventory.ContainsItem('Max cape') then
-      RogueEquipment += 'Max cape';
+      Self.RogueEquipment += 'Max cape';
 
     //Lava staves for shadow veil spell
     if Inventory.ContainsItem('Lava battlestaff') then
-      RogueEquipment += 'Lava battlestaff'
+      Self.RogueEquipment += 'Lava battlestaff'
     else if Inventory.ContainsItem('Mystic lava staff') then
-      RogueEquipment += 'Mystic lava staff'
+      Self.RogueEquipment += 'Mystic lava staff'
     else if Inventory.ContainsItem(21200) then
-      RogueEquipment += 21200;
+      Self.RogueEquipment += 21200
+    else if Inventory.ContainsAll(['Earth battlestaff', 'Tome of fire']) then
+    begin
+      Self.RogueEquipment += 'Earth battlestaff';
+      Self.RogueEquipment += 'Tome of fire';
+    end;
   end;
 
   if Equipment.Open() then
@@ -292,48 +293,52 @@ begin
     if Equipment.ContainsItem('Rogue mask') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue mask';
+      Self.RogueEquipment += 'Rogue mask';
     end;
 
     if Equipment.ContainsItem('Rogue top') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue top';
+      Self.RogueEquipment += 'Rogue top';
     end;
 
     if Equipment.ContainsItem('Rogue trousers') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue trousers';
+      Self.RogueEquipment += 'Rogue trousers';
     end;
 
     if Equipment.ContainsItem('Rogue gloves') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue gloves';
+      Self.RogueEquipment += 'Rogue gloves';
     end;
 
     if Equipment.ContainsItem('Rogue boots') then
     begin
       ProfitMultiplier += 0.2;
-      RogueEquipment += 'Rogue boots';
+      Self.RogueEquipment += 'Rogue boots';
     end;
 
 
     //This are not part of rogue equipment but are useful while thieving
     if Equipment.ContainsItem('Thieving cape') then
-      RogueEquipment += 'Thieving cape'
+      Self.RogueEquipment += 'Thieving cape'
     else if Equipment.ContainsItem('Thieving cape(t)') then
-      RogueEquipment += 'Thieving cape(t)';
+      Self.RogueEquipment += 'Thieving cape(t)';
 
     //Lava staves for shadow veil spell
     if Equipment.ContainsItem('Lava battlestaff') then
-      RogueEquipment += 'Lava battlestaff'
+      Self.RogueEquipment += 'Lava battlestaff'
     else if Equipment.ContainsItem('Mystic lava staff') then
-      RogueEquipment += 'Mystic lava staff'
+      Self.RogueEquipment += 'Mystic lava staff'
     else if Equipment.ContainsItem(21200) then
-      RogueEquipment += 21200;
-
+      Self.RogueEquipment += 21200
+    else if Equipment.ContainsAll(['Earth battlestaff', 'Tome of fire']) then
+    begin
+      Self.RogueEquipment += 'Earth battlestaff';
+      Self.RogueEquipment += 'Tome of fire';
+    end;
   end;
 
   GearAmount := Equipment.CountGear();
@@ -342,20 +347,24 @@ begin
 
   ActionProfit += Round(ActionProfit * ProfitMultiplier);
 
-  for Item in RogueEquipment do
-    StackableArray += Item; //Adding RogueEquipment to the non banking item list
+  for Item in Self.RogueEquipment do
+    StackableArray += Item; //Adding Self.RogueEquipment to the non banking item list
 end;
 
-procedure TThiever.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TThiever.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
-  UseRedemption := SuicideMode;
+  Self.UseRedemption := SuicideMode;
+
+  if DiaryLevel = 4 then
+    DiaryLevel += 1;
 
   CoinPouch := 'Coin pouch';
   Necklace := 'Dodgy necklace';
 
   Self.SetupNPC();
+  MinHealth := Max(Self.MaxHit, MinHealth);
 
   //NeckTimer to recheck necklace in case the script messes up.
   NeckTimer.Init(140000);
@@ -423,14 +432,14 @@ end;
 
 function TThiever.HasRogue(): Boolean;
 begin
-  Result := Inventory.ContainsAny(RogueEquipment);
+  Result := Inventory.ContainsAny(Self.RogueEquipment);
 end;
 
 function TThiever.EquipRogue(): Boolean;
 var
   Item: TRSItem;
 begin
-  for Item in RogueEquipment do
+  for Item in Self.RogueEquipment do
     if Inventory.ClickItem(Item) then
       Wait(200, 300);
 
@@ -467,44 +476,44 @@ end;
 
 
 function TThiever.IsLowHP(): Boolean;
-var
-  CurrentHP: Int32 := Minimap.GetHPLevel;
 begin
-  if NextHeal < 1 then
-    NextHeal := Round(Antiban.GetUniqueNumber(NPCMaxHit * 8));
+  if Self.NextHeal < 1 then
+  begin
+    Self.NextHeal := MinHealth + Random(-Self.MaxHit, Self.MaxHit) * Round(Antiban.GetUniqueNumber(2, 0, 4));
+    Self.NextHeal := EnsureRange(Self.NextHeal, Self.MaxHit, Round(BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) * 0.8));
+  end;
 
-  NextHeal += Random(-3, 3);
-
-  Result := (CurrentHP <= NextHeal) or (CurrentHP <= NPCMaxHit);
+  Result := Minimap.GetHPLevel() <= Self.NextHeal;
 end;
 
 function TThiever.IsPouchFull(): Boolean;
 begin
-  if CoinPouchLimit < 1 then
-    CoinPouchLimit := SRL.TruncatedGauss(28, 1);
-  Result := Inventory.CountItemStack(CoinPouch) >= CoinPouchLimit;
+  if Self.CoinPouchLimit < 1 then
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
+
+  Result := Inventory.CountItemStack(Self.CoinPouch) >= Self.CoinPouchLimit;
 end;
 
 
-function TThiever.CheckFailed(StartingHP: Int32): Boolean;
+function TThiever.CheckFailed(startingHP: Int32): Boolean;
 var
-  HasHitSplat: Boolean;
-  CurrentHP: Int32 := Minimap.GetHPLevel;
+  hasHitSplat: Boolean;
+  currentHP: Int32 := Minimap.GetHPLevel();
 begin
-  HasHitSplat := not RenderDisabled and
-                (MainScreen.FindHitsplats(MainScreen.GetPlayerBox) <> []);
+  hasHitSplat := not Self.RenderDisabled and
+                (MainScreen.FindHitsplats(MainScreen.GetPlayerBox()) <> []);
 
-  Result := (CurrentHP < StartingHP) or HasHitSplat;
+  Result := (currentHP < startingHP) or hasHitSplat;
 
   if Result then
   begin
     if HasHitSplat then
     begin
-      Options.RenderSelf;
-      RenderDisabled := True;
+      Options.RenderSelf();
+      Self.RenderDisabled := True;
     end
     else
-      Self.OpenCoinPouch;
+      Self.OpenCoinPouch();
   end;
 end;
 
@@ -520,39 +529,43 @@ begin
 end;
 
 
-function TThiever.OpenCoinPouch: Boolean;
+function TThiever.OpenCoinPouch(): Boolean;
 var
-  PouchCount: Int32;
+  pouchCount: Int32;
 begin
-  PouchCount := Inventory.CountItemStack(CoinPouch);
-  if Inventory.ClickItem(CoinPouch) then
+  pouchCount := Inventory.CountItemStack(Self.CoinPouch);
+  if Inventory.ClickItem(Self.CoinPouch) then
   begin
-    Wait(300);
-    Result := WaitUntil(not Inventory.ContainsItem(CoinPouch), 100, 1200);
+    Wait(600);
+    Result := WaitUntil(not Inventory.ContainsItem(Self.CoinPouch), 100, 2000);
   end;
 
   if Result then
   begin
-    CoinPouchLimit := SRL.TruncatedGauss(28, 1);
-    TotalActions += PouchCount;
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
+    Self.TotalActions += pouchCount;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
     WL.Activity.Restart();
   end;
-
-  if not Result then
-    Self.OpenCoinPouch;
 end;
 
 function TThiever.Heal(): Boolean;
+var
+  oldHP, newHP, hpLevel: Int32;
 begin
+  newHP := Minimap.GetHPLevel();
+  hpLevel := BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) - 1;
   repeat
+    oldHP := newHP;
     if not Inventory.Consume(FOOD_CONSUMABLE) then
       Exit;
 
-    Wait(300, 500);
-  until Result := (Minimap.GetHPPercent >= (50 + Antiban.GetUniqueNumber(20)));
+    newHP := Minimap.GetHPLevel();
+    Result := newHP > Random(oldHP, hpLevel);
+  until Result;
 
   if Result then
-    NextHeal := Round(Antiban.GetUniqueNumber(NPCMaxHit * 7));
+    Self.NextHeal := 0; //This will be reset when TThiever.IsLowHP() is called.
 end;
 
 function TThiever.EquipNeck(): Boolean;
@@ -622,17 +635,17 @@ begin
   end;
 end;
 
-function TThiever.WithdrawAny(Items: TRSItemArray; Quantity: Int32): Boolean;
+function TThiever.WithdrawAny(items: TRSItemArray; Quantity: Int32): Boolean;
 var
   Item: TRSItem;
-  ItemCount: Int32 := Inventory.CountItems(Items);
+  ItemCount: Int32 := Inventory.CountItems(items);
   QuantityNeeded: Int32 := Quantity - ItemCount;
   InvCount: Int32;
 begin
-  for Item in Items do
+  for Item in items do
     if Bank.ContainsItem(Item) then Exit(Self.Withdraw([Item, Quantity, False]));
 
-  for Item in Items do
+  for Item in items do
   begin
     if BankTab = -1 then
       BankTab := Bank.FindItemTab(Item);
@@ -778,9 +791,9 @@ begin
   Exit(PICKPOCKET);
 end;
 
-procedure TThiever.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TThiever.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();
@@ -904,105 +917,173 @@ end;
 type
   TThieverConfig = record(TScriptForm)
     NPCSelector: TLabeledCombobox;
-    FoodAmountEdit: TLabeledEdit;
+    DiaryLevelSelector: TLabeledComboBox;
     NeckAmountEdit: TLabeledEdit;
-    MinHealthEdit: TLabeledEdit;
-    SuicideState: TCheckbox;
+    SuicideState: TLabeledCheckbox;
   end;
 
-procedure TThieverConfig.StartScript(Sender: TObject);
+procedure TThieverConfig.StartScript(sender: TObject); override;
+var
+  foodAmountEdit, minHealthEdit: TEdit;
 begin
-  Self.Init(Sender);
+  foodAmountEdit := Self.Form.GetChild('cm_food_amount_edit');
+  minHealthEdit  := Self.Form.GetChild('cm_food_minimum_edit');
 
-  PickedNPC := ENPC(Self.NPCSelector.Combobox.getItemIndex());
-  SuicideMode := Self.SuicideState.getState = cbChecked;
+  PickedNPC := ENPC(Self.NPCSelector.GetItemIndex());
+  SuicideMode := Self.SuicideState.IsChecked();
 
-  FoodAmount := StrToInt(Self.WLPanel.FoodPanel.ConsumableAmount.GetText());
-  NeckAmount := StrToInt(Self.NeckAmountEdit.getText());
-  NextHeal := StrToInt(Self.WLPanel.FoodPanel.MinPoints.GetText());
+  DiaryLevel := Self.DiaryLevelSelector.GetItemIndex() + 1;
+  FoodAmount := StrToInt(foodAmountEdit.GetText());
+  NeckAmount := StrToInt(Self.NeckAmountEdit.GetText());
+  MinHealth  := StrToint(minHealthEdit.GetText());
+
+  inherited;
 end;
 
-procedure TThieverConfig.NPCSelectorOnChange(Sender: TObject);
+procedure TThieverConfig.NPCSelectorOnChange({$H-}sender: TObject);{$H+}
 begin
-  Writeln(Sender, ' has changed');
-
-  case ENPC(Self.NPCSelector.Combobox.getItemIndex()) of
+  case ENPC(Self.NPCSelector.GetItemIndex()) of
     MAN:
       begin
-        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.SetChecked(False);
         Self.SuicideState.setEnabled(False);
       end;
 
     MASTER_FARMER:
       begin
-        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.SetChecked(False);
         Self.SuicideState.setEnabled(False);
       end;
 
     TZHAAR_CITY:
       begin
-        Self.SuicideState.setState(cbUnchecked);
+        Self.SuicideState.SetChecked(False);
         Self.SuicideState.setEnabled(False);
       end;
 
     else
     begin
-      Self.SuicideState.setState(cbChecked);
+      Self.SuicideState.SetChecked(True);
       Self.SuicideState.setEnabled(True);
     end;
   end;
-
 end;
 
-procedure TThieverConfig.Setup(UseFood, UsePrayer, UseBank: Boolean); override;
+function TScriptForm.CreateConsumableSettings(owner: TControl; consumableType: ERSConsumable; addInfo: Boolean = True): TPanel; override;
+var
+  typeStr: String;
+  consumableAmount: TLabeledEdit;
+  fullWidth, w, space, y: Int32;
 begin
-  inherited;
+  fullWidth := Floor(Self.Size.X/3);
+  space := Floor(fullWidth * 0.1);
+  w := Floor(fullWidth - space * 2);
+  if addInfo then
+    y := Floor(Self.Size.Y/2.5)
+  else
+    y := TControl.AdjustToDPI(15);
 
-  with Self.NPCSelector do
+  case consumableType of
+    FOOD_CONSUMABLE:   typeStr := 'Food';
+    PRAYER_CONSUMABLE: typeStr := 'Prayer';
+    ENERGY_CONSUMABLE: typeStr := 'Energy';
+    BOOST_CONSUMABLE:  typeStr := 'Boost';
+  end;
+
+  Result := inherited;
+
+  with consumableAmount do
   begin
-    Create(Self.SSPanel.Panel);
-    SetCaption('NPC:');
-    SetLeft(5);
-    SetTop(50);
-    SetWidth(200);
-    Combobox.setStyle(csDropDownList);
-    Combobox.getItems.Add('Men and women (Lumbridge only)');
-    Combobox.getItems.Add('Master farmers (Draynor only)');
-    Combobox.getItems.Add('Guards (Falador only)');
-    Combobox.getItems.Add('Elves (Prifddinas only)');
-    Combobox.getItems.Add('Tzhaars');
-    Combobox.setItemIndex(Ord(PickedNPC));
-    Combobox.setOnChange(@Self.NPCSelectorOnChange);
+    Create(Result);
+    SetCaption('Withdraw ' + LowerCase(typeStr) + ' amount:');
+    SetName('cm_' + typeStr + '_amount');
+    SetLeft(fullWidth * 2 + space);
+    SetTop(y);
+    SetWidth(w);
+    SetText('8');
+    Edit.setOnKeyPress(@Edit.NumberField);
+  end;
+end;
+
+
+procedure TThieverConfig.Run(); override;
+var
+  tab: TTabSheet;
+  panel: TPanel;
+  foodAmountEdit, minHealthEdit: TEdit;
+begin
+  Self.Setup('Wasp Pickpocketer');
+  Self.Start.setOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.DiaryLevelSelector do
+  begin
+    Create(tab);
+    SetCaption('Ardougne diaries completed:');
+    SetLeft(TControl.AdjustToDPI(30));
+    SetTop(TControl.AdjustToDPI(180));
+    SetStyle(csDropDownList);
+    AddItemArray(['None/Easy diary', 'Medium diary', 'Hard diary', 'Elite diary']);
+    SetItemIndex(DiaryLevel - 1);
   end;
 
   with Self.NeckAmountEdit do
   begin
-    Create(Self.SSPanel.Panel);
+    Create(tab);
     SetCaption('Necklaces amount:');
-    SetLeft(250);
-    SetTop(Self.NPCSelector.GetTop());
-    SetWidth(110);
+    SetLeft(Self.DiaryLevelSelector.GetRight() + TControl.AdjustToDPI(30));
+    SetTop(Self.DiaryLevelSelector.GetTop());
+    SetWidth(TControl.AdjustToDPI(120));
     SetText(ToStr(NeckAmount));
+  end;
+
+
+  with Self.NPCSelector do
+  begin
+    Create(tab);
+    SetCaption('NPC:');
+    SetLeft(Self.DiaryLevelSelector.GetLeft());
+    SetTop(Self.DiaryLevelSelector.GetBottom() + TControl.AdjustToDPI(10));
+    SetStyle(csDropDownList);
+    AddItemArray(['Men and women (Lumbridge only)',
+                  'Master farmers (Draynor only)',
+                  'Guards (Falador only)', 'Elves (Prifddinas only)',
+                  'Tzhaars']);
+    SetItemIndex(Ord(PickedNPC));
+    Combobox.setOnChange(@Self.NPCSelectorOnChange);
   end;
 
   with Self.SuicideState do
   begin
-    Create(Self.SSPanel.Panel);
-    SetCaption('Suicide mode:');
-    SetLeft(5);
-    SetTop(Self.NPCSelector.GetBottom() + 15);
+    Create(tab);
+    SetCaption('Suicide mode');
+    SetLeft(Self.NPCSelector.GetRight() + TControl.AdjustToDPI(30));
+    SetTop(Self.NPCSelector.GetTop() + TControl.AdjustToDPI(15));
     SetEnabled(True);
     Self.NPCSelectorOnChange(@Self.SuicideState);
   end;
 
-  Self.WLPanel.FoodPanel.ConsumableAmount.SetText(ToStr(FoodAmount));
-  Self.WLPanel.FoodPanel.ConsumableAmount.SetVisible(True);
-  Self.WLPanel.StartButton.setOnClick(@Self.StartScript);
-end;
+  panel := Self.CreateConsumableSettings(tab, FOOD_CONSUMABLE, False);
 
-procedure TThieverConfig.Run(); override;
-begin
-  Self.Setup(True, False, False);
+  panel.SetTop(TControl.AdjustToDPI(300));
+
+  foodAmountEdit := panel.GetChild('cm_food_amount_edit');
+  minHealthEdit  := panel.GetChild('cm_food_minimum_edit');
+
+  foodAmountEdit.SetText(ToStr(FoodAmount));
+  foodAmountEdit.SetVisible(True);
+  minHealthEdit.SetText(ToStr(MinHealth));
+
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  Self.NPCSelectorOnChange(@Self.NPCSelector.ComboBox);
 
   inherited;
 end;
@@ -1013,7 +1094,7 @@ var
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@ThieverConfig.Run);
+  ThieverConfig.Run();
   {$ENDIF}
   Thiever.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.

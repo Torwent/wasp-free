@@ -174,7 +174,7 @@ begin
 end;
 
 
-procedure TSmelter.Init(MaxActions: Int32; MaxTime: Int64); override;
+procedure TSmelter.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
@@ -368,9 +368,9 @@ begin
         Break;
 end;
 
-procedure TSmelter.Run(MaxActions: Int32; MaxTime: Int64);
+procedure TSmelter.Run(maxActions: Int32; maxTime: Int64);
 begin
-  Self.Init(MaxActions, MaxTime);
+  Self.Init(maxActions, maxTime);
 
   repeat
     State := Self.GetState();
@@ -417,8 +417,8 @@ type
 
 procedure TSmelterConfig.StartScript(sender: TObject); override;
 begin
-  CurrentBar := ERSBarType(Self.BarTypeSelector.getItemIndex());
-  CurrentFurnace := ERSFurnace(Self.FurnaceSelector.getItemIndex());
+  CurrentBar := ERSBarType(Self.BarTypeSelector.GetItemIndex());
+  CurrentFurnace := ERSFurnace(Self.FurnaceSelector.GetItemIndex());
   inherited;
 end;
 
@@ -457,7 +457,6 @@ begin
   end;
 
   Self.CreateVersionPanel(tab);
-
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
