@@ -1,3 +1,12 @@
+## [2.3.6](https://github.com/Torwent/wasp-free/compare/v2.3.5...v2.3.6) (2023-06-13)
+
+
+### Bug Fixes
+
+* **forms_v2:** forms v2 was added to every script that was missing it ([a7d01bb](https://github.com/Torwent/wasp-free/commit/a7d01bb98a72b42a467322ed301e01d7f8ef03a6))
+
+
+
 ## [2.3.5](https://github.com/Torwent/wasp-free/compare/v2.3.4...v2.3.5) (2023-06-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **sawmill:** rune pouch and divine rune pouch shouldn't be deposited anymore ([e0abe2f](https://github.com/Torwent/wasp-free/commit/e0abe2fd771349769822d5280937e7078d8ab0e6))
-
-
-
-## [2.3.1](https://github.com/Torwent/wasp-free/compare/v2.3.0...v2.3.1) (2023-06-04)
-
-
-### Bug Fixes
-
-* README.md ([37396ec](https://github.com/Torwent/wasp-free/commit/37396ecc1dd99e2210f8ef6aaf989ee84a126547))
 
 
 
