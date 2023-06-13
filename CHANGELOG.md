@@ -1,3 +1,12 @@
+## [2.3.7](https://github.com/Torwent/wasp-free/compare/v2.3.6...v2.3.7) (2023-06-13)
+
+
+### Bug Fixes
+
+* **nmz:** read notes ([fcc45dd](https://github.com/Torwent/wasp-free/commit/fcc45dd6ea337812acd160782b269573d690a4b3))
+
+
+
 ## [2.3.6](https://github.com/Torwent/wasp-free/compare/v2.3.5...v2.3.6) (2023-06-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * read notes ([5c55b2d](https://github.com/Torwent/wasp-free/commit/5c55b2d57f70ad3a0c0234577f88c83d46f236ba))
-
-
-
-## [2.3.2](https://github.com/Torwent/wasp-free/compare/v2.3.1...v2.3.2) (2023-06-04)
-
-
-### Bug Fixes
-
-* **sawmill:** rune pouch and divine rune pouch shouldn't be deposited anymore ([e0abe2f](https://github.com/Torwent/wasp-free/commit/e0abe2fd771349769822d5280937e7078d8ab0e6))
 
 
 
