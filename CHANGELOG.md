@@ -1,3 +1,12 @@
+## [2.3.9](https://github.com/Torwent/wasp-free/compare/v2.3.8...v2.3.9) (2023-06-15)
+
+
+### Bug Fixes
+
+* **woodcutter:** read notes ([8b21b59](https://github.com/Torwent/wasp-free/commit/8b21b59ab44e58dae0136449b0f354154e42cfe3))
+
+
+
 ## [2.3.8](https://github.com/Torwent/wasp-free/compare/v2.3.7...v2.3.8) (2023-06-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** read notes ([b5f457c](https://github.com/Torwent/wasp-free/commit/b5f457c9ee340cdb532594c3404033d1b9a4de5b))
-
-
-
-## [2.3.4](https://github.com/Torwent/wasp-free/compare/v2.3.3...v2.3.4) (2023-06-09)
-
-
-### Bug Fixes
-
-* **enchanter:** tiny logic fixes ([8e5ec8a](https://github.com/Torwent/wasp-free/commit/8e5ec8abcf0df54a1a941c730f44df6ebbb61baf))
 
 
 
