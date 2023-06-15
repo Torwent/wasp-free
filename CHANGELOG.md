@@ -1,3 +1,12 @@
+## [2.3.8](https://github.com/Torwent/wasp-free/compare/v2.3.7...v2.3.8) (2023-06-15)
+
+
+### Bug Fixes
+
+* **enchanter:** fixed red topaz ([c2a2841](https://github.com/Torwent/wasp-free/commit/c2a284117192019c3db0c839c54253c12ab26bb9))
+
+
+
 ## [2.3.7](https://github.com/Torwent/wasp-free/compare/v2.3.6...v2.3.7) (2023-06-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** tiny logic fixes ([8e5ec8a](https://github.com/Torwent/wasp-free/commit/8e5ec8abcf0df54a1a941c730f44df6ebbb61baf))
-
-
-
-## [2.3.3](https://github.com/Torwent/wasp-free/compare/v2.3.2...v2.3.3) (2023-06-05)
-
-
-### Bug Fixes
-
-* read notes ([5c55b2d](https://github.com/Torwent/wasp-free/commit/5c55b2d57f70ad3a0c0234577f88c83d46f236ba))
 
 
 
