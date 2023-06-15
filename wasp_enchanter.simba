@@ -422,7 +422,7 @@ type
 
 procedure TEnchanterConfig.StartScript(sender: TObject); override;
 begin
-  RegularJewel := Self.GemSelector.getText() + ' ' + Self.JewelSelector.getText().ToLower();
+  RegularJewel := Self.GemSelector.getText().Replace('Red t', 'T') + ' ' + Self.JewelSelector.getText().ToLower();
   inherited;
 end;
 
