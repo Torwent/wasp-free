@@ -1,3 +1,12 @@
+## [2.3.10](https://github.com/Torwent/wasp-free/compare/v2.3.9...v2.3.10) (2023-06-20)
+
+
+### Bug Fixes
+
+* **wc:** fixed varrock east ([a8409a8](https://github.com/Torwent/wasp-free/commit/a8409a83105c9e22589232f9cfc684e16b888f46))
+
+
+
 ## [2.3.9](https://github.com/Torwent/wasp-free/compare/v2.3.8...v2.3.9) (2023-06-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **forms_v2:** forms v2 was added to every script that was missing it ([a7d01bb](https://github.com/Torwent/wasp-free/commit/a7d01bb98a72b42a467322ed301e01d7f8ef03a6))
-
-
-
-## [2.3.5](https://github.com/Torwent/wasp-free/compare/v2.3.4...v2.3.5) (2023-06-11)
-
-
-### Bug Fixes
-
-* **alcher:** read notes ([b5f457c](https://github.com/Torwent/wasp-free/commit/b5f457c9ee340cdb532594c3404033d1b9a4de5b))
 
 
 
