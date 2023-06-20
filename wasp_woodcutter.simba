@@ -599,18 +599,18 @@ type
 
 procedure TCutterConfig.StartScript(sender: TObject); override;
 begin
-  CurrentTree := ERSTree(Self.TreeSelector.Combobox.getItemIndex());
+  CurrentTree := ERSTree(Self.TreeSelector.getItemIndex());
 
   case Self.BankSelector.GetText() of
-    'Power WC (cut and drop)': BankLocation := ERSBank.POWER_WC;
-    'Grand Exchange':          BankLocation := ERSBank.GE;
-    'Varrock east':            BankLocation := ERSBank.VARROCK_E;
-    'Varrock west':            BankLocation := ERSBank.VARROCK_W;
-    'Draynor':                 BankLocation := ERSBank.DRAYNOR_VILLAGE;
-    'Seers'' village':         BankLocation := ERSBank.SEERS_VILLAGE;
-    'Edgeville':               BankLocation := ERSBank.EDGE;
-    'Woodcutting guild':       BankLocation := ERSBank.WOODCUT_GUILD;
-    'Prifddinas':              BankLocation := ERSBank.PRIFDDINAS;
+    'Power WC (cut and drop)':              BankLocation := ERSBank.POWER_WC;
+    'Grand Exchange':                       BankLocation := ERSBank.GE;
+    'Varrock east (cuts close to sawmill)': BankLocation := ERSBank.VARROCK_E;
+    'Varrock west':                         BankLocation := ERSBank.VARROCK_W;
+    'Draynor':                              BankLocation := ERSBank.DRAYNOR_VILLAGE;
+    'Seers'' village':                      BankLocation := ERSBank.SEERS_VILLAGE;
+    'Edgeville':                            BankLocation := ERSBank.EDGE;
+    'Woodcutting guild':                    BankLocation := ERSBank.WOODCUT_GUILD;
+    'Prifddinas':                           BankLocation := ERSBank.PRIFDDINAS;
   end;
 
   UseSawmill := Self.SawmillState.IsChecked();
