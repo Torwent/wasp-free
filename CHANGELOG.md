@@ -1,3 +1,12 @@
+## [2.3.11](https://github.com/Torwent/wasp-free/compare/v2.3.10...v2.3.11) (2023-06-21)
+
+
+### Bug Fixes
+
+* removed undef directives from all scripts since they were not doing anything ([760050e](https://github.com/Torwent/wasp-free/commit/760050ea2d34b4025b259ca73d2d7ab3bde6fa20))
+
+
+
 ## [2.3.10](https://github.com/Torwent/wasp-free/compare/v2.3.9...v2.3.10) (2023-06-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** read notes ([fcc45dd](https://github.com/Torwent/wasp-free/commit/fcc45dd6ea337812acd160782b269573d690a4b3))
-
-
-
-## [2.3.6](https://github.com/Torwent/wasp-free/compare/v2.3.5...v2.3.6) (2023-06-13)
-
-
-### Bug Fixes
-
-* **forms_v2:** forms v2 was added to every script that was missing it ([a7d01bb](https://github.com/Torwent/wasp-free/commit/a7d01bb98a72b42a467322ed301e01d7f8ef03a6))
 
 
 

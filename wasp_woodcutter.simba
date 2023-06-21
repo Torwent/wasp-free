@@ -1,12 +1,11 @@
 {$DEFINE SCRIPT_ID := '207b1ab4-561d-4543-8467-705cdfce98ec'}
-{$DEFINE SCRIPT_REVISION := '27'}
+{$DEFINE SCRIPT_REVISION := '28'}
 {$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
 begin
   Login.PlayerIndex := 0;
-  StatsPayload.SetUsername('');
 end;
 
 type
