@@ -1,5 +1,5 @@
-{$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := 'bffb9ec8-588b-406d-9872-9ab274b5c934'}
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '18'}
+{$DEFINE SCRIPT_ID := 'bffb9ec8-588b-406d-9872-9ab274b5c934'}
+{$DEFINE SCRIPT_REVISION := '18'}
 {$IFDEF WINDOWS}{$DEFINE FORMS_V2}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -283,11 +283,12 @@ end;
 
 function TMiner.DropItems(): Boolean;
 var
-  InvCount: Int32 := 28;
+  invCount: Int32;
 begin
-  Result := Inventory.ShiftDrop(DropList, Inventory.RandomPattern);
+  invCount := Inventory.Count();
+  Result := Inventory.ShiftDrop(Self.DropList, Inventory.RandomPattern());
 
-  TotalActions += (InvCount - Inventory.Count);
+  TotalActions += (invCount - Inventory.Count());
 
   if Result then
     WL.Activity.Restart();
@@ -306,19 +307,19 @@ begin
   Result := SRL.IsAnimating(MainScreen.GetPlayerBox(), MainScreen.NormalizeDistance(450), 350, 3);
 end;
 
-function TMiner.WaitMining(t: UInt32 = 3000): Boolean;
+function TMiner.WaitMining(t: UInt32 = 1400): Boolean;
 var
-  GotXP: Boolean;
+  gotXP: Boolean;
 begin
-  if Inventory.Count <> PrevInvCount then
+  if Inventory.Count() <> PrevInvCount then
   begin
-    Mining := False;
+    Self.Mining := False;
     Exit(False);
   end;
 
-  Result := WaitUntil((Mining := Self.IsMining) or (GotXP := XPBar.EarnedXP), 100, t);
-  if GotXP then
-    Result := Mining := False;
+  Result := WaitUntil((Self.Mining := Self.IsMining) or (gotXP := XPBar.EarnedXP()), 100, t);
+  if gotXP then
+    Result := Self.Mining := False;
 end;
 
 
@@ -402,8 +403,7 @@ end;
 var
   Miner: TMiner;
 
-
-function TRSBank.DepositItemArray(Tab: Int32; ItemArray: TRSItemArray; UseQuantityButtons: Boolean): Boolean; override;
+function TRSBank.DepositItemArray(tab: Int32; ItemArray: TRSItemArray; UseQuantityButtons: Boolean): Boolean; override;
 var
   Item: TRSItem;
   ItemList: TRSItemArray;
