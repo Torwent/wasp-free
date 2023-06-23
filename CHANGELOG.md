@@ -1,3 +1,12 @@
+## [2.3.12](https://github.com/Torwent/wasp-free/compare/v2.3.11...v2.3.12) (2023-06-23)
+
+
+### Bug Fixes
+
+* **alcher):** made it faster again ([f5e59fd](https://github.com/Torwent/wasp-free/commit/f5e59fd2c51c3b0f9114a1fa4366ef5c5c25446e))
+
+
+
 ## [2.3.11](https://github.com/Torwent/wasp-free/compare/v2.3.10...v2.3.11) (2023-06-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** fixed red topaz ([c2a2841](https://github.com/Torwent/wasp-free/commit/c2a284117192019c3db0c839c54253c12ab26bb9))
-
-
-
-## [2.3.7](https://github.com/Torwent/wasp-free/compare/v2.3.6...v2.3.7) (2023-06-13)
-
-
-### Bug Fixes
-
-* **nmz:** read notes ([fcc45dd](https://github.com/Torwent/wasp-free/commit/fcc45dd6ea337812acd160782b269573d690a4b3))
 
 
 
