@@ -60,11 +60,7 @@ type
     Materials: TRSItemArray;
     Smelting: Boolean;
 
-    BarAmount: Int32;
-    Multiplier: Int32;
-
-    UseOre2: Boolean;
-    UseRing: Boolean;
+    BarAmount, Multiplier: Int32;
   end;
 
 
@@ -96,79 +92,79 @@ end;
 
 procedure TSmelter.SetupItems();
 begin
-  Bar.Quantity := BANK_DEPOSIT_ALL;
+  Self.Bar.Quantity := BANK_DEPOSIT_ALL;
 
   case CurrentBar of
     ERSBarType.BRONZE:
       begin
-        Bar.Item := 'Bronze bar';
-        Ore1 := ['Copper ore', 14, False];
-        Ore2 := ['Tin ore', 14, False];
+        Self.Bar.Item := 'Bronze Self.Bar';
+        Self.Ore1 := ['Copper ore', 14, False];
+        Self.Ore2 := ['Tin ore', 14, False];
       end;
 
     ERSBarType.IRON:
       begin
-        Bar.Item := 'Iron bar';
-        Ore1 := ['Iron ore', BANK_WITHDRAW_ALL, False];
+        Self.Bar.Item := 'Iron Self.Bar';
+        Self.Ore1 := ['Iron ore', BANK_WITHDRAW_ALL, False];
       end;
 
     ERSBarType.SILVER:
       begin
-        Bar.Item := 'Silver bar';
-        Ore1 := ['Silver ore', BANK_WITHDRAW_ALL, False];
+        Self.Bar.Item := 'Silver Self.Bar';
+        Self.Ore1 := ['Silver ore', BANK_WITHDRAW_ALL, False];
       end;
 
     ERSBarType.STEEL:
       begin
-        Bar.Item := 'Steel bar';
-        Ore1 := ['Iron ore', 9, False];
-        Ore2 := ['Coal', 18, False];
+        Self.Bar.Item := 'Steel Self.Bar';
+        Self.Ore1 := ['Iron ore', 9, False];
+        Self.Ore2 := ['Coal', 18, False];
       end;
 
     ERSBarType.GOLD:
       begin
-        Bar.Item := 'Gold bar';
-        Ore1 := ['Gold ore', BANK_WITHDRAW_ALL, False];
+        Self.Bar.Item := 'Gold Self.Bar';
+        Self.Ore1 := ['Gold ore', BANK_WITHDRAW_ALL, False];
       end;
 
     ERSBarType.MITHRIL:
       begin
-        Bar.Item := 'Mithril bar';
-        Ore1 := ['Mithril ore', 5, False];
-        Ore2 := ['Coal', 20, False];
+        Self.Bar.Item := 'Mithril Self.Bar';
+        Self.Ore1 := ['Mithril ore', 5, False];
+        Self.Ore2 := ['Coal', 20, False];
       end;
 
     ERSBarType.ADAMANT:
       begin
-        Bar.Item := 'Adamantite bar';
-        Ore1 := ['Adamantite ore', 4, False];
-        Ore2 := ['Coal', 24, False];
+        Self.Bar.Item := 'Adamantite Self.Bar';
+        Self.Ore1 := ['Adamantite ore', 4, False];
+        Self.Ore2 := ['Coal', 24, False];
       end;
 
     ERSBarType.RUNITE:
       begin
-        Bar.Item := 'Runite bar';
-        Ore1 := ['Runite ore', 4, False];
-        Ore2 := ['Coal', 24, False];
+        Self.Bar.Item := 'Runite Self.Bar';
+        Self.Ore1 := ['Runite ore', 4, False];
+        Self.Ore2 := ['Coal', 24, False];
       end;
 
     ERSBarType.MOLTEN_GLASS:
       begin
-        Bar.Item := 'Molten glass';
-        Ore1 := ['Soda ash', 14, False];
-        Ore2 := ['Bucket of sand', 14, False];
+        Self.Bar.Item := 'Molten glass';
+        Self.Ore1 := ['Soda ash', 14, False];
+        Self.Ore2 := ['Bucket of sand', 14, False];
         Antiban.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
       end;
   end;
 
-  Self.Materials += Ore1.Item;
-  Self.ActionProfit := (ItemData.GetAverage(Bar.Item)) -
-                  (ItemData.GetAverage(Ore1.Item) * Ore1.Quantity);
+  Self.Materials += Self.Ore1.Item;
+  Self.ActionProfit := (ItemData.GetAverage(Self.Bar.Item)) -
+                  (ItemData.GetAverage(Self.Ore1.Item) * Self.Ore1.Quantity);
 
-  if Ore2 <> [] then
+  if Self.Ore2 <> [] then
   begin
-    Self.ActionProfit -= (ItemData.GetAverage(Ore2.Item) * Round(Ore2.Quantity / Ore1.Quantity));
-    Materials += Ore2.Item;
+    Self.ActionProfit -= (ItemData.GetAverage(Self.Ore2.Item) * Round(Self.Ore2.Quantity / Self.Ore1.Quantity));
+    Materials += Self.Ore2.Item;
   end;
 end;
 
@@ -267,7 +263,7 @@ begin
   if not Inventory.ContainsAll(Materials) then
     Exit;
 
-  if Result := Make.Select(ToStr(Bar.Item), MAKE_QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+  if Result := Make.Select(ToStr(Self.Bar.Item), MAKE_QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
     Smelting := XPBar.WaitXP(4000);
 end;
 
@@ -363,7 +359,7 @@ begin
   Result := inherited;
   if Result then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [Bar.Item, BANK_WITHDRAW_ALL, True], True) then
+      if Result := Bank.WithdrawItem(BankTab, [Self.Bar.Item, BANK_WITHDRAW_ALL, True], True) then
         Break;
 end;
 
@@ -436,7 +432,7 @@ begin
   with Self.BarTypeSelector do
   begin
     Create(tab);
-    SetCaption('Bar type:');
+    SetCaption('Self.Bar type:');
     SetLeft(TControl.AdjustToDPI(50));
     SetTop(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
