@@ -1,3 +1,12 @@
+## [2.3.13](https://github.com/Torwent/wasp-free/compare/v2.3.12...v2.3.13) (2023-06-25)
+
+
+### Bug Fixes
+
+* **smelter:** typos ([69ac385](https://github.com/Torwent/wasp-free/commit/69ac3859a77c8a189a235a4e3e57fb575f4d4b02))
+
+
+
 ## [2.3.12](https://github.com/Torwent/wasp-free/compare/v2.3.11...v2.3.12) (2023-06-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** read notes ([8b21b59](https://github.com/Torwent/wasp-free/commit/8b21b59ab44e58dae0136449b0f354154e42cfe3))
-
-
-
-## [2.3.8](https://github.com/Torwent/wasp-free/compare/v2.3.7...v2.3.8) (2023-06-15)
-
-
-### Bug Fixes
-
-* **enchanter:** fixed red topaz ([c2a2841](https://github.com/Torwent/wasp-free/commit/c2a284117192019c3db0c839c54253c12ab26bb9))
 
 
 
