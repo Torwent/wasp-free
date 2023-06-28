@@ -1,0 +1,571 @@
+{$DEFINE SCRIPT_ID := '96576fb4-1fa5-48c2-97d4-4d5344c3f2b0'}
+{$DEFINE SCRIPT_REVISION := '1'}
+{$IFNDEF SCRIPT_CHAIN}
+  {$DEFINE SCRIPT_GUI}
+  {$I SRL-T/osr.simba}
+  {$I WaspLib/osr.simba}
+
+begin
+  Login.PlayerIndex := 0;
+end;
+
+{$ENDIF}
+
+type
+  ERSMetalType = (SILVER, GOLD);
+
+  ERSStoneType = (
+    NONE, OPAL, JADE, RED_TOPAZ, SAPPHIRE, EMERALD,
+    RUBY, DIAMOND, DRAGONSTONE, ONYX, ZENYTE
+  );
+
+  ERSJewelType = (
+    TIARA, HOLY_SYMBOL, UNHOLY_SYMBOL, BOLTS, RING,
+    NECKLACE, BRACELET, AMULET
+  );
+
+  ERSFurnace = (EDGEVILLE_FURNACE, FALADOR_FURNACE, PRIFDDINAS_FURNACE);
+
+var
+  CurrentMetal = ERSMetalType.GOLD;
+  CurrentStone = ERSStoneType.EMERALD;
+  CurrentJewel = ERSJewelType.RING;
+  CurrentFurnace = ERSFurnace.EDGEVILLE_FURNACE;
+
+type
+  EJewelCrafterState = (
+    HOVER_BANK,
+    OPEN_BANK,
+    WITHDRAW_MOULD,
+    WITHDRAW_BARS,
+    WITHDRAW_GEMS,
+    DEPOSIT_JEWELS,
+    DEPOSIT_RANDOM_ITEM,
+
+    OPEN_COLLECT,
+    HANDLE_COLLECT,
+
+    OPEN_FURNACE,
+    CRAFT_JEWEL,
+    WAIT_CRAFT,
+
+    CLOSE_INTERFACE,
+
+    LEVEL_UP,
+    CLOSE_CONTEXT,
+
+    END_SCRIPT,
+    OUT_OF_SUPPLIES
+  );
+
+  TJewelryCrafter = record(TBaseBankScript)
+    State: EJewelCrafterState;
+    Furnace: TRSObject;
+
+    Mould, Bar, Gem, Jewel: TRSBankItem;
+    Materials: TRSItemArray;
+    NoGem, IsCrafting: Boolean;
+    CraftItem: ERSCraftItem;
+  end;
+
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
+  Self.MinZoom := 0;
+  Self.MaxZoom := 30;
+
+  inherited;
+end;
+
+procedure TJewelryCrafter.SetupFurnaces();
+begin
+  case CurrentFurnace of
+    ERSFurnace.EDGEVILLE_FURNACE:
+      begin
+        RSW.Setup([RSRegions.VARROCK]);
+        Furnace := RSObjects.EdgevilleFurnace;
+      end;
+
+    ERSFurnace.FALADOR_FURNACE:
+      begin
+        RSW.Setup([RSRegions.FALADOR]);
+        Furnace := RSObjects.FaladorFurnace;
+      end;
+
+    ERSFurnace.PRIFDDINAS_FURNACE:
+      begin
+        RSW.Setup([RSRegions.PRIFDDINAS]);
+        Furnace := RSObjects.FaladorFurnace;
+      end;
+  end;
+end;
+
+procedure TJewelryCrafter.SetupItems();
+begin
+  case CurrentMetal of
+    ERSMetalType.SILVER: Self.Bar := TRSBankItem.Setup('Silver bar', 13);
+    ERSMetalType.GOLD: Self.Bar := TRSBankItem.Setup('Gold bar', 13);
+  end;
+
+  case CurrentStone of
+    ERSStoneType.NONE:
+    begin
+      Self.Bar.Quantity := -1;
+      Self.NoGem := True;
+    end;
+    ERSStoneType.OPAL: Self.Gem := TRSBankItem.Setup('Opal', 13);
+    ERSStoneType.JADE: Self.Gem := TRSBankItem.Setup('Jade', 13);
+    ERSStoneType.RED_TOPAZ: Self.Gem := TRSBankItem.Setup('Red topaz', 13);
+    ERSStoneType.SAPPHIRE: Self.Gem := TRSBankItem.Setup('Sapphire', 13);
+    ERSStoneType.EMERALD: Self.Gem := TRSBankItem.Setup('Emerald', 13);
+    ERSStoneType.RUBY: Self.Gem := TRSBankItem.Setup('Ruby', 13);
+    ERSStoneType.DIAMOND: Self.Gem := TRSBankItem.Setup('Diamond', 13);
+    ERSStoneType.DRAGONSTONE: Self.Gem := TRSBankItem.Setup('Dragonstone', 13);
+    ERSStoneType.ONYX: Self.Gem := TRSBankItem.Setup('Onyx', 13);
+    ERSStoneType.ZENYTE: Self.Gem := TRSBankItem.Setup('Zenyte', 13);
+  end;
+
+  case CurrentJewel of
+    ERSJewelType.TIARA:
+      begin
+        Self.Mould := TRSBankItem.Setup('Tiara mould', 1);
+        CurrentStone := ERSStoneType.NONE;
+        Self.NoGem := True;
+
+        Self.Bar.Quantity := -1;
+
+        if CurrentMetal = ERSMetalType.GOLD then
+          Self.Jewel := TRSBankItem.Setup('Gold tiara', -1)
+        else
+          Self.Jewel := TRSBankItem.Setup('Tiara', -1);
+      end;
+
+    ERSJewelType.HOLY_SYMBOL:
+      begin
+        Self.Mould := TRSBankItem.Setup('Holy mould', 1);
+        CurrentMetal := ERSMetalType.SILVER;
+        CurrentStone := ERSStoneType.NONE;
+        Self.NoGem := True;
+        Self.Jewel := TRSBankItem.Setup('Unstrung symbol', -1);
+      end;
+
+    ERSJewelType.UNHOLY_SYMBOL:
+      begin
+        Self.Mould := TRSBankItem.Setup('Unholy mould', 1);
+        CurrentMetal := ERSMetalType.SILVER;
+        CurrentStone := ERSStoneType.NONE;
+        Self.NoGem := True;
+        Self.Jewel := TRSBankItem.Setup('Unstrung emblem', -1);
+      end;
+
+    ERSJewelType.BOLTS:
+      begin
+        Self.Mould := TRSBankItem.Setup('Bolt mould', 1);
+        CurrentMetal := ERSMetalType.SILVER;
+        CurrentStone := ERSStoneType.NONE;
+        Self.NoGem := True;
+        Self.Jewel := TRSBankItem.Setup('Silver bolts (unf)', -1);
+      end;
+
+    ERSJewelType.RING:
+      begin
+        Self.Mould := TRSBankItem.Setup('Ring mould', 1);
+        if Self.NoGem then
+          Self.Jewel := TRSBankItem.Setup('Gold ring', -1)
+        else
+          Self.Jewel := TRSBankItem.Setup(ToStr(Self.Gem.Item).Replace('Red t', 'T') + ' ring', -1);
+      end;
+
+    ERSJewelType.NECKLACE:
+      begin
+        Self.Mould := TRSBankItem.Setup('Necklace mould', 1);
+        if Self.NoGem then
+          Self.Jewel := TRSBankItem.Setup('Gold necklace', -1)
+        else
+          Self.Jewel := TRSBankItem.Setup(ToStr(Self.Gem.Item).Replace('Red t', 'T') + ' necklace', -1);
+      end;
+
+    ERSJewelType.BRACELET:
+      begin
+        Self.Mould := TRSBankItem.Setup('Bracelet mould', 1);
+        if Self.NoGem then
+          Self.Jewel := TRSBankItem.Setup('Gold bracelet', -1)
+        else
+          Self.Jewel := TRSBankItem.Setup(ToStr(Self.Gem.Item).Replace('Red t', 'T') + ' bracelet', -1);
+      end;
+
+    ERSJewelType.AMULET:
+      begin
+        Self.Mould := TRSBankItem.Setup('Amulet mould', 1);
+        if Self.NoGem then
+          Self.Jewel := TRSBankItem.Setup('Gold amulet (u)', -1)
+        else
+          Self.Jewel := TRSBankItem.Setup(ToStr(Self.Gem.Item).Replace('Red t', 'T') + ' amulet (u)', -1);
+      end;
+  end;
+
+  if (CurrentMetal = ERSMetalType.GOLD) and (CurrentJewel <> ERSJewelType.TIARA) then
+    Self.CraftItem.SetCraftItem(Self.Jewel.Item);
+
+  Self.ActionProfit := ItemData.GetAverage(Self.Jewel.Item) -
+                       ItemData.GetAverage(Self.Bar.Item);
+
+  if not Self.NoGem then
+    Self.ActionProfit -= ItemData.GetAverage(Self.Gem.Item);
+
+  Self.Materials := [Self.Bar.Item, Self.Jewel.Item, Self.Mould.Item];
+
+  if not Self.NoGem then
+    Self.Materials += Self.Gem.Item;
+end;
+
+
+procedure TJewelryCrafter.Init(maxActions: Int32; maxTime: Int64); override;
+begin
+  inherited;
+
+  Self.SetupFurnaces();
+  Self.SetupItems();
+
+  if WLSettings.RemoteInput.HUDDebug then
+    DebugObjectArray += Self.Furnace;
+end;
+
+
+
+function TJewelryCrafter.OpenFurnace(): Boolean;
+begin
+  if Furnace.WalkSelectOption(['Smelt']) then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(CraftScreen.IsOpen() or SilverScreen.IsOpen() or Make.IsOpen(), 300, 5000);
+  end;
+end;
+
+
+function TJewelryCrafter.WaitCraft(waitTime: Int32 = 6000): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.CountItem(Self.Bar.Item);
+  if count = 0 then
+  begin
+    Self.IsCrafting := False;
+    Exit;
+  end;
+
+  Result := WaitUntil((Inventory.CountItem(Self.Bar.Item) < count) or XPBar.EarnedXP(), 300, waitTime);
+  Self.IsCrafting := Result;
+
+  if Result then
+    WL.Activity.Restart();
+end;
+
+function TJewelryCrafter._CraftSilverJewel(): Boolean;
+begin
+  if SilverScreen.CraftItem(Self.Jewel.Item, -1, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+    Result := Self.WaitCraft();
+end;
+
+function TJewelryCrafter._CraftGoldJewel(): Boolean;
+begin
+  if CurrentJewel = ERSJewelType.TIARA then
+  begin
+    if Make.Select(0, MAKE_QUANTITY_ALL) then
+      Exit(Self.WaitCraft());
+    Exit;
+  end;
+
+  if CraftScreen.CraftItem(Self.CraftItem, -1, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+    Result := Self.WaitCraft();
+end;
+
+function TJewelryCrafter.CraftJewel(): Boolean;
+begin
+  if not Inventory.ContainsItem(Self.Bar.Item) then
+    Exit;
+
+  if CurrentMetal = ERSMetalType.SILVER then
+    Exit(Self._CraftSilverJewel());
+
+  Result := Self._CraftGoldJewel();
+end;
+
+
+function TJewelryCrafter.GetState(): EJewelCrafterState;
+begin
+  if WL.Activity.IsFinished() then
+    Exit(EJewelCrafterState.END_SCRIPT);
+
+  if Chat.LeveledUp() then
+  begin
+    Self.IsCrafting := False;
+    Exit(EJewelCrafterState.LEVEL_UP);
+  end;
+
+  if MainScreen.HasInterface() then
+  begin
+    Self.IsCrafting := False;
+    Self.HoveringBank := False;
+    if Bank.IsOpen() then
+    begin
+      if Inventory.ContainsItem(Self.Jewel.Item) then
+        Exit(EJewelCrafterState.DEPOSIT_JEWELS);
+
+      if Inventory.HasRandomItem(Self.Materials) then
+        Exit(EJewelCrafterState.DEPOSIT_RANDOM_ITEM);
+
+      if not Self.BankEmpty then
+      begin
+        if not Inventory.ContainsItem(Self.Mould.Item) then
+          Exit(EJewelCrafterState.WITHDRAW_MOULD);
+
+        if not Inventory.ContainsItem(Self.Bar.Item) then
+          Exit(EJewelCrafterState.WITHDRAW_BARS);
+
+        if not Self.NoGem and not Inventory.ContainsItem(Self.Gem.Item) then
+          Exit(EJewelCrafterState.WITHDRAW_GEMS);
+      end;
+    end;
+
+    if CraftScreen.IsOpen() or SilverScreen.IsOpen() then
+      Exit(EJewelCrafterState.CRAFT_JEWEL);
+
+    if not Self.CollectEmpty and CollectBox.IsOpen() then
+      Exit(EJewelCrafterState.HANDLE_COLLECT);
+
+    Exit(EJewelCrafterState.CLOSE_INTERFACE);
+  end;
+
+  if Make.IsOpen() then
+    Exit(EJewelCrafterState.CRAFT_JEWEL);
+
+  if (Self.NoGem and Inventory.ContainsAll([Self.Mould.Item, Self.Bar.Item])) or
+     (not Self.NoGem and Inventory.ContainsAll([Self.Mould.Item, Self.Bar.Item, Self.Gem.Item])) then
+  begin
+    if Self.IsCrafting then
+    begin
+      if not Self.HoveringBank then
+      begin
+        Self.CountItemsLeft(Self.Bar.Item);
+
+        if Self.ShouldHoverBank() then
+          Exit(EJewelCrafterState.HOVER_BANK);
+      end;
+
+      Exit(EJewelCrafterState.WAIT_CRAFT);
+    end;
+
+    if Make.IsOpen() then
+      Exit(EJewelCrafterState.CRAFT_JEWEL);
+
+    Exit(EJewelCrafterState.OPEN_FURNACE);
+  end;
+
+  if Self.BankEmpty then
+  begin
+    if Self.CollectEmpty then
+      Exit(EJewelCrafterState.OUT_OF_SUPPLIES);
+
+    Exit(EJewelCrafterState.OPEN_COLLECT);
+  end;
+
+  if Self.BankEmpty then
+    Exit(EJewelCrafterState.OPEN_COLLECT);
+
+  Exit(EJewelCrafterState.OPEN_BANK);
+end;
+
+function TJewelryCrafter.Terminate(): Boolean; override;
+begin
+  Result := inherited;
+end;
+
+procedure TJewelryCrafter.Run(maxActions: Int32; maxTime: Int64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      EJewelCrafterState.HOVER_BANK: Self.HoverBank();
+      EJewelCrafterState.OPEN_BANK: Bank.WalkOpen();
+      EJewelCrafterState.WITHDRAW_MOULD: Self.Withdraw(Self.Mould);
+      EJewelCrafterState.WITHDRAW_BARS: Self.Withdraw(Self.Bar);
+      EJewelCrafterState.WITHDRAW_GEMS: Self.Withdraw(Self.Gem);
+      EJewelCrafterState.DEPOSIT_JEWELS: Bank.DepositItem(Self.Jewel, True);
+      EJewelCrafterState.DEPOSIT_RANDOM_ITEM: Bank.DepositAllBut(Self.BankTab, Self.Materials);
+
+      EJewelCrafterState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EJewelCrafterState.HANDLE_COLLECT: Self.HandleCollectBox(Self.Materials);
+
+      EJewelCrafterState.OPEN_FURNACE: Self.OpenFurnace();
+      EJewelCrafterState.CRAFT_JEWEL: Self.CraftJewel();
+      EJewelCrafterState.WAIT_CRAFT: Self.WaitCraft();
+
+      EJewelCrafterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EJewelCrafterState.CLOSE_CONTEXT: ChooseOption.Close();
+      EJewelCrafterState.LEVEL_UP: Chat.HandleLevelUp();
+
+      EJewelCrafterState.END_SCRIPT, EJewelCrafterState.OUT_OF_SUPPLIES: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+
+  if not Self.Terminate() then
+    TerminateScript(Self.Name + ' didn''t terminate properly. Stopping execution.');
+end;
+
+var
+  JewelryCrafter: TJewelryCrafter;
+
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
+type
+  TJewelryCrafterConfig = record(TScriptForm)
+    BarTypeSelector: TLabeledCombobox;
+    StoneTypeSelector: TLabeledCombobox;
+    JewelTypeSelector: TLabeledCombobox;
+    FurnaceSelector: TLabeledCombobox;
+  end;
+
+procedure TJewelryCrafterConfig.StartScript(sender: TObject); override;
+begin
+  CurrentMetal := ERSMetalType(Self.BarTypeSelector.GetItemIndex());
+  CurrentStone := ERSStoneType(Self.StoneTypeSelector.GetItemIndex());
+  CurrentJewel := ERSJewelType(Self.JewelTypeSelector.GetItemIndex());
+  CurrentFurnace := ERSFurnace(Self.FurnaceSelector.GetItemIndex());
+
+  inherited;
+end;
+
+procedure TJewelryCrafterConfig.StoneSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+  i, j: Int32;
+begin
+  combobox := sender;
+  i := combobox.getItemIndex();
+  j := Self.JewelTypeSelector.GetItemIndex();
+
+  Self.BarTypeSelector.SetEnabled((i = 0) and (j = 0));
+
+  case i of
+    1..3: Self.BarTypeSelector.SetItemIndex(0);
+    else  Self.BarTypeSelector.SetItemIndex(1);
+  end;
+
+  case j of
+    1..3: Self.BarTypeSelector.SetItemIndex(0);
+    else  Self.BarTypeSelector.SetItemIndex(1);
+  end;
+end;
+
+procedure TJewelryCrafterConfig.JewelSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+  i: Int32;
+begin
+  combobox := sender;
+  i := combobox.getItemIndex();
+
+  Self.StoneTypeSelector.SetEnabled(i > 3);
+  if i < 4 then
+    Self.StoneTypeSelector.SetItemIndex(0);
+
+  Self.StoneSelectorOnChange(Self.StoneTypeSelector.ComboBox);
+end;
+
+
+procedure TJewelryCrafterConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Jewelry Crafter');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.FurnaceSelector do
+  begin
+    Create(tab);
+    SetCaption('Furnace:');
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(200));
+    SetStyle(csDropDownList);
+    AddItemArray(['Edgeville', 'Falador', 'Prifddinnas']);
+    SetItemIndex(Ord(CurrentFurnace));
+  end;
+
+  with Self.JewelTypeSelector do
+  begin
+    Create(tab);
+    SetCaption('Jewel type:');
+    SetLeft(Self.FurnaceSelector.GetLeft());
+    SetTop(Self.FurnaceSelector.GetBottom() + TControl.AdjustToDPI(20));
+    SetStyle(csDropDownList);
+    AddItemArray([
+      'Tiara', 'Holy symbol', 'Unholy symbol', 'Bolts', 'Ring',
+      'Necklace', 'Bracelet', 'Amulet'
+    ]);
+    SetItemIndex(Ord(CurrentJewel));
+    ComboBox.setOnChange(@Self.JewelSelectorOnChange);
+  end;
+
+  with Self.StoneTypeSelector do
+  begin
+    Create(tab);
+    SetCaption('Stone type:');
+    SetLeft(Self.JewelTypeSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetTop(Self.JewelTypeSelector.GetTop());
+    SetStyle(csDropDownList);
+    AddItemArray([
+      'None', 'Opal', 'Jade', 'Red topaz', 'Sapphire', 'Emerald',
+      'Ruby', 'Diamond', 'Dragonstone', 'Onyx', 'Zenyte'
+    ]);
+    SetItemIndex(Ord(CurrentStone));
+    ComboBox.SetOnChange(@Self.StoneSelectorOnChange);
+  end;
+
+  with Self.BarTypeSelector do
+  begin
+    Create(tab);
+    SetCaption('Bar type:');
+    SetLeft(Self.StoneTypeSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetTop(Self.StoneTypeSelector.GetTop());
+    SetStyle(csDropDownList);
+    AddItemArray(['Silver', 'Gold']);
+    SetItemIndex(Ord(CurrentMetal));
+    SetEnabled(False);
+  end;
+
+  Self.CreateVersionPanel(tab);
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  Self.JewelSelectorOnChange(Self.JewelTypeSelector.ComboBox);
+
+  inherited;
+end;
+
+var
+  JewelryCrafterConfig: TJewelryCrafterConfig;
+{$ENDIF}
+{$ENDIF}
+
+{$IFNDEF SCRIPT_CHAIN}
+begin
+  {$IFDEF SCRIPT_GUI}
+  JewelryCrafterConfig.Run();
+  {$ENDIF}
+  JewelryCrafter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.
+{$ENDIF}
