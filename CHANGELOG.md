@@ -1,3 +1,12 @@
+## [2.4.1](https://github.com/Torwent/wasp-free/compare/v2.4.0...v2.4.1) (2023-06-28)
+
+
+### Bug Fixes
+
+* **jewelry smelter:** the gui now locks/unlocks the proper bar for all jewelry ([bfd3ee1](https://github.com/Torwent/wasp-free/commit/bfd3ee1b1b793c8b967187ba87da9ac15b46714c))
+
+
+
 # [2.4.0](https://github.com/Torwent/wasp-free/compare/v2.3.13...v2.4.0) (2023-06-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * removed undef directives from all scripts since they were not doing anything ([760050e](https://github.com/Torwent/wasp-free/commit/760050ea2d34b4025b259ca73d2d7ab3bde6fa20))
-
-
-
-## [2.3.10](https://github.com/Torwent/wasp-free/compare/v2.3.9...v2.3.10) (2023-06-20)
-
-
-### Bug Fixes
-
-* **wc:** fixed varrock east ([a8409a8](https://github.com/Torwent/wasp-free/commit/a8409a83105c9e22589232f9cfc684e16b888f46))
 
 
 
