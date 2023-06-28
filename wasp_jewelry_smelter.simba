@@ -456,12 +456,13 @@ begin
 
   case i of
     1..3: Self.BarTypeSelector.SetItemIndex(0);
-    else  Self.BarTypeSelector.SetItemIndex(1);
-  end;
-
-  case j of
-    1..3: Self.BarTypeSelector.SetItemIndex(0);
-    else  Self.BarTypeSelector.SetItemIndex(1);
+    else
+    begin
+      if j < 4 then
+        Self.BarTypeSelector.SetItemIndex(0)
+      else
+        Self.BarTypeSelector.SetItemIndex(1);
+    end;
   end;
 end;
 
