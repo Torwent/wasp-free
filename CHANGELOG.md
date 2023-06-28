@@ -1,3 +1,12 @@
+# [2.4.0](https://github.com/Torwent/wasp-free/compare/v2.3.13...v2.4.0) (2023-06-28)
+
+
+### Features
+
+* **jewelry smelter:** new script added ([b0acfd5](https://github.com/Torwent/wasp-free/commit/b0acfd55ba474fb24cd9edc212f5142405779d41))
+
+
+
 ## [2.3.13](https://github.com/Torwent/wasp-free/compare/v2.3.12...v2.3.13) (2023-06-25)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **wc:** fixed varrock east ([a8409a8](https://github.com/Torwent/wasp-free/commit/a8409a83105c9e22589232f9cfc684e16b888f46))
-
-
-
-## [2.3.9](https://github.com/Torwent/wasp-free/compare/v2.3.8...v2.3.9) (2023-06-15)
-
-
-### Bug Fixes
-
-* **woodcutter:** read notes ([8b21b59](https://github.com/Torwent/wasp-free/commit/8b21b59ab44e58dae0136449b0f354154e42cfe3))
 
 
 
