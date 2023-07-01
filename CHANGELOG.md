@@ -1,3 +1,12 @@
+## [2.4.2](https://github.com/Torwent/wasp-free/compare/v2.4.1...v2.4.2) (2023-07-01)
+
+
+### Bug Fixes
+
+* **ardy knights:** compatibility with latest SRL-T ([0e72089](https://github.com/Torwent/wasp-free/commit/0e720897783a54685d2706706baaed29b940ce13))
+
+
+
 ## [2.4.1](https://github.com/Torwent/wasp-free/compare/v2.4.0...v2.4.1) (2023-06-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher):** made it faster again ([f5e59fd](https://github.com/Torwent/wasp-free/commit/f5e59fd2c51c3b0f9114a1fa4366ef5c5c25446e))
-
-
-
-## [2.3.11](https://github.com/Torwent/wasp-free/compare/v2.3.10...v2.3.11) (2023-06-21)
-
-
-### Bug Fixes
-
-* removed undef directives from all scripts since they were not doing anything ([760050e](https://github.com/Torwent/wasp-free/commit/760050ea2d34b4025b259ca73d2d7ab3bde6fa20))
 
 
 
