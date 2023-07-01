@@ -105,13 +105,13 @@ begin
     ERSBarType.IRON:
       begin
         Self.Bar.Item := 'Iron bar';
-        Self.Ore1 := ['Iron ore', BANK_WITHDRAW_ALL, False];
+        Self.Ore1 := ['Iron ore', TRSBank.QUANTITY_ALL, False];
       end;
 
     ERSBarType.SILVER:
       begin
         Self.Bar.Item := 'Silver bar';
-        Self.Ore1 := ['Silver ore', BANK_WITHDRAW_ALL, False];
+        Self.Ore1 := ['Silver ore', TRSBank.QUANTITY_ALL, False];
       end;
 
     ERSBarType.STEEL:
@@ -124,7 +124,7 @@ begin
     ERSBarType.GOLD:
       begin
         Self.Bar.Item := 'Gold bar';
-        Self.Ore1 := ['Gold ore', BANK_WITHDRAW_ALL, False];
+        Self.Ore1 := ['Gold ore', TRSBank.QUANTITY_ALL, False];
       end;
 
     ERSBarType.MITHRIL:
@@ -263,7 +263,7 @@ begin
   if not Inventory.ContainsAll(Materials) then
     Exit;
 
-  if Result := Make.Select(ToStr(Self.Bar.Item), MAKE_QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+  if Result := Make.Select(ToStr(Self.Bar.Item), TRSMake.QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
     Smelting := XPBar.WaitXP(4000);
 end;
 
@@ -359,7 +359,7 @@ begin
   Result := inherited;
   if Result then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [Self.Bar.Item, BANK_WITHDRAW_ALL, True], True) then
+      if Result := Bank.WithdrawItem(BankTab, [Self.Bar.Item, TRSBank.QUANTITY_ALL, True], True) then
         Break;
 end;
 

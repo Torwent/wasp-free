@@ -186,7 +186,7 @@ end;
 
 function TSawmillRunner.HandleSawmill(): Boolean;
 begin
-  if Make.Select(Ord(CurrentTask), MAKE_QUANTITY_ALL) then
+  if Make.Select(Ord(CurrentTask), TRSMake.QUANTITY_ALL) then
     Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 3000);
 end;
 
@@ -261,7 +261,7 @@ begin
 
       OPEN_BANK: Bank.WalkOpen();
 
-      WITHDRAW_ITEMS: Self.Withdraw([Self.Logs, BANK_WITHDRAW_ALL, False]);
+      WITHDRAW_ITEMS: Self.Withdraw([Self.Logs, TRSBank.QUANTITY_ALL, False]);
       DEPOSIT_ITEMS: Self.Deposit();
       DEPOSIT_RANDOM_ITEMS: Bank.DepositAllBut(Self.BankTab, Self.NeededItems);
       OPEN_COLLECT: CollectBox.WalkOpen();

@@ -272,7 +272,7 @@ function TJewelryCrafter._CraftGoldJewel(): Boolean;
 begin
   if CurrentJewel = ERSJewelType.TIARA then
   begin
-    if Make.Select(0, MAKE_QUANTITY_ALL) then
+    if Make.Select(0, TRSMake.QUANTITY_ALL) then
       Exit(Self.WaitCraft());
     Exit;
   end;

@@ -94,7 +94,7 @@ begin
 
   Tool := ['Glassblowing pipe', 1, False];
   if SRL.Dice(70) then
-    X_Number := BANK_WITHDRAW_ALL
+    X_Number := TRSBank.QUANTITY_ALL
   else
     X_Number := Random(27, 9999);
 
@@ -182,7 +182,7 @@ var
   Button: TRSButton;
   Buttons: TRSButtonArray;
 begin
-  if Amount <> MAKE_QUANTITY_ALL then
+  if Amount <> TRSMake.QUANTITY_ALL then
   begin
     Result := inherited;
     Exit;
@@ -220,7 +220,7 @@ begin
       Break;
     end;
 
-  Blowing := Result := Make.Select(ItemIndex, MAKE_QUANTITY_ALL, SRL.Dice(98.5));
+  Blowing := Result := Make.Select(ItemIndex, TRSMake.QUANTITY_ALL, SRL.Dice(98.5));
   if Result then WaitUntil(not Make.IsOpen, 50, 2000);
 end;
 
@@ -307,7 +307,7 @@ begin
 
   if Result then
     for i := 0 to 3 do
-      if Result := Bank.WithdrawItem(Self.BankTab, [Product.Item, BANK_WITHDRAW_ALL, True], True) then
+      if Result := Bank.WithdrawItem(Self.BankTab, [Product.Item, TRSBank.QUANTITY_ALL, True], True) then
         Break;
 end;
 

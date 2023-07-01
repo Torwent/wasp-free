@@ -527,7 +527,7 @@ begin
         if (Inventory.CountItem(Self.Necklace) < (NeckAmount-2)) or
            not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         begin
-          WL.GameSettings.BankWithdrawX := 0;
+          TRSBank.CachedQuantity := 0;
           Bank.DepositAll();
         end;
 

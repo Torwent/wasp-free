@@ -445,7 +445,7 @@ end;
 
 function TWoodcutter.MakePlanks(): Boolean;
 begin
-  if Make.Select(Self.SawmillString, MAKE_QUANTITY_ALL, SRL.Dice(95)) then
+  if Make.Select(Self.SawmillString, TRSMake.QUANTITY_ALL, SRL.Dice(95)) then
     Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 10000);
 
   if Result then

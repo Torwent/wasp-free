@@ -96,7 +96,7 @@ begin
   BurntFish := ['herring', 'mackerel', 'sardine', 'anchovies',
                 'giant carp', 'trout', 'cod', 'pike', 'salmon', 'tuna', 'bass'];
 
-  Ingredient := [('Raw ' + ToStr(Food).Lower()), BANK_WITHDRAW_ALL, False];
+  Ingredient := [('Raw ' + ToStr(Food).Lower()), TRSBank.QUANTITY_ALL, False];
 
   if (CookedPrefix.Find(LowerCase(Food)) > -1) then
     Products := [
@@ -220,7 +220,7 @@ begin
   if 'arambwan' in Food then
     i := 1;
 
-  Result := Cooking := Make.Select(i, MAKE_QUANTITY_ALL, Antiban.BioDice);
+  Result := Cooking := Make.Select(i, TRSMake.QUANTITY_ALL, Antiban.BioDice);
   
   if Result then
     WaitUntil(not Make.IsOpen, 100, 4000);  
@@ -308,7 +308,7 @@ begin
   Result := inherited();
   if Result then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [Products[0].Item, BANK_WITHDRAW_ALL, True], True) then
+      if Result := Bank.WithdrawItem(BankTab, [Products[0].Item, TRSBank.QUANTITY_ALL, True], True) then
         Break;
 end;
 

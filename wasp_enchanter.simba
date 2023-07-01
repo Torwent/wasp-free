@@ -367,7 +367,7 @@ function TEnchanter.Terminate(): Boolean; override;
 begin
   if inherited then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [EnchantedJewel, BANK_WITHDRAW_ALL, True], True) then
+      if Result := Bank.WithdrawItem(BankTab, [EnchantedJewel, TRSBank.QUANTITY_ALL, True], True) then
         Break;
 end;
 
