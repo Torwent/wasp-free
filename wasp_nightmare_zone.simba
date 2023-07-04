@@ -440,7 +440,7 @@ begin
     ERSClientMode.RESIZABLE_MODERN: B := [10, 53, 63, 72];
   end;
 
-  Result := OCR.RecognizeNumber(B, TOCRShadowRule.Create(20), RS_FONT_QUILL);
+  Result := OCR.RecognizeNumber(B, TOCRShadowFilter.Create(20), RS_FONT_QUILL);
 end;
 
 function TNMZFighter.NeedAbsorption(): Boolean;
@@ -822,10 +822,10 @@ function TRSBankPin.Enter(Pin: String): Boolean; override;
 
   function GetDigitToEnter: Char;
   begin
-    if OCR.LocateText(Self.Bounds, 'FIRST',  RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[1]);
-    if OCR.LocateText(Self.Bounds, 'SECOND', RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[2]);
-    if OCR.LocateText(Self.Bounds, 'THIRD',  RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[3]);
-    if OCR.LocateText(Self.Bounds, 'FOURTH', RS_FONT_BOLD_12, TOCRColorRule.Create([$FFFFFF]), 1) then Exit(Pin[4]);
+    if OCR.LocateText(Self.Bounds, 'FIRST',  RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(Pin[1]);
+    if OCR.LocateText(Self.Bounds, 'SECOND', RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(Pin[2]);
+    if OCR.LocateText(Self.Bounds, 'THIRD',  RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(Pin[3]);
+    if OCR.LocateText(Self.Bounds, 'FOURTH', RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(Pin[4]);
   end;
 
 var
