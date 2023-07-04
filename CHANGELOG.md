@@ -1,3 +1,12 @@
+## [2.4.3](https://github.com/Torwent/wasp-free/compare/v2.4.2...v2.4.3) (2023-07-04)
+
+
+### Bug Fixes
+
+* read notes ([7ceedb8](https://github.com/Torwent/wasp-free/commit/7ceedb8f9ac36f946a7ef5232c7f9750c03d7752))
+
+
+
 ## [2.4.2](https://github.com/Torwent/wasp-free/compare/v2.4.1...v2.4.2) (2023-07-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **smelter:** typos ([69ac385](https://github.com/Torwent/wasp-free/commit/69ac3859a77c8a189a235a4e3e57fb575f4d4b02))
-
-
-
-## [2.3.12](https://github.com/Torwent/wasp-free/compare/v2.3.11...v2.3.12) (2023-06-23)
-
-
-### Bug Fixes
-
-* **alcher):** made it faster again ([f5e59fd](https://github.com/Torwent/wasp-free/commit/f5e59fd2c51c3b0f9114a1fa4366ef5c5c25446e))
 
 
 
