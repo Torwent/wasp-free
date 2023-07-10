@@ -601,8 +601,8 @@ var
   ItemCount: Int32;
 begin
   if ToStr(ValuableItem) <> '' then
-    ItemCount := Inventory.CountItem(ValuableItem);
-  Result := Bank.DepositAllBut(BankTab, StackableArray);
+    ItemCount := Inventory.CountItem(Self.ValuableItem);
+  Result := Bank.DepositRandomItems(Self.StackableArray);
   if ItemCount > 0 then
   begin
     if Inventory.CountItem(ValuableItem) = 0 then
@@ -700,7 +700,7 @@ begin
   begin
     if Bank.IsOpen() then
     begin
-      if Inventory.HasRandomItem(Self.StackableArray) then
+      if Inventory.ContainsRandomItems(Self.StackableArray) then
         Exit(DEPOSIT_LOOT);
       if Inventory.CountItem(Necklace) < NeckAmount then
         Exit(WITHDRAW_NECKLACES);

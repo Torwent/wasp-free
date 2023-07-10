@@ -445,7 +445,7 @@ end;
 
 function TWoodcutter.MakePlanks(): Boolean;
 begin
-  if Make.Select(Self.SawmillString, TRSMake.QUANTITY_ALL, SRL.Dice(95)) then
+  if Make.Select(Self.SawmillString, Make.QUANTITY_ALL, SRL.Dice(95)) then
     Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 10000);
 
   if Result then
@@ -456,14 +456,13 @@ function TWoodcutter.Deposit(): Boolean;
 var
   count: Int32;
 begin
-  WriteLn 'HERE';
   if UseSawmill then
     count := Inventory.CountItem(Self.Plank)
   else
     count := Inventory.CountItem(Self.Logs);
-  WriteLn 'HERE1';
-  Result := Bank.DepositItemArray(Self.BankTab, Self.BankList, True);
-  WriteLn 'HERE2';
+
+  Result := Bank.DepositItems(Self.BankList, True);
+
   if Result then
   begin
     Self.TotalActions += count;

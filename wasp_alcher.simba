@@ -175,7 +175,7 @@ begin
     else
     begin
       slots := Inventory.GetEmptySlots();
-      Inventory.MouseSlot(Inventory.RandomSlotNearby(slot, slots), MOUSE_LEFT);
+      Inventory.ClickSlot(Inventory.RandomSlotNearby(slot, slots));
       Exit(False);
     end;
   end

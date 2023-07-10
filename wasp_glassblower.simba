@@ -43,9 +43,7 @@ type
   TBlower = record(TBaseBankScript)
     State: EBlowerState;
 
-    Tool: TRSBankWithdrawItem;
-    Material: TRSBankWithdrawItem;
-    Product: TRSBankDepositItem;
+    Tool, Material, Product: TRSBankItem;
     Blowing: Boolean;
     CurrentLevel: Int32;
     UseBestItem: Boolean;
@@ -92,28 +90,28 @@ begin
   if not ItemChanged then
     Exit;
 
-  Tool := ['Glassblowing pipe', 1, False];
+  Self.Tool := TRSBankItem.Setup('Glassblowing pipe', 1);
   if SRL.Dice(70) then
-    X_Number := TRSBank.QUANTITY_ALL
+    X_Number := Bank.QUANTITY_ALL
   else
     X_Number := Random(27, 9999);
 
-  Material := ['Molten glass', X_Number, False];
+  Self.Material := TRSBankItem.Setup('Molten glass', X_Number);
 
   case CurrentGlass of
-    ERSGlassItem.BEER:     Product := ['Beer glass', X_Number];
-    ERSGlassItem.LANTERN:  Product := ['Empty candle lantern', X_Number];
-    ERSGlassItem.LAMP:     Product := ['Empty oil lamp', X_Number];
-    ERSGlassItem.VIAL:     Product := ['Vial', X_Number];
-    ERSGlassItem.FISHBOWL: Product := ['Empty fishbowl', X_Number];
-    ERSGlassItem.ORB:      Product := ['Unpowered orb', X_Number];
-    ERSGlassItem.LENS:     Product := ['Lantern lens', X_Number];
-    ERSGlassItem.BULB:     Product := ['Empty light orb', X_Number];
+    ERSGlassItem.BEER:     Self.Product := TRSBankItem.Setup('Beer glass', X_Number);
+    ERSGlassItem.LANTERN:  Self.Product := TRSBankItem.Setup('Empty candle lantern', X_Number);
+    ERSGlassItem.LAMP:     Self.Product := TRSBankItem.Setup('Empty oil lamp', X_Number);
+    ERSGlassItem.VIAL:     Self.Product := TRSBankItem.Setup('Vial', X_Number);
+    ERSGlassItem.FISHBOWL: Self.Product := TRSBankItem.Setup('Empty fishbowl', X_Number);
+    ERSGlassItem.ORB:      Self.Product := TRSBankItem.Setup('Unpowered orb', X_Number);
+    ERSGlassItem.LENS:     Self.Product := TRSBankItem.Setup('Lantern lens', X_Number);
+    ERSGlassItem.BULB:     Self.Product := TRSBankItem.Setup('Empty light orb', X_Number);
   end;
 
-  ProductCost := ItemData.GetAverage(Material.Item);
-  ActionProfit := ItemData.GetAverage(Product.Item) - ProductCost;
-  ItemChanged := False;
+  ProductCost := ItemData.GetAverage(Self.Material.Item);
+  Self.ActionProfit := ItemData.GetAverage(Self.Product.Item) - ProductCost;
+  Self.ItemChanged := False;
 end;
 
 procedure TBlower.Init(maxActions: Int32; maxTime: Int64); override;
@@ -138,7 +136,7 @@ end;
 
 function TBlower.DepositExtraItems(): Boolean;
 var
-  Slots, DepositSlots: TIntegerArray;
+  slots, DepositSlots: TIntegerArray;
   i: Int32;
 begin
   if Tool.Quantity = 1 then
@@ -157,8 +155,8 @@ function TBlower.Deposit(): Boolean;
 var
   ItemCount: Int32 := Self.CountItem;
 begin
-  if Result := Bank.DepositItem(BankTab, Product, True) then
-    if WaitUntil(Self.CountItem = 0, 100, 3000) then
+  if Result := Bank.DepositItem(Self.Product, True) then
+    if WaitUntil(Self.CountItem() = 0, 100, 3000) then
       TotalActions += ItemCount;
 end;
 
@@ -182,7 +180,7 @@ var
   Button: TRSButton;
   Buttons: TRSButtonArray;
 begin
-  if Amount <> TRSMake.QUANTITY_ALL then
+  if Amount <> Make.QUANTITY_ALL then
   begin
     Result := inherited;
     Exit;
@@ -220,7 +218,7 @@ begin
       Break;
     end;
 
-  Blowing := Result := Make.Select(ItemIndex, TRSMake.QUANTITY_ALL, SRL.Dice(98.5));
+  Blowing := Result := Make.Select(ItemIndex, Make.QUANTITY_ALL, SRL.Dice(98.5));
   if Result then WaitUntil(not Make.IsOpen, 50, 2000);
 end;
 
@@ -258,7 +256,7 @@ begin
       if Inventory.ContainsItem(Product.Item) then
         Exit(EBlowerState.DEPOSIT_PRODUCT);
 
-      if Inventory.HasRandomItem([Tool.Item, Material.Item]) then
+      if Inventory.ContainsRandomItems([Tool.Item, Material.Item]) then
         Exit(EBlowerState.DEPOSIT_RANDOM_ITEM);
 
       if Self.BankEmpty or Inventory.ContainsAll([Tool.Item, Material.Item]) then
@@ -307,7 +305,7 @@ begin
 
   if Result then
     for i := 0 to 3 do
-      if Result := Bank.WithdrawItem(Self.BankTab, [Product.Item, TRSBank.QUANTITY_ALL, True], True) then
+      if Result := Bank.WithdrawItem(Self.BankTab, [Product.Item, Bank.QUANTITY_ALL, True], True) then
         Break;
 end;
 
@@ -326,8 +324,8 @@ begin
 
     case State of
       EBlowerState.OPEN_BANK: Bank.WalkOpen();
-      EBlowerState.WITHDRAW_TOOL: Self.Withdraw(Tool);
-      EBlowerState.WITHDRAW_MATERIAL: Self.Withdraw(Material);
+      EBlowerState.WITHDRAW_TOOL: Self.Withdraw(Self.Tool);
+      EBlowerState.WITHDRAW_MATERIAL: Self.Withdraw(Self.Material);
       EBlowerState.DEPOSIT_PRODUCT: Self.Deposit();
       EBlowerState.DEPOSIT_RANDOM_ITEM: Self.DepositExtraItems();
 

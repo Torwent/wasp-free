@@ -272,7 +272,7 @@ function TJewelryCrafter._CraftGoldJewel(): Boolean;
 begin
   if CurrentJewel = ERSJewelType.TIARA then
   begin
-    if Make.Select(0, TRSMake.QUANTITY_ALL) then
+    if Make.Select(0, Make.QUANTITY_ALL) then
       Exit(Self.WaitCraft());
     Exit;
   end;
@@ -313,7 +313,7 @@ begin
       if Inventory.ContainsItem(Self.Jewel.Item) then
         Exit(EJewelCrafterState.DEPOSIT_JEWELS);
 
-      if Inventory.HasRandomItem(Self.Materials) then
+      if Inventory.ContainsRandomItems(Self.Materials) then
         Exit(EJewelCrafterState.DEPOSIT_RANDOM_ITEM);
 
       if not Self.BankEmpty then
@@ -397,7 +397,7 @@ begin
       EJewelCrafterState.WITHDRAW_BARS: Self.Withdraw(Self.Bar);
       EJewelCrafterState.WITHDRAW_GEMS: Self.Withdraw(Self.Gem);
       EJewelCrafterState.DEPOSIT_JEWELS: Bank.DepositItem(Self.Jewel, True);
-      EJewelCrafterState.DEPOSIT_RANDOM_ITEM: Bank.DepositAllBut(Self.BankTab, Self.Materials);
+      EJewelCrafterState.DEPOSIT_RANDOM_ITEM: Bank.DepositRandomItems(Self.Materials);
 
       EJewelCrafterState.OPEN_COLLECT: CollectBox.WalkOpen();
       EJewelCrafterState.HANDLE_COLLECT: Self.HandleCollectBox(Self.Materials);

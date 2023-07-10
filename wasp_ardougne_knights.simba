@@ -477,7 +477,7 @@ end;
 
 function TKnightsThiever.Deposit(): Boolean;
 begin
-  Result := Bank.DepositItemArray(Self.BankTab, Self.BankArray, False);
+  Result := Bank.DepositItems(Self.BankArray, False);
 end;
 
 
@@ -527,7 +527,7 @@ begin
         if (Inventory.CountItem(Self.Necklace) < (NeckAmount-2)) or
            not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
         begin
-          TRSBank.CachedQuantity := 0;
+          Bank.CachedQuantity := 0;
           Bank.DepositAll();
         end;
 
@@ -615,7 +615,7 @@ begin
       DEPOSIT_ITEMS: Self.Deposit();
       WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(FOOD_CONSUMABLE);
       WITHDRAW_NECK: Self.Withdraw([Self.Necklace, NeckAmount, False]);
-      DEPOSIT_NECK: Bank.DepositItem(Self.BankTab, [Necklace, -1], False);
+      DEPOSIT_NECK: Bank.DepositItem(Self.Necklace, False);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);

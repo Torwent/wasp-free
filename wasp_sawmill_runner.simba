@@ -118,7 +118,7 @@ var
   count: Int32;
 begin
   count := Inventory.CountItem(Self.Plank);
-  if Bank.DepositItem(Self.BankTab, [Self.Plank, BANK_DEPOSIT_ALL], True) then
+  if Bank.DepositItem(Self.Plank, True) then
     Result := WaitUntil(not Inventory.ContainsItem(Self.Plank), 200, 4000);
 
   if Result then
@@ -186,7 +186,7 @@ end;
 
 function TSawmillRunner.HandleSawmill(): Boolean;
 begin
-  if Make.Select(Ord(CurrentTask), TRSMake.QUANTITY_ALL) then
+  if Make.Select(Ord(CurrentTask), Make.QUANTITY_ALL) then
     Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 3000);
 end;
 
@@ -203,7 +203,7 @@ begin
       if Inventory.ContainsItem(Self.Plank) then
         Exit(DEPOSIT_ITEMS);
 
-      if Inventory.HasRandomItem(Self.NeededItems) then
+      if Inventory.ContainsRandomItems(Self.NeededItems) then
         Exit(DEPOSIT_RANDOM_ITEMS);
 
       if not Inventory.IsFull() then
@@ -261,9 +261,9 @@ begin
 
       OPEN_BANK: Bank.WalkOpen();
 
-      WITHDRAW_ITEMS: Self.Withdraw([Self.Logs, TRSBank.QUANTITY_ALL, False]);
+      WITHDRAW_ITEMS: Self.Withdraw([Self.Logs, Bank.QUANTITY_ALL, False]);
       DEPOSIT_ITEMS: Self.Deposit();
-      DEPOSIT_RANDOM_ITEMS: Bank.DepositAllBut(Self.BankTab, Self.NeededItems);
+      DEPOSIT_RANDOM_ITEMS: Bank.DepositRandomItems(Self.NeededItems);
       OPEN_COLLECT: CollectBox.WalkOpen();
       HANDLE_COLLECT: Self.HandleCollectBox([]);
       CLOSE_INTERFACE: MainScreen.CloseInterface();

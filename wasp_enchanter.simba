@@ -278,10 +278,10 @@ function TEnchanter.Deposit(): Boolean;
 var
   itemCount: Int32;
 begin
-  itemCount := Inventory.CountItem(EnchantedJewel);
+  itemCount := Inventory.CountItem(Self.EnchantedJewel);
 
-  if Bank.DepositItem(BankTab, [EnchantedJewel, BANK_DEPOSIT_ALL], True) then
-    Result := WaitUntil(Inventory.CountItem(EnchantedJewel) = 0, 100, 3000);
+  if Bank.DepositItem(Self.EnchantedJewel, True) then
+    Result := WaitUntil(Inventory.CountItem(Self.EnchantedJewel) = 0, 100, 3000);
 
   if Result then
   begin
@@ -367,7 +367,7 @@ function TEnchanter.Terminate(): Boolean; override;
 begin
   if inherited then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [EnchantedJewel, TRSBank.QUANTITY_ALL, True], True) then
+      if Result := Bank.WithdrawItem(Self.EnchantedJewel, True) then
         Break;
 end;
 

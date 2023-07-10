@@ -295,7 +295,7 @@ end;
 
 function TMiner.Deposit(): Boolean;
 begin
-  Result := Bank.DepositItemArray(BankTab, BankList, True);
+  Result := Bank.DepositItems(Self.BankList, True);
   if Result then
     WL.Activity.Restart();
 end;
@@ -402,21 +402,6 @@ end;
 var
   Miner: TMiner;
 
-function TRSBank.DepositItemArray(tab: Int32; ItemArray: TRSItemArray; UseQuantityButtons: Boolean): Boolean; override;
-var
-  Item: TRSItem;
-  ItemList: TRSItemArray;
-begin
-  for Item in ItemArray do
-    if Inventory.ContainsItem(Item) then
-      ItemList += Item;
-
-  for Item in ItemList do
-    Self.DepositItem(Tab, Item, UseQuantityButtons);
-
-  Result := not Inventory.ContainsAny(ItemList);
-end;
-
 {$IFDEF SCRIPT_GUI}
 type
   TMinerConfig = record(TScriptForm)
@@ -439,7 +424,7 @@ begin
   inherited;
 end;
 
-procedure TMinerConfig.RockSelectorOnChange(sender: TObject);
+procedure TMinerConfig.RockSelectorOnChange({$H-}sender: TObject);{$H+}
 begin
   Self.BankSelector.Clear();
 

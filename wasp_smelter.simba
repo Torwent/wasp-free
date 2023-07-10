@@ -105,13 +105,13 @@ begin
     ERSBarType.IRON:
       begin
         Self.Bar.Item := 'Iron bar';
-        Self.Ore1 := ['Iron ore', TRSBank.QUANTITY_ALL, False];
+        Self.Ore1 := ['Iron ore', Bank.QUANTITY_ALL, False];
       end;
 
     ERSBarType.SILVER:
       begin
         Self.Bar.Item := 'Silver bar';
-        Self.Ore1 := ['Silver ore', TRSBank.QUANTITY_ALL, False];
+        Self.Ore1 := ['Silver ore', Bank.QUANTITY_ALL, False];
       end;
 
     ERSBarType.STEEL:
@@ -124,7 +124,7 @@ begin
     ERSBarType.GOLD:
       begin
         Self.Bar.Item := 'Gold bar';
-        Self.Ore1 := ['Gold ore', TRSBank.QUANTITY_ALL, False];
+        Self.Ore1 := ['Gold ore', Bank.QUANTITY_ALL, False];
       end;
 
     ERSBarType.MITHRIL:
@@ -263,7 +263,7 @@ begin
   if not Inventory.ContainsAll(Materials) then
     Exit;
 
-  if Result := Make.Select(ToStr(Self.Bar.Item), TRSMake.QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+  if Result := Make.Select(ToStr(Self.Bar.Item), Make.QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
     Smelting := XPBar.WaitXP(4000);
 end;
 
@@ -306,7 +306,7 @@ begin
       if Inventory.ContainsItem(Self.Bar.Item) then
         Exit(ESmelterState.DEPOSIT_BAR);
 
-      if Inventory.HasRandomItem(Materials) then
+      if Inventory.ContainsRandomItems(Materials) then
         Exit(ESmelterState.DEPOSIT_RANDOM_ITEM);
 
       if not Self.BankEmpty and not Inventory.ContainsAll(Materials) then
@@ -359,7 +359,7 @@ begin
   Result := inherited;
   if Result then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [Self.Bar.Item, TRSBank.QUANTITY_ALL, True], True) then
+      if Result := Bank.WithdrawItem(BankTab, [Self.Bar.Item, Bank.QUANTITY_ALL, True], True) then
         Break;
 end;
 
@@ -376,7 +376,7 @@ begin
       ESmelterState.OPEN_BANK: Bank.WalkOpen();
       ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw();
       ESmelterState.DEPOSIT_BAR: Self.Deposit();
-      ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositAllBut(Self.BankTab, Self.Materials);
+      ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositRandomItems(Self.Materials);
 
       ESmelterState.OPEN_COLLECT: CollectBox.WalkOpen();
       ESmelterState.HANDLE_COLLECT: Self.HandleCollectBox(Self.Materials);

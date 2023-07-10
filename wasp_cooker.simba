@@ -96,20 +96,20 @@ begin
   BurntFish := ['herring', 'mackerel', 'sardine', 'anchovies',
                 'giant carp', 'trout', 'cod', 'pike', 'salmon', 'tuna', 'bass'];
 
-  Ingredient := [('Raw ' + ToStr(Food).Lower()), TRSBank.QUANTITY_ALL, False];
+  Ingredient := [('Raw ' + ToStr(Food).Lower()), Bank.QUANTITY_ALL, False];
 
   if (CookedPrefix.Find(LowerCase(Food)) > -1) then
     Products := [
-      ['Cooked ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL],
-      ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]]
+      ['Cooked ' + ToStr(Food).Lower, Bank.QUANTITY_ALL],
+      ['Burnt ' + ToStr(Food).Lower, Bank.QUANTITY_ALL]]
   else if (BurntFish.Find(LowerCase(Food)) > -1) then
     Products := [
-      [Food, BANK_DEPOSIT_ALL],
-      ['Burnt fish', BANK_DEPOSIT_ALL]]
+      [Food, Bank.QUANTITY_ALL],
+      ['Burnt fish', Bank.QUANTITY_ALL]]
   else
     Products := [
-      [Food, BANK_DEPOSIT_ALL],
-      ['Burnt ' + ToStr(Food).Lower, BANK_DEPOSIT_ALL]];
+      [Food, Bank.QUANTITY_ALL],
+      ['Burnt ' + ToStr(Food).Lower, Bank.QUANTITY_ALL]];
 
   ActionProfit := (
     ItemData.GetAverage(Products[0].Item) -
@@ -191,7 +191,7 @@ begin
 
   for Product in Products do
   begin
-    if not Bank.DepositItem(BankTab, Product, True) then
+    if not Bank.DepositItem(Product, True) then
       Exit(False);
     WaitUntil((InvCount > Inventory.Count), 50, 2000);
     InvCount := Inventory.Count;
@@ -220,7 +220,7 @@ begin
   if 'arambwan' in Food then
     i := 1;
 
-  Result := Cooking := Make.Select(i, TRSMake.QUANTITY_ALL, Antiban.BioDice);
+  Result := Cooking := Make.Select(i, Make.QUANTITY_ALL, Antiban.BioDice);
   
   if Result then
     WaitUntil(not Make.IsOpen, 100, 4000);  
@@ -308,7 +308,7 @@ begin
   Result := inherited();
   if Result then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [Products[0].Item, TRSBank.QUANTITY_ALL, True], True) then
+      if Result := Bank.WithdrawItem(Products[0].Item, True) then
         Break;
 end;
 
