@@ -1,3 +1,12 @@
+## [2.4.4](https://github.com/Torwent/wasp-free/compare/v2.4.3...v2.4.4) (2023-07-10)
+
+
+### Bug Fixes
+
+* compatibility with latest SRL-T and WaspLib ([3c58482](https://github.com/Torwent/wasp-free/commit/3c584824c94aadbc908c21aa209d3b799fa7ca22))
+
+
+
 ## [2.4.3](https://github.com/Torwent/wasp-free/compare/v2.4.2...v2.4.3) (2023-07-04)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **jewelry smelter:** new script added ([b0acfd5](https://github.com/Torwent/wasp-free/commit/b0acfd55ba474fb24cd9edc212f5142405779d41))
-
-
-
-## [2.3.13](https://github.com/Torwent/wasp-free/compare/v2.3.12...v2.3.13) (2023-06-25)
-
-
-### Bug Fixes
-
-* **smelter:** typos ([69ac385](https://github.com/Torwent/wasp-free/commit/69ac3859a77c8a189a235a4e3e57fb575f4d4b02))
 
 
 
