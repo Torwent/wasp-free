@@ -1,3 +1,12 @@
+## [2.4.5](https://github.com/Torwent/wasp-free/compare/v2.4.4...v2.4.5) (2023-07-11)
+
+
+### Bug Fixes
+
+* compatibility with latest wasplib, fix crashes in several scripts (nmz, pickpocketer) ([4fd1798](https://github.com/Torwent/wasp-free/commit/4fd1798a2235586e045a6360eabdac5cec8cb538))
+
+
+
 ## [2.4.4](https://github.com/Torwent/wasp-free/compare/v2.4.3...v2.4.4) (2023-07-10)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **jewelry smelter:** the gui now locks/unlocks the proper bar for all jewelry ([bfd3ee1](https://github.com/Torwent/wasp-free/commit/bfd3ee1b1b793c8b967187ba87da9ac15b46714c))
-
-
-
-# [2.4.0](https://github.com/Torwent/wasp-free/compare/v2.3.13...v2.4.0) (2023-06-28)
-
-
-### Features
-
-* **jewelry smelter:** new script added ([b0acfd5](https://github.com/Torwent/wasp-free/commit/b0acfd55ba474fb24cd9edc212f5142405779d41))
 
 
 
