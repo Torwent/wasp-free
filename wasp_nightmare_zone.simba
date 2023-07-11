@@ -478,8 +478,8 @@ begin
     slotOption := 'Guzzle';
 
   currentHP := Minimap.GetHPLevel();
-  slot := Inventory.FindItem(Self.DamageItem);
-  if slot = -1 then
+
+  if not Inventory.FindItem(Self.DamageItem, slot) then
     Exit(currentHP = 1);
 
   while Self.NeedLowerHP(currentHP) do
@@ -502,11 +502,7 @@ var
   doseCount, slot, currentHP: Int32;
   slots: TIntegerArray;
 begin
-  if not Inventory.Open() then
-    Exit;
-
-  slots := Inventory.FindItems(potionArray);
-  if slots = [] then
+  if not Inventory.FindItems(potionArray, slots) then
     Exit;
 
   slot := slots[0];
@@ -727,13 +723,15 @@ begin
   begin
     chatCache := Chat.GetChat();
 
-    if chatCache.ContainsAll(['Ill', 'want', 'coins']) then
+    if chatCache.ContainsAll(['I''ll', 'want', 'coins']) then
     begin
       if 'deduct the money' in chatCache then
         Exit(HANDLE_DOMINIC);
 
       Exit(OUT_OF_MONEY);
     end;
+
+    Exit(END_SCRIPT);
   end;
 
   if 'Agree' in title then

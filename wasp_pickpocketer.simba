@@ -827,7 +827,9 @@ begin
     begin
       Self.DebugLn('Consumable found: ' + ToStr(item));
       consumable := Self.Setup(item);
-      consumable.BankTab := Bank.GetCurrentTab(); //TODO: Search parent maybe?
+      consumable.BankItem.Tab := Bank.GetCurrentTab(); //TODO: Search parent maybe?
+      consumable.BankItem.Scroll := Bank.GetScrollPosition();
+
       Thiever.StackableArray += item;
       Result += consumable;
     end;
