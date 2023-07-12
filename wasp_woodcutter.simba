@@ -627,7 +627,7 @@ begin
   Self.SawmillState.setEnabled(False);
 
   case combobox.GetText() of
-    'Varrock east', 'Woodcutting guild', 'Prifddinas':
+    'Varrock east (cuts close to sawmill)', 'Woodcutting guild', 'Prifddinas':
         case ERSTree(Self.TreeSelector.GetItemIndex()) of
           REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
             Self.SawmillState.SetEnabled(True);
