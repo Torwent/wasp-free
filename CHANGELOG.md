@@ -1,3 +1,12 @@
+## [2.4.6](https://github.com/Torwent/wasp-free/compare/v2.4.5...v2.4.6) (2023-07-12)
+
+
+### Bug Fixes
+
+* **nmz:** bankpin override is not required anymore ([be761bd](https://github.com/Torwent/wasp-free/commit/be761bdf18a11f8a36ec994b31e963630b5b57a6))
+
+
+
 ## [2.4.5](https://github.com/Torwent/wasp-free/compare/v2.4.4...v2.4.5) (2023-07-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** compatibility with latest SRL-T ([0e72089](https://github.com/Torwent/wasp-free/commit/0e720897783a54685d2706706baaed29b940ce13))
-
-
-
-## [2.4.1](https://github.com/Torwent/wasp-free/compare/v2.4.0...v2.4.1) (2023-06-28)
-
-
-### Bug Fixes
-
-* **jewelry smelter:** the gui now locks/unlocks the proper bar for all jewelry ([bfd3ee1](https://github.com/Torwent/wasp-free/commit/bfd3ee1b1b793c8b967187ba87da9ac15b46714c))
 
 
 
