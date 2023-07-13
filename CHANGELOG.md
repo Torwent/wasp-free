@@ -1,3 +1,12 @@
+## [2.4.8](https://github.com/Torwent/wasp-free/compare/v2.4.7...v2.4.8) (2023-07-13)
+
+
+### Bug Fixes
+
+* **offerer:** updated to the new TRSBankItems ([f1ea717](https://github.com/Torwent/wasp-free/commit/f1ea7177ce2a4732aaa924f110a7ed3a38ac0159))
+
+
+
 ## [2.4.7](https://github.com/Torwent/wasp-free/compare/v2.4.6...v2.4.7) (2023-07-12)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility with latest SRL-T and WaspLib ([3c58482](https://github.com/Torwent/wasp-free/commit/3c584824c94aadbc908c21aa209d3b799fa7ca22))
-
-
-
-## [2.4.3](https://github.com/Torwent/wasp-free/compare/v2.4.2...v2.4.3) (2023-07-04)
-
-
-### Bug Fixes
-
-* read notes ([7ceedb8](https://github.com/Torwent/wasp-free/commit/7ceedb8f9ac36f946a7ef5232c7f9750c03d7752))
 
 
 
