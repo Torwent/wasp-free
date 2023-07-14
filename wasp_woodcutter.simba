@@ -244,6 +244,12 @@ begin
         Self.UseBank := True;
       end;
 
+    SEERS_VILLAGE:
+      begin
+        Self.RSW.Setup([RSRegions.SEERS_VILLAGE]);
+        Self.UseBank := True;
+      end;
+
     POWER_WC:
       begin
         Self.UseBank := False;
