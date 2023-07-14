@@ -1,3 +1,12 @@
+## [2.4.9](https://github.com/Torwent/wasp-free/compare/v2.4.8...v2.4.9) (2023-07-14)
+
+
+### Bug Fixes
+
+* **wc:** should bank in seers village now, not tested ([5d705f0](https://github.com/Torwent/wasp-free/commit/5d705f0938605102134290f77a99b66a1f1138b5))
+
+
+
 ## [2.4.8](https://github.com/Torwent/wasp-free/compare/v2.4.7...v2.4.8) (2023-07-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility with latest wasplib, fix crashes in several scripts (nmz, pickpocketer) ([4fd1798](https://github.com/Torwent/wasp-free/commit/4fd1798a2235586e045a6360eabdac5cec8cb538))
-
-
-
-## [2.4.4](https://github.com/Torwent/wasp-free/compare/v2.4.3...v2.4.4) (2023-07-10)
-
-
-### Bug Fixes
-
-* compatibility with latest SRL-T and WaspLib ([3c58482](https://github.com/Torwent/wasp-free/commit/3c584824c94aadbc908c21aa209d3b799fa7ca22))
 
 
 
