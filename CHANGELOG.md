@@ -1,3 +1,12 @@
+## [2.4.11](https://github.com/Torwent/wasp-free/compare/v2.4.10...v2.4.11) (2023-07-22)
+
+
+### Bug Fixes
+
+* **cooker:** updated to the new TRSBankItems ([5d7b661](https://github.com/Torwent/wasp-free/commit/5d7b661481baac778b44d94d5578c9529a23b87c))
+
+
+
 ## [2.4.10](https://github.com/Torwent/wasp-free/compare/v2.4.9...v2.4.10) (2023-07-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** Varrock East has the sawmill reenabled ([29f7a20](https://github.com/Torwent/wasp-free/commit/29f7a2061c67acf22b9c2e61d8b5e8d5db4abdd1))
-
-
-
-## [2.4.6](https://github.com/Torwent/wasp-free/compare/v2.4.5...v2.4.6) (2023-07-12)
-
-
-### Bug Fixes
-
-* **nmz:** bankpin override is not required anymore ([be761bd](https://github.com/Torwent/wasp-free/commit/be761bdf18a11f8a36ec994b31e963630b5b57a6))
 
 
 
