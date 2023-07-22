@@ -32,6 +32,7 @@ type
     WITHDRAW_NECK,
     DEPOSIT_NECK,
     WITHDRAW_FOOD,
+    FIX_INVENTORY,
     HANDLE_COLLECT,
     CLOSE_INTERFACE,
 
@@ -60,8 +61,7 @@ type
     Knight: TRSNPC;
 
     CoinPouch: TRSItem;
-    Necklace: TRSItem;
-    ValuableItem: TRSItem;
+    Necklace: TRSBankItem;
 
     LootArray: TRSItemArray;
     KeepArray: TRSItemArray;
@@ -219,7 +219,7 @@ begin
   FoodHandler.Amount := FoodAmount;
 
   Self.CoinPouch := 'Coin pouch';
-  Self.Necklace := 'Dodgy necklace';
+  Self.Necklace := TRSBankItem.Setup('Dodgy necklace', NeckAmount);
   Self.KeepArray := ['Coin pouch', 'Coins', 'Cosmic rune', 'Dodgy necklace'];
   Self.BankArray := ['Jug', 'Pie dish'];
 
@@ -236,7 +236,7 @@ begin
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
   Wait(5000);
   Self.CheckRogueEquipment();
-  Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
+  Self.HasNeck := Equipment.ContainsItem(Self.Necklace.Item);
 
   if WLSettings.RemoteInput.HUDDebug then
     DebugMMDotArray += Self.Knight;
@@ -363,15 +363,22 @@ begin
 end;
 
 function TKnightsThiever.EquipNeck(): Boolean;
+var
+  slot: Int32;
 begin
-  if Result := Inventory.ClickItem(Self.Necklace) then Wait(300, 400);
+  Result := Inventory.FindItem(Self.Necklace.Item, slot);
 
-  Self.FreshNeck := Self.HasNeck := Result;
+  if Result then
+  begin
+    WaitUntil(not Inventory.IsSlotUsed(slot), 300, 3000);
+    Self.FreshNeck := True;
+    Self.HasNeck := True;
+  end;
 end;
 
 function TKnightsThiever.CheckNeck(): Boolean;
 begin
-  Result := Self.HasNeck := Equipment.ContainsItem(Self.Necklace);
+  Result := Self.HasNeck := Equipment.ContainsItem(Self.Necklace.Item);
 
   Self.NeckTimer.Restart(Random(-30000, 60000));
 end;
@@ -420,9 +427,10 @@ end;
 
 function TKnightsThiever.StealKnight(): Boolean;
 var
-  Slot: Int32 := Inventory.GetSelectedSlot();
-  CurrentHP: Int32 := Minimap.GetHPLevel();
+  slot: Int32 := Inventory.GetSelectedSlot();
+  currentHP: Int32 := Minimap.GetHPLevel();
   circle: TCircle;
+  i: Int32;
 begin
   if Slot > -1 then Inventory.ClickSlot(Slot);
 
@@ -444,7 +452,7 @@ begin
 
     case Self.Pattern of
       4:
-      for 1 to RandomLeft(0, 2) do
+      for i := 1 to RandomLeft(0, 2) do
       begin
         circle.X := Mouse.Position().X;
         circle.Y := Mouse.Position().Y;
@@ -454,7 +462,7 @@ begin
         Wait(200, 350);
       end;
       6:
-      for 1 to RandomLeft(0, 3) do
+      for i := 1 to RandomLeft(0, 3) do
       begin
         circle.X := Mouse.Position().X;
         circle.Y := Mouse.Position().Y;
@@ -480,6 +488,26 @@ begin
   Result := Bank.DepositItems(Self.BankArray, False);
 end;
 
+function TKnightsThiever.FixInventory(): Boolean;
+begin
+  if (Inventory.CountItem(Self.Necklace.Item) < (NeckAmount-2)) or
+     not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
+  begin
+    Bank.CachedQuantity := 0;
+    Bank.DepositAll();
+  end;
+
+  Self.Necklace.Quantity := 1;
+  Result := Bank.DepositItem(Self.Necklace, False);
+end;
+
+function TKnightsThiever.Withdraw(out item: TRSBankItem; attempt: Int32 = 0): Boolean; override;
+begin
+  if item = Self.Necklace then
+    item.Quantity := NeckAmount - Inventory.CountItem(Self.Necklace.Item);
+
+  Result := inherited(item, attempt);
+end;
 
 procedure TKnightsThiever.HandleUpstairs();
 const
@@ -504,6 +532,7 @@ begin
   until Minimap.OnGroundLevel();
 end;
 
+
 function TKnightsThiever.GetState(): EThieverState;
 begin
   if WL.Activity.IsFinished() then
@@ -523,20 +552,9 @@ begin
         Exit(DEPOSIT_ITEMS);
 
       if Inventory.IsFull() then
-      begin
-        if (Inventory.CountItem(Self.Necklace) < (NeckAmount-2)) or
-           not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
-        begin
-          Bank.CachedQuantity := 0;
-          Bank.DepositAll();
-        end;
+        Exit(FIX_INVENTORY);
 
-        Bank.DepositItem([Self.Necklace, 1], False);
-
-        Exit(WAIT_STATE);
-      end;
-
-      case Inventory.CountItem(Self.Necklace) of
+      case Inventory.CountItem(Self.Necklace.Item) of
         0..(NeckAmount-2): Exit(WITHDRAW_NECK);
         (NeckAmount-2)..(NeckAmount+2): ;
         else Exit(DEPOSIT_NECK);
@@ -579,7 +597,7 @@ begin
 
   if (NeckAmount > 0) and not Self.FreshNeck and (not Self.HasNeck or Self.NecklaceExpired) then
   begin
-    if Inventory.ContainsItem(Self.Necklace) then
+    if Inventory.ContainsItem(Self.Necklace.Item) then
       Exit(EQUIP_NECK);
 
     Exit(OPEN_BANK);
@@ -614,8 +632,9 @@ begin
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_ITEMS: Self.Deposit();
       WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(FOOD_CONSUMABLE);
-      WITHDRAW_NECK: Self.Withdraw([Self.Necklace, NeckAmount, False]);
+      WITHDRAW_NECK: Self.Withdraw(Self.Necklace);
       DEPOSIT_NECK: Bank.DepositItem(Self.Necklace, False);
+      FIX_INVENTORY: Self.FixInventory();
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
