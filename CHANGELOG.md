@@ -1,3 +1,12 @@
+## [2.4.10](https://github.com/Torwent/wasp-free/compare/v2.4.9...v2.4.10) (2023-07-22)
+
+
+### Bug Fixes
+
+* **ardy knights:** banking tweaks ([d62e629](https://github.com/Torwent/wasp-free/commit/d62e629850ebf3e985e4c777a346572cb92d103a))
+
+
+
 ## [2.4.9](https://github.com/Torwent/wasp-free/compare/v2.4.8...v2.4.9) (2023-07-14)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** bankpin override is not required anymore ([be761bd](https://github.com/Torwent/wasp-free/commit/be761bdf18a11f8a36ec994b31e963630b5b57a6))
-
-
-
-## [2.4.5](https://github.com/Torwent/wasp-free/compare/v2.4.4...v2.4.5) (2023-07-11)
-
-
-### Bug Fixes
-
-* compatibility with latest wasplib, fix crashes in several scripts (nmz, pickpocketer) ([4fd1798](https://github.com/Torwent/wasp-free/commit/4fd1798a2235586e045a6360eabdac5cec8cb538))
 
 
 
