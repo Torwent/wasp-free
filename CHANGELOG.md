@@ -1,3 +1,12 @@
+## [2.4.13](https://github.com/Torwent/wasp-free/compare/v2.4.12...v2.4.13) (2023-07-23)
+
+
+### Bug Fixes
+
+* **alcher:** profit calc should be fixed now ([7d1b4ac](https://github.com/Torwent/wasp-free/commit/7d1b4ac855374221e6c317e3f15f041962f8af30))
+
+
+
 ## [2.4.12](https://github.com/Torwent/wasp-free/compare/v2.4.11...v2.4.12) (2023-07-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **wc:** should bank in seers village now, not tested ([5d705f0](https://github.com/Torwent/wasp-free/commit/5d705f0938605102134290f77a99b66a1f1138b5))
-
-
-
-## [2.4.8](https://github.com/Torwent/wasp-free/compare/v2.4.7...v2.4.8) (2023-07-13)
-
-
-### Bug Fixes
-
-* **offerer:** updated to the new TRSBankItems ([f1ea717](https://github.com/Torwent/wasp-free/commit/f1ea7177ce2a4732aaa924f110a7ed3a38ac0159))
 
 
 
