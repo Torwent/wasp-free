@@ -6,7 +6,7 @@
   {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex := 0;
+  Login.PlayerIndex := 1;
 end;
 {$ENDIF}
 
@@ -162,14 +162,8 @@ end;
 
 
 function TCooker.HasProducts(): Boolean;
-var
-  product: TRSBankItem;
 begin
-  for product in Self.Products do
-    if not Inventory.ContainsItem(product.Item) then
-      Exit(False);
-
-  Result := True;
+  Result := Inventory.ContainsAny([Self.Products[0].Item, Self.Products[1].Item]);
 end;
 
 function TCooker.OpenBank(): Boolean;
