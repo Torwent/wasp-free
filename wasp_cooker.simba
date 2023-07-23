@@ -1,12 +1,12 @@
 {$DEFINE SCRIPT_ID := 'de957f22-8a37-4660-a7a3-9bef52cadd70'}
-{$DEFINE SCRIPT_REVISION := '27'}
+{$DEFINE SCRIPT_REVISION := '28'}
 {$IFNDEF SCRIPT_CHAIN}
   {$DEFINE SCRIPT_GUI}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex := 1;
+  Login.PlayerIndex := 0;
 end;
 {$ENDIF}
 

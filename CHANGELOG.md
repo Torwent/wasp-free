@@ -1,3 +1,12 @@
+## [2.4.12](https://github.com/Torwent/wasp-free/compare/v2.4.11...v2.4.12) (2023-07-23)
+
+
+### Bug Fixes
+
+* **cooker:** should work again ([995d014](https://github.com/Torwent/wasp-free/commit/995d01411a2c5f44154a3a9d87af87ecf1775581))
+
+
+
 ## [2.4.11](https://github.com/Torwent/wasp-free/compare/v2.4.10...v2.4.11) (2023-07-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **offerer:** updated to the new TRSBankItems ([f1ea717](https://github.com/Torwent/wasp-free/commit/f1ea7177ce2a4732aaa924f110a7ed3a38ac0159))
-
-
-
-## [2.4.7](https://github.com/Torwent/wasp-free/compare/v2.4.6...v2.4.7) (2023-07-12)
-
-
-### Bug Fixes
-
-* **woodcutter:** Varrock East has the sawmill reenabled ([29f7a20](https://github.com/Torwent/wasp-free/commit/29f7a2061c67acf22b9c2e61d8b5e8d5db4abdd1))
 
 
 
