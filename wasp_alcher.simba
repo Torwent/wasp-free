@@ -163,8 +163,8 @@ begin
       if WaitUntil(Magic.IsOpen(), 50, SRL.TruncatedGauss(1200, 2000)) then
       begin
         WL.Activity.Restart();
-        Self.TotalActions := Round(XPBar.Read() - WL.XP.Start / 65);
-        Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+        Self.TotalActions += 1;
+        Self.TotalProfit += Self.ActionProfit;
 
         Wait(800, 1200 + Round(Antiban.GetUniqueNumber(800, 200, 1500)));
         Exit(True);
