@@ -1,3 +1,12 @@
+# [2.5.0](https://github.com/Torwent/wasp-free/compare/v2.4.13...v2.5.0) (2023-07-28)
+
+
+### Features
+
+* **alcher:** now uses the alch handler. not tested, may not work ([ad78045](https://github.com/Torwent/wasp-free/commit/ad78045e0747f8e21f0adb041fb07e439930be8b))
+
+
+
 ## [2.4.13](https://github.com/Torwent/wasp-free/compare/v2.4.12...v2.4.13) (2023-07-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** banking tweaks ([d62e629](https://github.com/Torwent/wasp-free/commit/d62e629850ebf3e985e4c777a346572cb92d103a))
-
-
-
-## [2.4.9](https://github.com/Torwent/wasp-free/compare/v2.4.8...v2.4.9) (2023-07-14)
-
-
-### Bug Fixes
-
-* **wc:** should bank in seers village now, not tested ([5d705f0](https://github.com/Torwent/wasp-free/commit/5d705f0938605102134290f77a99b66a1f1138b5))
 
 
 
