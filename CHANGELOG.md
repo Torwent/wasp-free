@@ -1,3 +1,12 @@
+## [2.5.1](https://github.com/Torwent/wasp-free/compare/v2.5.0...v2.5.1) (2023-07-28)
+
+
+### Bug Fixes
+
+* **alcher:** forgot to add action and profit tracker ([7835a44](https://github.com/Torwent/wasp-free/commit/7835a44ab6727853795fae8c1717fafab5ae0abc))
+
+
+
 # [2.5.0](https://github.com/Torwent/wasp-free/compare/v2.4.13...v2.5.0) (2023-07-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** updated to the new TRSBankItems ([5d7b661](https://github.com/Torwent/wasp-free/commit/5d7b661481baac778b44d94d5578c9529a23b87c))
-
-
-
-## [2.4.10](https://github.com/Torwent/wasp-free/compare/v2.4.9...v2.4.10) (2023-07-22)
-
-
-### Bug Fixes
-
-* **ardy knights:** banking tweaks ([d62e629](https://github.com/Torwent/wasp-free/commit/d62e629850ebf3e985e4c777a346572cb92d103a))
 
 
 
