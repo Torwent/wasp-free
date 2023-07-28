@@ -379,7 +379,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(State));
 
-    case State of
+    case Self.State of
       EEnchanterState.OPEN_BANK: Bank.WalkOpen();
       EEnchanterState.WITHDRAW_TOOL: Self.Withdraw([CosmicRune, -1, False]);
       EEnchanterState.WITHDRAW_MATERIAL: Self.Withdraw([RegularJewel, -1, False]);

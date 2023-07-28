@@ -379,7 +379,7 @@ begin
     if Self.InvCount <> Self.PrevInvCount then
       WL.Activity.Restart();
 
-    case State of
+    case Self.State of
       EMinerState.OPEN_BANK: Bank.WalkOpen();
       EMinerState.DEPOSIT_ITEMS: Self.Deposit();
       EMinerState.CLOSE_INTERFACE: MainScreen.CloseInterface();

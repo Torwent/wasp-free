@@ -157,7 +157,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(State));
 
-    case State of
+    case Self.State of
       LEVELED_UP: Chat.HandleLevelUp();
       DROP_LOOT:  Self.DropItems();
       FIND_STALL, ROB_STALL: Self.RobStall();

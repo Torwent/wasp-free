@@ -256,7 +256,7 @@ begin
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
 
-    case State of
+    case Self.State of
       WAIT_STATE: Wait(500, 800);
 
       OPEN_BANK: Bank.WalkOpen();

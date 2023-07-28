@@ -322,7 +322,7 @@ begin
     Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
 
-    case State of
+    case Self.State of
       EBlowerState.OPEN_BANK: Bank.WalkOpen();
       EBlowerState.WITHDRAW_TOOL: Self.Withdraw(Self.Tool);
       EBlowerState.WITHDRAW_MATERIAL: Self.Withdraw(Self.Material);

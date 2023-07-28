@@ -371,7 +371,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(State));
 
-    case State of
+    case Self.State of
       ESmelterState.HOVER_BANK: Self.HoverBank();
       ESmelterState.OPEN_BANK: Bank.WalkOpen();
       ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw();

@@ -238,7 +238,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(State));
 
-    case State of
+    case Self.State of
       OPEN_BANK:        Bank.WalkOpen();
       WITHDRAW_WRATH:   Self.Withdraw(Self.WrathRune);
       WITHDRAW_ALT:     Self.Withdraw(Self.AltRune);

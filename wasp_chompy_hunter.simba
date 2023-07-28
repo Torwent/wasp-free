@@ -193,7 +193,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(State));
 
-    case State of
+    case Self.State of
       WAIT_STATE: Wait(1200, 2400);
       WAIT_COMBAT: WaitUntil(not MainScreen.WaitInCombat(2400), 100, 5000);
       FILL_TOAD: Self.FillToad();

@@ -11,7 +11,6 @@ end;
 {$ENDIF}
 
 var
-  CustomItem: TRSItem := 'noted Rune 2h sword';
   AlchSpell: ERSSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
   LossProtection: Boolean := True;
   WalkGE: Boolean := True;
@@ -27,13 +26,7 @@ type
 
     CLOSE_INTERFACE,
 
-    OPEN_MAGIC_TAB,
-    CHOOSE_SPELL,
-
-    OPEN_INV_TAB,
-    CHOOSE_ITEM,
-    DESELECT_ITEM,
-    HANDLE_WARNING,
+    CAST_ALCHEMY,
     WALK_ALCH,
 
     CLOSE_CONTEXT,
@@ -51,9 +44,7 @@ type
   end;
 
 const
-  VARROCK_BOUNDS: TPointArray = [
-    [7941, 2831], [7941, 2363], [8337, 2370], [8341, 2837]
-  ];
+  VARROCK_BOUNDS: TPointArray = [[7941, 2831], [7941, 2363], [8337, 2370], [8341, 2837]];
 
 procedure TAntiban.Setup(); override;
 begin
@@ -68,119 +59,11 @@ procedure TAlcher.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
-  Self.RSW.Setup([RSRegions.GRAND_EXCHANGE]);
-
-  AlchItemArray += CustomItem;
+  if WalkGE then
+    Self.RSW.Setup([RSRegions.GRAND_EXCHANGE]);
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');
-end;
-
-
-procedure TAlcher.SetupAlchItems();
-var
-  item: TRSItem;
-  Slot: Int32;
-  ItemString: String;
-begin
-  if not Inventory.Open() and not Inventory.SetSelectedItem(-1) then
-    Exit;
-
-  for item in AlchItemArray do
-  begin
-    if Inventory.FindItem(item, Slot) then
-    begin
-      ItemString := ToStr(item);
-
-      Writeln('Found possible item to alch: ', ItemString + '.');
-
-      if ItemString.Contains('noted ') then
-        ItemString := ItemString.After('noted ');
-
-      Self.ActionProfit := ItemData.GetHighAlchProfit(ItemString);
-      Writeln('Profit per alch: ', Self.ActionProfit, '.');
-
-      if not LossProtection or (Self.ActionProfit > -350) then //350 gp threshold to account for price fluctuations.
-      begin
-        Self.AlchItem := item;
-        Exit;
-      end;
-
-      Writeln('Item is not profitable');
-    end;
-  end;
-
-  Self.AlchItem := 'null';
-end;
-
-
-function TAlcher.ChooseSpell(): Boolean;
-begin
-  if not Magic.IsOpen and not Magic.CanActivate(AlchSpell) then
-    Exit;
-  Result := Magic.CastSpell(AlchSpell);
-end;
-
-function TAlcher.DeselectItem(): Boolean;
-begin
-  if Inventory.SetSelectedSlot(-1) then
-  begin
-    Wait(1200, 2000);
-    Result := WaitUntil(Inventory.ContainsItem(Self.AlchItem), 100, 2000);
-  end;
-end;
-
-function TAlcher.MoveItem(): Boolean;
-var
-  Slot: Int32;
-begin
-  if Inventory.FindItem(Self.AlchItem, Slot) and (Slot = 11) then
-    Exit;
-
-  Result := Inventory.Drag(Slot, 11);
-end;
-
-function TAlcher.ChooseItem(): Boolean;
-var
-  slot: Int32;
-  slots: TIntegerArray;
-begin
-  if ToStr(Self.AlchItem) = '' then
-    Self.SetupAlchItems;
-
-  if Inventory.FindItem(Self.AlchItem, slot) then
-  begin
-    if (slot <> 11) and Inventory.ItemIsStackable(Self.AlchItem) then
-    begin
-      if ChooseOption.Open() then
-        ChooseOption.Select('Cancel');
-      Self.MoveItem();
-      Exit(False);
-    end;
-
-    if SRL.Dice(99.95) and Inventory.ClickSlot(slot, '>') then
-    begin
-      if WaitUntil(Magic.IsOpen(), 50, SRL.TruncatedGauss(1200, 2000)) then
-      begin
-        WL.Activity.Restart();
-        Self.TotalActions += 1;
-        Self.TotalProfit += Self.ActionProfit;
-
-        Wait(800, 1200 + Round(Antiban.GetUniqueNumber(800, 200, 1500)));
-        Exit(True);
-      end;
-
-      Wait(600, 800);
-    end
-    else
-    begin
-      slots := Inventory.GetEmptySlots();
-      Inventory.ClickSlot(Inventory.RandomSlotNearby(slot, slots));
-      Exit(False);
-    end;
-  end
-  else
-    Self.AlchItem := '';
 end;
 
 function TAlcher.HandleWarning(): Boolean;
@@ -204,6 +87,19 @@ begin
   Chat.ClickContinue();
   WaitUntil(Chat.ClickOption('Cancel', False), 50, 3000);
   Wait(2000);
+end;
+
+function TAlcher.CastAlchemy(attempts: Int32 = 0): Boolean;
+begin
+  Result := RSAlchHandler.CastAlchemy(AlchSpell = ERSSpell.HIGH_LEVEL_ALCHEMY);
+
+  if Chat.HasContinue() then
+    Self.HandleWarning();
+
+  if attempts > 5 then
+    TerminateScript('Can''t cast alchemy for some reason.');
+  if not Result and RSClient.IsLoggedIn() then
+    Self.CastAlchemy(Inc(attempts));
 end;
 
 
@@ -251,49 +147,7 @@ begin
       Exit(EAlcherState.WALK_ALCH);
   end;
 
-  if Chat.HasContinue() then
-    Exit(EAlcherState.HANDLE_WARNING);
-
-  if Magic.IsOpen() then
-  begin
-    if Magic.IsSpellSelected(AlchSpell) then
-      Exit(EAlcherState.OPEN_INV_TAB);
-
-    if not Magic.CanActivate(AlchSpell) and
-       not Inventory.ContainsItem('Nature rune') then
-    begin
-      if BankEmpty and CollectEmpty then
-        Exit(EAlcherState.OUT_OF_NATURES);
-
-      if BankEmpty then
-        Exit(EAlcherState.OPEN_COLLECT);
-
-      Exit(EAlcherState.OPEN_BANK);
-    end;
-
-    Exit(EAlcherState.CHOOSE_SPELL);
-  end;
-
-  if Inventory.IsOpen() then
-  begin
-    if ToStr(Self.AlchItem) = '' then
-      Exit(EAlcherState.SWITCH_ITEM);
-    if ToStr(Self.AlchItem) = 'null' then
-      Exit(EAlcherState.OUT_OF_ITEMS);
-
-    if not Inventory.ContainsItem(Self.AlchItem) then
-    begin
-      if Inventory.GetSelectedSlot() > -1 then
-        Exit(EAlcherState.DESELECT_ITEM);
-
-      Exit(EAlcherState.SWITCH_ITEM);
-    end;
-      
-    if MainScreen.IsUpText('Alchemy ->') then
-      Exit(EAlcherState.CHOOSE_ITEM);
-  end;
-
-  Exit(EAlcherState.OPEN_MAGIC_TAB);
+  Result := EAlcherState.CAST_ALCHEMY;
 end;
 
 procedure TAlcher.Run(maxActions: Int32; maxTime: Int64);
@@ -304,7 +158,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(State));
 
-    case State of
+    case Self.State of
       EAlcherState.WALK_ALCH: InGe := Self.RSW.WebWalk(RSObjects.GEBank.Coordinates, 10, 0.2);
 
       EAlcherState.OPEN_BANK: Bank.WalkOpen();
@@ -315,17 +169,10 @@ begin
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
       EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      EAlcherState.CHOOSE_SPELL: Self.ChooseSpell();
-      EAlcherState.CHOOSE_ITEM: Self.ChooseItem();
-      EAlcherState.OPEN_MAGIC_TAB: Magic.Open();
-      EAlcherState.OPEN_INV_TAB: Inventory.Open();
-      EAlcherState.HANDLE_WARNING: Self.HandleWarning();
-      EAlcherState.DESELECT_ITEM: Self.DeselectItem();
+      EAlcherState.CAST_ALCHEMY: Self.CastAlchemy();
 
       EAlcherState.CLOSE_CONTEXT: ChooseOption.Close();
 
-      EAlcherState.SWITCH_ITEM: Self.SetupAlchItems();
-      EAlcherState.OUT_OF_ITEMS, EAlcherState.OUT_OF_NATURES,
       EAlcherState.END_SCRIPT: Break;
     end;
 
@@ -350,8 +197,6 @@ type
   end;
 
 procedure TAlcherConfig.StartScript(sender: TObject); override;
-var
-  str: String;
 begin
   case Self.AlchSelector.GetItemIndex() of
     0: AlchSpell := ERSSpell.HIGH_LEVEL_ALCHEMY;
@@ -360,11 +205,6 @@ begin
 
   LossProtection := Self.IgnoreProfit.IsChecked();
   WalkGE := Self.WalkGECheckbox.IsChecked();
-
-  str := Self.CustomItemSelector.GetText();
-  if str = '' then
-    str := 'noted Rune 2h sword';
-  CustomItem := str;
 
   inherited;
 end;
@@ -411,16 +251,8 @@ begin
     SetChecked(WalkGE);
   end;
 
-  with Self.CustomItemSelector do
-  begin
-    Create(tab);
-    SetCaption('Custom item to alch:');
-    SetLeft(Self.AlchSelector.GetLeft());
-    SetTop(Self.AlchSelector.GetBottom() + TControl.AdjustToDPI(20));
-    SetText(ToStr(CustomItem));
-  end;
-
   Self.CreateVersionPanel(tab);
+  Self.CreateAlchemyPanel();
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

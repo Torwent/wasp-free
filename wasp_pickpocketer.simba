@@ -777,7 +777,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(State));
 
-    case State of
+    case Self.State of
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_LOOT: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);

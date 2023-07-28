@@ -568,7 +568,7 @@ begin
     State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
 
-    case State of
+    case Self.State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen();
       EWoodcutterState.DEPOSIT_ITEMS: Self.Deposit();
       EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
