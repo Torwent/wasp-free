@@ -91,7 +91,7 @@ end;
 
 function TAlcher.CastAlchemy(attempts: Int32 = 0): Boolean;
 begin
-  Result := RSAlchHandler.CastAlchemy(AlchSpell = ERSSpell.HIGH_LEVEL_ALCHEMY);
+  Result := RSAlchHandler.CastAlchemy(AlchSpell = ERSSpell.HIGH_LEVEL_ALCHEMY, True);
 
   if Chat.HasContinue() then
     Self.HandleWarning();
@@ -102,10 +102,7 @@ begin
     Self.CastAlchemy(Inc(attempts));
 
   if Result then
-  begin
     Self.TotalActions += 1;
-    Self.TotalProfit := RSAlchHandler
-  end;
 end;
 
 
