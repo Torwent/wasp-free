@@ -370,6 +370,7 @@ begin
 
   if Result then
   begin
+    Inventory.ClickSlot(slot);
     WaitUntil(not Inventory.IsSlotUsed(slot), 300, 3000);
     Self.FreshNeck := True;
     Self.HasNeck := True;
