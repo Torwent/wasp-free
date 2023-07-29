@@ -1,3 +1,12 @@
+## [2.5.2](https://github.com/Torwent/wasp-free/compare/v2.5.1...v2.5.2) (2023-07-29)
+
+
+### Bug Fixes
+
+* **ardy knights:** should equip necklaces again ([ecdc21e](https://github.com/Torwent/wasp-free/commit/ecdc21ef2db56f7e2992d86e3abc9acb282f17fe))
+
+
+
 ## [2.5.1](https://github.com/Torwent/wasp-free/compare/v2.5.0...v2.5.1) (2023-07-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** should work again ([995d014](https://github.com/Torwent/wasp-free/commit/995d01411a2c5f44154a3a9d87af87ecf1775581))
-
-
-
-## [2.4.11](https://github.com/Torwent/wasp-free/compare/v2.4.10...v2.4.11) (2023-07-22)
-
-
-### Bug Fixes
-
-* **cooker:** updated to the new TRSBankItems ([5d7b661](https://github.com/Torwent/wasp-free/commit/5d7b661481baac778b44d94d5578c9529a23b87c))
 
 
 
