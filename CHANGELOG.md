@@ -1,3 +1,12 @@
+## [2.5.3](https://github.com/Torwent/wasp-free/compare/v2.5.2...v2.5.3) (2023-07-29)
+
+
+### Bug Fixes
+
+* **alcher:** compiles again and it's working with the new alch handler (at least for smaller amounts) ([e07ef99](https://github.com/Torwent/wasp-free/commit/e07ef9934cb4fc60fbd55f06f8764aac4cf1de9c))
+
+
+
 ## [2.5.2](https://github.com/Torwent/wasp-free/compare/v2.5.1...v2.5.2) (2023-07-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** profit calc should be fixed now ([7d1b4ac](https://github.com/Torwent/wasp-free/commit/7d1b4ac855374221e6c317e3f15f041962f8af30))
-
-
-
-## [2.4.12](https://github.com/Torwent/wasp-free/compare/v2.4.11...v2.4.12) (2023-07-23)
-
-
-### Bug Fixes
-
-* **cooker:** should work again ([995d014](https://github.com/Torwent/wasp-free/commit/995d01411a2c5f44154a3a9d87af87ecf1775581))
 
 
 
