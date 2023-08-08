@@ -305,6 +305,9 @@ begin
 
   if MainScreen.HasInterface() then
   begin
+    Self.Enchanting := False;
+    Self.HoveringBank := False;
+
     if Bank.IsOpen() then
     begin
       if Inventory.ContainsItem(Self.EnchantedJewel) then

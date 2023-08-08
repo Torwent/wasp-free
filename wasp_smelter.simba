@@ -294,13 +294,15 @@ begin
 
   if Chat.LeveledUp() then
   begin
-    Smelting := False;
+    Self.Smelting := False;
     Exit(ESmelterState.LEVEL_UP);
   end;
 
   if MainScreen.HasInterface() then
   begin
+    Self.Smelting := False;
     Self.HoveringBank := False;
+
     if Bank.IsOpen() then
     begin
       if Inventory.ContainsItem(Self.Bar.Item) then

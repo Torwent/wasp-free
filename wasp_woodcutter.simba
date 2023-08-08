@@ -524,6 +524,7 @@ begin
 
   if MainScreen.HasInterface() then
   begin
+    Self.Woodcutting := False;
     if Bank.IsOpen() and Inventory.ContainsAny(Self.BankList) then
       Exit(EWoodcutterState.DEPOSIT_ITEMS);
     Exit(EWoodcutterState.CLOSE_INTERFACE);

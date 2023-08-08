@@ -250,7 +250,7 @@ begin
 
   if Chat.LeveledUp() then
   begin
-    Cooking := False;
+    Self.Cooking := False;
     Exit(ECookerState.LEVEL_UP);
   end;
 
@@ -260,6 +260,7 @@ begin
   if MainScreen.HasInterface() then
   begin
     Self.Cooking := False;
+    Self.HoveringBank := False;
     if not Self.BankEmpty and Bank.IsOpen() then
     begin
       if Self.HasProducts() then

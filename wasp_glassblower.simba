@@ -242,7 +242,7 @@ begin
 
   if Chat.LeveledUp() then
   begin
-    Blowing := False;
+    Self.Blowing := False;
     Exit(EBlowerState.LEVEL_UP);
   end;
 
@@ -251,6 +251,8 @@ begin
 
   if MainScreen.HasInterface() then
   begin
+    Self.Blowing := False;
+    Self.HoveringBank := False;
     if Bank.IsOpen() then
     begin
       if Inventory.ContainsItem(Product.Item) then
