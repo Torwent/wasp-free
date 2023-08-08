@@ -1,3 +1,12 @@
+## [2.5.4](https://github.com/Torwent/wasp-free/compare/v2.5.3...v2.5.4) (2023-08-08)
+
+
+### Bug Fixes
+
+* read notes ([329cf26](https://github.com/Torwent/wasp-free/commit/329cf26f970d437e81d2c007f815750b660c6911))
+
+
+
 ## [2.5.3](https://github.com/Torwent/wasp-free/compare/v2.5.2...v2.5.3) (2023-07-29)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **alcher:** now uses the alch handler. not tested, may not work ([ad78045](https://github.com/Torwent/wasp-free/commit/ad78045e0747f8e21f0adb041fb07e439930be8b))
-
-
-
-## [2.4.13](https://github.com/Torwent/wasp-free/compare/v2.4.12...v2.4.13) (2023-07-23)
-
-
-### Bug Fixes
-
-* **alcher:** profit calc should be fixed now ([7d1b4ac](https://github.com/Torwent/wasp-free/commit/7d1b4ac855374221e6c317e3f15f041962f8af30))
 
 
 
