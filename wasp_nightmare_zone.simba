@@ -3,6 +3,7 @@
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
+{$I WaspLib/osr/handlers/combathandler.simba}
 
 begin
   Login.PlayerIndex := 0;
@@ -203,7 +204,7 @@ begin
 
   Self.SetupDamageItem();
 
-  Self.PrayFlick := Stats.GetCurrentLevel(ERSSkill.PRAYER) > 21;
+  Self.PrayFlick := Stats.GetLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers();
 
   if WLSettings.RemoteInput.HUDDebug then

@@ -3,6 +3,7 @@
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
+{$I WaspLib/osr/handlers/combathandler.simba}
 
 begin
   Login.PlayerIndex := 0;
@@ -283,7 +284,7 @@ begin
   if not Self.CheckedLoot then
     Exit(CHECK_LOOT);
 
-  if Inventory.ContainsAny(RSAction.AlchItemArray) then
+  if Inventory.ContainsAny(RSAlchHandler.ItemArray) then
     Exit(ALCH_DROP);
 
   if Self.FindSleepyKraken() then
@@ -313,7 +314,7 @@ begin
       EAT_FOOD: Inventory.Consume(FOOD_CONSUMABLE);
       DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
       ENABLE_QPRAY: Minimap.EnablePrayer();
-      ALCH_DROP: if RSAction.AlchItems(RSAction.AlchItemArray) then Wait(600, 800);
+      ALCH_DROP: RSAlchHandler.CastAlchemy(True, True);
       EQUIP_BRACELET: CombatHandler.EquipBracelet();
       END_SCRIPT: Break;
     end;

@@ -4,6 +4,7 @@
   {$DEFINE SCRIPT_GUI}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
+  {$I WaspLib/osr/handlers/alchhandler.simba}
 
 begin
   Login.PlayerIndex := 0;
@@ -116,6 +117,9 @@ function TAlcher.GetState(): EAlcherState;
 begin
   if WL.Activity.IsFinished() then
     Exit(EAlcherState.END_SCRIPT);
+
+  if RSAlchHandler.Disabled then
+    Exit(EAlcherState.OUT_OF_ITEMS);
 
   if ChooseOption.IsOpen() then
     Exit(EAlcherState.CLOSE_CONTEXT);
