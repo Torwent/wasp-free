@@ -1,3 +1,12 @@
+## [2.5.5](https://github.com/Torwent/wasp-free/compare/v2.5.4...v2.5.5) (2023-08-14)
+
+
+### Bug Fixes
+
+* compatibility update with latest wasplib ([ee79c7c](https://github.com/Torwent/wasp-free/commit/ee79c7cbf8acf767ae1d2c7b199a544b51753226))
+
+
+
 ## [2.5.4](https://github.com/Torwent/wasp-free/compare/v2.5.3...v2.5.4) (2023-08-08)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** forgot to add action and profit tracker ([7835a44](https://github.com/Torwent/wasp-free/commit/7835a44ab6727853795fae8c1717fafab5ae0abc))
-
-
-
-# [2.5.0](https://github.com/Torwent/wasp-free/compare/v2.4.13...v2.5.0) (2023-07-28)
-
-
-### Features
-
-* **alcher:** now uses the alch handler. not tested, may not work ([ad78045](https://github.com/Torwent/wasp-free/commit/ad78045e0747f8e21f0adb041fb07e439930be8b))
 
 
 
