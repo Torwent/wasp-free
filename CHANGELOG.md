@@ -1,3 +1,12 @@
+## [2.5.6](https://github.com/Torwent/wasp-free/compare/v2.5.5...v2.5.6) (2023-08-29)
+
+
+### Bug Fixes
+
+* **woodcutter:** added plank sack support ([f68b209](https://github.com/Torwent/wasp-free/commit/f68b20930b16426361edd9974072b7441301b4b9))
+
+
+
 ## [2.5.5](https://github.com/Torwent/wasp-free/compare/v2.5.4...v2.5.5) (2023-08-14)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** should equip necklaces again ([ecdc21e](https://github.com/Torwent/wasp-free/commit/ecdc21ef2db56f7e2992d86e3abc9acb282f17fe))
-
-
-
-## [2.5.1](https://github.com/Torwent/wasp-free/compare/v2.5.0...v2.5.1) (2023-07-28)
-
-
-### Bug Fixes
-
-* **alcher:** forgot to add action and profit tracker ([7835a44](https://github.com/Torwent/wasp-free/commit/7835a44ab6727853795fae8c1717fafab5ae0abc))
 
 
 
