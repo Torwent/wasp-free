@@ -30,6 +30,7 @@ type
   EWoodcutterState = (
     OPEN_BANK,
     DEPOSIT_ITEMS,
+    EMPTY_SACK,
     CLOSE_INTERFACE,
 
     WALK_SPOT,
@@ -43,6 +44,7 @@ type
 
     OPEN_SAWMILL,
     HANDLE_MAKE,
+    FILL_PLANK_SACK,
 
     DROP_ITEMS,
     END_SCRIPT
@@ -52,17 +54,18 @@ type
     State: EWoodcutterState;
 
     RSTree: TRSObject;
-    TreeTimerMultiplier: Int32;
 
     ToolType: TCTS2Color;
-    ToolShift: Int32;
 
     Logs, Plank: TRSItem;
-    LogPrice, PlankSawmillPrice, PlankPrice: Int32;
+    TreeTimerMultiplier, ToolShift, LogPrice, PlankSawmillPrice,
+    PlankPrice: Int32;
+
     SawmillString: String;
+
     GearOutfit, BankList, DropList: TRSItemArray;
 
-    Woodcutting, UseBank: Boolean;
+    Woodcutting, UseBank, UsePlankSack, PlankSackFull: Boolean;
   end;
 
 procedure TAntiban.Setup(); override;
@@ -366,6 +369,8 @@ begin
 
   Self.SetupTool();
 
+  Self.UsePlankSack := UseSawmill and Inventory.ContainsItem('Plank sack');
+
   if WLSettings.RemoteInput.HUDDebug then
   begin
     DebugObjectArray += RSTree;
@@ -458,12 +463,28 @@ begin
     Self.TotalProfit += Self.PlankSawmillPrice * Inventory.CountItem(Self.Plank);
 end;
 
+function TWoodcutter.FillPlankSack(): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.Count();
+  if Inventory.ClickItem('Plank sack', 'Fill') then
+    Result := WaitUntil(Inventory.Count() < count, 300, 3000);
+
+  if Result then
+    Self.PlankSackFull := True;
+end;
+
 function TWoodcutter.Deposit(): Boolean;
 var
   count: Int32;
 begin
   if UseSawmill then
-    count := Inventory.CountItem(Self.Plank)
+  begin
+    count := Inventory.CountItem(Self.Plank);
+    if Self.UsePlankSack then
+      count += 27;
+  end
   else
     count := Inventory.CountItem(Self.Logs);
 
@@ -479,6 +500,14 @@ begin
   end
   else
     WriteLn 'Failed to deposit!';
+end;
+
+function TWoodcutter.EmptySack():Boolean;
+begin
+  if Inventory.ClickItem('Plank sack', 'Empty') then
+    Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 300, 3000);
+
+  Self.PlankSackFull := False;
 end;
 
 
@@ -533,6 +562,14 @@ begin
   if Inventory.ContainsAny(Self.GearOutfit) then
     Exit(EWoodcutterState.EQUIP_GEAR);
 
+  if UseBank and Inventory.ContainsAny([Self.Plank, Self.Logs]) and
+     not RSW.AtTile(RSTree.Coordinates, 40) then
+    Exit(EWoodcutterState.OPEN_BANK);
+
+
+  if UseBank and not RSW.AtTile(RSTree.Coordinates, 40) and Self.UsePlankSack and Self.PlankSackFull then
+    Exit(EWoodcutterState.EMPTY_SACK);
+
   if Inventory.IsFull() then
   begin
     Self.Woodcutting := False;
@@ -540,8 +577,19 @@ begin
     if not UseBank then
       Exit(EWoodcutterState.DROP_ITEMS);
 
-    if UseSawmill and not Inventory.ContainsItem(Self.Plank) and Self.HasEnoughMoney() then
-      Exit(EWoodcutterState.OPEN_SAWMILL);
+    if UseSawmill then
+    begin
+      if Inventory.ContainsItem(Self.Plank) then
+      begin
+        if not Self.UsePlankSack or Self.PlankSackFull then
+          Exit(EWoodcutterState.OPEN_BANK);
+
+        Exit(EWoodcutterState.FILL_PLANK_SACK);
+      end;
+
+      if Self.HasEnoughMoney() then
+        Exit(EWoodcutterState.OPEN_SAWMILL);
+    end;
 
     Exit(EWoodcutterState.OPEN_BANK);
   end;
@@ -557,7 +605,6 @@ begin
 
   if Minimap.IsSpecWeapon() and (Minimap.GetSpecLevel = 100) then
     Exit(EWoodcutterState.USE_SPEC);
-
   Exit(EWoodcutterState.CUT_TREE);
 end;
 
@@ -572,6 +619,7 @@ begin
     case Self.State of
       EWoodcutterState.OPEN_BANK: Bank.WalkOpen();
       EWoodcutterState.DEPOSIT_ITEMS: Self.Deposit();
+      EWoodcutterState.EMPTY_SACK: Self.EmptySack();
       EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
       EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree.Coordinates, 10, 0.2);
       EWoodcutterState.WAIT_STATE: Self.WaitCutting();
@@ -582,6 +630,7 @@ begin
       EWoodcutterState.CUT_TREE: Self.CutTree();
       EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill();
       EWoodcutterState.HANDLE_MAKE: Self.MakePlanks();
+      EWoodcutterState.FILL_PLANK_SACK: Self.FillPlankSack();
       EWoodcutterState.DROP_ITEMS: Self.DropItems();
       EWoodcutterState.END_SCRIPT: Break;
     end;
