@@ -1,3 +1,12 @@
+## [2.5.10](https://github.com/Torwent/wasp-free/compare/v2.5.9...v2.5.10) (2023-08-31)
+
+
+### Bug Fixes
+
+* **builder:** force camera rotation if we are miss clicking the furniture ([a5a35cf](https://github.com/Torwent/wasp-free/commit/a5a35cf3430521f7d496bfff9fcb49d5b4d20076))
+
+
+
 ## [2.5.9](https://github.com/Torwent/wasp-free/compare/v2.5.8...v2.5.9) (2023-08-31)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** added plank sack support ([f68b209](https://github.com/Torwent/wasp-free/commit/f68b20930b16426361edd9974072b7441301b4b9))
-
-
-
-## [2.5.5](https://github.com/Torwent/wasp-free/compare/v2.5.4...v2.5.5) (2023-08-14)
-
-
-### Bug Fixes
-
-* compatibility update with latest wasplib ([ee79c7c](https://github.com/Torwent/wasp-free/commit/ee79c7cbf8acf767ae1d2c7b199a544b51753226))
 
 
 
