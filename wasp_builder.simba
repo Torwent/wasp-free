@@ -51,6 +51,7 @@ type
 
     Plank: TRSItem;
     PlankSackCount, NotedPlanksSlot, MinPlankCount: Int32;
+    LastPoint: TPoint;
   end;
 
 
@@ -135,8 +136,9 @@ end;
 procedure TBuilder.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
-  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH]);
 
+  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH]);
+  Self.LastPoint := [0, 0];
   Self.SetupNPC();
   Self.SetupObjects();
   Self.SetupPlank();
@@ -174,7 +176,17 @@ begin
 end;
 
 function TBuilder.BuildFurniture(): Boolean;
+var
+  tpa: TPointArray;
 begin
+  if Self.LastPoint <> [0, 0] then
+  begin
+    tpa := [Self.LastPoint];
+    tpa := tpa.Grow(8);
+
+    Mouse.Move(tpa);
+  end;
+
   if FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu']) then
   begin
     Minimap.WaitMoving();
@@ -188,7 +200,17 @@ begin
 end;
 
 function TBuilder.DestroyFurniture(): Boolean;
+var
+  tpa: TPointArray;
 begin
+  if Self.LastPoint <> [0, 0] then
+  begin
+    tpa := [Self.LastPoint];
+    tpa := tpa.Grow(8);
+
+    Mouse.Move(tpa);
+  end;
+
   if BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My']) then
   begin
     Minimap.WaitMoving;
@@ -291,6 +313,8 @@ begin
   end;
 
   Result := FurnitureIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
+
+  XPBar.EarnedXP();
 
   if Result then
   begin
@@ -451,6 +475,8 @@ begin
     Mouse.Click(MOUSE_LEFT);
     Exit(MainScreen.DidRedClick());
   end;
+
+  Builder.LastPoint := Mouse.Position();
 
   Result := ChooseOption.Select(action, MOUSE_LEFT, True, (False));
 end;
