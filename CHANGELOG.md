@@ -1,3 +1,12 @@
+## [2.5.9](https://github.com/Torwent/wasp-free/compare/v2.5.8...v2.5.9) (2023-08-31)
+
+
+### Bug Fixes
+
+* **builder:** improved reliability of clicking the furniture ([fbab890](https://github.com/Torwent/wasp-free/commit/fbab890f96f95b3649b51e020184095418f957ae))
+
+
+
 ## [2.5.8](https://github.com/Torwent/wasp-free/compare/v2.5.7...v2.5.8) (2023-08-31)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility update with latest wasplib ([ee79c7c](https://github.com/Torwent/wasp-free/commit/ee79c7cbf8acf767ae1d2c7b199a544b51753226))
-
-
-
-## [2.5.4](https://github.com/Torwent/wasp-free/compare/v2.5.3...v2.5.4) (2023-08-08)
-
-
-### Bug Fixes
-
-* read notes ([329cf26](https://github.com/Torwent/wasp-free/commit/329cf26f970d437e81d2c007f815750b660c6911))
 
 
 
