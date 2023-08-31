@@ -342,6 +342,9 @@ begin
     if not UsePhials then
       Exit(EBuilderState.ENTER_HOUSE);
 
+    if (CurrentFurniture = ERSFurniture.MYTH_CAPE) and not Inventory.ContainsItem('Mythical cape') then
+      Exit(EBuilderState.ENTER_HOUSE);
+
     if Inventory.IsFull() then
     begin
       if Self.UsePlankSack and (Self.PlankSackCount < Self.MinPlankCount) then
@@ -386,7 +389,7 @@ begin
       EBuilderState.LEVEL_UP: Chat.HandleLevelUp();
 
       EBuilderState.HANDLE_BUILD_CHAT: Self.HandleBuildChat();
-      EBuilderState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
+      EBuilderState.HANDLE_PHIALS_CHAT: Chat.ClickOption('All');
       EBuilderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
       EBuilderState.HANDLE_SERVANT: Self.HandleServant();
       EBuilderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
