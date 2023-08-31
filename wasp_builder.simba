@@ -196,6 +196,11 @@ begin
   begin
     ChooseOption.Close();
     FurnitureIsBuilt := True;
+  end
+  else
+  begin
+    Antiban.RandomRotate();
+    Self.LastPoint := [0,0];
   end;
 end;
 
@@ -213,13 +218,19 @@ begin
 
   if BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My']) then
   begin
-    Minimap.WaitMoving;
-    Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
+    Minimap.WaitMoving();
+    Result := WaitUntil(Chat.GetChatTitle() = 'Really remove it?', 200, 3000);
+
   end
   else if ChooseOption.HasOption(['Build La', 'Build Gu']) then
   begin
-    ChooseOption.Close;
+    ChooseOption.Close();
     FurnitureIsBuilt := False;
+  end
+  else
+  begin
+    Antiban.RandomRotate();
+    Self.LastPoint := [0,0];
   end;
 end;
 
