@@ -10,28 +10,29 @@ end;
 
 type
   ERSNPC = (PHIALS, SERVANT);
-  ERSLarder = (REGULAR_LARDER, OAK_LARDER);
+  ERSFurniture = (REGULAR_LARDER, OAK_LARDER, MYTH_CAPE);
 
 var
   CurrentNPC: ERSNPC := PHIALS;
-  CurrentLarder: ERSLarder := OAK_LARDER;
+  CurrentFurniture: ERSFurniture := ERSFurniture.MYTH_CAPE;
 
 type
-  ELarderState = (
+  EBuilderState = (
     LEVEL_UP,
     WAIT_STATE,
 
     EXIT_HOUSE,
     ENTER_HOUSE,
 
-    BUILD_LARDER,
+    BUILD_FURNITURE,
     HANDLE_FURNITURE_UI,
-    DESTROY_LARDER,
-    HANDLE_LARDER_CHAT,
+    DESTROY_FURNITURE,
+    HANDLE_BUILD_CHAT,
     HANDLE_PIN,
 
     GET_PLANKS,
     HANDLE_PHIALS_CHAT,
+    FILL_SACK,
     CALL_SERVANT,
     TALK_SERVANT,
     HANDLE_SERVANT,
@@ -40,20 +41,16 @@ type
   );
 
   TBuilder = record(TBaseWalkerScript)
-    State: ELarderState;
+    State: EBuilderState;
     POH: TRSWalker;
 
-    BuiltLarder: TRSObject;
-    LarderSpace: TRSObject;
+    BuiltFurniture, FurnitureSpace: TRSObject;
     ServantNPC: TRSNPC;
 
-    LarderIsBuilt: Boolean;
-    UsePhials: Boolean;
-    WaitingServant: Boolean;
+    UsePlankSack, FurnitureIsBuilt, UsePhials, WaitingServant: Boolean;
 
     Plank: TRSItem;
-    NotedPlanksSlot: Int32;
-    MinInvCount: Int32;
+    PlankSackCount, NotedPlanksSlot, MinPlankCount: Int32;
   end;
 
 
@@ -77,34 +74,53 @@ end;
 
 procedure TBuilder.SetupPlank();
 begin
-  case CurrentLarder of
+  case CurrentFurniture of
     REGULAR_LARDER:
       begin
-        Plank := 'Plank';
-        MinInvCount := 12;
+        Self.Plank := 'Plank';
+        Self.MinPlankCount := 8;
       end;
 
     OAK_LARDER:
       begin
-        Plank := 'Oak plank';
-        MinInvCount := 11;
+        Self.Plank := 'Oak plank';
+        Self.MinPlankCount := 8;
+      end;
+
+    MYTH_CAPE:
+      begin
+        Self.Plank := 'Teak plank';
+        Self.MinPlankCount := 3;
       end;
   end;
 end;
 
 procedure TBuilder.SetupObjects();
 begin
-  BuiltLarder.Setup(1.5, 7, [[3604, 86]]);
-  BuiltLarder.Setup(['Larder']);
-  BuiltLarder.Filter.Finder := False;
-  BuiltLarder.Filter.UpText := False;
-  BuiltLarder.Finder.ColorClusters += [CTS2(6916239, 10, 0.33, 1.18), CTS2(4154749, 9, 0.13, 0.65), 150];
+  if CurrentFurniture = ERSFurniture.MYTH_CAPE then
+  begin
+    BuiltFurniture.Setup(0.3, 4, [[3607, 110]]);
+    BuiltFurniture.Setup(['Teleport']);
+    BuiltFurniture.Filter.Finder := False;
+    BuiltFurniture.Filter.UpText := False;
 
-  LarderSpace.Setup(1.5, 7, [[3604, 86]]);
-  LarderSpace.Setup(['2 more']);
-  LarderSpace.Filter.Finder := False;
-  LarderSpace.Filter.UpText := False;
-  LarderSpace.Finder.ColorClusters += [CTS2(10529472, 16, 0.25, 0.95), CTS2(8884636, 16, 0.16, 0.18), 80];
+    FurnitureSpace.Setup(0.3, 4, [[3607, 110]]);
+    FurnitureSpace.Setup(['2 more']);
+    FurnitureSpace.Filter.Finder := False;
+    FurnitureSpace.Filter.UpText := False;
+
+    Exit;
+  end;
+
+  BuiltFurniture.Setup(1.5, 7, [[3604, 86]]);
+  BuiltFurniture.Setup(['Larder']);
+  BuiltFurniture.Filter.Finder := False;
+  BuiltFurniture.Filter.UpText := False;
+
+  FurnitureSpace.Setup(1.5, 7, [[3604, 86]]);
+  FurnitureSpace.Setup(['2 more']);
+  FurnitureSpace.Filter.Finder := False;
+  FurnitureSpace.Filter.UpText := False;
 end;
 
 procedure TAntiban.Setup(); override;
@@ -125,18 +141,21 @@ begin
   Self.SetupObjects();
   Self.SetupPlank();
 
-  ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
+  Self.UsePlankSack := Inventory.ContainsItem('Plank sack');
+
+  Self.ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
 
   if CurrentNPC = PHIALS then
-    case CurrentLarder of
-      REGULAR_LARDER: Inventory.FindItem('noted Plank', NotedPlanksSlot);
-      OAK_LARDER: Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
+    case CurrentFurniture of
+      ERSFurniture.REGULAR_LARDER: Inventory.FindItem('noted Plank', NotedPlanksSlot);
+      ERSFurniture.OAK_LARDER: Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
+      ERSFurniture.MYTH_CAPE: Inventory.FindItem('noted Teak plank', NotedPlanksSlot);
     end;
 
   if WLSettings.RemoteInput.HUDDebug then
   begin
-    DebugObjectArray += BuiltLarder;
-    DebugObjectArray += LarderSpace;
+    DebugObjectArray += BuiltFurniture;
+    DebugObjectArray += FurnitureSpace;
     DebugObjectArray += RSObjects.POHPortal;
     DebugMMDotArray += RSNPCs.Phials;
     DebugMMDotArray += ServantNPC;
@@ -149,35 +168,36 @@ begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
   begin
     Minimap.WaitMoving();
+    WaitUntil((BankPin.IsOpen() and BankPin.Enter(Login.GetPlayerPin())) or MainScreen.LoadingPOH(), 300, 10000);
     Result := MainScreen.WaitLoadingPOH(10000);
   end;
 end;
 
-function TBuilder.BuildLarder(): Boolean;
+function TBuilder.BuildFurniture(): Boolean;
 begin
-  if LarderSpace.WalkSelectOption(['Build La']) then
+  if FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu']) then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(MainScreen.IsClassicOpen(), 200, 5000);
   end
-  else if ChooseOption.HasOption('Remove L') then
+  else if ChooseOption.HasOption(['Remove La', 'Remove My']) then
   begin
     ChooseOption.Close();
-    LarderIsBuilt := True;
+    FurnitureIsBuilt := True;
   end;
 end;
 
-function TBuilder.DestroyLarder(): Boolean;
+function TBuilder.DestroyFurniture(): Boolean;
 begin
-  if BuiltLarder.WalkSelectOption(['Remove L']) then
+  if BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(Chat.GetChatTitle = 'Really remove it?', 200, 3000);
   end
-  else if ChooseOption.HasOption('Build La') then
+  else if ChooseOption.HasOption(['Build La', 'Build Gu']) then
   begin
     ChooseOption.Close;
-    LarderIsBuilt := False;
+    FurnitureIsBuilt := False;
   end;
 end;
 
@@ -219,6 +239,27 @@ begin
 end;
 
 
+function TBuilder.FillSack(attempt: Int32 = 0): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.CountItem(Self.Plank);
+
+  if Inventory.ClickItem('Plank sack', 'Fill') then
+    Result := WaitUntil(Inventory.CountItem(Self.Plank) < count, 300, 3000);
+
+  if Result then
+    Self.PlankSackCount += count
+  else if attempt = 2 then
+  begin
+    Self.PlankSackCount := 28;
+    Exit(True);
+  end
+  else
+    Exit(Self.FillSack(attempt + 1));
+end;
+
+
 function TBuilder.HandleServant(): Boolean;
 begin
   Result := Chat.ClickOption('Fetch', BioHash);
@@ -229,25 +270,36 @@ begin
   end;
 end;
 
-function TBuilder.HandleLarderChat(): Boolean;
+function TBuilder.HandleBuildChat(): Boolean;
 begin
   Keyboard.PressKey(VK_1);
   Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
-  LarderIsBuilt := not Result;
+  FurnitureIsBuilt := not Result;
   Wait(100, 150);
 end;
 
 function TBuilder.HandleFurniture(): Boolean;
+var
+  count: Int32;
 begin
-  case CurrentLarder of
-    REGULAR_LARDER: Keyboard.PressKey(VK_1);
-    OAK_LARDER: Keyboard.PressKey(VK_2);
+  count := Inventory.CountItem(Self.Plank);
+
+  case CurrentFurniture of
+    ERSFurniture.REGULAR_LARDER: Keyboard.PressKey(VK_1);
+    ERSFurniture.OAK_LARDER: Keyboard.PressKey(VK_2);
+    ERSFurniture.MYTH_CAPE: Keyboard.PressKey(VK_4);
   end;
 
-  Result := LarderIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
+  Result := FurnitureIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
 
   if Result then
   begin
+    if count < Self.MinPlankCount then
+    begin
+      count := Self.MinPlankCount - count;
+      Self.PlankSackCount -= count;
+    end;
+
     Self.TotalActions += 1;
     Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
     WL.Activity.Restart();
@@ -257,7 +309,7 @@ begin
 end;
 
 
-function TBuilder.GetState(): ELarderState;
+function TBuilder.GetState(): EBuilderState;
 var
   s: String;
 begin
@@ -265,53 +317,61 @@ begin
     Exit(END_SCRIPT);
 
   if Chat.LeveledUp() then
-    Exit(ELarderState.LEVEL_UP);
+    Exit(EBuilderState.LEVEL_UP);
 
   s := Chat.GetChatTitle();
 
   if s.Contains('remove') then
-    Exit(ELarderState.HANDLE_LARDER_CHAT);
+    Exit(EBuilderState.HANDLE_BUILD_CHAT);
 
   if s.Contains('Select') then
-    Exit(ELarderState.HANDLE_PHIALS_CHAT);
+    Exit(EBuilderState.HANDLE_PHIALS_CHAT);
 
   if s.Contains('Repeat') then
-    Exit(ELarderState.HANDLE_SERVANT);
+    Exit(EBuilderState.HANDLE_SERVANT);
 
   if MainScreen.IsClassicOpen() then
   begin
     if BankPin.IsOpen() then
-      Exit(ELarderState.HANDLE_PIN);
-    Exit(ELarderState.HANDLE_FURNITURE_UI);
+      Exit(EBuilderState.HANDLE_PIN);
+    Exit(EBuilderState.HANDLE_FURNITURE_UI);
   end;
 
   if not Minimap.InPOH() then
   begin
-    if not UsePhials or Inventory.IsFull() then
-      Exit(ELarderState.ENTER_HOUSE);
-    Exit(ELarderState.GET_PLANKS);
+    if not UsePhials then
+      Exit(EBuilderState.ENTER_HOUSE);
+
+    if Inventory.IsFull() then
+    begin
+      if Self.UsePlankSack and (Self.PlankSackCount < Self.MinPlankCount) then
+        Exit(EBuilderState.FILL_SACK);
+      Exit(EBuilderState.ENTER_HOUSE);
+    end;
+
+    Exit(EBuilderState.GET_PLANKS);
   end;
 
-  if Self.LarderIsBuilt then
-    Exit(ELarderState.DESTROY_LARDER);
+  if Self.FurnitureIsBuilt then
+    Exit(EBuilderState.DESTROY_FURNITURE);
 
-  if Inventory.Count() > Self.MinInvCount then
+  if (Inventory.CountItem(Self.Plank) + Self.PlankSackCount) > Self.MinPlankCount then
   begin
-    WaitingServant := False;
-    Exit(ELarderState.BUILD_LARDER);
+    Self.WaitingServant := False;
+    Exit(EBuilderState.BUILD_FURNITURE);
   end;
 
   if Self.UsePhials then
-    Exit(ELarderState.EXIT_HOUSE);
+    Exit(EBuilderState.EXIT_HOUSE);
 
   if WaitingServant then
   begin
     if ServantNPC.IsVisible() then
-      Exit(ELarderState.TALK_SERVANT);
-    Exit(ELarderState.WAIT_STATE);
+      Exit(EBuilderState.TALK_SERVANT);
+    Exit(EBuilderState.WAIT_STATE);
   end;
 
-  Exit(ELarderState.CALL_SERVANT);
+  Exit(EBuilderState.CALL_SERVANT);
 end;
 
 procedure TBuilder.Run(maxActions: Int32; maxTime: Int64);
@@ -323,24 +383,25 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      ELarderState.LEVEL_UP: Chat.HandleLevelUp();
+      EBuilderState.LEVEL_UP: Chat.HandleLevelUp();
 
-      ELarderState.HANDLE_LARDER_CHAT: Self.HandleLarderChat();
-      ELarderState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
-      ELarderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
-      ELarderState.HANDLE_SERVANT: Self.HandleServant();
-      ELarderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
+      EBuilderState.HANDLE_BUILD_CHAT: Self.HandleBuildChat();
+      EBuilderState.HANDLE_PHIALS_CHAT: Keyboard.PressKey(VK_3);
+      EBuilderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
+      EBuilderState.HANDLE_SERVANT: Self.HandleServant();
+      EBuilderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
 
-      ELarderState.CALL_SERVANT: Self.CallServant();
-      ELarderState.TALK_SERVANT: Self.TalkServant();
-      ELarderState.EXIT_HOUSE: Options.LeaveHouse();
-      ELarderState.GET_PLANKS: Self.PhialsGetPlanks();
+      EBuilderState.CALL_SERVANT: Self.CallServant();
+      EBuilderState.TALK_SERVANT: Self.TalkServant();
+      EBuilderState.EXIT_HOUSE: Options.LeaveHouse();
+      EBuilderState.GET_PLANKS: Self.PhialsGetPlanks();
+      EBuilderState.FILL_SACK: Self.FillSack();
 
-      ELarderState.ENTER_HOUSE: Self.EnterHouse();
-      ELarderState.BUILD_LARDER: Self.BuildLarder();
-      ELarderState.DESTROY_LARDER: Self.DestroyLarder();
+      EBuilderState.ENTER_HOUSE: Self.EnterHouse();
+      EBuilderState.BUILD_FURNITURE: Self.BuildFurniture();
+      EBuilderState.DESTROY_FURNITURE: Self.DestroyFurniture();
 
-      ELarderState.WAIT_STATE: Wait(7000, 8000);
+      EBuilderState.WAIT_STATE: Wait(7000, 8000);
 
       END_SCRIPT: Break;
     end;
@@ -496,7 +557,7 @@ end;
 type
   TBuilderConfig = record(TScriptForm)
     NPCSelector: TLabeledCombobox;
-    LarderSelector: TLabeledCombobox;
+    FurnitureSelector: TLabeledCombobox;
     BuilderInfo: TLabel;
     ImagePanel: TImage;
   end;
@@ -504,7 +565,7 @@ type
 procedure TBuilderConfig.StartScript(sender: TObject); override;
 begin
   CurrentNPC := ERSNPC(Self.NPCSelector.GetItemIndex());
-  CurrentLarder := ERSLarder(Self.LarderSelector.GetItemIndex());
+  CurrentFurniture := ERSFurniture(Self.FurnitureSelector.GetItemIndex());
   inherited;
 end;
 
@@ -572,15 +633,15 @@ begin
     Combobox.SetOnChange(@Self.NPCSelectorOnChange);
   end;
 
-  with Self.LarderSelector do
+  with Self.FurnitureSelector do
   begin
     Create(tab);
-    SetCaption('Larder:');
+    SetCaption('Furniture:');
     SetTop(Self.NPCSelector.GetTop());
     SetLeft(Self.NPCSelector.GetRight() + TControl.AdjustToDPI(15));
     SetStyle(csDropDownList);
-    AddItemArray(['Regular', 'Oak']);
-    SetItemIndex(Ord(CurrentLarder));
+    AddItemArray(['Regular larder', 'Oak larder', 'Myth cape']);
+    SetItemIndex(Ord(CurrentFurniture));
   end;
 
   with Self.BuilderInfo do
@@ -593,8 +654,8 @@ begin
   with Self.ImagePanel do
   begin
     Create(tab);
-    SetTop(Self.LarderSelector.GetTop() + TControl.AdjustToDPI(15));
-    SetLeft(Self.LarderSelector.GetRight() + TControl.AdjustToDPI(80));
+    SetTop(Self.FurnitureSelector.GetTop() + TControl.AdjustToDPI(15));
+    SetLeft(Self.FurnitureSelector.GetRight() + TControl.AdjustToDPI(80));
     LoadFromFile(IncludePath+'\WaspLib\docs\images\POH_layout.png');
     SetWidth(TControl.AdjustToDPI(195));
     SetHeight(TControl.AdjustToDPI(194));
