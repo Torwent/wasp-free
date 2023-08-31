@@ -1,3 +1,12 @@
+## [2.5.7](https://github.com/Torwent/wasp-free/compare/v2.5.6...v2.5.7) (2023-08-31)
+
+
+### Bug Fixes
+
+* **builder:** larder builder renamed to builder ([49cab17](https://github.com/Torwent/wasp-free/commit/49cab17d91234ef35794ca0984c87802d23d3097))
+
+
+
 ## [2.5.6](https://github.com/Torwent/wasp-free/compare/v2.5.5...v2.5.6) (2023-08-29)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **alcher:** compiles again and it's working with the new alch handler (at least for smaller amounts) ([e07ef99](https://github.com/Torwent/wasp-free/commit/e07ef9934cb4fc60fbd55f06f8764aac4cf1de9c))
-
-
-
-## [2.5.2](https://github.com/Torwent/wasp-free/compare/v2.5.1...v2.5.2) (2023-07-29)
-
-
-### Bug Fixes
-
-* **ardy knights:** should equip necklaces again ([ecdc21e](https://github.com/Torwent/wasp-free/commit/ecdc21ef2db56f7e2992d86e3abc9acb282f17fe))
 
 
 
