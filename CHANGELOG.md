@@ -1,3 +1,12 @@
+## [2.5.8](https://github.com/Torwent/wasp-free/compare/v2.5.7...v2.5.8) (2023-08-31)
+
+
+### Bug Fixes
+
+* **builder:** shouldn't get stuck on phials chat anymore. ([d858437](https://github.com/Torwent/wasp-free/commit/d858437a21ba492ed04398be7abd2965210f2f3e))
+
+
+
 ## [2.5.7](https://github.com/Torwent/wasp-free/compare/v2.5.6...v2.5.7) (2023-08-31)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * read notes ([329cf26](https://github.com/Torwent/wasp-free/commit/329cf26f970d437e81d2c007f815750b660c6911))
-
-
-
-## [2.5.3](https://github.com/Torwent/wasp-free/compare/v2.5.2...v2.5.3) (2023-07-29)
-
-
-### Bug Fixes
-
-* **alcher:** compiles again and it's working with the new alch handler (at least for smaller amounts) ([e07ef99](https://github.com/Torwent/wasp-free/commit/e07ef9934cb4fc60fbd55f06f8764aac4cf1de9c))
 
 
 
