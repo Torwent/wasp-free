@@ -1,3 +1,12 @@
+## [2.6.2](https://github.com/Torwent/wasp-free/compare/v2.6.1...v2.6.2) (2023-09-01)
+
+
+### Bug Fixes
+
+* **woodcutter:** willows at draynor should work again ([47704a5](https://github.com/Torwent/wasp-free/commit/47704a5006aef26bf6763f34faa826f6cb1d1da8))
+
+
+
 ## [2.6.1](https://github.com/Torwent/wasp-free/compare/v2.6.0...v2.6.1) (2023-09-01)
 
 
@@ -27,15 +36,6 @@
 ### Bug Fixes
 
 * **builder:** improved reliability of clicking the furniture ([fbab890](https://github.com/Torwent/wasp-free/commit/fbab890f96f95b3649b51e020184095418f957ae))
-
-
-
-## [2.5.8](https://github.com/Torwent/wasp-free/compare/v2.5.7...v2.5.8) (2023-08-31)
-
-
-### Bug Fixes
-
-* **builder:** shouldn't get stuck on phials chat anymore. ([d858437](https://github.com/Torwent/wasp-free/commit/d858437a21ba492ed04398be7abd2965210f2f3e))
 
 
 
