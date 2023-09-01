@@ -562,10 +562,16 @@ begin
   if Inventory.ContainsAny(Self.GearOutfit) then
     Exit(EWoodcutterState.EQUIP_GEAR);
 
-  if UseBank and Inventory.ContainsAny([Self.Plank, Self.Logs]) and
-     not RSW.AtTile(RSTree.Coordinates, 40) then
-    Exit(EWoodcutterState.OPEN_BANK);
-
+  if UseBank and not RSW.AtTile(RSTree.Coordinates, 40) then
+  begin
+    if UseSawmill then
+    begin
+      if Inventory.ContainsAny([Self.Plank, Self.Logs]) then
+        Exit(EWoodcutterState.OPEN_BANK);
+    end
+    else if Inventory.ContainsItem(Self.Logs) then
+      Exit(EWoodcutterState.OPEN_BANK);
+  end;
 
   if UseBank and not RSW.AtTile(RSTree.Coordinates, 40) and Self.UsePlankSack and Self.PlankSackFull then
     Exit(EWoodcutterState.EMPTY_SACK);
