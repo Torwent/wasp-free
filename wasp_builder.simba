@@ -305,10 +305,18 @@ end;
 
 function TBuilder.HandleBuildChat(): Boolean;
 begin
-  Keyboard.PressKey(VK_1);
-  Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
-  FurnitureIsBuilt := not Result;
-  Wait(100, 150);
+  if Chat.ClickOption('Yes') then
+    Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
+
+  if Result then
+  begin
+    if CurrentFurniture = ERSFurniture.MYTH_CAPE then
+      Result := WaitUntil(Inventory.ContainsItem('Mythical cape'), 50, 3000)
+    else
+      Wait(100, 150);
+
+    FurnitureIsBuilt := not Result;
+  end;
 end;
 
 function TBuilder.HandleFurniture(): Boolean;
