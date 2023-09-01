@@ -1,3 +1,12 @@
+## [2.6.1](https://github.com/Torwent/wasp-free/compare/v2.6.0...v2.6.1) (2023-09-01)
+
+
+### Bug Fixes
+
+* **builder:** read notes ([dda8f43](https://github.com/Torwent/wasp-free/commit/dda8f43dc9a842dfe2ff7d492501fb498fb86022))
+
+
+
 # [2.6.0](https://github.com/Torwent/wasp-free/compare/v2.5.10...v2.6.0) (2023-09-01)
 
 
@@ -27,15 +36,6 @@
 ### Bug Fixes
 
 * **builder:** shouldn't get stuck on phials chat anymore. ([d858437](https://github.com/Torwent/wasp-free/commit/d858437a21ba492ed04398be7abd2965210f2f3e))
-
-
-
-## [2.5.7](https://github.com/Torwent/wasp-free/compare/v2.5.6...v2.5.7) (2023-08-31)
-
-
-### Bug Fixes
-
-* **builder:** larder builder renamed to builder ([49cab17](https://github.com/Torwent/wasp-free/commit/49cab17d91234ef35794ca0984c87802d23d3097))
 
 
 
