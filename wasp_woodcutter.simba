@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := '207b1ab4-561d-4543-8467-705cdfce98ec'}
-{$DEFINE SCRIPT_REVISION := '37'}
+{$DEFINE SCRIPT_REVISION := '38'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -54,6 +54,8 @@ type
     State: EWoodcutterState;
 
     RSTree: TRSObject;
+
+    TreeWalkerCoord : TPoint;
 
     ToolType: TCTS2Color;
 
@@ -381,9 +383,11 @@ end;
 
 function TWoodcutter.CutTree(): Boolean;
 begin
-  if (Self.UseBank and RSTree.WalkClick()) or RSTree.Click() then
+
+ if (Self.UseBank and RSTree.WalkClick()) or RSTree.Click() then
   begin
     Minimap.WaitMoving();
+    Self.TreeWalkerCoord := Self.RSW.MSToWorld(Mouse.Position);
     Result := Self.Woodcutting := True;
   end;
 end;
@@ -510,7 +514,6 @@ begin
   Self.PlankSackFull := False;
 end;
 
-
 function TSRL.IsAnimating(Area:TBox; Shift, WaitTime:UInt32; Iter:UInt32=1): Boolean; override;
 var
   i:Int32;
@@ -520,13 +523,44 @@ begin
       Exit(True);
 end;
 
+function TWoodCutter.AtTree(): Boolean;
+var
+  MyPos, SearchPos : TPoint;
+  SearchBox : TBox;
+  PointDist : Double;
+begin
+
+  if MiniMap.IsPlayerMoving() then
+  begin
+      Exit(False);
+  end;
+
+  MyPos := Self.RSW.GetMyPos();
+  PointDist := MyPos.DistanceTo(Self.TreeWalkerCoord);
+
+  //Check if we're at the tree we clicked
+  if PointDist > Self.RSTree.ShapeArray[0].Tile.Z then
+  begin
+    Exit(False);
+  end;
+
+  SearchPos := RSW.WorldToMM(MyPos, Self.TreeWalkerCoord, Minimap.GetCompassAngle(False));
+  SearchPos := MiniMap.PointToMs(SearchPos);
+  SearchBox := Box(SearchPos, Round(Self.RSTree.ShapeArray[0].Tile.Z), Round(Self.RSTree.ShapeArray[0].Tile.Z));
+
+  //We're kind of close to the tree we clicked, lets search the area for green
+  if Length(MainScreen.FindObject(Self.RSTree.Finder, SearchBox)) > 0 then
+  begin
+    Exit(True);
+  end;
+end;
+
 function TWoodcutter.IsCutting(): Boolean;
 var
   b: TBox;
 begin
   b := MainScreen.GetPlayerBox();
-  Self.Woodcutting := SRL.IsAnimating(b, MainScreen.NormalizeDistance(600), 350, 10 * TreeTimerMultiplier);
-  Result := Self.Woodcutting;
+  Result := Self.Woodcutting := Self.AtTree();
 end;
 
 function TWoodcutter.WaitCutting(): Boolean;
