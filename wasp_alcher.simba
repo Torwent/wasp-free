@@ -28,6 +28,7 @@ type
     CLOSE_INTERFACE,
 
     CAST_ALCHEMY,
+    WAIT_ALCH,
     WALK_ALCH,
 
     CLOSE_CONTEXT,
@@ -79,7 +80,7 @@ begin
   if Magic.MouseSpell(AlchSpell, MOUSE_RIGHT) and ChooseOption.IsOpen then
     ChooseOption.Select('Warnings');
 
-  WaitUntil(Chat.HasContinue, 50, 2000);
+  WaitUntil(Chat.HasContinue(), 50, 2000);
   Chat.ClickContinue();
   WaitUntil(Chat.ClickOption('Set value', False), 50, 3000);
   Wait(2000);
@@ -154,6 +155,9 @@ begin
       Exit(EAlcherState.WALK_ALCH);
   end;
 
+  if (RSAlchHandler.Timer.Timeout > 0) and not RSAlchHandler.Timer.IsFinished() then
+    Exit(EAlcherState.WAIT_ALCH);
+
   Result := EAlcherState.CAST_ALCHEMY;
 end;
 
@@ -176,6 +180,7 @@ begin
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
       EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
+      EAlcherState.WAIT_ALCH: Wait(100);
       EAlcherState.CAST_ALCHEMY: Self.CastAlchemy();
 
       EAlcherState.CLOSE_CONTEXT: ChooseOption.Close();
