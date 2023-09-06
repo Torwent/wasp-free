@@ -1,3 +1,18 @@
+# [2.7.0](https://github.com/Torwent/wasp-free/compare/v2.6.2...v2.7.0) (2023-09-06)
+
+
+### Bug Fixes
+
+* **alcher:** should print actions more often now, also added some failsafes ([1eaf3f6](https://github.com/Torwent/wasp-free/commit/1eaf3f6cb78ec3641dcb592b4cf437efd4cadd39))
+* **Builder:** Show work well on ladders again ([85d9f20](https://github.com/Torwent/wasp-free/commit/85d9f20d90f3c5fa2e807ceb46916be14794ceec))
+
+
+### Features
+
+* **woodcutter:** rework ([1232105](https://github.com/Torwent/wasp-free/commit/12321056b96daf5ae4499608a02fcb4226099dfe))
+
+
+
 ## [2.6.2](https://github.com/Torwent/wasp-free/compare/v2.6.1...v2.6.2) (2023-09-01)
 
 
@@ -27,15 +42,6 @@
 ### Features
 
 * **blast furnace:** new script release ([195a135](https://github.com/Torwent/wasp-free/commit/195a135b686c798271f1e57b8e1df1775264cf6c))
-
-
-
-## [2.5.9](https://github.com/Torwent/wasp-free/compare/v2.5.8...v2.5.9) (2023-08-31)
-
-
-### Bug Fixes
-
-* **builder:** improved reliability of clicking the furniture ([fbab890](https://github.com/Torwent/wasp-free/commit/fbab890f96f95b3649b51e020184095418f957ae))
 
 
 
