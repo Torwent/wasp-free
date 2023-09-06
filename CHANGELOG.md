@@ -1,3 +1,12 @@
+## [2.7.1](https://github.com/Torwent/wasp-free/compare/v2.7.0...v2.7.1) (2023-09-06)
+
+
+### Bug Fixes
+
+* **nightmare_zone:** fix not drinking overload ([0a12b26](https://github.com/Torwent/wasp-free/commit/0a12b26759e9c722965c30a746d99edc91094cf4))
+
+
+
 # [2.7.0](https://github.com/Torwent/wasp-free/compare/v2.6.2...v2.7.0) (2023-09-06)
 
 
@@ -32,11 +41,6 @@
 
 
 # [2.6.0](https://github.com/Torwent/wasp-free/compare/v2.5.10...v2.6.0) (2023-09-01)
-
-
-### Bug Fixes
-
-* **builder:** force camera rotation if we are miss clicking the furniture ([a5a35cf](https://github.com/Torwent/wasp-free/commit/a5a35cf3430521f7d496bfff9fcb49d5b4d20076))
 
 
 ### Features
