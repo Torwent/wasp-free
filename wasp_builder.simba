@@ -100,12 +100,12 @@ procedure TBuilder.SetupObjects();
 begin
   if CurrentFurniture = ERSFurniture.MYTH_CAPE then
   begin
-    BuiltFurniture.Setup(0.3, 4, [[3607, 110]]);
+    BuiltFurniture.Setup(0.3, 4, [[3603, 139]]);
     BuiltFurniture.Setup(['Teleport']);
     BuiltFurniture.Filter.Finder := False;
     BuiltFurniture.Filter.UpText := False;
 
-    FurnitureSpace.Setup(0.3, 4, [[3607, 110]]);
+    FurnitureSpace.Setup(0.3, 4, [[3603, 139]]);
     FurnitureSpace.Setup(['2 more']);
     FurnitureSpace.Filter.Finder := False;
     FurnitureSpace.Filter.UpText := False;
@@ -113,12 +113,12 @@ begin
     Exit;
   end;
 
-  BuiltFurniture.Setup(1.5, 7, [[3604, 86]]);
+  BuiltFurniture.Setup(1.5, 7, [[3600, 115]]);
   BuiltFurniture.Setup(['Larder']);
   BuiltFurniture.Filter.Finder := False;
   BuiltFurniture.Filter.UpText := False;
 
-  FurnitureSpace.Setup(1.5, 7, [[3604, 86]]);
+  FurnitureSpace.Setup(1.5, 7, [[3600, 115]]);
   FurnitureSpace.Setup(['2 more']);
   FurnitureSpace.Filter.Finder := False;
   FurnitureSpace.Filter.UpText := False;
@@ -337,7 +337,7 @@ begin
 
   if Result then
   begin
-    if count < Self.MinPlankCount then
+    if Self.UsePlankSack and (count < Self.MinPlankCount) then
     begin
       count := Self.MinPlankCount - count;
       Self.PlankSackCount -= count;
