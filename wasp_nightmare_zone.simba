@@ -485,6 +485,8 @@ begin
 
   while Self.NeedLowerHP(currentHP) do
   begin
+    if (Self.Potion = 'Overload') and Self.HasBoostPot() and (currentHP > 50) then
+      Exit;                
     Inventory.ClickSlot(slot, slotOption);
     Wait(100);
 
