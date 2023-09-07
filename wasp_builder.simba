@@ -137,7 +137,7 @@ procedure TBuilder.Init(maxActions: Int32; maxTime: Int64); override;
 begin
   inherited;
 
-  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.TEMP_POH]);
+  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.POH]);
   Self.LastPoint := [0, 0];
   Self.SetupNPC();
   Self.SetupObjects();
@@ -606,8 +606,8 @@ type
   TBuilderConfig = record(TScriptForm)
     NPCSelector: TLabeledCombobox;
     FurnitureSelector: TLabeledCombobox;
-    BuilderInfo: TLabel;
-    ImagePanel: TImage;
+    LayoutInfo, BuilderInfo: TLabel;
+    ImagePanel: TPanel;
   end;
 
 procedure TBuilderConfig.StartScript(sender: TObject); override;
@@ -624,16 +624,9 @@ begin
   combobox := sender;
   case combobox.getItemIndex() of
     0: Self.BuilderInfo.SetCaption(
-       'Make sure you have noted planks with you.' +
-
-       LineEnding + LineEnding +
-       'Your house layout must look exactly like the image to the right!' +
-       LineEnding +
-       'Looking close enough won''t do, it has to look exactly the same.' +
-       LineEnding +
-       'If you have more rooms, move them 3 squares away so they are never,' +
-       LineEnding +
-       'ever visible on the minimap.'
+       'Make sure you have noted planks with you, hammer, saw and coins.'
+       + LineEnding +
+       'You may also bring a plank sack if you have one.'
        );
 
     1: Self.BuilderInfo.SetCaption(
@@ -643,17 +636,58 @@ begin
        LineEnding +
        'You also need money in your servant''s money bag and you need to' +
        LineEnding +
-       'replenish it manually once in a while.' +
-
-       LineEnding + LineEnding +
-       'Your house layout must look exactly like the image to the right!' +
-       LineEnding +
-       'Looking close enough won''t do, it has to look exactly the same.' +
-       LineEnding +
-       'If you have more rooms, move them 3 squares away so they are never,' +
-       LineEnding +
-       'ever visible on the minimap.'
+       'replenish it MANUALLY once in a while.'
        );
+  end;
+end;
+
+procedure TBuilderConfig.FurnitureSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+
+  DownloadToFile(
+    'https://enqlpchobniylwpsjcqc.supabase.co/storage/v1/object/public/imgs/scripts/bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15/assets/hall.png',
+    WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png'
+  );
+
+  DownloadToFile(
+    'https://enqlpchobniylwpsjcqc.supabase.co/storage/v1/object/public/imgs/scripts/bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15/assets/kitchen.png',
+    WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png'
+  );
+
+  case combobox.getItemIndex() of
+    0, 1:
+      begin
+        ImagePanel.SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png');
+        Self.LayoutInfo.setCaption(
+          'Your POH layout must look like this on the minimap, no other room should be seen.'
+          + LineEnding +
+          'If you have more rooms move them 2 or 3 squares away with the house options.'
+          + LineEnding +
+          'You may be able to use other rooms instead of these but I cannot guarantee it will work.'
+          + LineEnding + LineEnding +
+          'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
+          + LineEnding + LineEnding +
+          'Have your larder in the NORTHWEST side of the kitchen.'
+        );
+      end;
+    2:
+      begin
+        ImagePanel.SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png');
+        Self.LayoutInfo.setCaption(
+          'Your POH layout must look like this on the minimap, no other room should be seen.'
+          + LineEnding +
+          'If you have more rooms move them 2 or 3 squares away with the house options.'
+          + LineEnding +
+          'You may be able to use other rooms but I cannot guarantee it will work.'
+          + LineEnding + LineEnding +
+          'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
+          + LineEnding + LineEnding +
+          'Have your cape mount in the SOUTHWEST side of the hall.'
+        );
+      end;
   end;
 end;
 
@@ -673,7 +707,7 @@ begin
   begin
     Create(tab);
     SetCaption('Method:');
-    SetLeft(TControl.AdjustToDPI(50));
+    SetLeft(TControl.AdjustToDPI(40));
     SetTop(TControl.AdjustToDPI(150));
     SetStyle(csDropDownList);
     AddItemArray(['Phials', 'Demon butler']);
@@ -690,30 +724,42 @@ begin
     SetStyle(csDropDownList);
     AddItemArray(['Regular larder', 'Oak larder', 'Myth cape']);
     SetItemIndex(Ord(CurrentFurniture));
+    ComboBox.setOnChange(@Self.FurnitureSelectorOnChange);
+  end;
+
+  with Self.LayoutInfo do
+  begin
+    Create(tab);
+    SetLeft(Self.NPCSelector.GetLeft());
+    SetTop(Self.NPCSelector.GetBottom() + TControl.AdjustToDPI(15));
+    SetHint('House layout instructions.');
   end;
 
   with Self.BuilderInfo do
   begin
     Create(tab);
-    SetLeft(Self.NPCSelector.GetLeft());
-    SetTop(Self.NPCSelector.GetBottom() + TControl.AdjustToDPI(15));
+    SetLeft(Self.LayoutInfo.GetLeft());
+    SetTop(Self.LayoutInfo.GetBottom() + TControl.AdjustToDPI(95));
+    SetHint('NPC mode instructions.');
   end;
 
   with Self.ImagePanel do
   begin
     Create(tab);
     SetTop(Self.FurnitureSelector.GetTop() + TControl.AdjustToDPI(15));
-    SetLeft(Self.FurnitureSelector.GetRight() + TControl.AdjustToDPI(80));
-    LoadFromFile(IncludePath+'\WaspLib\docs\images\POH_layout.png');
-    SetWidth(TControl.AdjustToDPI(195));
-    SetHeight(TControl.AdjustToDPI(194));
+    SetLeft(Self.FurnitureSelector.GetRight() + TControl.AdjustToDPI(90));
+    SetWidth(TControl.AdjustToDPI(240));
+    SetHeight(TControl.AdjustToDPI(240));
+    setHint('House layout. Make sure your house layout looks like this!');
   end;
 
   Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
+
   Self.NPCSelectorOnChange(Self.NPCSelector.ComboBox);
+  Self.FurnitureSelectorOnChange(Self.FurnitureSelector.ComboBox);
 
   inherited;
 end;
