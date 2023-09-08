@@ -401,7 +401,7 @@ begin
   if Self.FurnitureIsBuilt then
     Exit(EBuilderState.DESTROY_FURNITURE);
 
-  if (Inventory.CountItem(Self.Plank) + Self.PlankSackCount) > Self.MinPlankCount then
+  if (Inventory.CountItem(Self.Plank) + Self.PlankSackCount) >= Self.MinPlankCount then
   begin
     Self.WaitingServant := False;
     Exit(EBuilderState.BUILD_FURNITURE);
