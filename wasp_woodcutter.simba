@@ -536,7 +536,7 @@ begin
   CurrentTree := ERSTree(Self.TreeSelector.getItemIndex());
 
   case Self.LocationSelector.GetText() of
-    'Varrock west':      TreeLocation := ETreeLocation.VARROCK_EAST;
+    'Varrock east':      TreeLocation := ETreeLocation.VARROCK_EAST;
     'Varrock west':      TreeLocation := ETreeLocation.VARROCK_WEST;
     'Edgeville':         TreeLocation := ETreeLocation.EDGEVILLE;
     'Draynor':           TreeLocation := ETreeLocation.DRAYNOR_VILLAGE;
