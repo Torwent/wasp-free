@@ -576,7 +576,7 @@ begin
 
   case ERSTree(combobox.getItemIndex()) of
     ERSTree.REGULAR_TREE: Self.LocationSelector.AddItemArray([
-                            'Varrock west, Varrock east'
+                            'Varrock west', 'Varrock east'
                           ]);
     ERSTree.OAK_TREE: Self.LocationSelector.AddItemArray([
                         'Varrock west', 'Varrock east', 'Woodcutting guild'
