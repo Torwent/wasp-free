@@ -122,7 +122,7 @@ begin
   Self.UseBestItem := CurrentGlass = ERSGlassItem.Best;
   Self.ItemChanged := True;
 
-  Self.CurrentLevel := BaseStats.GetCurrentLevel(ERSSkill.CRAFTING);
+  Self.CurrentLevel := Stats.GetLevel(ERSSkill.CRAFTING);
 end;
 
 

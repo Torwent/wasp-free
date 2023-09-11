@@ -223,8 +223,6 @@ end;
 
 
 function TWoodcutter.CutTree(): Boolean;
-var
-  atpa: T2DPointArray;
 begin
   if RSTree.WalkClick() then
   begin
@@ -362,7 +360,7 @@ end;
 function TWoodCutter.AtTree(): Boolean;
 var
   searchBox : TBox;
-  cuboid: TCuboid;
+  cuboid: TCuboidEx;
   atpa: T2DPointArray;
   tpa: TPointArray;
 begin

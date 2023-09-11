@@ -14,9 +14,9 @@ type
   );
 
 var
-  CurrentBar: EBarType = EBarType.RUNITE;
+  CurrentBar: EBarType = EBarType.MITHRIL;
   UseCoalBag: Boolean = True;
-  UseEnergyBoosts: Boolean = True;
+  UseEnergyBoosts: Boolean = False;
 
 type
   EBFState = (

@@ -141,6 +141,7 @@ end;
 function TKrakenKiller.FindRagingKraken(): Boolean;
 var
   MMDots: TPointArray;
+  cuboid: TCuboidEx;
   KrakenDot: TPoint;
 begin
   MMDots := Minimap.GetDots(ERSMinimapDot.NPC);
@@ -154,9 +155,8 @@ begin
   MMDots.Sort(MMDots.Mean());
   KrakenDot := MMDots[0];
 
-  Self.KrakenTPA := Minimap.GetCuboidMS(KrakenDot, [3, 3, 8], [-3, -3]);
-  Self.KrakenTPA := KrakenTPA.Connect();
-  Self.KrakenTPA.Fill();
+  cuboid := Minimap.GetCuboidMS(KrakenDot, [3, 3, 8], [-3, -3]);
+  Self.KrakenTPA := cuboid.ShapeFill();
 end;
 
 
