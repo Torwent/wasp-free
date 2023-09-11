@@ -1,3 +1,12 @@
+## [2.7.4](https://github.com/Torwent/wasp-free/compare/v2.7.3...v2.7.4) (2023-09-11)
+
+
+### Bug Fixes
+
+* **woodcutter:** minor tweak for improved behavior ([5f67ffd](https://github.com/Torwent/wasp-free/commit/5f67ffd37c704d05973da9c5d50d3878a8ea275d))
+
+
+
 ## [2.7.3](https://github.com/Torwent/wasp-free/compare/v2.7.2...v2.7.3) (2023-09-08)
 
 
@@ -29,15 +38,6 @@
 ### Features
 
 * **woodcutter:** rework ([1232105](https://github.com/Torwent/wasp-free/commit/12321056b96daf5ae4499608a02fcb4226099dfe))
-
-
-
-## [2.6.2](https://github.com/Torwent/wasp-free/compare/v2.6.1...v2.6.2) (2023-09-01)
-
-
-### Bug Fixes
-
-* **woodcutter:** willows at draynor should work again ([47704a5](https://github.com/Torwent/wasp-free/commit/47704a5006aef26bf6763f34faa826f6cb1d1da8))
 
 
 
