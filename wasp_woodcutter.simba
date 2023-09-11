@@ -228,8 +228,8 @@ var
 begin
   if RSTree.WalkClick() then
   begin
-    Minimap.WaitMoving();
     Self.TreeWalkerCoord := Self.RSW.MSToWorld(Mouse.Position(), Round(Self.RSTree.ShapeArray[0].Tile.Z/2));
+    Minimap.WaitMoving();
     Result := True;
     Self.Woodcutting := True;
     Self.TreeTimer.Restart();
