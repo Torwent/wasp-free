@@ -1,3 +1,12 @@
+## [2.7.5](https://github.com/Torwent/wasp-free/compare/v2.7.4...v2.7.5) (2023-09-11)
+
+
+### Bug Fixes
+
+* compatibility fixes with latest wasplib ([822bbda](https://github.com/Torwent/wasp-free/commit/822bbda1545f9acf3a2a993605642f5a2683ad67))
+
+
+
 ## [2.7.4](https://github.com/Torwent/wasp-free/compare/v2.7.3...v2.7.4) (2023-09-11)
 
 
@@ -23,21 +32,6 @@
 
 * **builder:** now uses the new house layout ([16c539d](https://github.com/Torwent/wasp-free/commit/16c539deac3a38c988cb253bf9199f17e0323d57))
 * **nightmare_zone:** fix not drinking overload ([0a12b26](https://github.com/Torwent/wasp-free/commit/0a12b26759e9c722965c30a746d99edc91094cf4))
-
-
-
-# [2.7.0](https://github.com/Torwent/wasp-free/compare/v2.6.2...v2.7.0) (2023-09-06)
-
-
-### Bug Fixes
-
-* **alcher:** should print actions more often now, also added some failsafes ([1eaf3f6](https://github.com/Torwent/wasp-free/commit/1eaf3f6cb78ec3641dcb592b4cf437efd4cadd39))
-* **Builder:** Show work well on ladders again ([85d9f20](https://github.com/Torwent/wasp-free/commit/85d9f20d90f3c5fa2e807ceb46916be14794ceec))
-
-
-### Features
-
-* **woodcutter:** rework ([1232105](https://github.com/Torwent/wasp-free/commit/12321056b96daf5ae4499608a02fcb4226099dfe))
 
 
 
