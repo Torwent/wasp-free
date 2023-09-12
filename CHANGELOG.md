@@ -1,3 +1,12 @@
+## [2.7.6](https://github.com/Torwent/wasp-free/compare/v2.7.5...v2.7.6) (2023-09-12)
+
+
+### Bug Fixes
+
+* **builder:** typos ([89f11ff](https://github.com/Torwent/wasp-free/commit/89f11ff9b1b6eb3cbd6e3dd0aa389e8f1f111570))
+
+
+
 ## [2.7.5](https://github.com/Torwent/wasp-free/compare/v2.7.4...v2.7.5) (2023-09-11)
 
 
@@ -31,7 +40,6 @@
 ### Bug Fixes
 
 * **builder:** now uses the new house layout ([16c539d](https://github.com/Torwent/wasp-free/commit/16c539deac3a38c988cb253bf9199f17e0323d57))
-* **nightmare_zone:** fix not drinking overload ([0a12b26](https://github.com/Torwent/wasp-free/commit/0a12b26759e9c722965c30a746d99edc91094cf4))
 
 
 
