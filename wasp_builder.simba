@@ -670,7 +670,7 @@ begin
           + LineEnding + LineEnding +
           'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
           + LineEnding + LineEnding +
-          'Have your larder in the NORTHWEST side of the kitchen.'
+          'Have your larder in the NORTHEAST side of the kitchen.'
         );
       end;
     2:
@@ -685,7 +685,7 @@ begin
           + LineEnding + LineEnding +
           'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
           + LineEnding + LineEnding +
-          'Have your cape mount in the SOUTHWEST side of the hall.'
+          'Have your cape mount in the SOUTHEAST side of the hall.'
         );
       end;
   end;
