@@ -1,3 +1,12 @@
+## [2.7.7](https://github.com/Torwent/wasp-free/compare/v2.7.6...v2.7.7) (2023-09-14)
+
+
+### Bug Fixes
+
+* **blast furnace:** refactor ([5627953](https://github.com/Torwent/wasp-free/commit/5627953b29b0be299826f9fa27d4bb44348093e2))
+
+
+
 ## [2.7.6](https://github.com/Torwent/wasp-free/compare/v2.7.5...v2.7.6) (2023-09-12)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **builder:** fixed a logic typo ([5e8615d](https://github.com/Torwent/wasp-free/commit/5e8615d98504b35757a513f3c6240e3e18be164d))
-
-
-
-## [2.7.2](https://github.com/Torwent/wasp-free/compare/v2.7.1...v2.7.2) (2023-09-07)
-
-
-### Bug Fixes
-
-* **builder:** now uses the new house layout ([16c539d](https://github.com/Torwent/wasp-free/commit/16c539deac3a38c988cb253bf9199f17e0323d57))
 
 
 
