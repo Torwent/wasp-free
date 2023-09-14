@@ -175,7 +175,7 @@ begin
   Self.GoldGlovesB := TRSBankItem.Setup(Self.GoldGloves);
   Self.CoalBagB := TRSBankItem.Setup(Self.CoalBag);
 
-  if BaseStats.GetCurrentLevel(ERSSkill.SMITHING) < 60 then
+  if Stats.GetLevel(ERSSkill.SMITHING) < 60 then
     Self.Fee := 0.02667
   else
     Self.Fee := 0.02;
@@ -235,7 +235,7 @@ begin
   end;
 end;
 
-function TBlastFurnace.ReadPot(): Boolean;
+procedure TBlastFurnace.ReadPot();
 var
   option: TRSChatboxOption;
 begin
@@ -335,22 +335,6 @@ begin
   end;
 end;
 
-function TBlastFurnace.SetupBankTab(): Boolean;
-begin
-  if not Bank.ContainsItem(Self.Coal) then
-  begin
-    Self.BankTab := Bank.FindItemTab(Self.Coal);
-
-    if not Bank.ContainsItem(Self.Coal) then
-      Exit;
-  end;
-
-  if (Self.BankTab = -1) then
-    Self.BankTab := Bank.GetCurrentTab();
-
-  Result := Self.BankTab <> -1;
-end;
-
 function TBlastFurnace.WithdrawTool(out item: TRSBankItem): Boolean;
 var
   invCount: Int32;
@@ -401,9 +385,35 @@ begin
     WriteLn('Something went wrong! There''s more coal loaded than it should.');
 end;
 
-function TBlastFurnace.LoadBelt(isCoal: Boolean = False): Boolean;
+function TBlastFurnace.LoadOre(): Boolean;
 var
-  count: Int32;
+  count, newCount: Int32;
+begin
+  count := Inventory.Count();
+  XPBar.EarnedXP();
+  Self.DispenserFull := False;
+
+  if RSObjects.BlastFurnaceConveyorBelt.WalkClick() then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil((newCount := Inventory.Count()) < count, 300, 5000);
+  end;
+
+  if not Result then
+    Exit;
+
+  count := count - newCount;
+  Self.LoadedCoal -= (count * Self.CoalRatio);
+  Self.PotFull := True;
+  Self.TotalProfit -= count * Self.OrePrice;
+
+  if UseCoalBag and Inventory.ContainsItem(Self.CoalBag) then
+    Inventory.MouseItem(Self.CoalBag);
+end;
+
+function TBlastFurnace.LoadCoal(): Boolean;
+var
+  count, newCount: Int32;
 begin
   count := Inventory.Count();
   XPBar.EarnedXP(); //Reset xp cache.
@@ -412,29 +422,20 @@ begin
   if RSObjects.BlastFurnaceConveyorBelt.WalkClick() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(not Inventory.IsFull(), 300, 5000);
+    Result := WaitUntil((newCount := Inventory.Count()) < count, 300, 5000);
   end;
 
-  if Result then
-  begin
-    count := count - Inventory.Count();
+  if not Result then
+    Exit;
 
-    if isCoal then
-    begin
-      Self.LoadedCoal += count;
-      Self.TotalProfit -= count * Self.CoalPrice;
-    end
-    else
-    begin
-      Self.LoadedCoal -= (count * Self.CoalRatio);
-      Self.PotFull := True;
-      Self.TotalProfit -= count * Self.OrePrice;
-    end;
+  count := count - newCount;
+  Self.LoadedCoal += count;
+  Self.TotalProfit -= count * Self.CoalPrice;
 
-    if UseCoalBag and Inventory.ContainsItem(Self.CoalBag) then
-      Inventory.MouseItem(Self.CoalBag);
-  end;
+  if UseCoalBag and Inventory.ContainsItem(Self.CoalBag) then
+    Inventory.MouseItem(Self.CoalBag);
 end;
+
 
 procedure TBlastFurnace.WaitMoving(doAntiban: Boolean = True; change: Boolean = False);
 var
@@ -542,61 +543,74 @@ begin
   Result := Self.CoalBagAmount = Self.MaxCoalBag;
 end;
 
-function TBlastFurnace.FillCoalBag(ignoreBank: Boolean = False): Boolean;
+function TBlastFurnace.FillCoalBag(): Boolean;
 var
-  bankOpen: Boolean;
-  slot, amount: Int32;
+  slot: Int32;
 begin
-  bankOpen := Bank.IsOpen();
-  if not ignoreBank and not bankOpen then
+  if not Bank.IsOpen() or not Inventory.FindItem(Self.CoalBag, slot) then
     Exit;
 
-  if not bankOpen then
-    amount := Inventory.CountItem('Coal');
+  if Inventory.ClickSlot(slot, 'Fill') then
+    Result := Inventory.ItemInterface.WaitFade(slot)
+  else
+    Self.RightClickCoalBag();
 
-  if Inventory.FindItem(Self.CoalBag, slot) then
-  begin
-    if Inventory.ClickSlot(slot, 'Fill') then
-      Result := Inventory.ItemInterface.WaitFade(slot);
-
-    if Result or bankOpen then
-    begin
-      if bankOpen then
-      begin
-        if Result then
-          Self.CoalBagAmount := Self.MaxCoalBag
-        else
-          Self.EmptyCoalBag(True);
-        Exit;
-      end;
-
-      Self.CoalBagAmount := amount;
-    end;
-  end;
+  if Result then
+    Self.CoalBagAmount := Self.MaxCoalBag;
 end;
 
-function TBlastFurnace.EmptyCoalBag(useMouse: Boolean = False): Boolean;
+procedure TBlastFurnace.RightClickCoalBag();
 var
   count, tmp: Int32;
 begin
   count := Inventory.CountEmptySlots();
-  if (useMouse and Inventory.ClickItem(Self.CoalBag, 'Empty ')) or
-     Inventory.ShiftDrop([Self.CoalBag], Inventory.RandomPattern()) then
+  if Inventory.ClickItem(Self.CoalBag, 'Empty ') then
+    RSObjects.BlastFurnaceConveyorBelt.Hover();
+
+  if WaitUntil(count <> (tmp := Inventory.CountEmptySlots()), 300, 4000) then
+    Self.CoalBagAmount -= count - tmp
+  else
+    Self.CoalBagAmount := 0;
+end;
+
+function TBlastFurnace.ShiftClickCoalBag(): Boolean;
+var
+  count, tmp: Int32;
+begin
+  count := Inventory.CountEmptySlots();
+  if Inventory.ShiftDrop([Self.CoalBag], Inventory.RandomPattern()) then
     RSObjects.BlastFurnaceConveyorBelt.Hover();
 
   Result := WaitUntil(count <> (tmp := Inventory.CountEmptySlots()), 300, 4000);
 
-  if useMouse and not Result then
-    Result := True;
-
   if Result then
   begin
-    if count <> tmp then
-      Self.CoalBagAmount -= count - tmp
-    else
-      Self.CoalBagAmount := 0;
-  end else if not useMouse then
-    Self.EmptyCoalBag(True);
+    Self.CoalBagAmount -= count - tmp;
+    Exit;
+  end;
+
+  Self.RightClickCoalBag();
+end;
+
+function TBlastFurnace.RefillCoalBag(): Boolean;
+var
+  slot, amount: Int32;
+begin
+  if not Bank.IsOpen() then
+    amount := Inventory.CountItem('Coal')
+  else
+    amount := Self.MaxCoalBag;
+
+  if not Inventory.FindItem(Self.CoalBag, slot) then
+    Exit;
+
+  if Inventory.ClickSlot(slot, 'Fill') then
+    Result := Inventory.ItemInterface.WaitFade(slot);
+
+  if Result then
+    Self.CoalBagAmount := amount
+  else
+    Self.RightClickCoalBag();
 end;
 
 
@@ -861,8 +875,8 @@ begin
       EBFState.CLOSE_CONTEXT_MENU: ChooseOption.Close();
 
       EBFState.FILL_COAL_BAG: Self.FillCoalBag();
-      EBFState.REFILL_COAL_BAG: Self.FillCoalBag(True);
-      EBFState.EMPTY_COAL_BAG: Self.EmptyCoalBag();
+      EBFState.REFILL_COAL_BAG: Self.RefillCoalBag();
+      EBFState.EMPTY_COAL_BAG: Self.ShiftClickCoalBag();
 
       EBFState.CLICK_COFFER: Self.ClickCoffer();
       EBFState.HANDLE_COFFER_CHAT: Self.HandleCofferChat();
@@ -875,8 +889,8 @@ begin
       EBFState.ENABLE_RUN: Self.EnableRun();
       EBFState.DRINK_ENERGY: Inventory.Consume(ERSConsumable.ENERGY_CONSUMABLE);
 
-      EBFState.LOAD_ORES: Self.LoadBelt();
-      EBFState.LOAD_COAL: Self.LoadBelt(True);
+      EBFState.LOAD_ORES: Self.LoadOre();
+      EBFState.LOAD_COAL: Self.LoadCoal();
       EBFState.WALK_DISPENSER: Self.WalkDispenser();
       EBFState.GET_BARS: Self.GetBars();
 
