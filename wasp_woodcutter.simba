@@ -619,7 +619,7 @@ begin
     SetTop(TControl.AdjustToDPI(150));
     SetStyle(csDropDownList);
     AddItemArray(['Regular tree', 'Oak tree', 'Willow tree', 'Teak tree',
-                  'Maple tree', 'Mahogany tree', 'Yew tree', 'Blisterwood tree',
+                  'Maple tree', 'Mahogany tree', 'Yew tree',
                   'Magic tree']);
     SetItemIndex(Ord(CurrentTree));
     Combobox.SetOnChange(@Self.TreeSelectorOnChange);
