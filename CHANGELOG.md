@@ -1,3 +1,12 @@
+## [2.7.9](https://github.com/Torwent/wasp-free/compare/v2.7.8...v2.7.9) (2023-09-16)
+
+
+### Bug Fixes
+
+* **nmz:** fix compilation issues with latest WaspLib ([b05b3b6](https://github.com/Torwent/wasp-free/commit/b05b3b6c48c9f22e4a64deb95c40b44450a9dada))
+
+
+
 ## [2.7.8](https://github.com/Torwent/wasp-free/compare/v2.7.7...v2.7.8) (2023-09-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility fixes with latest wasplib ([822bbda](https://github.com/Torwent/wasp-free/commit/822bbda1545f9acf3a2a993605642f5a2683ad67))
-
-
-
-## [2.7.4](https://github.com/Torwent/wasp-free/compare/v2.7.3...v2.7.4) (2023-09-11)
-
-
-### Bug Fixes
-
-* **woodcutter:** minor tweak for improved behavior ([5f67ffd](https://github.com/Torwent/wasp-free/commit/5f67ffd37c704d05973da9c5d50d3878a8ea275d))
 
 
 
