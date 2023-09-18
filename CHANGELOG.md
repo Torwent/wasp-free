@@ -1,3 +1,12 @@
+## [2.7.10](https://github.com/Torwent/wasp-free/compare/v2.7.9...v2.7.10) (2023-09-18)
+
+
+### Bug Fixes
+
+* **nmz:** nmz compiles again ([769fd98](https://github.com/Torwent/wasp-free/commit/769fd98966164a588dbc4245a2236fb6ae85bc03))
+
+
+
 ## [2.7.9](https://github.com/Torwent/wasp-free/compare/v2.7.8...v2.7.9) (2023-09-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **builder:** typos ([89f11ff](https://github.com/Torwent/wasp-free/commit/89f11ff9b1b6eb3cbd6e3dd0aa389e8f1f111570))
-
-
-
-## [2.7.5](https://github.com/Torwent/wasp-free/compare/v2.7.4...v2.7.5) (2023-09-11)
-
-
-### Bug Fixes
-
-* compatibility fixes with latest wasplib ([822bbda](https://github.com/Torwent/wasp-free/commit/822bbda1545f9acf3a2a993605642f5a2683ad67))
 
 
 
