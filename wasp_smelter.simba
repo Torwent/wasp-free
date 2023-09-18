@@ -53,10 +53,7 @@ type
 
     Furnace: TRSObject;
 
-    Ore1: TRSBankWithdrawItem;
-    Ore2: TRSBankWithdrawItem;
-
-    Bar: TRSBankDepositItem;
+    Ore1, Ore2, Bar: TRSBankItem;
     Materials: TRSItemArray;
     Smelting: Boolean;
 
@@ -92,67 +89,65 @@ end;
 
 procedure TSmelter.SetupItems();
 begin
-  Self.Bar.Quantity := BANK_DEPOSIT_ALL;
-
   case CurrentBar of
     ERSBarType.BRONZE:
       begin
-        Self.Bar.Item := 'Bronze bar';
-        Self.Ore1 := ['Copper ore', 14, False];
-        Self.Ore2 := ['Tin ore', 14, False];
+        Self.Bar  := TRSBankItem.Setup('Bronze bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Copper ore', 14, False);
+        Self.Ore2 := TRSBankItem.Setup('Tin ore', 14, False);
       end;
 
     ERSBarType.IRON:
       begin
-        Self.Bar.Item := 'Iron bar';
-        Self.Ore1 := ['Iron ore', Bank.QUANTITY_ALL, False];
+        Self.Bar  := TRSBankItem.Setup('Iron bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Iron ore', Bank.QUANTITY_ALL, False);
       end;
 
     ERSBarType.SILVER:
       begin
-        Self.Bar.Item := 'Silver bar';
-        Self.Ore1 := ['Silver ore', Bank.QUANTITY_ALL, False];
+        Self.Bar  := TRSBankItem.Setup('Silver bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Silver ore', Bank.QUANTITY_ALL, False);
       end;
 
     ERSBarType.STEEL:
       begin
-        Self.Bar.Item := 'Steel bar';
-        Self.Ore1 := ['Iron ore', 9, False];
-        Self.Ore2 := ['Coal', 18, False];
+        Self.Bar  := TRSBankItem.Setup('Steel bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Iron ore', 9, False);
+        Self.Ore2 := TRSBankItem.Setup('Coal', 18, False);
       end;
 
     ERSBarType.GOLD:
       begin
-        Self.Bar.Item := 'Gold bar';
-        Self.Ore1 := ['Gold ore', Bank.QUANTITY_ALL, False];
+        Self.Bar  := TRSBankItem.Setup('Gold bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Gold ore', Bank.QUANTITY_ALL, False);
       end;
 
     ERSBarType.MITHRIL:
       begin
-        Self.Bar.Item := 'Mithril bar';
-        Self.Ore1 := ['Mithril ore', 5, False];
-        Self.Ore2 := ['Coal', 20, False];
+        Self.Bar  := TRSBankItem.Setup('Mithril bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Mithril ore', 5, False);
+        Self.Ore2 := TRSBankItem.Setup('Coal', 20, False);
       end;
 
     ERSBarType.ADAMANT:
       begin
-        Self.Bar.Item := 'Adamantite bar';
-        Self.Ore1 := ['Adamantite ore', 4, False];
-        Self.Ore2 := ['Coal', 24, False];
+        Self.Bar  := TRSBankItem.Setup('Adamantite bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Adamantite ore', 4, False);
+        Self.Ore2 := TRSBankItem.Setup('Coal', 24, False);
       end;
 
     ERSBarType.RUNITE:
       begin
-        Self.Bar.Item := 'Runite bar';
-        Self.Ore1 := ['Runite ore', 4, False];
-        Self.Ore2 := ['Coal', 24, False];
+        Self.Bar  := TRSBankItem.Setup('Runite bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Runite ore', 4, False);
+        Self.Ore2 := TRSBankItem.Setup('Coal', 24, False);
       end;
 
     ERSBarType.MOLTEN_GLASS:
       begin
-        Self.Bar.Item := 'Molten glass';
-        Self.Ore1 := ['Soda ash', 14, False];
-        Self.Ore2 := ['Bucket of sand', 14, False];
+        Self.Bar  := TRSBankItem.Setup('Molten glass', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TRSBankItem.Setup('Soda ash', 14, False);
+        Self.Ore2 := TRSBankItem.Setup('Bucket of sand', 14, False);
         Antiban.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
       end;
   end;
@@ -184,7 +179,7 @@ end;
 function TSmelter.Withdraw(): Boolean; overload;
 var
   invCount: Int32;
-  item: TRSBankWithdrawItem;
+  item: TRSBankItem;
   find1, find2: Boolean;
 begin
   find1 := Inventory.ContainsItem(Self.Ore1.Item);
@@ -209,14 +204,14 @@ begin
 
   invCount := Inventory.Count();
 
-  if Bank.WithdrawItem(Self.BankTab, item, True) then
+  if Bank.WithdrawItem(item, True) then
     Result := WaitUntil(Inventory.Count() > invCount, 100, 3000);
 
   if not Result then
   begin
     Bank.UnHoverIncinerator();
     Self.BankEmpty := not Bank.IsSearchOpen() and
-                      not WaitUntil(Bank.ContainsItem(Self.BankTab, item), 300, 3000);
+                      not WaitUntil(Bank.ContainsItem(item), 300, 3000);
 
     if Bank.IsSearchOpen() then
       Bank.CloseSearch();
@@ -359,9 +354,10 @@ end;
 function TSmelter.Terminate(): Boolean; override;
 begin
   Result := inherited;
+  Self.Bar.Noted := True;
   if Result then
     for 0 to 5 do
-      if Result := Bank.WithdrawItem(BankTab, [Self.Bar.Item, Bank.QUANTITY_ALL, True], True) then
+      if Result := Bank.WithdrawItem(Self.Bar, True) then
         Break;
 end;
 

@@ -42,6 +42,7 @@ type
   TAlcher = record(TBaseBankScript)
     State: EAlcherState;
     AlchItem: TRSItem;
+    NatureRune, Coins: TRSBankItem;
     InGE: Boolean;
   end;
 
@@ -66,6 +67,9 @@ begin
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');
+
+  Self.NatureRune := TRSBankItem.Setup('Nature rune', Bank.QUANTITY_ALL, False);
+  Self.Coins := TRSBankItem.Setup('Coins', Bank.QUANTITY_ALL, False);
 end;
 
 function TAlcher.HandleWarning(): Boolean;
@@ -173,8 +177,8 @@ begin
       EAlcherState.WALK_ALCH: InGe := Self.RSW.WebWalk(RSObjects.GEBank.Coordinates, 10, 0.2);
 
       EAlcherState.OPEN_BANK: Bank.WalkOpen();
-      EAlcherState.WITHDRAW_NATS: Self.Withdraw(['Nature rune', -1, False]);
-      EAlcherState.WITHDRAW_MONEY: Self.Withdraw(['Coins', -1, False]);
+      EAlcherState.WITHDRAW_NATS: Self.Withdraw(Self.NatureRune);
+      EAlcherState.WITHDRAW_MONEY: Self.Withdraw(Self.Coins);
 
       EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen();
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);

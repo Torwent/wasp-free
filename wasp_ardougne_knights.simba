@@ -279,7 +279,7 @@ begin
   if Self.NextHeal < 1 then
   begin
     Self.NextHeal := MinHealth + Random(-Self.MaxHit, Self.MaxHit) * Round(Antiban.GetUniqueNumber(2, 0, 4));
-    Self.NextHeal := EnsureRange(Self.NextHeal, Self.MaxHit, Round(BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) * 0.8));
+    Self.NextHeal := EnsureRange(Self.NextHeal, Self.MaxHit, Round(Stats.GetLevel(ERSSkill.HITPOINTS) * 0.8));
   end;
 
   Result := Minimap.GetHPLevel() <= Self.NextHeal;
@@ -348,7 +348,7 @@ var
   oldHP, newHP, hpLevel: Int32;
 begin
   newHP := Minimap.GetHPLevel();
-  hpLevel := BaseStats.GetCurrentLevel(ERSSkill.HITPOINTS) - 1;
+  hpLevel := Stats.GetLevel(ERSSkill.HITPOINTS) - 1;
   repeat
     oldHP := newHP;
     if not Inventory.Consume(FOOD_CONSUMABLE) then

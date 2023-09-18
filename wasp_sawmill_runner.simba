@@ -17,7 +17,7 @@ var
   CurrentTask: ERSPlankType := ERSPlankType.TEAK;
 
 type
-  EState = (
+  ESawmillRunnerState = (
     WAIT_STATE,
 
     OPEN_BANK,
@@ -38,8 +38,9 @@ type
   );
 
   TSawmillRunner = record(TBaseBankScript)
-    State: EState;
-    Coins, Logs, Plank, Ring: TRSItem;
+    State: ESawmillRunnerState;
+    Coins, Plank, Ring: TRSItem;
+    Logs: TRSBankItem;
     NeededItems: TRSItemArray;
     RingPosition: (UNKOWN, INV, EQUIP);
     TeleportCost: Int32;
@@ -69,34 +70,34 @@ begin
   case CurrentTask of
     ERSPlankType.NORMAL:
       begin
-        Self.Logs  := 'Logs';
+        Self.Logs  := TRSBankItem.Setup('Logs', Bank.QUANTITY_ALL, False);
         Self.Plank := 'Plank';
         Self.ActionProfit := -100;
       end;
 
     ERSPlankType.OAK:
       begin
-        Self.Logs  := 'Oak logs';
+        Self.Logs  := TRSBankItem.Setup('Oak logs', Bank.QUANTITY_ALL, False);
         Self.Plank := 'Oak plank';
         Self.ActionProfit := -250;
       end;
 
     ERSPlankType.TEAK:
       begin
-        Self.Logs  := 'Teak logs';
+        Self.Logs  := TRSBankItem.Setup('Teak logs', Bank.QUANTITY_ALL, False);
         Self.Plank := 'Teak plank';
         Self.ActionProfit := -500;
       end;
 
     ERSPlankType.MAHOGANY:
       begin
-        Self.Logs  := 'Mahogany logs';
+        Self.Logs  := TRSBankItem.Setup('Mahogany logs', Bank.QUANTITY_ALL, False);
         Self.Plank := 'Mahogany plank';
         Self.ActionProfit := -1500;
       end;
     end;
 
-  Self.ActionProfit += ItemData.GetAverage(Self.Plank) - ItemData.GetAverage(Self.Logs);
+  Self.ActionProfit += ItemData.GetAverage(Self.Plank) - ItemData.GetAverage(Self.Logs.Item);
   //teleport from spell and ring of the elements prices
   lawCost := ItemData.GetAverage('Law rune');
   airCost := ItemData.GetAverage('Air rune');
@@ -108,7 +109,7 @@ begin
                   ItemData.GetAverage('Earth rune');
 
   Self.NeededItems := [
-    Self.Coins, Self.Logs, Self.Ring, 'Law rune', 'Air rune', 'Fire rune', 'Rune pouch', 'Divine rune pouch'
+    Self.Coins, Self.Logs.Item, Self.Ring, 'Law rune', 'Air rune', 'Fire rune', 'Rune pouch', 'Divine rune pouch'
   ];
 end;
 
@@ -191,61 +192,61 @@ begin
 end;
 
 
-function TSawmillRunner.GetState(): EState;
+function TSawmillRunner.GetState(): ESawmillRunnerState;
 begin
   if WL.Activity.IsFinished() then
-    Exit(END_SCRIPT);
+    Exit(ESawmillRunnerState.END_SCRIPT);
 
   if MainScreen.HasInterface() then
   begin
     if not Self.BankEmpty and Bank.IsOpen() then
     begin
       if Inventory.ContainsItem(Self.Plank) then
-        Exit(DEPOSIT_ITEMS);
+        Exit(ESawmillRunnerState.DEPOSIT_ITEMS);
 
       if Inventory.ContainsRandomItems(Self.NeededItems) then
-        Exit(DEPOSIT_RANDOM_ITEMS);
+        Exit(ESawmillRunnerState.DEPOSIT_RANDOM_ITEMS);
 
       if not Inventory.IsFull() then
-        Exit(WITHDRAW_ITEMS);
+        Exit(ESawmillRunnerState.WITHDRAW_ITEMS);
     end;
 
     if not Self.CollectEmpty and CollectBox.IsOpen() then
-      Exit(HANDLE_COLLECT);
+      Exit(ESawmillRunnerState.HANDLE_COLLECT);
 
-    Exit(CLOSE_INTERFACE);
+    Exit(ESawmillRunnerState.CLOSE_INTERFACE);
   end;
 
-  if Inventory.ContainsItem(Self.Plank) or not Inventory.ContainsItem(Self.Logs) then
+  if Inventory.ContainsItem(Self.Plank) or not Inventory.ContainsItem(Self.Logs.Item) then
   begin
     if Self.InGE(Self.RSW.GetMyPos()) then
     begin
       if Self.BankEmpty then
       begin
         if Self.CollectEmpty then
-          Exit(OUT_OF_SUPPLIES);
+          Exit(ESawmillRunnerState.OUT_OF_SUPPLIES);
 
-        Exit(OPEN_COLLECT);
+        Exit(ESawmillRunnerState.OPEN_COLLECT);
       end;
 
-      Exit(OPEN_BANK);
+      Exit(ESawmillRunnerState.OPEN_BANK);
     end;
 
-    Exit(TELEPORT_GE);
+    Exit(ESawmillRunnerState.TELEPORT_GE);
   end;
 
   if Make.IsOpen() then
-    Exit(HANDLE_MAKE);
+    Exit(ESawmillRunnerState.HANDLE_MAKE);
 
-  if Inventory.ContainsItem(Self.Logs) then
+  if Inventory.ContainsItem(Self.Logs.Item) then
   begin
     if Self.InGE(Self.RSW.GetMyPos()) then
-      Exit(TELEPORT_SAWMILL);
+      Exit(ESawmillRunnerState.TELEPORT_SAWMILL);
 
-    Exit(BUY_PLANKS);
+    Exit(ESawmillRunnerState.BUY_PLANKS);
   end;
 
-  Exit(WAIT_STATE);
+  Exit(ESawmillRunnerState.WAIT_STATE);
 end;
 
 procedure TSawmillRunner.Run(maxActions: Int32; maxTime: Int64);
@@ -257,23 +258,23 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      WAIT_STATE: Wait(500, 800);
+      ESawmillRunnerState.WAIT_STATE: Wait(500, 800);
 
-      OPEN_BANK: Bank.WalkOpen();
+      ESawmillRunnerState.OPEN_BANK: Bank.WalkOpen();
 
-      WITHDRAW_ITEMS: Self.Withdraw([Self.Logs, Bank.QUANTITY_ALL, False]);
-      DEPOSIT_ITEMS: Self.Deposit();
-      DEPOSIT_RANDOM_ITEMS: Bank.DepositRandomItems(Self.NeededItems);
-      OPEN_COLLECT: CollectBox.WalkOpen();
-      HANDLE_COLLECT: Self.HandleCollectBox([]);
-      CLOSE_INTERFACE: MainScreen.CloseInterface();
+      ESawmillRunnerState.WITHDRAW_ITEMS: Self.Withdraw(Self.Logs);
+      ESawmillRunnerState.DEPOSIT_ITEMS: Self.Deposit();
+      ESawmillRunnerState.DEPOSIT_RANDOM_ITEMS: Bank.DepositRandomItems(Self.NeededItems);
+      ESawmillRunnerState.OPEN_COLLECT: CollectBox.WalkOpen();
+      ESawmillRunnerState.HANDLE_COLLECT: Self.HandleCollectBox([]);
+      ESawmillRunnerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      TELEPORT_SAWMILL: Self.SawmillTeleport();
-      TELEPORT_GE: Self.VarrockTeleport();
-      BUY_PLANKS: Self.BuyPlanks();
-      HANDLE_MAKE: Self.HandleSawmill();
+      ESawmillRunnerState.TELEPORT_SAWMILL: Self.SawmillTeleport();
+      ESawmillRunnerState.TELEPORT_GE: Self.VarrockTeleport();
+      ESawmillRunnerState.BUY_PLANKS: Self.BuyPlanks();
+      ESawmillRunnerState.HANDLE_MAKE: Self.HandleSawmill();
 
-      OUT_OF_SUPPLIES, END_SCRIPT: Break;
+      ESawmillRunnerState.OUT_OF_SUPPLIES, ESawmillRunnerState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();

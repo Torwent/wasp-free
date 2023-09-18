@@ -4,6 +4,7 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 {$I WaspLib/osr/handlers/combathandler.simba}
+{$SCOPEDENUMS ON}
 
 begin
   Login.PlayerIndex := 0;
@@ -240,55 +241,55 @@ end;
 function TKrakenKiller.GetState(): EKrakenState;
 begin
   if WL.Activity.IsFinished() and not MainScreen.InCombat() then
-    Exit(END_SCRIPT);
+    Exit(EKrakenState.END_SCRIPT);
 
   if not Self.InsideBossRoom() then
   begin
     if 'Pay' in Chat.GetChatTitle ()then
-      Exit(HANDLE_CHAT);
-    Exit(ENTER_CREVICE);
+      Exit(EKrakenState.HANDLE_CHAT);
+    Exit(EKrakenState.ENTER_CREVICE);
   end;
 
   if (Minimap.GetHPLevel() <= 40) then
   begin
     if Inventory.ContainsConsumable(FOOD_CONSUMABLE) then
-      Exit(EAT_FOOD)
+      Exit(EKrakenState.EAT_FOOD)
     else if Self.FindRagingKraken() then
-      Exit(ATTACK_KRAKEN)
+      Exit(EKrakenState.ATTACK_KRAKEN)
     else if (Minimap.GetHPLevel() <= 25) then
       TerminateScript('OUT OF FOOD AND HEALTH');
   end;
 
   if (Minimap.GetPrayerLevel() <= 30) and Inventory.ContainsConsumable(PRAYER_CONSUMABLE) then
-    Exit(DRINK_PRAYER);
+    Exit(EKrakenState.DRINK_PRAYER);
 
   if CombatHandler.NeedBracelet() then
-    Exit(EQUIP_BRACELET);
+    Exit(EKrakenState.EQUIP_BRACELET);
 
   if Self.UseImbuedHeart and ImbuedHeart.IsFinished() then
-    Exit(BOOST);
+    Exit(EKrakenState.BOOST);
 
   if not Minimap.IsPrayerEnabled() and (Minimap.GetPrayerLevel() > 0) then
-    Exit(ENABLE_QPRAY);
+    Exit(EKrakenState.ENABLE_QPRAY);
 
   if not RSW.AtTile(Self.Bridge, 5) then
-    Exit(WALK_BRIDGE);
+    Exit(EKrakenState.WALK_BRIDGE);
 
   if Self.FindRagingKraken() then
   begin
     if Self.IsAttacking then
-      Exit(WAIT_STATE);
-    Exit(ATTACK_KRAKEN);
+      Exit(EKrakenState.WAIT_STATE);
+    Exit(EKrakenState.ATTACK_KRAKEN);
   end;
 
   if not Self.CheckedLoot then
-    Exit(CHECK_LOOT);
+    Exit(EKrakenState.CHECK_LOOT);
 
   if Inventory.ContainsAny(RSAlchHandler.ItemArray) then
-    Exit(ALCH_DROP);
+    Exit(EKrakenState.ALCH_DROP);
 
   if Self.FindSleepyKraken() then
-    Exit(WAKE_KRAKEN);
+    Exit(EKrakenState.WAKE_KRAKEN);
 end;
 
 procedure TKrakenKiller.Run(maxActions: Int32; maxTime: Int64);
@@ -301,22 +302,22 @@ begin
 
     case Self.State of
       //Outside
-      ENTER_CREVICE: Self.EnterCrevice();
-      HANDLE_CHAT: Self.HandlePayment();
+      EKrakenState.ENTER_CREVICE: Self.EnterCrevice();
+      EKrakenState.HANDLE_CHAT: Self.HandlePayment();
 
       //Inside
-      WALK_BRIDGE: RSW.WebWalk(Bridge, 5, 0.2);
-      WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
-      CHECK_LOOT: Self.CheckLoot();
-      WAKE_KRAKEN: Self.WakeKraken();
-      ATTACK_KRAKEN: IsAttacking := Self.AttackKraken();
-      BOOST: Self.BoostMagic();
-      EAT_FOOD: Inventory.Consume(FOOD_CONSUMABLE);
-      DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
-      ENABLE_QPRAY: Minimap.EnablePrayer();
-      ALCH_DROP: RSAlchHandler.CastAlchemy(True, True);
-      EQUIP_BRACELET: CombatHandler.EquipBracelet();
-      END_SCRIPT: Break;
+      EKrakenState.WALK_BRIDGE: RSW.WebWalk(Bridge, 5, 0.2);
+      EKrakenState.WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
+      EKrakenState.CHECK_LOOT: Self.CheckLoot();
+      EKrakenState.WAKE_KRAKEN: Self.WakeKraken();
+      EKrakenState.ATTACK_KRAKEN: IsAttacking := Self.AttackKraken();
+      EKrakenState.BOOST: Self.BoostMagic();
+      EKrakenState.EAT_FOOD: Inventory.Consume(FOOD_CONSUMABLE);
+      EKrakenState.DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
+      EKrakenState.ENABLE_QPRAY: Minimap.EnablePrayer();
+      EKrakenState.ALCH_DROP: RSAlchHandler.CastAlchemy(True, True);
+      EKrakenState.EQUIP_BRACELET: CombatHandler.EquipBracelet();
+      EKrakenState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban(True, False);

@@ -827,33 +827,48 @@ begin
   NMZFighter.CofferChecked := False;
 end;
 
-//override to move the camera less.
-function TRSObject._HoverHelper(Attempts: Int32): Boolean; override;
+function TRSObject._HoverHelper(attempts: Int32; trackTarget: Boolean): Boolean; override;
 var
-  Attempt: Int32;
-  ATPA: T2DPointArray;
-  Points: TPointArray;
+  shouldExit: Boolean;
+  attempt: Int32;
+  atpa: T2DPointArray;
+  tpa: TPointArray;
+  angle: Double;
 begin
-  for Attempt := 0 to Attempts do
+  Result := Self._UpTextCheck(shouldExit);
+  if shouldExit then
+    Exit;
+
+  for attempt := 0 to attempts do
   begin
-    if Filter.UpText and MainScreen.IsUpText(UpText) then
+    if Self.Find(atpa) then
+    begin
+      if attempt < 2 then
+        tpa := atpa[0] // 0 for the closest one.
+      else if Length(atpa) > (attempt - 2) then
+        tpa := atpa[attempt - 2]
+      else
+        tpa := atpa[Random(0, High(atpa))];
+
+      if trackTarget then
+        Mouse.OnMovingEx := @Self._UpdateTarget;
+      Mouse.Move(tpa[Random(0, High(tpa))]);
+
+      if not Self.Filter.UpText then
+        Exit(True);
+    end
+    else
+      Exit;
+
+    if MainScreen.IsUpText(Self.UpText) then
       Exit(True);
 
-    if Self.Find(ATPA) then
+    //will rotate the screen for the last attempt if hasn't hovered properly yet
+    if attempt = (attempts - 1) then
     begin
-      if Attempt < 2 then
-        Points := ATPA[0] // 0 for the closest one.
-      else
-        Points := ATPA[Random(0, High(ATPA))];
-
-      if Points <> [] then
-      begin
-        Mouse.Move(Points[Random(0, High(Points))]);
-        if not Filter.UpText then
-          Exit(True);
-      end;
-    end
-    else Exit(False);
+      angle := Minimap.GetCompassAngle() + Random(-50, 50);
+      Minimap.SetCompassAngle(angle, 10);
+    end;
   end;
 end;
 
