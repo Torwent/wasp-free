@@ -91,11 +91,11 @@ var
   FinalTPA: TPointArray;
   MMDots: TPointArray;
 begin
-  MinimapTPA := Minimap.GetPolygon.Connect();
+  MinimapTPA := Minimap.GetPolygon().Connect();
   MinimapTPA.Fill();
   MinimapTPA := MinimapTPA.Erode(3);
 
-  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds);
+  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds());
 
   MMDots := Minimap.GetDots(ERSMinimapDot.NPC).Offset(2, 2);
   MMDots := MMDots.Grow(2);
@@ -126,12 +126,13 @@ end;
 
 function TChompyHunter.FillToad(): Boolean;
 var
-  InvCount := Inventory.Count;
+  count: Int32;
 begin
-  if Toad.Click(True, 10) then
+  count := Inventory.Count();
+  if Self.Toad.Click(True, 10) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(InvCount < Inventory.Count, 100, 5000);
+    Result := WaitUntil(count < Inventory.Count(), 300, 5000);
   end;
 
   if Result then
