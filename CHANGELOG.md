@@ -1,3 +1,12 @@
+## [2.7.11](https://github.com/Torwent/wasp-free/compare/v2.7.10...v2.7.11) (2023-09-20)
+
+
+### Bug Fixes
+
+* **chompy hunter:** tweaks so the script behaves a tiny bit better ([a1e5849](https://github.com/Torwent/wasp-free/commit/a1e5849f6110b3b99d5e854d40e76101e255ba2e))
+
+
+
 ## [2.7.10](https://github.com/Torwent/wasp-free/compare/v2.7.9...v2.7.10) (2023-09-18)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** refactor ([5627953](https://github.com/Torwent/wasp-free/commit/5627953b29b0be299826f9fa27d4bb44348093e2))
-
-
-
-## [2.7.6](https://github.com/Torwent/wasp-free/compare/v2.7.5...v2.7.6) (2023-09-12)
-
-
-### Bug Fixes
-
-* **builder:** typos ([89f11ff](https://github.com/Torwent/wasp-free/commit/89f11ff9b1b6eb3cbd6e3dd0aa389e8f1f111570))
 
 
 
