@@ -81,7 +81,7 @@ begin
   if not Magic.Open then
     Exit;
 
-  if Magic.MouseSpell(AlchSpell, MOUSE_RIGHT) and ChooseOption.IsOpen then
+  if Magic.ClickSpell(AlchSpell) and ChooseOption.IsOpen()  then
     ChooseOption.Select('Warnings');
 
   WaitUntil(Chat.HasContinue(), 50, 2000);
