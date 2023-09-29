@@ -1,3 +1,12 @@
+## [2.8.2](https://github.com/Torwent/wasp-free/compare/v2.8.1...v2.8.2) (2023-09-29)
+
+
+### Bug Fixes
+
+* **tab maker:** typo ([df11a6d](https://github.com/Torwent/wasp-free/commit/df11a6d72c324f58919b8d581d53b0c44f13cd66))
+
+
+
 ## [2.8.1](https://github.com/Torwent/wasp-free/compare/v2.8.0...v2.8.1) (2023-09-29)
 
 
@@ -27,15 +36,6 @@
 ### Bug Fixes
 
 * **chompy hunter:** tweaks so the script behaves a tiny bit better ([a1e5849](https://github.com/Torwent/wasp-free/commit/a1e5849f6110b3b99d5e854d40e76101e255ba2e))
-
-
-
-## [2.7.10](https://github.com/Torwent/wasp-free/compare/v2.7.9...v2.7.10) (2023-09-18)
-
-
-### Bug Fixes
-
-* **nmz:** nmz compiles again ([769fd98](https://github.com/Torwent/wasp-free/commit/769fd98966164a588dbc4245a2236fb6ae85bc03))
 
 
 
