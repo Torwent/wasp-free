@@ -266,6 +266,9 @@ begin
     if not Self.UsePhials or Inventory.IsFull() then
       Exit(ETabMakerState.ENTER_HOUSE);
 
+    if not Inventory.Contains(Self.NotedSoftClay) then
+      Exit(ETabMakerState.END_SCRIPT);
+
     Exit(ETabMakerState.TALK_TO_PHIALS);
   end;
 
