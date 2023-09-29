@@ -42,7 +42,6 @@ type
 
   TBuilder = record(TBaseWalkerScript)
     State: EBuilderState;
-    POH: TRSWalker;
 
     BuiltFurniture, FurnitureSpace: TRSObject;
     ServantNPC: TRSNPC;
@@ -100,28 +99,28 @@ procedure TBuilder.SetupObjects();
 begin
   if CurrentFurniture = ERSFurniture.MYTH_CAPE then
   begin
-    BuiltFurniture.Setup(0.3, 4, [[3603, 139]]);
-    BuiltFurniture.Setup(['Teleport']);
-    BuiltFurniture.Filter.Finder := False;
-    BuiltFurniture.Filter.UpText := False;
+    Self.BuiltFurniture.Setup(0.3, 4, [[3603, 139]]);
+    Self.BuiltFurniture.Setup(['Teleport']);
+    Self.BuiltFurniture.Filter.Finder := False;
+    Self.BuiltFurniture.Filter.UpText := False;
 
-    FurnitureSpace.Setup(0.3, 4, [[3603, 139]]);
-    FurnitureSpace.Setup(['2 more']);
-    FurnitureSpace.Filter.Finder := False;
-    FurnitureSpace.Filter.UpText := False;
+    Self.FurnitureSpace.Setup(0.3, 4, [[3603, 139]]);
+    Self.FurnitureSpace.Setup(['2 more']);
+    Self.FurnitureSpace.Filter.Finder := False;
+    Self.FurnitureSpace.Filter.UpText := False;
 
     Exit;
   end;
 
-  BuiltFurniture.Setup(1.5, 7, [[3600, 115]]);
-  BuiltFurniture.Setup(['Larder']);
-  BuiltFurniture.Filter.Finder := False;
-  BuiltFurniture.Filter.UpText := False;
+  Self.BuiltFurniture.Setup(1.5, 7, [[3600, 115]]);
+  Self.BuiltFurniture.Setup(['Larder']);
+  Self.BuiltFurniture.Filter.Finder := False;
+  Self.BuiltFurniture.Filter.UpText := False;
 
-  FurnitureSpace.Setup(1.5, 7, [[3600, 115]]);
-  FurnitureSpace.Setup(['2 more']);
-  FurnitureSpace.Filter.Finder := False;
-  FurnitureSpace.Filter.UpText := False;
+  Self.FurnitureSpace.Setup(1.5, 7, [[3600, 115]]);
+  Self.FurnitureSpace.Setup(['2 more']);
+  Self.FurnitureSpace.Filter.Finder := False;
+  Self.FurnitureSpace.Filter.UpText := False;
 end;
 
 procedure TAntiban.Setup(); override;
@@ -156,11 +155,11 @@ begin
 
   if WLSettings.RemoteInput.HUDDebug then
   begin
-    DebugObjectArray += BuiltFurniture;
-    DebugObjectArray += FurnitureSpace;
+    DebugObjectArray += Self.BuiltFurniture;
+    DebugObjectArray += Self.FurnitureSpace;
     DebugObjectArray += RSObjects.POHPortal;
     DebugMMDotArray += RSNPCs.Phials;
-    DebugMMDotArray += ServantNPC;
+    DebugMMDotArray += Self.ServantNPC;
   end;
 end;
 
@@ -187,7 +186,7 @@ begin
     Mouse.Move(tpa);
   end;
 
-  if FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu']) then
+  if Self.FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu']) then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(MainScreen.IsClassicOpen(), 200, 5000);
@@ -216,7 +215,7 @@ begin
     Mouse.Move(tpa);
   end;
 
-  if BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My']) then
+  if Self.BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My']) then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(Chat.GetChatTitle() = 'Really remove it?', 200, 3000);
@@ -237,10 +236,10 @@ end;
 
 function TBuilder.CallServant(): Boolean;
 begin
-  if ServantNPC.Click then
+  if Self.ServantNPC.Click() then
   begin
-    Minimap.WaitMoving;
-    Result := WaitUntil(Chat.GetChatTitle = 'Repeat last task?',
+    Minimap.WaitMoving();
+    Result := WaitUntil(Chat.GetChatTitle() = 'Repeat last task?',
                         SRL.TruncatedGauss(50, 1500), 5000);
   end
   else
@@ -262,13 +261,13 @@ end;
 
 function TBuilder.TalkServant(): Boolean;
 begin
-  if ServantNPC.Click then
+  if Self.ServantNPC.Click() then
   begin
-    Minimap.WaitMoving;
-    Result := WaitUntil(Inventory.IsFull, 100, 5000);
+    Minimap.WaitMoving();
+    Result := WaitUntil(Inventory.IsFull(), 100, 5000);
   end;
 
-  WaitingServant := not Result;
+  Self.WaitingServant := not Result;
 end;
 
 
@@ -298,7 +297,7 @@ begin
   Result := Chat.ClickOption('Fetch', BioHash);
   if Result then
   begin
-    WaitingServant := True;
+    Self.WaitingServant := True;
     WaitUntil(Chat.GetChatTitle() <> 'Repeat last task?', 200, 3000)
   end;
 end;
@@ -306,7 +305,7 @@ end;
 function TBuilder.HandleBuildChat(): Boolean;
 begin
   if Chat.ClickOption('Yes') then
-    Result := WaitUntil(Chat.GetChatTitle <> 'Really remove it?', 200, 3000);
+    Result := WaitUntil(Chat.GetChatTitle() <> 'Really remove it?', 200, 3000);
 
   if Result then
   begin
@@ -315,7 +314,7 @@ begin
     else
       Wait(100, 150);
 
-    FurnitureIsBuilt := not Result;
+    Self.FurnitureIsBuilt := not Result;
   end;
 end;
 
@@ -331,7 +330,7 @@ begin
     ERSFurniture.MYTH_CAPE: Keyboard.PressKey(VK_4);
   end;
 
-  Result := FurnitureIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
+  Result := Self.FurnitureIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
 
   XPBar.EarnedXP();
 
