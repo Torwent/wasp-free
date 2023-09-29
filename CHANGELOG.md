@@ -1,3 +1,12 @@
+## [2.8.1](https://github.com/Torwent/wasp-free/compare/v2.8.0...v2.8.1) (2023-09-29)
+
+
+### Bug Fixes
+
+* **tab maker:** added fail safe to running out of clay ([36dc3a2](https://github.com/Torwent/wasp-free/commit/36dc3a2896928c59bf3aa8d3e7ed18da6c76248c))
+
+
+
 # [2.8.0](https://github.com/Torwent/wasp-free/compare/v2.7.12...v2.8.0) (2023-09-29)
 
 
@@ -27,15 +36,6 @@
 ### Bug Fixes
 
 * **nmz:** nmz compiles again ([769fd98](https://github.com/Torwent/wasp-free/commit/769fd98966164a588dbc4245a2236fb6ae85bc03))
-
-
-
-## [2.7.9](https://github.com/Torwent/wasp-free/compare/v2.7.8...v2.7.9) (2023-09-16)
-
-
-### Bug Fixes
-
-* **nmz:** fix compilation issues with latest WaspLib ([b05b3b6](https://github.com/Torwent/wasp-free/commit/b05b3b6c48c9f22e4a64deb95c40b44450a9dada))
 
 
 
