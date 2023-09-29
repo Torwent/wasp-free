@@ -217,7 +217,7 @@ end;
 
 function TTabMaker.WaitTabs(): Boolean;
 begin
-  Result := XPBar.WaitXP(2600);
+  Result := XPBar.WaitXP(2800);
   Self.IsTabbing := Result;
 end;
 
@@ -266,7 +266,7 @@ begin
     if not Self.UsePhials or Inventory.IsFull() then
       Exit(ETabMakerState.ENTER_HOUSE);
 
-    if not Inventory.Contains(Self.NotedSoftClay) then
+    if not Inventory.ContainsItem(Self.NotedSoftClay) then
       Exit(ETabMakerState.END_SCRIPT);
 
     Exit(ETabMakerState.TALK_TO_PHIALS);
