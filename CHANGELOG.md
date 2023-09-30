@@ -1,3 +1,12 @@
+## [2.8.3](https://github.com/Torwent/wasp-free/compare/v2.8.2...v2.8.3) (2023-09-30)
+
+
+### Bug Fixes
+
+* **woodcutter:** added isle of souls and castle wars for teaks ([077f077](https://github.com/Torwent/wasp-free/commit/077f077c885f83dddf82e9dc8bc0c69bf752db6a))
+
+
+
 ## [2.8.2](https://github.com/Torwent/wasp-free/compare/v2.8.1...v2.8.2) (2023-09-29)
 
 
@@ -27,15 +36,6 @@
 ### Features
 
 * **tab_maker:** added new script ([73b1dab](https://github.com/Torwent/wasp-free/commit/73b1dabbfbb7bdc3831a6cc0dedf14756a6024da))
-
-
-
-## [2.7.11](https://github.com/Torwent/wasp-free/compare/v2.7.10...v2.7.11) (2023-09-20)
-
-
-### Bug Fixes
-
-* **chompy hunter:** tweaks so the script behaves a tiny bit better ([a1e5849](https://github.com/Torwent/wasp-free/commit/a1e5849f6110b3b99d5e854d40e76101e255ba2e))
 
 
 
