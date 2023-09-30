@@ -10,7 +10,8 @@ end;
 
 type
   ETreeLocation = (
-    VARROCK_WEST, VARROCK_EAST, EDGEVILLE, SEERS_VILLAGE, DRAYNOR_VILLAGE, WOODCUT_GUILD, PRIFDDINAS
+    VARROCK_WEST, VARROCK_EAST, EDGEVILLE, SEERS_VILLAGE, DRAYNOR_VILLAGE,
+    WOODCUT_GUILD, PRIFDDINAS, ISLE_OF_SOULS, CASTLE_WARS
   );
 
   ERSTree = (
@@ -182,6 +183,8 @@ begin
     ETreeLocation.VARROCK_WEST:    Self.RSW.Setup([RSRegions.VARROCK_WEST]);
     ETreeLocation.EDGEVILLE:       Self.RSW.Setup([RSRegions.EDGEVILLE]);
     ETreeLocation.PRIFDDINAS:      Self.RSW.Setup([RSRegions.PRIFDDINAS]);
+    ETreeLocation.ISLE_OF_SOULS:   Self.RSW.Setup([RSRegions.ISLE_OF_SOULS]);
+    ETreeLocation.CASTLE_WARS:     Self.RSW.Setup([RSRegions.CASTLE_WARS]);
     ETreeLocation.DRAYNOR_VILLAGE: Self.RSW.Setup([RSRegions.DRAYNOR_VILLAGE]);
     ETreeLocation.SEERS_VILLAGE:   Self.RSW.Setup([RSRegions.SEERS_VILLAGE]);
   end;
@@ -472,13 +475,15 @@ begin
   end;
 
   if Self.Woodcutting then
+  begin
+    if Self.CheckNest() then
+      Exit(EWoodcutterState.PICKUP_NEST);
+
     Exit(EWoodcutterState.WAIT_STATE);
+  end;
 
   if UseBank and not me.WithinDistance(Self.RSTree.Coordinates, 15) then
     Exit(EWoodcutterState.WALK_SPOT);
-
-  if Self.CheckNest() then
-    Exit(EWoodcutterState.PICKUP_NEST);
 
   if Minimap.IsSpecWeapon() and (Minimap.GetSpecLevel() = 100) then
     Exit(EWoodcutterState.USE_SPEC);
@@ -541,6 +546,8 @@ begin
     'Seers'' village':   TreeLocation := ETreeLocation.SEERS_VILLAGE;
     'Woodcutting guild': TreeLocation := ETreeLocation.WOODCUT_GUILD;
     'Prifddinas':        TreeLocation := ETreeLocation.PRIFDDINAS;
+    'Isle of souls':     TreeLocation := ETreeLocation.ISLE_OF_SOULS;
+    'Castle wars':      TreeLocation := ETreeLocation.CASTLE_WARS;
   end;
 
   PowerCut := Self.PowerCutState.IsChecked();
@@ -580,7 +587,7 @@ begin
                         'Varrock west', 'Varrock east', 'Woodcutting guild'
                       ]);
     ERSTree.WILLOW_TREE: Self.LocationSelector.AddItemArray(['Draynor']);
-    ERSTree.TEAK_TREE: Self.LocationSelector.AddItemArray(['Prifddinas']);
+    ERSTree.TEAK_TREE: Self.LocationSelector.AddItemArray(['Prifddinas', 'Isle of souls', 'Castle wars']);
     ERSTree.MAPLE_TREE: Self.LocationSelector.AddItemArray([
                   'Seers'' village', 'Woodcutting guild'
                 ]);
@@ -598,6 +605,23 @@ begin
   Self.LocationSelector.SetEnabled(Self.LocationSelector.ComboBox.getItems().getCount() > 1);
   Self.TreeLocationOnChange(Self.LocationSelector.ComboBox);
 end;
+
+procedure TCutterConfig._CheckBoxToggle(sender: TObject);
+var
+  checkbox: TCheckBox;
+begin
+  checkbox := sender;
+  if not checkbox.IsEnabled() then
+    Exit;
+  if not checkbox.IsChecked() then
+    Exit;
+
+  case checkbox.getName() of
+    'sawmill_checkbox': Self.PowerCutState.SetChecked(False);
+    'powercut_checkbox': Self.SawmillState.SetChecked(False);
+  end;
+end;
+
 
 procedure TCutterConfig.Run(); override;
 var
@@ -639,9 +663,11 @@ begin
   begin
     Create(tab);
     SetCaption('Powercut');
+    SetName('powercut');
     SetLeft(Self.TreeSelector.GetRight() + TControl.AdjustToDPI(15));
     SetTop(Self.TreeSelector.GetTop() + TControl.AdjustToDPI(15));
     SetChecked(PowerCut);
+    CheckBox.setOnChange(@Self._CheckBoxToggle);
   end;
 
   with Self.PickNestsState do
@@ -657,8 +683,10 @@ begin
   begin
     Create(tab);
     SetCaption('Sawmill');
+    SetName('sawmill');
     SetLeft(Self.PickNestsState.GetLeft());
     SetTop(Self.LocationSelector.GetBottom() + TControl.AdjustToDPI(30));
+    CheckBox.setOnChange(@Self._CheckBoxToggle);
   end;
 
   Self.CreateVersionPanel(tab);
