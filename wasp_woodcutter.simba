@@ -78,6 +78,8 @@ begin
 end;
 
 procedure TWoodcutter.SetupTree();
+var
+  p: TPoint;
 begin
   case CurrentTree of
     ERSTree.REGULAR_TREE:
@@ -149,6 +151,11 @@ begin
       end;
   end;
 
+  for p in Self.RSTree.Coordinates do
+    RSGroundItems.BirdNest.DotFilter.Setup([p.X, p.Y, 9], True);
+  RSGroundItems.BirdNest.ShapeArray.SetShape([1, 1, 1]);
+  RSGroundItems.BirdNest.Filter.Walker := True;
+
   Self.LogPrice := ItemData.GetAverage(Self.Logs);
 
   Self.DropList := [
@@ -165,12 +172,12 @@ begin
   end;
 
   Self.BankList += 'Bird nest';
-  Self.BankList += 23866;
-  Self.BankList += 23966;
-  Self.BankList += 23967;
-  Self.BankList += 23968;
-  Self.BankList += 23969;
-  Self.BankList += 23970;  //Crystal shards
+  Self.BankList += 'Clue nest (beginner)';
+  Self.BankList += 'Clue nest (easy)';
+  Self.BankList += 'Clue nest (medium)';
+  Self.BankList += 'Clue nest (hard)';
+  Self.BankList += 'Clue nest (elite)';
+  Self.BankList += 'Crystal shards';
 end;
 
 procedure TWoodcutter.SetupBank();
@@ -202,7 +209,7 @@ begin
   Self.SetupBank();
   Self.SetupTree();
 
-  GearOutfit := [
+  Self.GearOutfit := [
     'Lumberjack hat',
     'Lumberjack top',
     'Lumberjack legs',
@@ -227,13 +234,15 @@ end;
 
 function TWoodcutter.CutTree(): Boolean;
 begin
-  if RSTree.WalkClick() then
+  Result := RSTree.WalkClick();
+  if Result then
   begin
+    XPBar.EarnedXP();
     Self.TreeWalkerCoord := Self.RSW.MSToWorld(Mouse.Position(), Round(Self.RSTree.ShapeArray[0].Tile.Z/2));
     Minimap.WaitMoving();
-    Result := True;
     Self.Woodcutting := True;
     Self.TreeTimer.Restart();
+    Wait(1200, 1600);
   end;
 end;
 
@@ -274,12 +283,15 @@ end;
 
 function TWoodcutter.PickNest(): Boolean;
 var
+
   count: Int32;
 begin
   count := Inventory.Count();
+  if count >= 28 then
+    Exit;
   if RSGroundItems.BirdNest.Click(True, 0) then
   begin
-    Self.Woodcutting := False;
+    Self.TreeTimer.Timeout := GetTickCount();
     Minimap.WaitMoving();
     Result := WaitUntil(count < Inventory.Count(), 300, 8000);
   end;
@@ -556,7 +568,6 @@ begin
 
   inherited;
 end;
-
 
 procedure TCutterConfig.TreeLocationOnChange(sender: TObject);
 var
