@@ -1,3 +1,12 @@
+## [2.8.4](https://github.com/Torwent/wasp-free/compare/v2.8.3...v2.8.4) (2023-10-01)
+
+
+### Bug Fixes
+
+* **woodcutter:** should pick nests again ([935f722](https://github.com/Torwent/wasp-free/commit/935f722fb227f508d7a42dec5c32a01ff55a80f0))
+
+
+
 ## [2.8.3](https://github.com/Torwent/wasp-free/compare/v2.8.2...v2.8.3) (2023-09-30)
 
 
@@ -26,11 +35,6 @@
 
 
 # [2.8.0](https://github.com/Torwent/wasp-free/compare/v2.7.12...v2.8.0) (2023-09-29)
-
-
-### Bug Fixes
-
-* **alcher:** compatibility with latest SRL-T ([4037e19](https://github.com/Torwent/wasp-free/commit/4037e19b1e7900a532137287336c270e5de6fd3f))
 
 
 ### Features
