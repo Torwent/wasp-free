@@ -1,3 +1,12 @@
+## [2.8.5](https://github.com/Torwent/wasp-free/compare/v2.8.4...v2.8.5) (2023-10-03)
+
+
+### Bug Fixes
+
+* **enchanter:** compatibility fix with latest srl ([3a98f59](https://github.com/Torwent/wasp-free/commit/3a98f59007bf3893d2a3f36715d7fd40faa4b60c))
+
+
+
 ## [2.8.4](https://github.com/Torwent/wasp-free/compare/v2.8.3...v2.8.4) (2023-10-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **tab maker:** added fail safe to running out of clay ([36dc3a2](https://github.com/Torwent/wasp-free/commit/36dc3a2896928c59bf3aa8d3e7ed18da6c76248c))
-
-
-
-# [2.8.0](https://github.com/Torwent/wasp-free/compare/v2.7.12...v2.8.0) (2023-09-29)
-
-
-### Features
-
-* **tab_maker:** added new script ([73b1dab](https://github.com/Torwent/wasp-free/commit/73b1dabbfbb7bdc3831a6cc0dedf14756a6024da))
 
 
 
