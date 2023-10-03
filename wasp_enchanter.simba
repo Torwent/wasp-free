@@ -257,27 +257,6 @@ begin
   Self.Enchanting := Result;
 end;
 
-function TEnchanter.DeselectSpell(): Boolean;
-var
-  selected: ERSSpell;
-begin
-  if Magic.IsOpen() then
-  begin
-    selected := Magic.GetSelectedSpell();
-    if selected <> ERSSpell.UNKNOWN then
-    begin
-      Magic.MouseSpell(selected, MOUSE_LEFT);
-      Result := Magic.GetSelectedSpell() = ERSSpell.UNKNOWN;
-    end;
-  end
-  else if MainScreen.IsUpText('Cast') then
-  begin
-    ChooseOption.Open();
-    ChooseOption.Select('Cancel');
-  end;
-end;
-
-
 function TEnchanter.Deposit(): Boolean;
 var
   itemCount: Int32;
@@ -403,7 +382,7 @@ begin
       EEnchanterState.OPEN_INVENTORY: Inventory.Open();
       EEnchanterState.CAST_SPELL: Magic.CastSpell(SPELL);
       EEnchanterState.ENCHANT_JEWEL: Self.EnchantJewel();
-      EEnchanterState.CANCEL_SPELL: Self.DeselectSpell();
+      EEnchanterState.CANCEL_SPELL: Magic.Deselect();
 
       EEnchanterState.OUT_OF_SUPPLIES, EEnchanterState.END_SCRIPT: Break;
     end;
