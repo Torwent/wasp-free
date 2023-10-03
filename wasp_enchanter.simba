@@ -362,7 +362,7 @@ begin
 
   if Magic.IsOpen() then
   begin
-    if Self.Enchanting or Magic.IsSpellSelected(SPELL) then
+    if Self.Enchanting or Magic.IsSelected(SPELL) then
       Exit(OPEN_INVENTORY);
     Exit(CAST_SPELL);
   end;

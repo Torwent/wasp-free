@@ -152,7 +152,7 @@ begin
   end;
 
   for p in Self.RSTree.Coordinates do
-    RSGroundItems.BirdNest.DotFilter.Setup([p.X, p.Y, 9], True);
+    RSGroundItems.BirdNest.DotFilter.Setup([p.X, p.Y, 16], True);
   RSGroundItems.BirdNest.ShapeArray.SetShape([1, 1, 1]);
   RSGroundItems.BirdNest.Filter.Walker := True;
 
@@ -283,7 +283,6 @@ end;
 
 function TWoodcutter.PickNest(): Boolean;
 var
-
   count: Int32;
 begin
   count := Inventory.Count();
