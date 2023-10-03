@@ -1,3 +1,12 @@
+## [2.8.6](https://github.com/Torwent/wasp-free/compare/v2.8.5...v2.8.6) (2023-10-03)
+
+
+### Bug Fixes
+
+* **enchanter:** now fully supports the new magic methods ([6d7200b](https://github.com/Torwent/wasp-free/commit/6d7200b2e0d6e1b0a0e0d77d99f062fde434b6ab))
+
+
+
 ## [2.8.5](https://github.com/Torwent/wasp-free/compare/v2.8.4...v2.8.5) (2023-10-03)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **tab maker:** typo ([df11a6d](https://github.com/Torwent/wasp-free/commit/df11a6d72c324f58919b8d581d53b0c44f13cd66))
-
-
-
-## [2.8.1](https://github.com/Torwent/wasp-free/compare/v2.8.0...v2.8.1) (2023-09-29)
-
-
-### Bug Fixes
-
-* **tab maker:** added fail safe to running out of clay ([36dc3a2](https://github.com/Torwent/wasp-free/commit/36dc3a2896928c59bf3aa8d3e7ed18da6c76248c))
 
 
 
