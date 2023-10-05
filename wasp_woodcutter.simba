@@ -152,7 +152,10 @@ begin
   end;
 
   for p in Self.RSTree.Coordinates do
+  begin
+    RSGroundItems.BirdNest.Coordinates += p;
     RSGroundItems.BirdNest.DotFilter.Setup([p.X, p.Y, 16], True);
+  end;
   RSGroundItems.BirdNest.ShapeArray.SetShape([1, 1, 1]);
   RSGroundItems.BirdNest.Filter.Walker := True;
 
@@ -242,7 +245,7 @@ begin
     Minimap.WaitMoving();
     Self.Woodcutting := True;
     Self.TreeTimer.Restart();
-    Wait(1200, 1600);
+    Wait(2400, 3200);
   end;
 end;
 
@@ -288,7 +291,8 @@ begin
   count := Inventory.Count();
   if count >= 28 then
     Exit;
-  if RSGroundItems.BirdNest.Click(True, 0) then
+
+  if RSGroundItems.BirdNest.Click(True, 1) then
   begin
     Self.TreeTimer.Timeout := GetTickCount();
     Minimap.WaitMoving();
