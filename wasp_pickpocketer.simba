@@ -17,7 +17,7 @@ type
 var
   PickedNPC: ENPC := ENPC.ELF;       //Use one of the above NPCs.
   SuicideMode: Boolean := True;      //Pickpocket until death. Useful if you respawn nearby.
-  DiaryLevel: Int32 := 3;
+  DiaryLevel: Int32 := 4;
   FoodAmount: Int32 := 10;
   NeckAmount: Int32 := 0;
   MinHealth: Int32 := 20;
@@ -375,7 +375,8 @@ begin
 
   Self.CheckRogueEquipment();
   Self.HasNeck := Equipment.ContainsItem(Necklace);
-  if Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
+
+  if Magic.Open() and Magic.ContainsSpell(ERSSpell.SHADOW_VEIL) then
   begin
     Self.UseShadowVeil := True;
     Magic.CastSpell(ERSSpell.SHADOW_VEIL);
