@@ -1,3 +1,12 @@
+## [2.8.8](https://github.com/Torwent/wasp-free/compare/v2.8.7...v2.8.8) (2023-10-09)
+
+
+### Bug Fixes
+
+* **pickpocketer:** should cast shadow veil again ([b9db050](https://github.com/Torwent/wasp-free/commit/b9db05096c8652b7f09d831c42c51ddc462e66dc))
+
+
+
 ## [2.8.7](https://github.com/Torwent/wasp-free/compare/v2.8.6...v2.8.7) (2023-10-05)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** should pick nests again ([935f722](https://github.com/Torwent/wasp-free/commit/935f722fb227f508d7a42dec5c32a01ff55a80f0))
-
-
-
-## [2.8.3](https://github.com/Torwent/wasp-free/compare/v2.8.2...v2.8.3) (2023-09-30)
-
-
-### Bug Fixes
-
-* **woodcutter:** added isle of souls and castle wars for teaks ([077f077](https://github.com/Torwent/wasp-free/commit/077f077c885f83dddf82e9dc8bc0c69bf752db6a))
 
 
 
