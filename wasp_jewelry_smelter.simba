@@ -221,7 +221,7 @@ begin
 end;
 
 
-procedure TJewelryCrafter.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TJewelryCrafter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -382,7 +382,7 @@ begin
   Result := inherited;
 end;
 
-procedure TJewelryCrafter.Run(maxActions: Int32; maxTime: Int64);
+procedure TJewelryCrafter.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

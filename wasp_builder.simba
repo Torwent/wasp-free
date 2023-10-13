@@ -132,7 +132,7 @@ begin
   inherited;
 end;
 
-procedure TBuilder.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TBuilder.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -419,7 +419,7 @@ begin
   Exit(EBuilderState.CALL_SERVANT);
 end;
 
-procedure TBuilder.Run(maxActions: Int32; maxTime: Int64);
+procedure TBuilder.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

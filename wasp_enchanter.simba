@@ -222,7 +222,7 @@ begin
   Self.EnchantedJewel := TRSBankItem.Setup(enchantedItem, Bank.QUANTITY_ALL, False);
 end;
 
-procedure TEnchanter.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TEnchanter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
   Self.RSW.SetupNamedRegion();
@@ -357,7 +357,7 @@ begin
         Break;
 end;
 
-procedure TEnchanter.Run(maxActions: Int32; maxTime: Int64);
+procedure TEnchanter.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

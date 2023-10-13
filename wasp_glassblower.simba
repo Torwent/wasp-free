@@ -113,7 +113,7 @@ begin
   Self.ItemChanged := False;
 end;
 
-procedure TBlower.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TBlower.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
   Self.RSW.SetupNamedRegion();
@@ -311,7 +311,7 @@ begin
         Break;
 end;
 
-procedure TBlower.Run(maxActions: Int32; maxTime: Int64);
+procedure TBlower.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

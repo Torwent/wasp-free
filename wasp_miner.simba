@@ -209,7 +209,7 @@ begin
   end;
 end;
 
-procedure TMiner.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TMiner.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -366,7 +366,7 @@ begin
   Exit(EMinerState.MINE_ROCK);
 end;
 
-procedure TMiner.Run(maxActions: Int32; maxTime: Int64);
+procedure TMiner.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

@@ -83,7 +83,7 @@ begin
   StallCooldown.Timeout := GetTickCount();
 end;
 
-procedure TStallRobber.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TStallRobber.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -149,7 +149,7 @@ begin
     Exit(FIND_STALL);
 end;
 
-procedure TStallRobber.Run(maxActions: Int32; maxTime: Int64);
+procedure TStallRobber.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

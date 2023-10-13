@@ -350,7 +350,7 @@ begin
     StackableArray += Item; //Adding Self.RogueEquipment to the non banking item list
 end;
 
-procedure TThiever.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TThiever.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -770,7 +770,7 @@ begin
   Exit(PICKPOCKET);
 end;
 
-procedure TThiever.Run(maxActions: Int32; maxTime: Int64);
+procedure TThiever.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

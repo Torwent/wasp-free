@@ -102,7 +102,7 @@ begin
   Self.ActionProfit -= ItemData.GetAverage(Self.AltRune.Item);
 end;
 
-procedure TRemainOfferer.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TRemainOfferer.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
   Self.RSW.SetupNamedRegion();
@@ -230,7 +230,7 @@ begin
   Exit(EOffererState.WAIT_STATE);
 end;
 
-procedure TRemainOfferer.Run(maxActions: Int32; maxTime: Int64);
+procedure TRemainOfferer.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

@@ -201,7 +201,7 @@ begin
   Self.DispenserFull := True;
 end;
 
-procedure TBlastFurnace.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TBlastFurnace.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -841,7 +841,7 @@ begin
   Exit(EBFState.OPEN_BANK);
 end;
 
-procedure TBlastFurnace.Run(maxActions: Int32; maxTime: Int64);
+procedure TBlastFurnace.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

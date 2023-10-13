@@ -164,7 +164,7 @@ begin
 end;
 
 
-procedure TSmelter.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TSmelter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -361,7 +361,7 @@ begin
         Break;
 end;
 
-procedure TSmelter.Run(maxActions: Int32; maxTime: Int64);
+procedure TSmelter.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

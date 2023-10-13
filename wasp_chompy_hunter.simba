@@ -35,7 +35,7 @@ begin
   inherited;
 end;
 
-procedure TChompyHunter.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TChompyHunter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -187,7 +187,7 @@ begin
   Exit(FILL_BELLOWS);
 end;
 
-procedure TChompyHunter.Run(maxActions: Int32; maxTime: Int64);
+procedure TChompyHunter.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

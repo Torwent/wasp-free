@@ -205,7 +205,7 @@ begin
 end;
 
 
-procedure TWoodcutter.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TWoodcutter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -505,7 +505,7 @@ begin
   Exit(EWoodcutterState.CUT_TREE);
 end;
 
-procedure TWoodcutter.Run(maxActions: Int32; maxTime: Int64);
+procedure TWoodcutter.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

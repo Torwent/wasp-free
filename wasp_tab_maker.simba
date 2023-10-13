@@ -101,7 +101,7 @@ begin
   inherited;
 end;
 
-procedure TTabMaker.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TTabMaker.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -291,7 +291,7 @@ begin
   Exit(ETabMakerState.CALL_SERVANT);
 end;
 
-procedure TTabMaker.Run(maxActions: Int32; maxTime: Int64);
+procedure TTabMaker.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

@@ -71,7 +71,7 @@ begin
   inherited;
 end;
 
-procedure TKrakenKiller.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TKrakenKiller.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -292,7 +292,7 @@ begin
     Exit(EKrakenState.WAKE_KRAKEN);
 end;
 
-procedure TKrakenKiller.Run(maxActions: Int32; maxTime: Int64);
+procedure TKrakenKiller.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 

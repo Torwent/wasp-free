@@ -149,7 +149,7 @@ begin
   inherited;
 end;
 
-procedure TCooker.Init(maxActions: Int32; maxTime: Int64); override;
+procedure TCooker.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
@@ -305,7 +305,7 @@ begin
         Break;
 end;
 
-procedure TCooker.Run(maxActions: Int32; maxTime: Int64);
+procedure TCooker.Run(maxActions: UInt32; maxTime: UInt64);
 begin
   Self.Init(maxActions, maxTime);
 
