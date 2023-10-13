@@ -1,3 +1,12 @@
+## [2.8.9](https://github.com/Torwent/wasp-free/compare/v2.8.8...v2.8.9) (2023-10-13)
+
+
+### Bug Fixes
+
+* compatibility fix with latest WaspLib ([8394561](https://github.com/Torwent/wasp-free/commit/8394561c058f832850aac5300a08be09d07ce8d6))
+
+
+
 ## [2.8.8](https://github.com/Torwent/wasp-free/compare/v2.8.7...v2.8.8) (2023-10-09)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** compatibility fix with latest srl ([3a98f59](https://github.com/Torwent/wasp-free/commit/3a98f59007bf3893d2a3f36715d7fd40faa4b60c))
-
-
-
-## [2.8.4](https://github.com/Torwent/wasp-free/compare/v2.8.3...v2.8.4) (2023-10-01)
-
-
-### Bug Fixes
-
-* **woodcutter:** should pick nests again ([935f722](https://github.com/Torwent/wasp-free/commit/935f722fb227f508d7a42dec5c32a01ff55a80f0))
 
 
 
