@@ -97,30 +97,33 @@ end;
 
 procedure TBuilder.SetupObjects();
 begin
-  if CurrentFurniture = ERSFurniture.MYTH_CAPE then
-  begin
-    Self.BuiltFurniture.Setup(0.3, 4, [[3603, 139]]);
-    Self.BuiltFurniture.Setup(['Teleport']);
-    Self.BuiltFurniture.Filter.Finder := False;
-    Self.BuiltFurniture.Filter.UpText := False;
 
-    Self.FurnitureSpace.Setup(0.3, 4, [[3603, 139]]);
-    Self.FurnitureSpace.Setup(['2 more']);
-    Self.FurnitureSpace.Filter.Finder := False;
-    Self.FurnitureSpace.Filter.UpText := False;
+  case CurrentFurniture of
+  ERSFurniture.MYTH_CAPE:
+    begin
+      Self.BuiltFurniture.Setup(0.3, 4, [[3604, 139]]);
+      Self.BuiltFurniture.Setup(['Teleport']);
+      Self.BuiltFurniture.Filter.Finder := False;
 
-    Exit;
+      Self.FurnitureSpace.Setup(0.3, 4, [[3604, 139]]);
+      Self.FurnitureSpace.Setup(['2 more']);
+      Self.FurnitureSpace.Filter.Finder := False;
+      Self.FurnitureSpace.Filter.UpText := False;
+    end;
+
+  ERSFurniture.REGULAR_LARDER, ERSFurniture.OAK_LARDER:
+    begin
+      Self.BuiltFurniture.Setup(1.5, 7, [[3600, 115]]);
+      Self.BuiltFurniture.Setup(['Larder']);
+      Self.BuiltFurniture.Filter.Finder := False;
+      Self.BuiltFurniture.Filter.UpText := False;
+
+      Self.FurnitureSpace.Setup(1.5, 7, [[3600, 115]]);
+      Self.FurnitureSpace.Setup(['2 more']);
+      Self.FurnitureSpace.Filter.Finder := False;
+      Self.FurnitureSpace.Filter.UpText := False;
+    end;
   end;
-
-  Self.BuiltFurniture.Setup(1.5, 7, [[3600, 115]]);
-  Self.BuiltFurniture.Setup(['Larder']);
-  Self.BuiltFurniture.Filter.Finder := False;
-  Self.BuiltFurniture.Filter.UpText := False;
-
-  Self.FurnitureSpace.Setup(1.5, 7, [[3600, 115]]);
-  Self.FurnitureSpace.Setup(['2 more']);
-  Self.FurnitureSpace.Filter.Finder := False;
-  Self.FurnitureSpace.Filter.UpText := False;
 end;
 
 procedure TAntiban.Setup(); override;
@@ -181,7 +184,7 @@ begin
   if Self.LastPoint <> [0, 0] then
   begin
     tpa := [Self.LastPoint];
-    tpa := tpa.Grow(8);
+    tpa := tpa.Grow(4);
 
     Mouse.Move(tpa);
   end;
