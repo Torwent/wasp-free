@@ -1,3 +1,12 @@
+## [2.8.12](https://github.com/Torwent/wasp-free/compare/v2.8.11...v2.8.12) (2023-10-15)
+
+
+### Bug Fixes
+
+* **offerer:** temp fix for the bank opening every spell ([d1d0878](https://github.com/Torwent/wasp-free/commit/d1d08789602a20ba3ca44082884ecfec8b2a64bd))
+
+
+
 ## [2.8.11](https://github.com/Torwent/wasp-free/compare/v2.8.10...v2.8.11) (2023-10-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** should cast shadow veil again ([b9db050](https://github.com/Torwent/wasp-free/commit/b9db05096c8652b7f09d831c42c51ddc462e66dc))
-
-
-
-## [2.8.7](https://github.com/Torwent/wasp-free/compare/v2.8.6...v2.8.7) (2023-10-05)
-
-
-### Bug Fixes
-
-* **woodcutter:** more bird nest tweaks ([530b734](https://github.com/Torwent/wasp-free/commit/530b73497be783b9e72ea39507c0ff46bb3b4451))
 
 
 
