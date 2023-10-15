@@ -1,3 +1,12 @@
+## [2.8.11](https://github.com/Torwent/wasp-free/compare/v2.8.10...v2.8.11) (2023-10-15)
+
+
+### Bug Fixes
+
+* **builder:** fix attempts for myth cape ([2527d80](https://github.com/Torwent/wasp-free/commit/2527d802b4f2d460fd29c2a9424d839b923c58e7))
+
+
+
 ## [2.8.10](https://github.com/Torwent/wasp-free/compare/v2.8.9...v2.8.10) (2023-10-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** more bird nest tweaks ([530b734](https://github.com/Torwent/wasp-free/commit/530b73497be783b9e72ea39507c0ff46bb3b4451))
-
-
-
-## [2.8.6](https://github.com/Torwent/wasp-free/compare/v2.8.5...v2.8.6) (2023-10-03)
-
-
-### Bug Fixes
-
-* **enchanter:** now fully supports the new magic methods ([6d7200b](https://github.com/Torwent/wasp-free/commit/6d7200b2e0d6e1b0a0e0d77d99f062fde434b6ab))
 
 
 
