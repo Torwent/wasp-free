@@ -280,8 +280,10 @@ end;
 
 
 function TWoodcutter.CheckNest(): Boolean;
+var
+  atpa: T2DPointArray;
 begin
-  Result := PickNests and RSGroundItems.BirdNest.IsVisible();
+  Result := PickNests and RSGroundItems.BirdNest.Find(atpa);
 end;
 
 function TWoodcutter.PickNest(): Boolean;
@@ -386,10 +388,24 @@ begin
   searchBox := cuboid.Bounds();
   atpa := MainScreen.FindObject(Self.RSTree.Finder, searchBox);
   if atpa = [] then
+  begin
+    {$IFNDEF SRL_DISABLE_REMOTEINPUT}
+    RSClient.Clear(MainScreen.Bounds().Expand(-20));
+    {$ENDIF}
     Exit;
+  end;
 
-  tpa := atpa.Merge();
-  Result := cuboid.Filter(tpa) <> [];
+  tpa := cuboid.Filter(atpa.Merge());
+  Result := tpa <> [];
+
+  {$IFNDEF SRL_DISABLE_REMOTEINPUT}
+  RSClient.Clear(MainScreen.Bounds().Expand(-20));
+  if Result then
+  begin
+    RSClient.DrawCuboid(cuboid, $FFFFFF);
+    RSClient.DrawTPA(tpa);
+  end;
+  {$ENDIF}
 end;
 
 function TWoodcutter.IsCutting(): Boolean;
