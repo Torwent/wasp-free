@@ -125,9 +125,9 @@ end;
 function TRemainOfferer.CastSpell(): Boolean;
 begin
   Result := Magic.CastSpell(Self.OfferSpell);
-  if Result then
+  if True then
   begin
-    SpellCooldown.Restart(RandomLeft(0, 2500));
+    Self.SpellCooldown.Restart(RandomLeft(0, 2500));
     Self.RemainsLeft -= 3;
     Self.TotalActions += 1;
     Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
