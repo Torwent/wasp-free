@@ -28,6 +28,7 @@ type
     DESTROY_FURNITURE,
     HANDLE_BUILD_CHAT,
     HANDLE_PIN,
+    CLOSE_INTERFACE,
 
     GET_PLANKS,
     HANDLE_PHIALS_CHAT,
@@ -418,6 +419,9 @@ begin
   begin
     if BankPin.IsOpen() then
       Exit(EBuilderState.HANDLE_PIN);
+
+    if not Minimap.InPOH() then
+      Exit(EBuilderState.CLOSE_INTERFACE);
     Exit(EBuilderState.HANDLE_FURNITURE_UI);
   end;
 
@@ -477,6 +481,7 @@ begin
       EBuilderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
       EBuilderState.HANDLE_SERVANT: Self.HandleServant();
       EBuilderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
+      EBuilderState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       EBuilderState.CALL_SERVANT: Self.CallServant();
       EBuilderState.TALK_SERVANT: Self.TalkServant();
