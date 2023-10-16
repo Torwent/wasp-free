@@ -1,3 +1,12 @@
+## [2.9.1](https://github.com/Torwent/wasp-free/compare/v2.9.0...v2.9.1) (2023-10-16)
+
+
+### Bug Fixes
+
+* **builder:** added failsafe to house advertisement UI being open by accident ([bbcaf64](https://github.com/Torwent/wasp-free/commit/bbcaf641f63e5e8882176dd1ede19f4e8da72306))
+
+
+
 # [2.9.0](https://github.com/Torwent/wasp-free/compare/v2.8.12...v2.9.0) (2023-10-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** better visual debugging ([4cd0380](https://github.com/Torwent/wasp-free/commit/4cd038068c621bd63759b8dabdbea985c9e4c3df))
-
-
-
-## [2.8.9](https://github.com/Torwent/wasp-free/compare/v2.8.8...v2.8.9) (2023-10-13)
-
-
-### Bug Fixes
-
-* compatibility fix with latest WaspLib ([8394561](https://github.com/Torwent/wasp-free/commit/8394561c058f832850aac5300a08be09d07ce8d6))
 
 
 
