@@ -20,7 +20,6 @@ type
   EBuilderState = (
     LEVEL_UP,
     WAIT_STATE,
-
     EXIT_HOUSE,
     ENTER_HOUSE,
 
@@ -37,6 +36,7 @@ type
     TALK_SERVANT,
     HANDLE_SERVANT,
 
+    NO_ACTIVITY,
     END_SCRIPT
   );
 
@@ -97,18 +97,18 @@ end;
 
 procedure TBuilder.SetupObjects();
 begin
-
   case CurrentFurniture of
   ERSFurniture.MYTH_CAPE:
     begin
       Self.BuiltFurniture.Setup(0.3, 4, [[3604, 139]]);
       Self.BuiltFurniture.Setup(['Teleport']);
-      Self.BuiltFurniture.Filter.Finder := False;
+      Self.BuiltFurniture.Finder.Colors += CTS2(15198185, 9, 0.29, 0.68);
+      Self.BuiltFurniture.Finder.Colors += CTS2(13083513, 7, 0.03, 1.71);
+      Self.BuiltFurniture.Finder.Colors += CTS2(5799055, 10, 0.07, 0.85);
 
       Self.FurnitureSpace.Setup(0.3, 4, [[3604, 139]]);
       Self.FurnitureSpace.Setup(['2 more']);
-      Self.FurnitureSpace.Filter.Finder := False;
-      Self.FurnitureSpace.Filter.UpText := False;
+      Self.FurnitureSpace.Finder.Colors += CTS2(13293015, 14, 0.23, 0.37);
     end;
 
   ERSFurniture.REGULAR_LARDER, ERSFurniture.OAK_LARDER:
@@ -121,7 +121,6 @@ begin
       Self.FurnitureSpace.Setup(1.5, 7, [[3600, 115]]);
       Self.FurnitureSpace.Setup(['2 more']);
       Self.FurnitureSpace.Filter.Finder := False;
-      Self.FurnitureSpace.Filter.UpText := False;
     end;
   end;
 end;
@@ -167,6 +166,13 @@ begin
 end;
 
 
+function TBuilder.ContainsEnoughPlanks(): Boolean;
+begin
+  Result := (Inventory.CountItem(Self.Plank) + Self.PlankSackCount) >=
+            Self.MinPlankCount;
+end;
+
+
 function TBuilder.EnterHouse(): Boolean;
 begin
   if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
@@ -184,9 +190,7 @@ begin
   if Self.LastPoint <> [0, 0] then
   begin
     tpa := [Self.LastPoint];
-    tpa := tpa.Grow(4);
-
-    Mouse.Move(tpa);
+    Mouse.Move(tpa.Grow(6));
   end;
 
   if Self.FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu']) then
@@ -213,27 +217,24 @@ begin
   if Self.LastPoint <> [0, 0] then
   begin
     tpa := [Self.LastPoint];
-    tpa := tpa.Grow(8);
-
-    Mouse.Move(tpa);
+    Mouse.Move(tpa.Grow(6));
   end;
 
   if Self.BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(Chat.GetChatTitle() = 'Really remove it?', 200, 3000);
+    Exit(WaitUntil(Chat.GetChatTitle() = 'Really remove it?', 200, 3000));
+  end;
 
-  end
-  else if ChooseOption.HasOption(['Build La', 'Build Gu']) then
+  if ChooseOption.HasOption(['Build La', 'Build Gu']) or Inventory.ContainsItem('Mythical cape') then
   begin
     ChooseOption.Close();
     FurnitureIsBuilt := False;
-  end
-  else
-  begin
-    Antiban.RandomRotate();
-    Self.LastPoint := [0,0];
+    Exit;
   end;
+
+  Antiban.RandomRotate();
+  Self.LastPoint := [0,0];
 end;
 
 
@@ -306,9 +307,18 @@ begin
 end;
 
 function TBuilder.HandleBuildChat(): Boolean;
+var
+  tpa: TPointArray;
 begin
   if Chat.ClickOption('Yes') then
+  begin
+    if (Self.LastPoint <> [0, 0]) and Self.ContainsEnoughPlanks() then
+    begin
+      tpa := [Self.LastPoint];
+      ASyncMouse.Move(tpa.Grow(6));
+    end;
     Result := WaitUntil(Chat.GetChatTitle() <> 'Really remove it?', 200, 3000);
+  end;
 
   if Result then
   begin
@@ -324,6 +334,7 @@ end;
 function TBuilder.HandleFurniture(): Boolean;
 var
   count: Int32;
+  tpa: TPointArray;
 begin
   count := Inventory.CountItem(Self.Plank);
 
@@ -333,7 +344,14 @@ begin
     ERSFurniture.MYTH_CAPE: Keyboard.PressKey(VK_4);
   end;
 
-  Result := Self.FurnitureIsBuilt := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
+  if (Self.LastPoint <> [0, 0]) then
+  begin
+    tpa := [Self.LastPoint];
+    ASyncMouse.Move(tpa.Grow(6));
+  end;
+
+  Result := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
+  Self.FurnitureIsBuilt := Result;
 
   XPBar.EarnedXP();
 
@@ -353,13 +371,34 @@ begin
     MainScreen.CloseInterface();
 end;
 
+function TBuilder.HandlePhialsChat(): Boolean;
+var
+  slot: Int32;
+begin
+  Result := Chat.ClickOption('All');
+  if Result then
+  begin
+    if Self.UsePlankSack and (Self.PlankSackCount < Self.MinPlankCount) then
+    begin
+      if Inventory.FindItem('Plank sack', slot) then
+        AsyncMouse.Move(SRL.rowp(Mouse.Position(), Inventory.GetSlotBox(slot)));
+      Exit;
+    end;
+
+    RSObjects.POHPortal.PreHoverHelper(Self.RSW.GetMyPos());
+  end;
+end;
+
 
 function TBuilder.GetState(): EBuilderState;
 var
   s: String;
 begin
+  if Self.ShouldStop() then
+    Exit(EBuilderState.END_SCRIPT);
+
   if WL.Activity.IsFinished() then
-    Exit(END_SCRIPT);
+    Exit(EBuilderState.NO_ACTIVITY);
 
   if Chat.LeveledUp() then
     Exit(EBuilderState.LEVEL_UP);
@@ -403,7 +442,7 @@ begin
   if Self.FurnitureIsBuilt then
     Exit(EBuilderState.DESTROY_FURNITURE);
 
-  if (Inventory.CountItem(Self.Plank) + Self.PlankSackCount) >= Self.MinPlankCount then
+  if Self.ContainsEnoughPlanks() then
   begin
     Self.WaitingServant := False;
     Exit(EBuilderState.BUILD_FURNITURE);
@@ -434,7 +473,7 @@ begin
       EBuilderState.LEVEL_UP: Chat.HandleLevelUp();
 
       EBuilderState.HANDLE_BUILD_CHAT: Self.HandleBuildChat();
-      EBuilderState.HANDLE_PHIALS_CHAT: Chat.ClickOption('All');
+      EBuilderState.HANDLE_PHIALS_CHAT: Self.HandlePhialsChat();
       EBuilderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
       EBuilderState.HANDLE_SERVANT: Self.HandleServant();
       EBuilderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
@@ -451,11 +490,11 @@ begin
 
       EBuilderState.WAIT_STATE: Wait(7000, 8000);
 
-      END_SCRIPT: Break;
+      EBuilderState.NO_ACTIVITY, EBuilderState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();
-  until Self.ShouldStop();
+  until False;
 end;
 
 var
@@ -475,6 +514,54 @@ begin
 
   Bitmap.RotateBitmapEx(Minimap.GetCompassAngle(False), False, True, Result);
   Bitmap.Free();
+end;
+
+function TRSWalkerObject.FindOnMainScreen(cuboidArray: TCuboidExArray): T2DPointArray; override;
+var
+  i: Int32;
+  tpa: TPointArray;
+  tempFinder: TRSObjectFinder;
+begin
+  if (CurrentFurniture <> ERSFurniture.MYTH_CAPE) or
+     ((Self <> Builder.BuiltFurniture) and (Self <> Builder.FurnitureSpace)) then
+    Exit(inherited);
+
+  tempFinder := Self.Finder.Unlimited();
+  cuboidArray := MainScreen.Filter(cuboidArray);
+
+  {$IFNDEF SRL_DISABLE_REMOTEINPUT}
+  RSClient.Clear(MainScreen.Bounds().Expand(-20));
+  {$ENDIF}
+
+  for i := 0 to High(cuboidArray) do
+  begin
+    {$IFNDEF SRL_DISABLE_REMOTEINPUT}
+    RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
+    {$ENDIF}
+    tpa := MainScreen.FindObject(tempFinder, cuboidArray[i].Bounds()).Merge();
+    if tpa <> [] then
+    begin
+      tpa := cuboidArray[i].Filter(tpa);
+      if tpa <> [] then
+      begin
+        {$IFNDEF SRL_DISABLE_REMOTEINPUT}
+        RSClient.DrawTPA(tpa, $0000FF);
+        {$ENDIF}
+        Result += tpa;
+        Continue;
+      end;
+    end;
+
+    tpa := cuboidArray[i].ShapeFill();
+    if tpa <> [] then
+    begin
+      {$IFNDEF SRL_DISABLE_REMOTEINPUT}
+      RSClient.DrawTPA(tpa, $0000FF);
+      RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
+      {$ENDIF}
+      Result += tpa;
+    end;
+  end;
 end;
 
 function TRSWalkerObject._SelectHelper(action: TStringArray): Boolean; override;
@@ -502,93 +589,7 @@ begin
   Result := ChooseOption.Select(action, MOUSE_LEFT, True, (False));
 end;
 
-//TEMP OPTION FIXES
-function TRSOptions.IsHouseOptionsOpen(): Boolean; override;
-begin
-  Result := SRL.CountColor(CTS2(4630611, 23, 0.04, 0.79), Self.Bounds()) > 115;
-end;
-
-function TRSOptions.CallServant(): Boolean; override;
-var
-  s: String;
-  b: TBox;
-begin
-  if not Self.OpenHouseOptions() then
-    Exit;
-
-  b := Self.Bounds();
-
-  b.X1 += 9;
-  b.Y1 += 185;
-  b.X2 -= 9;
-  b.Y2 -= 50;
-
-  Mouse.Click(b, MOUSE_LEFT);
-  Result := WaitUntil(((s := Chat.GetChatTitle) = 'Demon butler') or
-                       (s = 'Repeat last task?'), SRL.TruncatedGauss(50, 1500), 5000);
-end;
-
-function TRSOptions.LeaveHouse(): Boolean; override;
-var
-  b: TBox;
-begin
-  if not Self.OpenHouseOptions() then
-    Exit;
-
-  b := Self.Bounds();
-
-  b.X1 += 9;
-  b.Y1 += 214;
-  b.X2 -= 9;
-  b.Y2 -= 21;
-
-  Mouse.Click(b, MOUSE_LEFT);
-  Result := WaitUntil(not Self.IsHouseOptionsOpen(), RandomLeft(50, 1500), 5000);
-end;
-
-function TRSBankPin.Enter(pin: String): Boolean; override;
-
-  function GetDigitToEnter(): Char;
-  begin
-    if OCR.LocateText(Self.Bounds, 'FIRST',  RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(pin[1]);
-    if OCR.LocateText(Self.Bounds, 'SECOND', RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(pin[2]);
-    if OCR.LocateText(Self.Bounds, 'THIRD',  RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(pin[3]);
-    if OCR.LocateText(Self.Bounds, 'FOURTH', RS_FONT_BOLD_12, TOCRColorFilter.Create([$FFFFFF]), 1) then Exit(pin[4]);
-  end;
-
-var
-  i: Int32;
-  digit: Char;
-begin
-  for 1 to 3 do // 3 Attempts
-  begin
-    for i := 1 to 4 do
-    begin
-      digit := GetDigitToEnter();
-      if digit = '' then
-        Break;
-
-      if not Self.ClickDigit(digit) then
-        Break;
-
-      Wait(1000, 2000, wdLeft);
-    end;
-
-    if 'try again' in Chat.GetChat() then
-    begin
-      Chat.ClickContinue(True);
-      Continue;
-    end;
-
-    if MainScreen.WaitLoadingPOH(5000) or Minimap.InPOH() then
-      Exit(True);
-  end;
-
-  Result := MainScreen.WaitLoadingPOH(5000) or Minimap.InPOH(); // wait 3 extra seconds before failing.
-end;
-
-
-procedure TRSMinimap.SetCompassAngle(Degrees: Double; Accuracy: Double = 5); override;
+procedure TRSMinimap.SetCompassAngle(degrees: Double; accuracy: Double = 5); override;
 begin
   if MainScreen.IsUpText('>') then
     ChooseOption.Select('Cancel');
@@ -596,11 +597,11 @@ begin
   inherited;
 end;
 
-procedure TSRL.Debug(Bitmap: TMufasaBitmap); override;
+procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
 begin
   inherited;
 
-  Builder.RSW.Draw(Bitmap);
+  Builder.RSW.Draw(bitmap);
 end;
 
 {$IFDEF SCRIPT_GUI}
