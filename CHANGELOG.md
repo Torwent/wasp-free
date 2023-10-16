@@ -1,3 +1,12 @@
+# [2.9.0](https://github.com/Torwent/wasp-free/compare/v2.8.12...v2.9.0) (2023-10-16)
+
+
+### Features
+
+* **builder:** read notes ([5c09518](https://github.com/Torwent/wasp-free/commit/5c09518874c2404d8ea5d9612975cf618cb6a8de))
+
+
+
 ## [2.8.12](https://github.com/Torwent/wasp-free/compare/v2.8.11...v2.8.12) (2023-10-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility fix with latest WaspLib ([8394561](https://github.com/Torwent/wasp-free/commit/8394561c058f832850aac5300a08be09d07ce8d6))
-
-
-
-## [2.8.8](https://github.com/Torwent/wasp-free/compare/v2.8.7...v2.8.8) (2023-10-09)
-
-
-### Bug Fixes
-
-* **pickpocketer:** should cast shadow veil again ([b9db050](https://github.com/Torwent/wasp-free/commit/b9db05096c8652b7f09d831c42c51ddc462e66dc))
 
 
 
