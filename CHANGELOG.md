@@ -1,3 +1,12 @@
+## [2.9.2](https://github.com/Torwent/wasp-free/compare/v2.9.1...v2.9.2) (2023-10-17)
+
+
+### Bug Fixes
+
+* **builder:** more fixes to builder ([31f529b](https://github.com/Torwent/wasp-free/commit/31f529bcfa5e620e43233ecbb909e18e5c84d62f))
+
+
+
 ## [2.9.1](https://github.com/Torwent/wasp-free/compare/v2.9.0...v2.9.1) (2023-10-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **builder:** fix attempts for myth cape ([2527d80](https://github.com/Torwent/wasp-free/commit/2527d802b4f2d460fd29c2a9424d839b923c58e7))
-
-
-
-## [2.8.10](https://github.com/Torwent/wasp-free/compare/v2.8.9...v2.8.10) (2023-10-15)
-
-
-### Bug Fixes
-
-* **woodcutter:** better visual debugging ([4cd0380](https://github.com/Torwent/wasp-free/commit/4cd038068c621bd63759b8dabdbea985c9e4c3df))
 
 
 
