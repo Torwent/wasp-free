@@ -175,8 +175,12 @@ end;
 
 
 function TBuilder.EnterHouse(): Boolean;
+var
+  portalOpen: Boolean;
 begin
-  if RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
+  portalOpen := 'house' in Chat.GetChat();
+
+  if (portalOpen and Chat.ClickOption('building')) or RSObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
   begin
     Minimap.WaitMoving();
     WaitUntil((BankPin.IsOpen() and BankPin.Enter(Login.GetPlayerPin())) or MainScreen.LoadingPOH(), 300, 10000);
@@ -422,7 +426,11 @@ begin
     Exit(EBuilderState.HANDLE_BUILD_CHAT);
 
   if s.Contains('Select') then
+  begin
+    if 'house' in Chat.GetChat() then
+      Exit(EBuilderState.ENTER_HOUSE);
     Exit(EBuilderState.HANDLE_PHIALS_CHAT);
+  end;
 
   if s.Contains('Repeat') then
     Exit(EBuilderState.HANDLE_SERVANT);
