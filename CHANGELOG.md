@@ -1,3 +1,12 @@
+## [2.9.4](https://github.com/Torwent/wasp-free/compare/v2.9.3...v2.9.4) (2023-10-22)
+
+
+### Bug Fixes
+
+* read notes ([02c65ad](https://github.com/Torwent/wasp-free/commit/02c65ad6d3105311202c1d58151fbccdecb161a6))
+
+
+
 ## [2.9.3](https://github.com/Torwent/wasp-free/compare/v2.9.2...v2.9.3) (2023-10-17)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * **builder:** read notes ([5c09518](https://github.com/Torwent/wasp-free/commit/5c09518874c2404d8ea5d9612975cf618cb6a8de))
-
-
-
-## [2.8.12](https://github.com/Torwent/wasp-free/compare/v2.8.11...v2.8.12) (2023-10-15)
-
-
-### Bug Fixes
-
-* **offerer:** temp fix for the bank opening every spell ([d1d0878](https://github.com/Torwent/wasp-free/commit/d1d08789602a20ba3ca44082884ecfec8b2a64bd))
 
 
 
