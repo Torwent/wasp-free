@@ -83,20 +83,20 @@ begin
   case CurrentFurnace of
     ERSFurnace.EDGEVILLE_FURNACE:
       begin
-        RSW.Setup([RSRegions.VARROCK]);
-        Furnace := RSObjects.EdgevilleFurnace;
+        Self.RSW.Setup([RSRegions.VARROCK]);
+        Self.Furnace := RSObjects.EdgevilleFurnace;
       end;
 
     ERSFurnace.FALADOR_FURNACE:
       begin
-        RSW.Setup([RSRegions.FALADOR]);
-        Furnace := RSObjects.FaladorFurnace;
+        Self.RSW.Setup([RSRegions.FALADOR]);
+        Self.Furnace := RSObjects.FaladorFurnace;
       end;
 
     ERSFurnace.PRIFDDINAS_FURNACE:
       begin
-        RSW.Setup([RSRegions.PRIFDDINAS]);
-        Furnace := RSObjects.FaladorFurnace;
+        Self.RSW.Setup([RSRegions.PRIFDDINAS]);
+        Self.Furnace := RSObjects.PrifddinasFurnace;
       end;
   end;
 end;
