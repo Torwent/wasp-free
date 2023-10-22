@@ -561,17 +561,17 @@ end;
 
 function TThiever.CastShadowVeil(): Boolean;
 begin
-  if not UseShadowVeil or not Magic.Open then
+  if not Self.UseShadowVeil or not Magic.Open() then
     Exit;
 
   if not Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
   begin
-    Result := UseShadowVeil := False;
+    Result := Self.UseShadowVeil := False;
     Exit(False);
   end;
 
   Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL);
-  ShadowVeilTimer.Restart(Random(-5000, 5000));
+  Self.ShadowVeilTimer.Restart(Random(-5000, 5000));
 end;
 
 function TThiever.PickNPC(): Boolean;
@@ -751,20 +751,20 @@ begin
       Exit(EAT_FOOD);
     if not SuicideMode then
       Exit(OPEN_BANK);
-    if not Self.RSW.AtTile(CurrentNPC.Coordinates, 40) then
+    if not Self.RSW.AtTile(Self.CurrentNPC.Coordinates, 40) then
       Exit(WALK_TO_NPC);
     if Self.UseRedemption and not Self.RedemptionEnabled then
       Exit(ENABLE_REDEMPTION);
-    if UseShadowVeil and ShadowVeilTimer.IsFinished() then
+    if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
       Exit(CAST_SHADOW_VEIL);
 
     Exit(PICKPOCKET);
   end;
 
-  if not Self.RSW.AtTile(CurrentNPC.Coordinates, 40) then
+  if not Self.RSW.AtTile(Self.CurrentNPC.Coordinates, 40) then
     Exit(WALK_TO_NPC);
 
-  if UseShadowVeil and ShadowVeilTimer.IsFinished() then
+  if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
     Exit(CAST_SHADOW_VEIL);
 
   Exit(PICKPOCKET);
@@ -775,8 +775,8 @@ begin
   Self.Init(maxActions, maxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case Self.State of
       OPEN_BANK: Bank.WalkOpen();
@@ -805,7 +805,9 @@ begin
       END_SCRIPT: Break;
     end;
 
+    Self.ShadowVeilTimer.Pause();
     Self.DoAntiban();
+    Self.ShadowVeilTimer.Resume();
   until Self.ShouldStop();
 end;
 

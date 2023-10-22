@@ -189,9 +189,30 @@ begin
   end;
 end;
 
-
 function TCooker.DoCooking(): Boolean;
+var
+  fire, tpa: TPointArray;
+  playerBox: TBox;
 begin
+  case CurrentLocation of
+    ERSLocation.ROGUES_DEN:
+      begin
+        playerBox := Box(Mainscreen.Center(), 100, 100);
+        if SRL.FindColors(tpa, CTS2(2730450, 13, 0.09, 1.45), playerBox) > 0 then
+          fire += tpa;
+        if SRL.FindColors(tpa, CTS2(15432, 1, 0.15, 0.01), playerBox) > 0 then
+          fire += tpa;
+
+        Mouse.Move(fire.Cluster(1).Biggest());
+        if Mainscreen.IsUpText(['Cook', 'Fire']) then
+        begin
+          Mouse.Click(MOUSE_LEFT);
+          Minimap.WaitPlayerMoving(300, 3000);
+          Exit(Make.IsOpen(4000));
+        end;
+      end;
+  end;
+
   if CookingObj.WalkSelectOption(['Cook', 'Fire']) then
   begin
     Minimap.WaitPlayerMoving(300, 3000);
