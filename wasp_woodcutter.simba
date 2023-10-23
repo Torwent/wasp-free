@@ -23,6 +23,7 @@ var
   CurrentTree: ERSTree := ERSTree.TEAK_TREE;
   TreeLocation: ETreeLocation := ETreeLocation.PRIFDDINAS;
   PowerCut: Boolean := True;
+  DoFletch: Boolean := False;
   UseSawmill: Boolean := True;
   PickNests: Boolean := True;
 
@@ -42,6 +43,7 @@ type
     USE_SPEC,
     CUT_TREE,
 
+    FLETCH,
     OPEN_SAWMILL,
     HANDLE_MAKE,
     FILL_PLANK_SACK,
@@ -55,7 +57,8 @@ type
 
     RSTree: TRSObject;
 
-    TreeWalkerCoord : TPoint;
+    TreeWalkerCoord: TPoint;
+    TreeCuboids: TCuboidExArray;
 
     Logs, Plank: TRSItem;
     LogPrice, PlankSawmillPrice, PlankPrice: Int32;
@@ -65,7 +68,7 @@ type
     GearOutfit, BankList, DropList: TRSItemArray;
     TreeTimer: TCountDown;
 
-    Woodcutting, UseBank, UsePlankSack, PlankSackFull: Boolean;
+    Woodcutting, IsFletching, UseBank, UsePlankSack, PlankSackFull: Boolean;
   end;
 
 procedure TAntiban.Setup(); override;
@@ -163,7 +166,8 @@ begin
 
   Self.DropList := [
     'Logs', 'Oak logs', 'Willow logs', 'Teak logs', 'Maple logs',
-    'Mahogany logs', 'Yew logs', 'Blisterwood logs', 'Magic logs'
+    'Mahogany logs', 'Yew logs', 'Blisterwood logs', 'Magic logs',
+    'Teak stock'
   ];
 
   Self.BankList := Self.DropList;
@@ -236,13 +240,17 @@ end;
 
 
 function TWoodcutter.CutTree(): Boolean;
+var
+  i: Int32;
 begin
   Result := RSTree.WalkClick();
   if Result then
   begin
-    XPBar.EarnedXP();
-    Self.TreeWalkerCoord := Self.RSW.MSToWorld(Mouse.Position(), Round(Self.RSTree.ShapeArray[0].Tile.Z/2));
+    for i := 0 to High(Self.TreeCuboids) do
+      if Self.TreeCuboids[i].Bounds().Contains(Mouse.Position) then
+        Self.TreeWalkerCoord := Self.RSW.MSToWorld(Self.TreeCuboids[i].Bottom.Mean(), 0);
     Minimap.WaitMoving();
+    XPBar.EarnedXP();
     Self.Woodcutting := True;
     Self.TreeTimer.Restart();
     Wait(2400, 3200);
@@ -303,6 +311,15 @@ begin
 end;
 
 
+function TWoodcutter.Fletch(): Boolean;
+begin
+  if Inventory.Use('Knife', Self.Logs) then
+    Result := Make.IsOpen(3000);
+
+  Self.IsFletching := Result;
+end;
+
+
 function TWoodcutter.OpenSawmill(): Boolean;
 begin
   if TreeLocation = ETreeLocation.PRIFDDINAS then
@@ -322,6 +339,15 @@ end;
 
 function TWoodcutter.MakePlanks(): Boolean;
 begin
+  if DoFletch then
+  begin
+    Self.IsFletching := False;
+    XPBar.EarnedXP();
+    if Make.Select(0, Make.QUANTITY_ALL, SRL.Dice(95)) then
+      Self.IsFletching := XPBar.WaitXP(4000);
+    Exit(Self.IsFletching);
+  end;
+
   if Make.Select(Self.SawmillString, Make.QUANTITY_ALL, SRL.Dice(95)) then
     Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 10000);
 
@@ -389,23 +415,19 @@ begin
   atpa := MainScreen.FindObject(Self.RSTree.Finder, searchBox);
   if atpa = [] then
   begin
-    {$IFNDEF SRL_DISABLE_REMOTEINPUT}
-    RSClient.Clear(MainScreen.Bounds().Expand(-20));
-    {$ENDIF}
+    RSClient.Clear(MainScreen.Bounds());
     Exit;
   end;
 
   tpa := cuboid.Filter(atpa.Merge());
   Result := tpa <> [];
 
-  {$IFNDEF SRL_DISABLE_REMOTEINPUT}
-  RSClient.Clear(MainScreen.Bounds().Expand(-20));
+  RSClient.Clear(MainScreen.Bounds());
   if Result then
   begin
     RSClient.DrawCuboid(cuboid, $FFFFFF);
     RSClient.DrawTPA(tpa);
   end;
-  {$ENDIF}
 end;
 
 function TWoodcutter.IsCutting(): Boolean;
@@ -447,11 +469,19 @@ begin
   if Chat.LeveledUp() then
   begin
     Self.Woodcutting := False;
+    Self.IsFletching := False;
     Exit(EWoodcutterState.LEVEL_UP);
   end;
 
-  if UseSawmill and Make.IsOpen() then
+  if (UseSawmill or DoFletch) and Make.IsOpen() then
     Exit(EWoodcutterState.HANDLE_MAKE);
+
+  if Self.IsFletching then
+  begin
+    if Inventory.ContainsItem(Self.Logs) then
+      Exit(EWoodcutterState.WAIT_STATE);
+    Self.IsFletching := False;
+  end;
 
   if MainScreen.HasInterface() then
   begin
@@ -484,6 +514,9 @@ begin
   if Inventory.IsFull() then
   begin
     Self.Woodcutting := False;
+
+    if DoFletch and Inventory.ContainsItem(Self.Logs) then
+      Exit(EWoodcutterState.FLETCH);
 
     if not UseBank then
       Exit(EWoodcutterState.DROP_ITEMS);
@@ -541,6 +574,7 @@ begin
       EWoodcutterState.USE_SPEC: Minimap.EnableSpec(100);
       EWoodcutterState.PICKUP_NEST: Self.PickNest();
       EWoodcutterState.CUT_TREE: Self.CutTree();
+      EWoodcutterState.FLETCH: Self.Fletch();
       EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill();
       EWoodcutterState.HANDLE_MAKE: Self.MakePlanks();
       EWoodcutterState.FILL_PLANK_SACK: Self.FillPlankSack();
@@ -554,6 +588,53 @@ end;
 
 var
   Woodcutter: TWoodcutter;
+
+function TRSWalkerObject.FindOnMainScreen(cuboidArray: TCuboidExArray): T2DPointArray; override;
+var
+  i: Int32;
+  tpa: TPointArray;
+  tempFinder: TRSObjectFinder;
+begin
+  if Self.Filter.Finder then
+    tempFinder := Self.Finder.Unlimited();
+
+  cuboidArray := MainScreen.Filter(cuboidArray);
+  Woodcutter.TreeCuboids := cuboidArray;
+
+  RSClient.Clear(MainScreen.Bounds());
+
+  for i := 0 to High(cuboidArray) do
+  begin
+    if Self.Filter.Finder then
+    begin
+      RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
+
+      tpa := MainScreen.FindObject(tempFinder, cuboidArray[i].Bounds()).Merge();
+      if tpa = [] then
+        Continue;
+
+      tpa := cuboidArray[i].Filter(tpa);
+      if tpa <> [] then
+      begin
+        Result += tpa;
+        RSClient.DrawTPA(tpa, $0000FF);
+      end;
+
+      Continue;
+    end;
+
+    tpa := cuboidArray[i].ShapeFill();
+    if tpa <> [] then
+    begin
+      if WLSettings.RemoteInput.HUDDebug then
+      begin
+        RSClient.DrawTPA(tpa, $0000FF);
+        RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
+      end;
+      Result += tpa;
+    end;
+  end;
+end;
 
 {$IFDEF SCRIPT_GUI}
 type
