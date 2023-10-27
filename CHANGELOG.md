@@ -1,3 +1,12 @@
+## [2.10.1](https://github.com/Torwent/wasp-free/compare/v2.10.0...v2.10.1) (2023-10-27)
+
+
+### Bug Fixes
+
+* **woodcutter:** the sawmill option is now disabled for the wc guild ([4729636](https://github.com/Torwent/wasp-free/commit/4729636f9b48e234355388db890102784ec283dc))
+
+
+
 # [2.10.0](https://github.com/Torwent/wasp-free/compare/v2.9.5...v2.10.0) (2023-10-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **builder:** fail safe to hour portal options being open ([5c0d0c2](https://github.com/Torwent/wasp-free/commit/5c0d0c2ffa322c260bd803313aa1101388073d5c))
-
-
-
-## [2.9.2](https://github.com/Torwent/wasp-free/compare/v2.9.1...v2.9.2) (2023-10-17)
-
-
-### Bug Fixes
-
-* **builder:** more fixes to builder ([31f529b](https://github.com/Torwent/wasp-free/commit/31f529bcfa5e620e43233ecbb909e18e5c84d62f))
 
 
 
