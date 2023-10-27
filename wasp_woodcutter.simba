@@ -679,7 +679,7 @@ begin
 
   case ERSTree(Self.TreeSelector.GetItemIndex()) of
     REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
-      Self.SawmillState.SetEnabled(text.ContainsAny(['east', 'guild', 'ddinas']));
+      Self.SawmillState.SetEnabled(text.ContainsAny(['east', 'ddinas'])); //, 'guild'
   end;
 end;
 
