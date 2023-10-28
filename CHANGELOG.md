@@ -1,3 +1,12 @@
+## [2.10.5](https://github.com/Torwent/wasp-free/compare/v2.10.4...v2.10.5) (2023-10-28)
+
+
+### Bug Fixes
+
+* **offerer:** now handles and screenshots level ups ([c33d5fe](https://github.com/Torwent/wasp-free/commit/c33d5febe63c77066015b521fd5768e8bf14bf38))
+
+
+
 ## [2.10.4](https://github.com/Torwent/wasp-free/compare/v2.10.3...v2.10.4) (2023-10-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **woodcutter:** the sawmill option is now disabled for the wc guild ([4729636](https://github.com/Torwent/wasp-free/commit/4729636f9b48e234355388db890102784ec283dc))
-
-
-
-# [2.10.0](https://github.com/Torwent/wasp-free/compare/v2.9.5...v2.10.0) (2023-10-23)
-
-
-### Features
-
-* **woodcutter:** read notes ([40e025b](https://github.com/Torwent/wasp-free/commit/40e025bb405bde9b2913b5d175d0de86519602db))
 
 
 
