@@ -34,6 +34,7 @@ type
     OPEN_MAGIC,
     CAST_SPELL,
     WAIT_STATE,
+    HANDLE_LEVEL,
 
     OUT_OF_SUPPLIES,
     END_SCRIPT
@@ -200,6 +201,9 @@ begin
     Exit(EOffererState.CLOSE_INTERFACE);
   end;
 
+  if Chat.LeveledUp() then
+    Exit(EOffererState.HANDLE_LEVEL);
+
   if (Self.RemainsLeft < 3) or not Self.CanCast() then
   begin
     if not Self.BankEmpty then
@@ -241,21 +245,22 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      OPEN_BANK:        Bank.WalkOpen();
-      WITHDRAW_WRATH:   Self.Withdraw(Self.WrathRune);
-      WITHDRAW_ALT:     Self.Withdraw(Self.AltRune);
-      WITHDRAW_REMAINS: Self.Withdraw(Self.Remains);
+      EOffererState.OPEN_BANK:        Bank.WalkOpen();
+      EOffererState.WITHDRAW_WRATH:   Self.Withdraw(Self.WrathRune);
+      EOffererState.WITHDRAW_ALT:     Self.Withdraw(Self.AltRune);
+      EOffererState.WITHDRAW_REMAINS: Self.Withdraw(Self.Remains);
 
-      OPEN_COLLECT:   CollectBox.WalkOpen();
-      HANDLE_COLLECT: Self.HandleCollectBox([Self.WrathRune.Item, Self.AltRune.Item, Self.Remains.Item]);
+      EOffererState.OPEN_COLLECT:   CollectBox.WalkOpen();
+      EOffererState.HANDLE_COLLECT: Self.HandleCollectBox([Self.WrathRune.Item, Self.AltRune.Item, Self.Remains.Item]);
 
-      CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EOffererState.CLOSE_INTERFACE: MainScreen.CloseInterface();
 
-      OPEN_MAGIC: Magic.Open();
-      CAST_SPELL: Self.CastSpell();
-      WAIT_STATE: Self.WaitCoolDown();
+      EOffererState.OPEN_MAGIC: Magic.Open();
+      EOffererState.CAST_SPELL: Self.CastSpell();
+      EOffererState.WAIT_STATE: Self.WaitCoolDown();
+      EOffererState.HANDLE_LEVEL: Chat.HandleLevelUp();
 
-      OUT_OF_SUPPLIES, END_SCRIPT: Break;
+      EOffererState.OUT_OF_SUPPLIES, END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();
