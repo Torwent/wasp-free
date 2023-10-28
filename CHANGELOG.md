@@ -1,3 +1,12 @@
+## [2.10.2](https://github.com/Torwent/wasp-free/compare/v2.10.1...v2.10.2) (2023-10-28)
+
+
+### Bug Fixes
+
+* **pickpocketer:** compiles again with latest WaspLib ([df881e4](https://github.com/Torwent/wasp-free/commit/df881e446d658c03916e7046b50046f7722d9b36))
+
+
+
 ## [2.10.1](https://github.com/Torwent/wasp-free/compare/v2.10.0...v2.10.1) (2023-10-27)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * read notes ([02c65ad](https://github.com/Torwent/wasp-free/commit/02c65ad6d3105311202c1d58151fbccdecb161a6))
-
-
-
-## [2.9.3](https://github.com/Torwent/wasp-free/compare/v2.9.2...v2.9.3) (2023-10-17)
-
-
-### Bug Fixes
-
-* **builder:** fail safe to hour portal options being open ([5c0d0c2](https://github.com/Torwent/wasp-free/commit/5c0d0c2ffa322c260bd803313aa1101388073d5c))
 
 
 
