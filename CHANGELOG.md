@@ -1,3 +1,12 @@
+## [2.10.3](https://github.com/Torwent/wasp-free/compare/v2.10.2...v2.10.3) (2023-10-28)
+
+
+### Bug Fixes
+
+* **pickpocketer:** suicidemode variable can be used to control the start up form now ([abb8c8f](https://github.com/Torwent/wasp-free/commit/abb8c8fbf23945b8ae931c3d2447e2bb412a9cf6))
+
+
+
 ## [2.10.2](https://github.com/Torwent/wasp-free/compare/v2.10.1...v2.10.2) (2023-10-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **jewelry smelter:** add priff furnace support ([278ee53](https://github.com/Torwent/wasp-free/commit/278ee53f14090d2430c02a9f3159f625ec435072))
-
-
-
-## [2.9.4](https://github.com/Torwent/wasp-free/compare/v2.9.3...v2.9.4) (2023-10-22)
-
-
-### Bug Fixes
-
-* read notes ([02c65ad](https://github.com/Torwent/wasp-free/commit/02c65ad6d3105311202c1d58151fbccdecb161a6))
 
 
 
