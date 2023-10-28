@@ -926,19 +926,7 @@ end;
 procedure TThieverConfig.NPCSelectorOnChange({$H-}sender: TObject);{$H+}
 begin
   case ENPC(Self.NPCSelector.GetItemIndex()) of
-    MAN:
-      begin
-        Self.SuicideState.SetChecked(False);
-        Self.SuicideState.setEnabled(False);
-      end;
-
-    MASTER_FARMER:
-      begin
-        Self.SuicideState.SetChecked(False);
-        Self.SuicideState.setEnabled(False);
-      end;
-
-    TZHAAR_CITY:
+    ENPC.MAN, ENPC.MASTER_FARMER, ENPC.TZHAAR_CITY:
       begin
         Self.SuicideState.SetChecked(False);
         Self.SuicideState.setEnabled(False);
@@ -946,7 +934,7 @@ begin
 
     else
     begin
-      Self.SuicideState.SetChecked(True);
+      Self.SuicideState.SetChecked(SuicideMode);
       Self.SuicideState.setEnabled(True);
     end;
   end;
