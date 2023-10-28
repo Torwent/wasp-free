@@ -46,7 +46,7 @@ type
     Remains, WrathRune, AltRune: TRSBankItem;
 
     RemainsLeft: Int32;
-    SpellCooldown: TCountDown;
+    SpellCooldown, NoRunes: Boolean;
   end;
 
 procedure TAntiban.Setup(); override;
@@ -61,8 +61,6 @@ end;
 procedure TRemainOfferer.SetupSpell();
 begin
   Self.WrathRune := TRSBankItem.Setup('Wrath rune');
-
-  Self.SpellCooldown.Setup(4800);
 
   case CurrentRemains of
     ERSRemains.FIENDISH_ASHES..ERSRemains.INFERNAL_ASHES:
@@ -116,8 +114,8 @@ function TRemainOfferer.CanCast(): Boolean;
 begin
   if Inventory.IsOpen() then
     Result := Inventory.ContainsAll([Self.WrathRune.Item, Self.AltRune.Item])
-  else if Magic.IsOpen() then
-    Result := Magic.CanActivate(Self.OfferSpell)
+  else if not Self.SpellCooldown and Magic.IsOpen() then
+    Result := WaitUntil(Magic.CanActivate(Self.OfferSpell), 300, 7000)
   else
     Result := True;
 end;
@@ -125,17 +123,12 @@ end;
 function TRemainOfferer.CastSpell(): Boolean;
 begin
   Result := Magic.CastSpell(Self.OfferSpell);
-  if True then
-  begin
-    Self.SpellCooldown.Restart(RandomLeft(0, 2500));
-    Self.RemainsLeft -= 3;
-    Self.TotalActions += 1;
-    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
-    Exit;
-  end;
 
-  if Inventory.Open() then
-    Self.RemainsLeft := Inventory.CountItem(Self.Remains.Item);
+  Self.SpellCooldown := True;
+
+  Self.RemainsLeft -= 3;
+  Self.TotalActions += 1;
+  Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
 end;
 
 procedure TRemainOfferer.WaitCoolDown();
@@ -168,7 +161,11 @@ begin
         else Antiban.CheckCharges();
       end;
     else
-      Wait(100);
+      begin
+        Self.SpellCooldown := not WaitUntil(Magic.CanActivate(Self.OfferSpell), 300, 7000);
+        Self.NoRunes := Self.SpellCooldown and Magic.IsOpen();
+        Wait(0, 2400, EWaitDir.wdLeft);
+      end;
   end;
 end;
 
@@ -178,8 +175,13 @@ begin
   if WL.Activity.IsFinished() then
     Exit(EOffererState.END_SCRIPT);
 
+  if Self.NoRunes then
+    Exit(EOffererState.OUT_OF_SUPPLIES);
+
   if MainScreen.HasInterface() then
   begin
+    Self.SpellCooldown := False;
+
     if Bank.IsOpen() then
     begin
       if not Inventory.ContainsItem(Self.WrathRune.Item) then
@@ -208,7 +210,7 @@ begin
     Exit(EOffererState.OUT_OF_SUPPLIES);
   end;
 
-  if Self.SpellCooldown.IsFinished() then
+  if not Self.SpellCooldown then
   begin
     if Magic.IsOpen() then
     begin
@@ -235,8 +237,8 @@ begin
   Self.Init(maxActions, maxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case Self.State of
       OPEN_BANK:        Bank.WalkOpen();
