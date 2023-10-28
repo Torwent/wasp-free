@@ -821,7 +821,7 @@ var
 begin
   Self.DebugLn('Setting up consumable of type: ' + ToStr(Self.ConsumableType));
 
-  for item in GetConsumableArray(Self.ConsumableType) do
+  for item in CONSUMABLE_ARRAYS[Self.ConsumableType] do
   begin
     if Self.ConsumableArray.Contains(item) then //avoid resetting items.
       Continue;
@@ -846,7 +846,7 @@ var
 begin
   Self.DebugLn('Setting up consumable of type: ' + ToStr(Self.ConsumableType));
 
-  for item in GetConsumableArray(Self.ConsumableType) do
+  for item in CONSUMABLE_ARRAYS[Self.ConsumableType] do
   begin
     if Self.ConsumableArray.Contains(item) then //avoid resetting leftover items.
       Continue;
