@@ -1,3 +1,12 @@
+## [2.10.6](https://github.com/Torwent/wasp-free/compare/v2.10.5...v2.10.6) (2023-11-02)
+
+
+### Bug Fixes
+
+* read notes ([4c46ae7](https://github.com/Torwent/wasp-free/commit/4c46ae7701c1b268cac5dcf54e598f69d2d7b9fd))
+
+
+
 ## [2.10.5](https://github.com/Torwent/wasp-free/compare/v2.10.4...v2.10.5) (2023-10-28)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** compiles again with latest WaspLib ([df881e4](https://github.com/Torwent/wasp-free/commit/df881e446d658c03916e7046b50046f7722d9b36))
-
-
-
-## [2.10.1](https://github.com/Torwent/wasp-free/compare/v2.10.0...v2.10.1) (2023-10-27)
-
-
-### Bug Fixes
-
-* **woodcutter:** the sawmill option is now disabled for the wc guild ([4729636](https://github.com/Torwent/wasp-free/commit/4729636f9b48e234355388db890102784ec283dc))
 
 
 
