@@ -87,7 +87,7 @@ end;
 
 procedure TTabMaker.SetupLectern();
 begin
-  Self.LecternObj.Setup(0.7, 5, [[3615, 102]]);
+  Self.LecternObj.Setup(0.7, 5, [[1871, 102]]);
   Self.LecternObj.Setup(['Study', 'Lectern']);
   Self.LecternObj.Filter.Finder := False;
 end;
