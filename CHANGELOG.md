@@ -1,3 +1,12 @@
+## [2.10.7](https://github.com/Torwent/wasp-free/compare/v2.10.6...v2.10.7) (2023-11-07)
+
+
+### Bug Fixes
+
+* **ardy knights:** compiles again ([56497cb](https://github.com/Torwent/wasp-free/commit/56497cb6106d5751db2a2011cbcac49943038afa))
+
+
+
 ## [2.10.6](https://github.com/Torwent/wasp-free/compare/v2.10.5...v2.10.6) (2023-11-02)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** suicidemode variable can be used to control the start up form now ([abb8c8f](https://github.com/Torwent/wasp-free/commit/abb8c8fbf23945b8ae931c3d2447e2bb412a9cf6))
-
-
-
-## [2.10.2](https://github.com/Torwent/wasp-free/compare/v2.10.1...v2.10.2) (2023-10-28)
-
-
-### Bug Fixes
-
-* **pickpocketer:** compiles again with latest WaspLib ([df881e4](https://github.com/Torwent/wasp-free/commit/df881e446d658c03916e7046b50046f7722d9b36))
 
 
 
