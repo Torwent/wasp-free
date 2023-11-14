@@ -611,7 +611,7 @@ begin
   if Self.PrayFlick and Self.PrayFlickTimer.IsFinished() then
     Exit(ENMZState.FLICK_PRAYER);
 
-  if not MainScreen.WaitInCombat(600) then
+  if not MainScreen.WaitInCombat(800) then
     Exit(ENMZState.ATTACK_NPC);
 
   if CombatHandler.CanSpec() then
@@ -903,6 +903,11 @@ begin
 
   if Result and NMZFighter.PowerSurgeTimer.IsFinished() and (Minimap.GetSpecLevel() < Self.WeaponSpec) then
     Self.Regear();
+end;
+
+function TRSMainScreen.InCombat(): Boolean; override;
+begin
+  Result := XPBar.EarnedXP() or (Self.FindHitsplats() <> []);
 end;
 
 {$IFDEF SCRIPT_GUI}
