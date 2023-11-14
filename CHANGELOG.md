@@ -1,3 +1,12 @@
+## [2.10.8](https://github.com/Torwent/wasp-free/compare/v2.10.7...v2.10.8) (2023-11-14)
+
+
+### Bug Fixes
+
+* **nmz:** should stop spam attacking enemies ([09eec50](https://github.com/Torwent/wasp-free/commit/09eec5072024f153f197307b0c1ac62ebd9ea662))
+
+
+
 ## [2.10.7](https://github.com/Torwent/wasp-free/compare/v2.10.6...v2.10.7) (2023-11-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **offerer:** should work properly again with the recent magic tab changes ([363cd65](https://github.com/Torwent/wasp-free/commit/363cd65ad1c002ef034d73c4cf90c577486c3d23))
-
-
-
-## [2.10.3](https://github.com/Torwent/wasp-free/compare/v2.10.2...v2.10.3) (2023-10-28)
-
-
-### Bug Fixes
-
-* **pickpocketer:** suicidemode variable can be used to control the start up form now ([abb8c8f](https://github.com/Torwent/wasp-free/commit/abb8c8fbf23945b8ae931c3d2447e2bb412a9cf6))
 
 
 
