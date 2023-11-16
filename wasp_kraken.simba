@@ -228,8 +228,8 @@ function TKrakenKiller.CheckLoot(): Boolean;
 var
   B: TBox := MainScreen.GetPlayerFloorBox();
 begin
-  while Inventory.IsFull() and Inventory.ContainsConsumable(FOOD_CONSUMABLE) do
-    Inventory.Consume(FOOD_CONSUMABLE);
+  while Inventory.IsFull() and Inventory.ContainsConsumable(ERSConsumable.FOOD) do
+    Inventory.Consume(ERSConsumable.FOOD);
 
   Result := CheckedLoot := True;
 
@@ -252,7 +252,7 @@ begin
 
   if (Minimap.GetHPLevel() <= 40) then
   begin
-    if Inventory.ContainsConsumable(FOOD_CONSUMABLE) then
+    if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
       Exit(EKrakenState.EAT_FOOD)
     else if Self.FindRagingKraken() then
       Exit(EKrakenState.ATTACK_KRAKEN)
@@ -260,7 +260,7 @@ begin
       TerminateScript('OUT OF FOOD AND HEALTH');
   end;
 
-  if (Minimap.GetPrayerLevel() <= 30) and Inventory.ContainsConsumable(PRAYER_CONSUMABLE) then
+  if (Minimap.GetPrayerLevel() <= 30) and Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
     Exit(EKrakenState.DRINK_PRAYER);
 
   if CombatHandler.NeedBracelet() then
@@ -312,8 +312,8 @@ begin
       EKrakenState.WAKE_KRAKEN: Self.WakeKraken();
       EKrakenState.ATTACK_KRAKEN: IsAttacking := Self.AttackKraken();
       EKrakenState.BOOST: Self.BoostMagic();
-      EKrakenState.EAT_FOOD: Inventory.Consume(FOOD_CONSUMABLE);
-      EKrakenState.DRINK_PRAYER: Inventory.Consume(PRAYER_CONSUMABLE);
+      EKrakenState.EAT_FOOD: Inventory.Consume(ERSConsumable.FOOD);
+      EKrakenState.DRINK_PRAYER: Inventory.Consume(ERSConsumable.PRAYER);
       EKrakenState.ENABLE_QPRAY: Minimap.EnablePrayer();
       EKrakenState.ALCH_DROP: RSAlchHandler.CastAlchemy(True, True);
       EKrakenState.EQUIP_BRACELET: CombatHandler.EquipBracelet();

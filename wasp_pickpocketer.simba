@@ -533,7 +533,7 @@ begin
   hpLevel := Stats.GetLevel(ERSSkill.HITPOINTS) - 1;
   repeat
     oldHP := newHP;
-    if not Inventory.Consume(FOOD_CONSUMABLE) then
+    if not Inventory.Consume(ERSConsumable.FOOD) then
       Exit;
 
     newHP := Minimap.GetHPLevel();
@@ -705,7 +705,7 @@ begin
         Exit(DEPOSIT_LOOT);
       if Inventory.CountItem(Necklace) < NeckAmount then
         Exit(WITHDRAW_NECKLACES);
-      if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
+      if not Inventory.HasEnoughConsumable(ERSConsumable.FOOD) then
         Exit(WITHDRAW_FOOD);
     end;
 
@@ -731,7 +731,7 @@ begin
   begin
     if Inventory.ContainsAny(Self.DropArray) then
       Exit(DROP_ITEMS);
-    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
+    if Inventory.FindConsumable(ERSConsumable.FOOD) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
@@ -747,7 +747,7 @@ begin
 
   if Self.IsLowHP() then
   begin
-    if not RedemptionEnabled and Inventory.ContainsConsumable(FOOD_CONSUMABLE) then
+    if not RedemptionEnabled and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
       Exit(EAT_FOOD);
     if not SuicideMode then
       Exit(OPEN_BANK);
@@ -781,7 +781,7 @@ begin
     case Self.State of
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_LOOT: Self.Deposit();
-      WITHDRAW_FOOD: Bank.WithdrawConsumable(FOOD_CONSUMABLE);
+      WITHDRAW_FOOD: Bank.WithdrawConsumable(ERSConsumable.FOOD);
       WITHDRAW_NECKLACES: Self.Withdraw([Necklace, NeckAmount, False]);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
@@ -955,10 +955,10 @@ begin
     y := TControl.AdjustToDPI(15);
 
   case consumableType of
-    FOOD_CONSUMABLE:   typeStr := 'Food';
-    PRAYER_CONSUMABLE: typeStr := 'Prayer';
-    ENERGY_CONSUMABLE: typeStr := 'Energy';
-    BOOST_CONSUMABLE:  typeStr := 'Boost';
+    ERSConsumable.FOOD:   typeStr := 'Food';
+    ERSConsumable.PRAYER: typeStr := 'Prayer';
+    ERSConsumable.ENERGY: typeStr := 'Energy';
+    ERSConsumable.BOOST:  typeStr := 'Boost';
   end;
 
   Result := inherited;
@@ -1038,7 +1038,7 @@ begin
     Self.NPCSelectorOnChange(@Self.SuicideState);
   end;
 
-  panel := Self.CreateConsumableSettings(tab, FOOD_CONSUMABLE, False);
+  panel := Self.CreateConsumableSettings(tab, ERSConsumable.FOOD, False);
 
   panel.SetTop(TControl.AdjustToDPI(300));
 

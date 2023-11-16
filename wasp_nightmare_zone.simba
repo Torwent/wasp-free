@@ -791,9 +791,9 @@ begin
       //Inside Dream.
       ENMZState.DRINK_BOOST: Self.DrinkPotion(Self.BoostPotion);
       ENMZState.DRINK_ABSORPTION: Self.DrinkPotion(Self.AbsPotion);
-      ENMZState.DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON_CONSUMABLE);
+      ENMZState.DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON);
 
-      ENMZState.WALK_MIDDLE: if RSW.WebWalk(Self.DreamMiddle, 5, 0.2) then Self.WalkMiddleTimer.Restart();
+      ENMZState.WALK_MIDDLE: if Self.RSW.WebWalk(Self.DreamMiddle, 5, 0.2) then Self.WalkMiddleTimer.Restart();
       ENMZState.ATTACK_NPC: CombatHandler.AttackMonster();
       ENMZState.WAIT_LEVEL, ENMZState.WAIT_SPEC,
       ENMZState.WAIT_CENTER, ENMZState.WAIT_STATE : XPBar.WaitXP(1200);

@@ -405,9 +405,6 @@ begin
   end;
 
   Self.CreateVersionPanel(tab);
-
-  Self.CreateConsumableSettings(ERSConsumable.FOOD_CONSUMABLE);
-  Self.CreateConsumableSettings(ERSConsumable.PRAYER_CONSUMABLE);
   Self.CreateAntibanManager();
   Self.CreateBankSettings();
   Self.CreateWaspLibSettings();

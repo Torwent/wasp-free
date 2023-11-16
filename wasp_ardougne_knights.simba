@@ -351,7 +351,7 @@ begin
   hpLevel := Stats.GetLevel(ERSSkill.HITPOINTS) - 1;
   repeat
     oldHP := newHP;
-    if not Inventory.Consume(FOOD_CONSUMABLE) then
+    if not Inventory.Consume(ERSConsumable.FOOD) then
       Exit;
 
     newHP := Minimap.GetHPLevel();
@@ -492,7 +492,7 @@ end;
 function TKnightsThiever.FixInventory(): Boolean;
 begin
   if (Inventory.CountItem(Self.Necklace.Item) < (NeckAmount-2)) or
-     not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
+     not Inventory.HasEnoughConsumable(ERSConsumable.FOOD) then
   begin
     Bank.CachedQuantity := 0;
     Bank.DepositAll();
@@ -561,7 +561,7 @@ begin
         else Exit(DEPOSIT_NECK);
       end;
 
-      if not Inventory.HasEnoughConsumable(FOOD_CONSUMABLE) then
+      if not Inventory.HasEnoughConsumable(ERSConsumable.FOOD) then
         Exit(WITHDRAW_FOOD);
     end;
 
@@ -590,7 +590,7 @@ begin
   begin
     if Inventory.ContainsAny(Self.BankArray) then
       Exit(OPEN_BANK);
-    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
+    if Inventory.FindConsumable(ERSConsumable.FOOD) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
@@ -606,7 +606,7 @@ begin
 
   if Self.IsLowHP() then
   begin
-    if Inventory.FindConsumable(FOOD_CONSUMABLE) then
+    if Inventory.FindConsumable(ERSConsumable.FOOD) then
       Exit(EAT_FOOD);
 
     Exit(OPEN_BANK);
@@ -632,7 +632,7 @@ begin
     case Self.State of
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_ITEMS: Self.Deposit();
-      WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(FOOD_CONSUMABLE);
+      WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(ERSConsumable.FOOD);
       WITHDRAW_NECK: Self.Withdraw(Self.Necklace);
       DEPOSIT_NECK: Bank.DepositItem(Self.Necklace, False);
       FIX_INVENTORY: Self.FixInventory();
@@ -714,10 +714,10 @@ begin
     y := TControl.AdjustToDPI(15);
 
   case consumableType of
-    FOOD_CONSUMABLE:   typeStr := 'Food';
-    PRAYER_CONSUMABLE: typeStr := 'Prayer';
-    ENERGY_CONSUMABLE: typeStr := 'Energy';
-    BOOST_CONSUMABLE:  typeStr := 'Boost';
+    ERSConsumable.FOOD:   typeStr := 'Food';
+    ERSConsumable.FOOD: typeStr := 'Prayer';
+    ERSConsumable.FOOD: typeStr := 'Energy';
+    ERSConsumable.FOOD:  typeStr := 'Boost';
   end;
 
   Result := inherited;
@@ -770,7 +770,7 @@ begin
     SetText(ToStr(NeckAmount));
   end;
 
-  panel := Self.CreateConsumableSettings(tab, FOOD_CONSUMABLE, False);
+  panel := Self.CreateConsumableSettings(tab, ERSConsumable.FOOD, False);
 
   panel.SetTop(TControl.AdjustToDPI(230));
 

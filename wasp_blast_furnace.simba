@@ -687,7 +687,7 @@ begin
 
         if UseEnergyBoosts and (Minimap.GetRunEnergy() < Self.MinEnergy) and not Minimap.HasStamina() then
         begin
-          if Inventory.ContainsConsumable(ERSConsumable.ENERGY_CONSUMABLE) then
+          if Inventory.ContainsConsumable(ERSConsumable.ENERGY) then
             Exit(EBFState.DRINK_ENERGY);
           Exit(WITHDRAW_ENERGY);
         end;
@@ -710,7 +710,7 @@ begin
         Exit(EBFState.WITHDRAW_COAL);
       end;
 
-      if UseEnergyBoosts and not Minimap.HasStamina() and Inventory.ContainsConsumable(ERSConsumable.ENERGY_CONSUMABLE) then
+      if UseEnergyBoosts and not Minimap.HasStamina() and Inventory.ContainsConsumable(ERSConsumable.ENERGY) then
         Exit(EBFState.DRINK_ENERGY);
 
       if Self.OutOfSync then
@@ -781,7 +781,7 @@ begin
   if UseEnergyBoosts then
   begin
     if not Minimap.HasStamina() and
-      Inventory.ContainsConsumable(ERSConsumable.ENERGY_CONSUMABLE) then
+      Inventory.ContainsConsumable(ERSConsumable.ENERGY) then
       Exit(EBFState.DRINK_ENERGY);
   end;
 
@@ -861,7 +861,7 @@ begin
       EBFState.WITHDRAW_COAL: Self.Withdraw(Self.CoalB);
       EBFState.WITHDRAW_GLOVES: Self.WithdrawTool(Self.GoldGlovesB);
       EBFState.WITHDRAW_BAG: Self.WithdrawTool(Self.CoalBagB);
-      EBFState.WITHDRAW_ENERGY: Bank.WithdrawConsumable(ERSConsumable.ENERGY_CONSUMABLE);
+      EBFState.WITHDRAW_ENERGY: Bank.WithdrawConsumable(ERSConsumable.ENERGY);
 
       EBFState.DEPOSIT_BARS: Self.DepositBars();
       EBFState.DEPOSIT_ORE, DEPOSIT_COAL: Bank.DepositItems([Self.Ore, Self.Coal], True);
@@ -887,7 +887,7 @@ begin
       EBFState.EQUIP_ICE_GLOVES: Self.EquipIceGloves();
 
       EBFState.ENABLE_RUN: Self.EnableRun();
-      EBFState.DRINK_ENERGY: Inventory.Consume(ERSConsumable.ENERGY_CONSUMABLE);
+      EBFState.DRINK_ENERGY: Inventory.Consume(ERSConsumable.ENERGY);
 
       EBFState.LOAD_ORES: Self.LoadOre();
       EBFState.LOAD_COAL: Self.LoadCoal();
