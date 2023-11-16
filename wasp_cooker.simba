@@ -174,13 +174,13 @@ begin
   end;
 end;
 
-
 function TCooker.Deposit(): Boolean;
 var
   invCount: Int32;
 begin
   invCount := Inventory.Count();
-  Result := Self.DepositItems(Self.Products);
+  Result := Self.DepositItem(Self.Products[0]);
+  Self.DepositItem(Self.Products[1]);
 
   if Result then
   begin
