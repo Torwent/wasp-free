@@ -1,3 +1,12 @@
+## [2.10.10](https://github.com/Torwent/wasp-free/compare/v2.10.9...v2.10.10) (2023-11-16)
+
+
+### Bug Fixes
+
+* fix compatibility with latest WaspLib ([fd8f8ae](https://github.com/Torwent/wasp-free/commit/fd8f8ae3203cd24369732739e4d3c1c601c5c6e4))
+
+
+
 ## [2.10.9](https://github.com/Torwent/wasp-free/compare/v2.10.8...v2.10.9) (2023-11-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * read notes ([4c46ae7](https://github.com/Torwent/wasp-free/commit/4c46ae7701c1b268cac5dcf54e598f69d2d7b9fd))
-
-
-
-## [2.10.5](https://github.com/Torwent/wasp-free/compare/v2.10.4...v2.10.5) (2023-10-28)
-
-
-### Bug Fixes
-
-* **offerer:** now handles and screenshots level ups ([c33d5fe](https://github.com/Torwent/wasp-free/commit/c33d5febe63c77066015b521fd5768e8bf14bf38))
 
 
 

@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := '003b8e09-e988-42ca-b261-b2b76d131800'}
-{$DEFINE SCRIPT_REVISION := '34'}
+{$DEFINE SCRIPT_REVISION := '35'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
