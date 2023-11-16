@@ -1,3 +1,12 @@
+## [2.10.9](https://github.com/Torwent/wasp-free/compare/v2.10.8...v2.10.9) (2023-11-16)
+
+
+### Bug Fixes
+
+* **cooker:** should now count actions when has burnt fish ([b0c5b80](https://github.com/Torwent/wasp-free/commit/b0c5b8079917e19395d255fc621ca4cc8b44a449))
+
+
+
 ## [2.10.8](https://github.com/Torwent/wasp-free/compare/v2.10.7...v2.10.8) (2023-11-14)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **offerer:** now handles and screenshots level ups ([c33d5fe](https://github.com/Torwent/wasp-free/commit/c33d5febe63c77066015b521fd5768e8bf14bf38))
-
-
-
-## [2.10.4](https://github.com/Torwent/wasp-free/compare/v2.10.3...v2.10.4) (2023-10-28)
-
-
-### Bug Fixes
-
-* **offerer:** should work properly again with the recent magic tab changes ([363cd65](https://github.com/Torwent/wasp-free/commit/363cd65ad1c002ef034d73c4cf90c577486c3d23))
 
 
 
