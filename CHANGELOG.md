@@ -1,3 +1,12 @@
+## [2.10.11](https://github.com/Torwent/wasp-free/compare/v2.10.10...v2.10.11) (2023-11-17)
+
+
+### Bug Fixes
+
+* **alcher:** tweaks for better alch timings ([1445078](https://github.com/Torwent/wasp-free/commit/144507822f25b380dfb6f80405771dd2f51b8164))
+
+
+
 ## [2.10.10](https://github.com/Torwent/wasp-free/compare/v2.10.9...v2.10.10) (2023-11-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** compiles again ([56497cb](https://github.com/Torwent/wasp-free/commit/56497cb6106d5751db2a2011cbcac49943038afa))
-
-
-
-## [2.10.6](https://github.com/Torwent/wasp-free/compare/v2.10.5...v2.10.6) (2023-11-02)
-
-
-### Bug Fixes
-
-* read notes ([4c46ae7](https://github.com/Torwent/wasp-free/commit/4c46ae7701c1b268cac5dcf54e598f69d2d7b9fd))
 
 
 
