@@ -1,3 +1,12 @@
+## [2.10.12](https://github.com/Torwent/wasp-free/compare/v2.10.11...v2.10.12) (2023-11-18)
+
+
+### Bug Fixes
+
+* **cooker:** shrimps should now work ([5094319](https://github.com/Torwent/wasp-free/commit/5094319647963210b151db80c6dabf3b5189f919))
+
+
+
 ## [2.10.11](https://github.com/Torwent/wasp-free/compare/v2.10.10...v2.10.11) (2023-11-17)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** should stop spam attacking enemies ([09eec50](https://github.com/Torwent/wasp-free/commit/09eec5072024f153f197307b0c1ac62ebd9ea662))
-
-
-
-## [2.10.7](https://github.com/Torwent/wasp-free/compare/v2.10.6...v2.10.7) (2023-11-07)
-
-
-### Bug Fixes
-
-* **ardy knights:** compiles again ([56497cb](https://github.com/Torwent/wasp-free/commit/56497cb6106d5751db2a2011cbcac49943038afa))
 
 
 
