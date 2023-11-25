@@ -695,7 +695,7 @@ begin
         if Inventory.ContainsRandomItems(Self.ItemList) then
           Exit(EBFState.DEPOSIT_RANDOM_ITEMS);
 
-        if Self.HasGloves and not Inventory.ContainsAny([Self.GoldGloves, Self.IceGloves]) then
+        if Bank.ContainsAny([Self.GoldGloves, Self.IceGloves]) and (CurrentBar = EBarType.GOLD) and not Inventory.ContainsAny([Self.GoldGloves, Self.IceGloves]) then
           Exit(EBFState.WITHDRAW_GLOVES);
 
         if UseCoalBag and not Inventory.ContainsItem(Self.CoalBag) then
