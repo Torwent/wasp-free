@@ -14,8 +14,8 @@ type
   );
 
 var
-  CurrentBar: EBarType = EBarType.MITHRIL;
-  UseCoalBag: Boolean = True;
+  CurrentBar: EBarType = EBarType.GOLD;
+  UseCoalBag: Boolean = False;
   UseEnergyBoosts: Boolean = False;
 
 type
@@ -300,7 +300,7 @@ end;
 function TBlastFurnace.WaitXP(): Boolean;
 begin
   Self.PotFull := False;
-  Result := XPBar.WaitXP(600);
+  Result := XPBar.WaitXP(12000); // Conveyor stops randomly as part of minigame. Script will get out of sync if we don't give conveyor enough time to restart and give XP for the already deposited ores.
   if Result then
   begin
     Self.DispenserFull := True;
@@ -456,7 +456,7 @@ begin
     if not Self.DispenserFull then
       Self.DispenserFull := XPBar.EarnedXP();
 
-    if changeGloves and Inventory.ContainsItem(Self.GoldGloves) then
+    if changeGloves and Inventory.ContainsItem(Self.GoldGloves) and Inventory.ContainsItem('Gold Ore') then // Makes so script equips gold gloves again after inventory is full of gold ore. Script would click bank > equip gloves > have to click bank again if we don't do this.
     begin
       if not MainScreen.HasInterface() and Inventory.ClickItem(Self.GoldGloves) then
       begin
@@ -522,7 +522,7 @@ end;
 function TBlastFurnace.EquipIceGloves(): Boolean;
 begin
   Result := Inventory.ClickItem(Self.IceGloves);
-
+  Wait(1000); // Small wait to reduce occurance of multiple click changing to wrong gloves
   if not Result then
     Exit;
 
