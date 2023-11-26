@@ -1,3 +1,13 @@
+## [2.10.13](https://github.com/Torwent/wasp-free/compare/v2.10.12...v2.10.13) (2023-11-26)
+
+
+### Bug Fixes
+
+* **blast furnace:** tweaks and reverted some minor things on Baconadors PR ([5b1cefc](https://github.com/Torwent/wasp-free/commit/5b1cefc143ad604b671c69a9d60c837bba476bc7))
+* Desyncing & Glove Management ([2330ffe](https://github.com/Torwent/wasp-free/commit/2330ffe734912178096e7ac6623199c094f49961))
+
+
+
 ## [2.10.12](https://github.com/Torwent/wasp-free/compare/v2.10.11...v2.10.12) (2023-11-18)
 
 
@@ -31,15 +41,6 @@
 ### Bug Fixes
 
 * **cooker:** should now count actions when has burnt fish ([b0c5b80](https://github.com/Torwent/wasp-free/commit/b0c5b8079917e19395d255fc621ca4cc8b44a449))
-
-
-
-## [2.10.8](https://github.com/Torwent/wasp-free/compare/v2.10.7...v2.10.8) (2023-11-14)
-
-
-### Bug Fixes
-
-* **nmz:** should stop spam attacking enemies ([09eec50](https://github.com/Torwent/wasp-free/commit/09eec5072024f153f197307b0c1ac62ebd9ea662))
 
 
 
