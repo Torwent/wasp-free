@@ -1,3 +1,12 @@
+## [2.10.14](https://github.com/Torwent/wasp-free/compare/v2.10.13...v2.10.14) (2023-11-26)
+
+
+### Bug Fixes
+
+* **pickpocketer:** scoped enums ([8c2b34a](https://github.com/Torwent/wasp-free/commit/8c2b34ab0fc45ca9606b2126129fd937a5d550cd))
+
+
+
 ## [2.10.13](https://github.com/Torwent/wasp-free/compare/v2.10.12...v2.10.13) (2023-11-26)
 
 
@@ -32,15 +41,6 @@
 ### Bug Fixes
 
 * fix compatibility with latest WaspLib ([fd8f8ae](https://github.com/Torwent/wasp-free/commit/fd8f8ae3203cd24369732739e4d3c1c601c5c6e4))
-
-
-
-## [2.10.9](https://github.com/Torwent/wasp-free/compare/v2.10.8...v2.10.9) (2023-11-16)
-
-
-### Bug Fixes
-
-* **cooker:** should now count actions when has burnt fish ([b0c5b80](https://github.com/Torwent/wasp-free/commit/b0c5b8079917e19395d255fc621ca4cc8b44a449))
 
 
 
