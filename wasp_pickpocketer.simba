@@ -689,85 +689,85 @@ end;
 function TThiever.GetState(): EThieverState;
 begin
   if WL.Activity.IsFinished() then
-    Exit(END_SCRIPT);
+    Exit(EThieverState.END_SCRIPT);
 
   if ChooseOption.IsOpen() then
-    Exit(CLOSE_CONTEXT);
+    Exit(EThieverState.CLOSE_CONTEXT);
 
   if MainScreen.FindGrave() then
-    Exit(LOOT_GRAVE);
+    Exit(EThieverState.LOOT_GRAVE);
 
   if MainScreen.HasInterface() then
   begin
     if Bank.IsOpen() then
     begin
       if Inventory.ContainsRandomItems(Self.StackableArray) then
-        Exit(DEPOSIT_LOOT);
+        Exit(EThieverState.DEPOSIT_LOOT);
       if Inventory.CountItem(Necklace) < NeckAmount then
-        Exit(WITHDRAW_NECKLACES);
+        Exit(EThieverState.WITHDRAW_NECKLACES);
       if not Inventory.HasEnoughConsumable(ERSConsumable.FOOD) then
-        Exit(WITHDRAW_FOOD);
+        Exit(EThieverState.WITHDRAW_FOOD);
     end;
 
-    Exit(CLOSE_INTERFACE);
+    Exit(EThieverState.CLOSE_INTERFACE);
   end;
 
   if Self.IsPouchFull() then
-    Exit(OPEN_POUCH);
+    Exit(EThieverState.OPEN_POUCH);
 
   if ChatButtons.GetState(ERSChatButton.GAME_CHAT) <> ERSChatButtonState.ENABLED then
-    Exit(CHANGE_CHAT_FILTER);
+    Exit(EThieverState.CHANGE_CHAT_FILTER);
 
   if not ChatButtons.IsActive(ERSChatButton.GAME_CHAT) then
-    Exit(OPEN_CHAT);
+    Exit(EThieverState.OPEN_CHAT);
 
   if NeckTimer.IsFinished() then
-    Exit(CHECK_NECKLACE);
+    Exit(EThieverState.CHECK_NECKLACE);
 
   if Inventory.ContainsAny(Self.RogueEquipment) then
-    Exit(EQUIP_ROGUE);
+    Exit(EThieverState.EQUIP_ROGUE);
 
   if not Self.HasSpace() then
   begin
     if Inventory.ContainsAny(Self.DropArray) then
-      Exit(DROP_ITEMS);
+      Exit(EThieverState.DROP_ITEMS);
     if Inventory.FindConsumable(ERSConsumable.FOOD) then
-      Exit(EAT_FOOD);
+      Exit(EThieverState.EAT_FOOD);
 
-    Exit(OPEN_BANK);
+    Exit(EThieverState.OPEN_BANK);
   end;
 
   if (NeckAmount > 0) and not FreshNeck and (not HasNeck or Self.NecklaceExpired) then
   begin
     if Inventory.ContainsItem(Necklace) then
-      Exit(EQUIP_NECKLACE);
+      Exit(EThieverState.EQUIP_NECKLACE);
 
-    Exit(OPEN_BANK);
+    Exit(EThieverState.OPEN_BANK);
   end;
 
   if Self.IsLowHP() then
   begin
     if not RedemptionEnabled and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-      Exit(EAT_FOOD);
+      Exit(EThieverState.EAT_FOOD);
     if not SuicideMode then
-      Exit(OPEN_BANK);
+      Exit(EThieverState.OPEN_BANK);
     if not Self.RSW.AtTile(Self.CurrentNPC.Coordinates, 40) then
-      Exit(WALK_TO_NPC);
+      Exit(EThieverState.WALK_TO_NPC);
     if Self.UseRedemption and not Self.RedemptionEnabled then
-      Exit(ENABLE_REDEMPTION);
+      Exit(EThieverState.ENABLE_REDEMPTION);
     if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
-      Exit(CAST_SHADOW_VEIL);
+      Exit(EThieverState.CAST_SHADOW_VEIL);
 
-    Exit(PICKPOCKET);
+    Exit(EThieverState.PICKPOCKET);
   end;
 
   if not Self.RSW.AtTile(Self.CurrentNPC.Coordinates, 40) then
-    Exit(WALK_TO_NPC);
+    Exit(EThieverState.WALK_TO_NPC);
 
   if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
-    Exit(CAST_SHADOW_VEIL);
+    Exit(EThieverState.CAST_SHADOW_VEIL);
 
-  Exit(PICKPOCKET);
+  Exit(EThieverState.PICKPOCKET);
 end;
 
 procedure TThiever.Run(maxActions: UInt32; maxTime: UInt64);
