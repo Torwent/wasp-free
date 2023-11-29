@@ -5,7 +5,7 @@
 {$I WaspLib/osr.simba}
 
 begin
-  Login.PlayerIndex := 0;
+  Login.PlayerIndex := 1;
 end;
 
 type

@@ -19,7 +19,7 @@ var
   SuicideMode: Boolean := True;      //Pickpocket until death. Useful if you respawn nearby.
   DiaryLevel: Int32 := 4;
   FoodAmount: Int32 := 10;
-  NeckAmount: Int32 := 0;
+  NeckAmount: Int32 := 4;
   MinHealth: Int32 := 20;
 
 type
@@ -57,30 +57,22 @@ type
     //init variables (to be set while the script is initiates)
     State: EThieverState;
 
-    UseShadowVeil: Boolean;
-    UseRedemption: Boolean;
+    UseShadowVeil, UseRedemption: Boolean;
 
     CurrentNPC: TRSNPC;
 
-    CoinPouch: TRSItem;
-    Necklace: TRSItem;
-    ValuableItem: TRSItem;
+    CoinPouch, Necklace, ValuableItem: TRSItem;
 
     LootArray, StackableArray, DropArray, RogueEquipment: TRSItemArray;
 
     GearAmount, ValuableItemValue: Int32;
-
-    NeckTimer: TCountDown;
-    ShadowVeilTimer: TCountDown;
+    NeckTimer, ShadowVeilTimer: TCountDown;
     LasPickPosition: TPoint;
 
     //run variables (to be used while the script is running)
-    RenderDisabled: Boolean;
-    HasNeck: Boolean;
-    FreshNeck: Boolean;
-    RedemptionEnabled: Boolean;
+    RenderDisabled, HasNeck, FreshNeck, RedemptionEnabled: Boolean;
 
-    CoinPouchLimit, MaxHit, NextHeal: Int32;
+    CoinPouchLimit, MaxHit, NextHeal, VeilAttempts: Int32;
   end;
 
 
@@ -558,16 +550,23 @@ begin
   NeckTimer.Restart(Random(-30000, 60000));
 end;
 
-
 function TThiever.CastShadowVeil(): Boolean;
 begin
-  if not Self.UseShadowVeil or not Magic.Open() then
+  if not Magic.Open() then
     Exit;
 
   if not Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
   begin
-    Result := Self.UseShadowVeil := False;
-    Exit(False);
+    if Self.VeilAttempts > 2 then
+    begin
+      Self.UseShadowVeil := Result;
+      Exit;
+    end;
+
+    Self.DebugLn('Shadow veil is not available yet.');
+    Self.ShadowVeilTimer.Restart(Random(-5000, 5000));
+    Self.VeilAttempts += 1;
+    Exit;
   end;
 
   Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL);
@@ -727,6 +726,14 @@ begin
   if Inventory.ContainsAny(Self.RogueEquipment) then
     Exit(EThieverState.EQUIP_ROGUE);
 
+  if (NeckAmount > 0) and not Self.FreshNeck and (not Self.HasNeck or Self.NecklaceExpired) then
+  begin
+    if Inventory.ContainsItem(Self.Necklace) then
+      Exit(EThieverState.EQUIP_NECKLACE);
+
+    Exit(EThieverState.OPEN_BANK);
+  end;
+
   if not Self.HasSpace() then
   begin
     if Inventory.ContainsAny(Self.DropArray) then
@@ -737,13 +744,11 @@ begin
     Exit(EThieverState.OPEN_BANK);
   end;
 
-  if (NeckAmount > 0) and not FreshNeck and (not HasNeck or Self.NecklaceExpired) then
-  begin
-    if Inventory.ContainsItem(Necklace) then
-      Exit(EThieverState.EQUIP_NECKLACE);
+  if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
+    Exit(EThieverState.CAST_SHADOW_VEIL);
 
-    Exit(EThieverState.OPEN_BANK);
-  end;
+  if not Self.RSW.AtTile(Self.CurrentNPC.Coordinates, 40) then
+    Exit(EThieverState.WALK_TO_NPC);
 
   if Self.IsLowHP() then
   begin
@@ -755,17 +760,7 @@ begin
       Exit(EThieverState.WALK_TO_NPC);
     if Self.UseRedemption and not Self.RedemptionEnabled then
       Exit(EThieverState.ENABLE_REDEMPTION);
-    if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
-      Exit(EThieverState.CAST_SHADOW_VEIL);
-
-    Exit(EThieverState.PICKPOCKET);
   end;
-
-  if not Self.RSW.AtTile(Self.CurrentNPC.Coordinates, 40) then
-    Exit(EThieverState.WALK_TO_NPC);
-
-  if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
-    Exit(EThieverState.CAST_SHADOW_VEIL);
 
   Exit(EThieverState.PICKPOCKET);
 end;
