@@ -1,3 +1,12 @@
+## [2.10.15](https://github.com/Torwent/wasp-free/compare/v2.10.14...v2.10.15) (2023-11-29)
+
+
+### Bug Fixes
+
+* **pickpocketer:** added a failsafe to shadowveil ([33e8b6f](https://github.com/Torwent/wasp-free/commit/33e8b6f9bde86e5ccc8880b080d3717da075e0ae))
+
+
+
 ## [2.10.14](https://github.com/Torwent/wasp-free/compare/v2.10.13...v2.10.14) (2023-11-26)
 
 
@@ -32,15 +41,6 @@
 ### Bug Fixes
 
 * **alcher:** tweaks for better alch timings ([1445078](https://github.com/Torwent/wasp-free/commit/144507822f25b380dfb6f80405771dd2f51b8164))
-
-
-
-## [2.10.10](https://github.com/Torwent/wasp-free/compare/v2.10.9...v2.10.10) (2023-11-16)
-
-
-### Bug Fixes
-
-* fix compatibility with latest WaspLib ([fd8f8ae](https://github.com/Torwent/wasp-free/commit/fd8f8ae3203cd24369732739e4d3c1c601c5c6e4))
 
 
 
