@@ -1,3 +1,12 @@
+## [2.10.16](https://github.com/Torwent/wasp-free/compare/v2.10.15...v2.10.16) (2023-11-30)
+
+
+### Bug Fixes
+
+* **pickpocketer:** Shadow veil attempts now reset to 0 once the spell is properly cast ([1ab9a54](https://github.com/Torwent/wasp-free/commit/1ab9a54971bcb73826669630d86e436b107def19))
+
+
+
 ## [2.10.15](https://github.com/Torwent/wasp-free/compare/v2.10.14...v2.10.15) (2023-11-29)
 
 
@@ -32,15 +41,6 @@
 ### Bug Fixes
 
 * **cooker:** shrimps should now work ([5094319](https://github.com/Torwent/wasp-free/commit/5094319647963210b151db80c6dabf3b5189f919))
-
-
-
-## [2.10.11](https://github.com/Torwent/wasp-free/compare/v2.10.10...v2.10.11) (2023-11-17)
-
-
-### Bug Fixes
-
-* **alcher:** tweaks for better alch timings ([1445078](https://github.com/Torwent/wasp-free/commit/144507822f25b380dfb6f80405771dd2f51b8164))
 
 
 
