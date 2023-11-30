@@ -559,6 +559,7 @@ begin
   begin
     if Self.VeilAttempts > 2 then
     begin
+      Self.DebugLn('Disabling shadow veil.');
       Self.UseShadowVeil := Result;
       Exit;
     end;
@@ -571,6 +572,7 @@ begin
 
   Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL);
   Self.ShadowVeilTimer.Restart(Random(-5000, 5000));
+  Self.VeilAttempts := 0;
 end;
 
 function TThiever.PickNPC(): Boolean;
