@@ -68,6 +68,8 @@ type
     FLICK_PRAYER,
 
     OUT_OF_MONEY,
+    BARREL_EMPTY,
+    DREAM_NOT_SET,
     END_SCRIPT
   );
 
@@ -201,7 +203,9 @@ begin
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
 
   CombatHandler.Setup(True, RSMonsters.AnyMonster, 25000 - Round(15000 * BioHash));
-  Combat.SetAutoRetaliate(True);
+
+  if not CombatHandler.AutoRetaliateEnabled then
+    Combat.SetAutoRetaliate(True);
 
   Self.SetupDamageItem();
 
@@ -318,7 +322,13 @@ begin
   begin
     Minimap.WaitMoving();
     Result := Chat.FindQuery('How many doses', 5000, 100);
+
+    if not Result then
+      Self.WithdrawFails += 1;
   end;
+
+  if Result then
+    Self.WithdrawFails := 0;
 end;
 
 function TNMZFighter.DepositPotion(Barrel: TRSObject): Boolean;
@@ -342,14 +352,10 @@ begin
   Chat.AnswerQuery('How many', ToStr(amount), 2000, 100);
   Result := WaitUntil(InvCount <> Inventory.Count, 100, 3000);
 
-
   if Result then
     Self.WithdrawFails := 0
   else
     Self.WithdrawFails += 1;
-
-  if Self.WithdrawFails > 2 then
-    Self.Fatal('We failed to withdraw potions 3 times. Did we run out?');
 end;
 
 function TNMZFighter.TalkWithDominic(): Boolean;
@@ -648,6 +654,9 @@ begin
   if WL.Activity.IsFinished() then
     Exit(ENMZState.END_SCRIPT);
 
+  if Self.WithdrawFails > 2 then
+    Exit(ENMZState.BARREL_EMPTY);
+
   query := Chat.GetQuery();
   title := Chat.GetChatTitle();
 
@@ -735,7 +744,7 @@ begin
       Exit(ENMZState.OUT_OF_MONEY);
     end;
 
-    Exit(ENMZState.END_SCRIPT);
+    Exit(ENMZState.DREAM_NOT_SET);
   end;
 
   if 'Agree' in title then
@@ -805,7 +814,10 @@ begin
       ENMZState.LOWER_HEALTH: Self.LowerHealth();
       ENMZState.FLICK_PRAYER: Self.FlickPrayer();
 
-      ENMZState.OUT_OF_MONEY, ENMZState.END_SCRIPT: Break;
+      ENMZState.OUT_OF_MONEY,
+      ENMZState.BARREL_EMPTY,
+      ENMZState.DREAM_NOT_SET,
+      ENMZState.END_SCRIPT: Break;
     end;
 
     if Self.InsideDream then
