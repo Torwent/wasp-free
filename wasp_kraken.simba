@@ -23,6 +23,8 @@ type
     CHECK_LOOT,
     WAKE_KRAKEN,
     ATTACK_KRAKEN,
+    SELECT_SPELL,
+    CAST_BLOOD,
     BOOST,
     EAT_FOOD,
     DRINK_PRAYER,
@@ -37,16 +39,14 @@ type
 
     RSW: TRSWalker;
     Bridge: TPoint;
-    BossRoomTPA: TPointArray;
+    BossRoomTPA, SleepyKraken, KrakenTPA: TPointArray;
 
     KrakenFinder: TRSObjectFinder;
-    SleepyKraken: TPointArray;
 
-    AnotherPlayer: Boolean;
-    KrakenTPA: TPointArray;
-    IsAttacking: Boolean;
-    CheckedLoot: Boolean;
-    UseImbuedHeart: Boolean;
+    AnotherPLayer, IsAttacking, CheckedLoot, UseImbuedHeart,
+    HasBloodSpells: Boolean;
+    BloodSpell: ERSSpell;
+
     ImbuedHeart: TCountDown;
   end;
 
@@ -71,13 +71,35 @@ begin
   inherited;
 end;
 
+function TKrakenKiller.CanCastBloodSpells(): Boolean;
+const
+  BLOOD_SPELLS: array of ERSSpell = [
+    ERSSpell.BLOOD_BARRAGE, ERSSpell.BLOOD_BLITZ,
+    ERSSPell.BLOOD_BURST, ERSSpell.BLOOD_RUSH
+  ];
+var
+  i: Int32;
+begin
+  if not Magic.IsSpellBook(ERSSpellBook.ANCIENT) or not Magic.Open() then
+    Exit;
+
+  for i := 0 to 3 do
+  begin
+    if Magic.ContainsSpell(BLOOD_SPELLS[i]) then
+    begin
+      Self.BloodSpell := BLOOD_SPELLS[i];
+      Exit(True);
+    end;
+  end;
+end;
+
 procedure TKrakenKiller.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  RSW.Setup([RSRegions.KRAKEN_COVE]);
-  Bridge := [10391, 1145];
-  BossRoomTPA := [
+  Self.RSW.Setup([RSRegions.KRAKEN_COVE]);
+  Self.Bridge := [10391, 1145];
+  Self.BossRoomTPA := [
     [10369, 1085], [10420, 1086], [10440, 1107],
     [10440, 1149], [10415, 1155], [10411, 1187],
     [10373, 1187], [10367, 1156], [10345, 1148],
@@ -87,11 +109,11 @@ begin
   FoodHandler.MinInvPoints := 10;
   FoodHandler.MinInvPoints := 90;
 
-  KrakenFinder.ClusterDistance := 3;
-  KrakenFinder.Erode := 2;
-  KrakenFinder.Grow := 4;
-  KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
-  KrakenFinder.MinShortSide := 70;
+  Self.KrakenFinder.ClusterDistance := 3;
+  Self.KrakenFinder.Erode := 2;
+  Self.KrakenFinder.Grow := 4;
+  Self.KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
+  Self.KrakenFinder.MinShortSide := 70;
   
   Self.UseImbuedHeart := True;
   Self.ImbuedHeart.Setup(7 * ONE_MINUTE);
@@ -99,6 +121,8 @@ begin
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
   CombatHandler.Setup(False, RSMonsters.Kraken, 5000, 4000);
+
+  Self.HasBloodSpells :=  Self.CanCastBloodSpells();
 
   if not Equipment.ContainsItem('Sanguinesti staff') then
   begin
@@ -191,7 +215,22 @@ begin
   if MainScreen.IsUpText('Attack K') then
   begin
     Mouse.Click(MOUSE_LEFT);
-    Result := IsAttacking := MainScreen.DidRedClick();
+    Result := MainScreen.DidRedClick();
+    Self.IsAttacking := Result;
+  end;
+end;
+
+function TKrakenKiller.CastBlood(): Boolean;
+begin
+  Mouse.Move(KrakenTPA.Mean());
+
+  if MainScreen.IsUpText('> K') then
+  begin
+    XPBar.EarnedXP();
+    Mouse.Click(MOUSE_LEFT);
+    Result := MainScreen.DidRedClick() and XPBar.WaitXP(1200);
+    if Result then
+      Self.IsAttacking := False;
   end;
 end;
 
@@ -226,19 +265,21 @@ end;
 
 function TKrakenKiller.CheckLoot(): Boolean;
 var
-  B: TBox := MainScreen.GetPlayerFloorBox();
+  b: TBox := MainScreen.GetPlayerFloorBox();
 begin
   while Inventory.IsFull() and Inventory.ContainsConsumable(ERSConsumable.FOOD) do
     Inventory.Consume(ERSConsumable.FOOD);
 
   Result := CheckedLoot := True;
 
-  while CombatHandler.LootHandler.CheckLoot(B) and Inventory.HasSpace(1) do
+  while CombatHandler.LootHandler.CheckLoot(b, 1) and Inventory.HasSpace(1) do
     Wait(400, 600);
 end;
 
 
 function TKrakenKiller.GetState(): EKrakenState;
+var
+  health: Int32;
 begin
   if WL.Activity.IsFinished() and not MainScreen.InCombat() then
     Exit(EKrakenState.END_SCRIPT);
@@ -250,17 +291,32 @@ begin
     Exit(EKrakenState.ENTER_CREVICE);
   end;
 
-  if (Minimap.GetHPLevel() <= 40) then
+  health := Minimap.GetHPLevel();
+  if health <= 40 then
   begin
+    if Self.HasBloodSpells then
+    begin
+      if not MainScreen.IsUpText('Blood') then
+      begin
+        if (health <= 25) and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+          Exit(EKrakenState.EAT_FOOD);
+
+        Exit(EKrakenState.SELECT_SPELL);
+      end;
+
+      if Self.FindRagingKraken() then
+        Exit(EKrakenState.CAST_BLOOD);
+    end;
+
     if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-      Exit(EKrakenState.EAT_FOOD)
-    else if Self.FindRagingKraken() then
-      Exit(EKrakenState.ATTACK_KRAKEN)
-    else if (Minimap.GetHPLevel() <= 25) then
+      Exit(EKrakenState.EAT_FOOD);
+    if Self.FindRagingKraken() then
+      Exit(EKrakenState.ATTACK_KRAKEN);
+    if health <= 25 then
       TerminateScript('OUT OF FOOD AND HEALTH');
   end;
 
-  if (Minimap.GetPrayerLevel() <= 30) and Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
+  if (Minimap.GetPrayerLevel() <= 30) and Inventory.ContainsItem('Prayer potion(1..4)') then
     Exit(EKrakenState.DRINK_PRAYER);
 
   if CombatHandler.NeedBracelet() then
@@ -285,7 +341,7 @@ begin
   if not Self.CheckedLoot then
     Exit(EKrakenState.CHECK_LOOT);
 
-  if Inventory.ContainsAny(RSAlchHandler.ItemArray) then
+  if not Self.HasBloodSpells and Inventory.ContainsAny(RSAlchHandler.ItemArray) then
     Exit(EKrakenState.ALCH_DROP);
 
   if Self.FindSleepyKraken() then
@@ -310,7 +366,9 @@ begin
       EKrakenState.WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
       EKrakenState.CHECK_LOOT: Self.CheckLoot();
       EKrakenState.WAKE_KRAKEN: Self.WakeKraken();
-      EKrakenState.ATTACK_KRAKEN: IsAttacking := Self.AttackKraken();
+      EKrakenState.SELECT_SPELL: Magic.CastSpell(Self.BloodSpell);
+      EKrakenState.CAST_BLOOD: Self.CastBlood();
+      EKrakenState.ATTACK_KRAKEN: Self.AttackKraken();
       EKrakenState.BOOST: Self.BoostMagic();
       EKrakenState.EAT_FOOD: Inventory.Consume(ERSConsumable.FOOD);
       EKrakenState.DRINK_PRAYER: Inventory.Consume(ERSConsumable.PRAYER);
@@ -359,14 +417,16 @@ begin
     Create(tab);
     SetCaption(
       'Keep in mind this script doesn''t bank so Sang Staff is highly recommended.'
-      + LineEnding +
+      + LINEENDING +
       'If you have issues staying alive consider using magic and defense boosting prayers.'
-      + LineEnding +
+      + LINEENDING +
       'Overhead prayers have no effect on kraken.'
-      + LineEnding + LineEnding +
+      + LINEENDING + LINEENDING +
       'Also keep in mind this won''t stop when you have your inventory full of loot.'
-      + LineEnding +
+      + LINEENDING +
       'I recommend you check it every 40 mins or so to see if it needs banking.'
+      + LINEENDING + LINEENDING +
+      'FISHING EXPLOSIVES ARE REQUIRED!'
     );
     SetLeft(TControl.AdjustToDPI(50));
     SetTop(TControl.AdjustToDPI(200));
