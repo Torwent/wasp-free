@@ -1,3 +1,12 @@
+## [2.10.18](https://github.com/Torwent/wasp-free/compare/v2.10.17...v2.10.18) (2023-12-08)
+
+
+### Bug Fixes
+
+* **kraken:** looting works again ([77bde1a](https://github.com/Torwent/wasp-free/commit/77bde1a724f3a60439ba0c6d027dd595f0572bdb))
+
+
+
 ## [2.10.17](https://github.com/Torwent/wasp-free/compare/v2.10.16...v2.10.17) (2023-12-04)
 
 
@@ -31,16 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** scoped enums ([8c2b34a](https://github.com/Torwent/wasp-free/commit/8c2b34ab0fc45ca9606b2126129fd937a5d550cd))
-
-
-
-## [2.10.13](https://github.com/Torwent/wasp-free/compare/v2.10.12...v2.10.13) (2023-11-26)
-
-
-### Bug Fixes
-
-* **blast furnace:** tweaks and reverted some minor things on Baconadors PR ([5b1cefc](https://github.com/Torwent/wasp-free/commit/5b1cefc143ad604b671c69a9d60c837bba476bc7))
-* Desyncing & Glove Management ([2330ffe](https://github.com/Torwent/wasp-free/commit/2330ffe734912178096e7ac6623199c094f49961))
 
 
 
