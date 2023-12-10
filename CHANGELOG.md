@@ -1,3 +1,12 @@
+## [2.10.19](https://github.com/Torwent/wasp-free/compare/v2.10.18...v2.10.19) (2023-12-10)
+
+
+### Bug Fixes
+
+* **wrath runecrafter:** read notes ([4162f37](https://github.com/Torwent/wasp-free/commit/4162f37d31c4699068e2fc6d0844e074864dd8d6))
+
+
+
 ## [2.10.18](https://github.com/Torwent/wasp-free/compare/v2.10.17...v2.10.18) (2023-12-08)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** added a failsafe to shadowveil ([33e8b6f](https://github.com/Torwent/wasp-free/commit/33e8b6f9bde86e5ccc8880b080d3717da075e0ae))
-
-
-
-## [2.10.14](https://github.com/Torwent/wasp-free/compare/v2.10.13...v2.10.14) (2023-11-26)
-
-
-### Bug Fixes
-
-* **pickpocketer:** scoped enums ([8c2b34a](https://github.com/Torwent/wasp-free/commit/8c2b34ab0fc45ca9606b2126129fd937a5d550cd))
 
 
 

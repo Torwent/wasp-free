@@ -1,5 +1,5 @@
 {$UNDEF SCRIPT_ID}{$DEFINE SCRIPT_ID := '928ed577-393d-476c-ae84-a5670c9f9fae'}
-{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '8'}
+{$UNDEF SCRIPT_REVISION}{$DEFINE SCRIPT_REVISION := '9'}
 {$IFDEF WINDOWS}{$DEFINE SCRIPT_GUI}{$ENDIF}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -34,9 +34,6 @@ type
 //==========================SETTINGS============================================
 begin
   Login.PlayerIndex := 0;
-  WLSettings.Antiban.Chat := False;
-  WLSettings.Antiban.GameTabs := False;
-  WLSettings.Antiban.Bank := False;
 end;
 
 var
