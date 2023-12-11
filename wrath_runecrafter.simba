@@ -38,62 +38,42 @@ end;
 
 var
   TELEPORTITEM: TeleportItemType         = RING_OF_DUELING; //teleport item
-
-
   PRAYERTHRESHOLD: Int32                 = 15; //when to drink prayer
   SCRIPTSPEED: Int32                     = 100;// 0-110, 100 is fastest 100-110 increases mouse speed
 
   ADAPTIVEWALK: Boolean                  = True;
   PRAY: Boolean                          = True;
   DESERTAMULET: Boolean                  = False;
-                                           //you can put a discord webhook url below I WILL NOT HELP YOU SET THIS UP
-  WEBHOOKURL: String                     = '';
-  WEBHOOKDISCID: String                  = '';// enter your disc ID to get @'d when sending webhooks
-
-  PROGRESSBACKGROUND: Background         = WASP;
 //==============================================================================
+
 type
-  EState = (
+  EWrathCrafterState = (
     NULL_STATE,
 
-    ENTER_STATUE,
-    ENTER_CAVE,
-    NAVIGATE_CORNER,
-    ENTER_RUINS,
+    ENTER_STATUE, ENTER_CAVE,
+    NAVIGATE_CORNER, ENTER_RUINS,
 
-    CRAFT_RUNES,
-    EMPTY_POUCH,
+    CRAFT_RUNES, EMPTY_POUCH,
 
-    OPEN_BANK,
-    DRINK_PRAYER,
-    WITHDRAW_PRAYER,
-    DRINK_STAMINA,
-    WITHDRAW_STAMINA,
-    WITHDRAW_FOOD,
-    EAT_FOOD,
-    FILL_POUCH,
+    OPEN_BANK, DRINK_PRAYER,
+    WITHDRAW_PRAYER, DRINK_STAMINA,
+    WITHDRAW_STAMINA, WITHDRAW_FOOD,
+    EAT_FOOD, FILL_POUCH,
     CLOSE_INTERFACE,
-    WITHDRAW_ESS,
-    EQUIP_RING,
-    WITHDRAW_RING,
-    WITHDRAW_GLORY,
-    UNEQUIP_GLORY,
-    EQUIP_GLORY,
-    DEPOSIT_RUNES,
-    DEPOSIT_RANDOM,
 
-    TALK_MAGE,
-    CALL_MAGE,
+    WITHDRAW_ESS, EQUIP_RING,
+    WITHDRAW_RING, WITHDRAW_GLORY,
+    UNEQUIP_GLORY, EQUIP_GLORY,
+    DEPOSIT_RUNES, DEPOSIT_RANDOM,
 
+    TALK_MAGE, CALL_MAGE,
     CLICK_STATUE,
 
-    TELEPORT_GUILD,
-    TELEPORT_BANK,
-    TELEPORT_NARDAH
+    TELEPORT_GUILD, TELEPORT_BANK, TELEPORT_NARDAH
   );
 
-  WrathRuneCrafter = record(TBaseBankScript)
-    State: EState;
+  TWrathRunecrafter = record(TBaseBankScript)
+    State: EWrathCrafterState;
     Transport: TUniversalTransport;
     Position: TPoint;
     MythGuildBox, MythGuildBasementBox, MythGuildIslandBox, WrathAltarBox,
@@ -111,26 +91,6 @@ type
     PouchFull, WithdrawRing, WithdrawGlory, UnequipGlory, NeedsStatue, InventoryHasEss,
     PouchDegraded, DepositedRunes: Boolean;
   end;
-var
-RUNESCRAFTED, PRSPACING, PRTOP, TITLEOFFSET, TITLECOLOR, FOOTERCOLOR: Int32;
-BGOFFSET: Int32 = 0;
-REDTEXT = True;
-DARKSHADOW = TRUE;
-
-const
-RELD_WELCOME_SENTENCES: TStringArray = [
-    'Join WaspScripts today!',
-    'Road to max cape with',
-    'No time to play legit?',
-    'What are you waiting for?',
-    'The best public color bots',
-    'Learn how to script at',
-    'Get that 99 with',
-    'Daily bans are not normal,',
-    'Everything is open source',
-    'Imagine AHK on steroids',
-    'Unleash the power of Simba'
-  ];
 
 procedure TAntiban.Setup(); override;
 begin
@@ -141,31 +101,11 @@ begin
   inherited;
 end;
 
-function WrathRuneCrafter.WaitMinimapChange(): Boolean;
+function TWrathRunecrafter.WaitMinimapChange(): Boolean;
 begin
-
   Result := SRL.IsAnimating(Minimap.Bounds(), 7000, 150, 20);
 end;
 
-
-procedure WrathRuneCrafter.SendWebhook(msg: String; FilePath: String = '');
-var
-  HTTP: Int32;
-begin
-  if WEBHOOKURL = "" then
-    Exit();
-  if WEBHOOKDISCID then
-    msg := ' <@' + WEBHOOKDISCID + '>' + LineEnding + msg;
-  HTTP := InitializeHTTPClient(False);
-  AddPostVariable(HTTP, 'content', msg);
-  try
-    PostHTTPPageEx(HTTP, WEBHOOKURL);
-    if filePath then
-      PostHTTPForm(HTTP, WEBHOOKURL, 'Attachments', FilePath);
-  finally
-    FreeHTTPClient(HTTP);
-  end;
-end;
 
 function TRSInventory.QuickShiftDrop(Items: TRSItemArray; Pattern: TIntegerArray = DROP_PATTERN_REGULAR): Boolean;//
 var
@@ -224,42 +164,38 @@ begin
   KeyUp(VK_SHIFT);
 end;
 
-procedure WrathRuneCrafter.WithdrawFood();
+procedure TWrathRunecrafter.WithdrawFood();
 begin
   FoodHandler.MinInvPoints := Self.MaxHealth - MiniMap.GetHPLevel();
   Bank.WithdrawConsumable(ERSConsumable.FOOD);
 end;
 
-procedure WrathRuneCrafter.DepositRunes();
+procedure TWrathRunecrafter.DepositRunes();
 var
   runeCount, slot: Int32;
-
 begin
     Inventory.FindItem('Wrath rune', slot);
     runeCount := Inventory.ItemInterface.CountStack(slot);
     Bank.GetButton(ERSBankButton.QUANTITY_ALL).Enable();
     Inventory.ClickSlot(slot, 'Deposit-All');
 
-    RUNESCRAFTED += runeCount;
+    Self.TotalActions += runeCount;
     Self.TotalProfit += runeCount * Self.WrathPrice;
     if Self.Essence.Item = 'Pure essence' then
       Self.TotalProfit -= runeCount * Self.EssPrice;//TODO do this on craft im lazy
 
     StatsPayload.Update(0, runeCount * (Self.WrathPrice - Self.EssPrice), 0);
 
-    Self.TotalActions += 1;
-
     Self.DepositedRunes := True;
-
 end;
 
-procedure WrathRuneCrafter.EatFood();
+procedure TWrathRunecrafter.EatFood();
 begin
   //TODO remove food cost from profit
   Inventory.Consume(ERSConsumable.FOOD);
 end;
 
-function WrathRuneCrafter.ClickStatue(): Boolean;
+function TWrathRunecrafter.ClickStatue(): Boolean;
 begin
   Result := RSObjects.ElidinisStatue.Click();
   if Result then
@@ -270,7 +206,7 @@ begin
   end;
 end;
 
-procedure WrathRuneCrafter.DrinkPotion(potion: String);
+procedure TWrathRunecrafter.DrinkPotion(potion: String);
 begin
   if potion.contains('Stam') then
   begin
@@ -287,7 +223,7 @@ begin
   Wait(200,300);
 end;
 
-procedure WrathRuneCrafter.DrinkPrayerPotion();
+procedure TWrathRunecrafter.DrinkPrayerPotion();
 begin
   if Inventory.ContainsItem('Prayer potion(1)') then
     Self.DrinkPotion('Prayer potion(1)')
@@ -296,27 +232,29 @@ begin
   Wait(200, 300);
 end;
 
-function WrathRuneCrafter.LowHealth(): Boolean;
+
+function TWrathRunecrafter.LowHealth(): Boolean;
 begin
   Result := Minimap.GetHPLevel() < Antiban.GetUniqueNumber(35, 45, 65);
 end;
 
-function WrathRuneCrafter.LowEnergy(): Boolean;
+function TWrathRunecrafter.LowEnergy(): Boolean;
 begin
   Result := not Minimap.HasStamina() and (Minimap.GetRunEnergy() < Antiban.GetUniqueNumber(35, 30, 50));
 end;
 
-function WrathRuneCrafter.LowPrayer(): Boolean;
+function TWrathRunecrafter.LowPrayer(): Boolean;
 begin
   Result := Minimap.GetPrayerLevel() < Antiban.GetUniqueNumber(35, PRAYERTHRESHOLD - 5, PRAYERTHRESHOLD + 10);
 end;
 
-function WrathRuneCrafter.ShouldTeleportNardah(): Boolean;
+
+function TWrathRunecrafter.ShouldTeleportNardah(): Boolean;
 begin
   Result := Self.LowPrayer() or Self.LowHealth() or Self.LowEnergy();
 end;
 
-procedure WrathRuneCrafter.DoUnequipGlory();
+procedure TWrathRunecrafter.DoUnequipGlory();
 begin
   if Equipment.ClickItem('Amulet of glory', 'Remove') then
   begin
@@ -324,31 +262,23 @@ begin
   end;
 end;
 
-procedure WrathRuneCrafter.OpenBank();
+function TWrathRunecrafter.OpenBank(): Boolean;
 begin
-  writeln TELEPORTITEM;
+  WriteLn('Teleport item: ', TELEPORTITEM);
   case TELEPORTITEM of
-    RING_OF_DUELING:
-    begin
-      if not Equipment.ContainsItem('Ring of Dueling(1)') then
-        Self.WithdrawRing := True;
-    end;
+    RING_OF_DUELING: Self.WithdrawRing := not Equipment.ContainsItem('Ring of Dueling(1)');
     AMULET_OF_GLORY:
     begin
       writeln Equipment.ContainsItem('Amulet of glory(1)');
       if not Equipment.ContainsItem('Amulet of glory(1)') then
-      begin
-        writeln Equipment.ContainsItem('Amulet of glory(1)');
         Self.DoUnequipGlory();
-      end;
     end;
   end;
 
-  Bank.WalkOpen();
-  Minimap.WaitMoving();
+  Result := Bank.WalkOpen();
 end;
 
-procedure WrathRuneCrafter.UseCraftingCape();
+procedure TWrathRunecrafter.UseCraftingCape();
 var
   slots: TIntegerArray;
 begin
@@ -363,7 +293,7 @@ begin
   Self.WaitMinimapChange();
 end;
 
-procedure WrathRuneCrafter.UseMaxCape();
+procedure TWrathRunecrafter.UseMaxCape();
 var
   capeString: String;
 begin
@@ -374,7 +304,7 @@ begin
   Self.WaitMinimapChange();
 end;
 
-procedure WrathRuneCrafter.TeleportNardah();
+procedure TWrathRunecrafter.TeleportNardah();
 begin
   if Self.Amulet = 'Desert amulet 4' then
     Equipment.ClickItem('Desert amulet 4', 'Nardah')
@@ -385,7 +315,7 @@ begin
   Self.WaitMinimapChange();
 end;
 
-procedure WrathRuneCrafter.UseEternalGlory();
+procedure TWrathRunecrafter.UseEternalGlory();
 begin
   if Self.Amulet = 'Amulet of eternal glory' then
     Equipment.ClickItem('Amulet of eternal glory', 'Edgeville')
@@ -400,31 +330,27 @@ begin
   Self.WaitMinimapChange();
 end;
 
-procedure WrathRuneCrafter.UseGlory();
+procedure TWrathRunecrafter.UseGlory();
 begin
   Self.Transport.handleJewelleryTeleport(RSTeleports.EDGEVILLE);
 
 end;
 
-procedure WrathRuneCrafter.UseRingOfDueling();
+procedure TWrathRunecrafter.UseRingOfDueling();
 begin
   if Equipment.ClickItem('Ring of Dueling(1)', 'Castle Wars')  then
   begin
     Self.WaitMinimapChange();
     Self.RingofDuelTries := 0;
-  end
-  else
-  begin
-    Self.RingofDuelTries += 1;
-    if Self.RingofDuelTries >= 5 then
-    begin
-    Self.SendWebhook('Wrath Runecrafter cannot find ring of dueling');
-    TerminateScript("Can't find ring of dueling");
-    end;
+    Exit;
   end;
+
+  Self.RingofDuelTries += 1;
+  if Self.RingofDuelTries >= 5 then
+    TerminateScript("Can't find ring of dueling");
 end;
 
-procedure WrathRuneCrafter.TeleportBank();
+procedure TWrathRunecrafter.TeleportBank();
 begin
   case TELEPORTITEM of
     RING_OF_DUELING: Self.UseRingOfDueling();
@@ -435,10 +361,10 @@ begin
   end;
 end;
 
-procedure WrathRuneCrafter.CallMage();
+
+procedure TWrathRunecrafter.CallMage();
 begin
-  Magic.MouseSpell(ERSSpell.NPC_CONTACT, MOUSE_RIGHT);
-  if ChooseOption.Select('Dark Mage') then
+  if Magic.ClickSpell(ERSSpell.NPC_CONTACT, 'Dark Mage') then
   begin
     StatsPayload.Update(0, -Self.NpcContactPrice, 0);
     Self.TotalProfit -= Self.NpcContactPrice;
@@ -446,7 +372,7 @@ begin
   end;
 end;
 
-procedure WrathRuneCrafter.TalkMage();
+procedure TWrathRunecrafter.TalkMage();
 var
   Finished: Boolean;
 begin
@@ -461,7 +387,7 @@ begin
   Self.PouchDegraded := False;
 end;
 
-procedure WrathRuneCrafter.EquipRing();
+procedure TWrathRunecrafter.EquipRing();
 begin
   if Inventory.ClickItem(Self.Ring.Item, 'Wear') then
   begin
@@ -470,7 +396,7 @@ begin
   end;
 end;
 
-procedure WrathRuneCrafter.TeleportGuild();
+procedure TWrathRunecrafter.TeleportGuild();
 begin
 
   if Self.Cape = 'Mythical cape' then
@@ -484,7 +410,7 @@ begin
   Self.WaitMinimapChange();
 end;
 
-procedure WrathRuneCrafter.FillPouch();
+procedure TWrathRunecrafter.FillPouch();
 var
   essCountBefore, essCountAfter: Int32;
   box: TBox;
@@ -514,7 +440,7 @@ begin
     Self.PouchDegraded := True;
 end;
 
-procedure WrathRuneCrafter.EmptyPouch();
+procedure TWrathRunecrafter.EmptyPouch();
 var
   essCountBefore, essCountAfter: Int32;
 begin
@@ -537,7 +463,7 @@ begin
   end;
 end;
 
-procedure WrathRuneCrafter.NavigateCorner();
+procedure TWrathRunecrafter.NavigateCorner();
 var
   minimapPoint, P: TPoint;
   randomness: Int32;
@@ -562,7 +488,7 @@ begin
   Minimap.WaitFlag(5);
 end;
 
-procedure WrathRuneCrafter.EnterCave();
+procedure TWrathRunecrafter.EnterCave();
 begin
   try
     if RSObjects.MythicCave.WalkClick() then
@@ -575,6 +501,7 @@ begin
   end;
 end;
 
+
 procedure TAntiban.TakeBreak(var Task: TBreakTask); override;
 begin
   if PRAY then
@@ -582,7 +509,8 @@ begin
   inherited;
 end;
 
-procedure WrathRuneCrafter.EnterStatue();
+
+procedure TWrathRunecrafter.EnterStatue();
 begin
   try
     if RSObjects.MythicStatue.WalkClick() then
@@ -595,7 +523,7 @@ begin
   end;
 end;
 
-procedure WrathRuneCrafter.EnterRuins();
+procedure TWrathRunecrafter.EnterRuins();
 begin
   try
     if RSObjects.MysteriousRuins.Click() then
@@ -612,7 +540,7 @@ begin
   end;
 end;
 
-function WrathRuneCrafter.InBox(box: TBox): Boolean;
+function TWrathRunecrafter.InBox(box: TBox): Boolean;
 begin
   if inRange(Self.Position.X, box.X1, box.X2) and inRange(Self.Position.Y, box.Y1, box.Y2) then
     Result := True
@@ -620,40 +548,40 @@ begin
     Result := False;
 end;
 
-function WrathRuneCrafter.NearBank(): Boolean;
+function TWrathRunecrafter.NearBank(): Boolean;
 begin
   Result := Self.InBox(Self.CastleWarsBox) or Self.InBox(Self.EdgevilleBox)
             or Self.InBox(Self.CraftingGuildBox);
 end;
 
-procedure WrathRuneCrafter.EquipGlory();
+procedure TWrathRunecrafter.EquipGlory();
 begin
   Inventory.ClickItem('Amulet of glory', 'Wear');
 end;
 
-procedure WrathRuneCrafter.BankWithdrawGlory();
+procedure TWrathRunecrafter.BankWithdrawGlory();
 var                                               //TODO REDO
   bankItem: TRSBankItem;
 begin
   bankItem := TRSBankItem.Setup(Self.Amulet, 1);
- if Self.Withdraw(bankItem) then;
+  if Self.Withdraw(bankItem) then;
     Self.WithdrawGlory := False;
 end;
 
-procedure WrathRuneCrafter.BankWithdrawRing();
+procedure TWrathRunecrafter.BankWithdrawRing();
 begin
   Self.Withdraw(self.Ring);
   if WaitUntil(Inventory.ContainsItem(Self.Ring.Item), 300, 6000) then
     Self.WithdrawRing := False;
 end;
 
-procedure WrathRuneCrafter.WithdrawEss();
+procedure TWrathRunecrafter.WithdrawEss();
 begin
   if Self.Withdraw(self.Essence) then
     Self.InventoryHasEss := True;
 end;
 
-function WrathRuneCrafter.ParsePouchInt(number: String): Int32;
+function TWrathRunecrafter.ParsePouchInt(number: String): Int32;
 var
   StrArray: TStringArray;
 begin
@@ -705,7 +633,8 @@ begin
 
 end;
 
-procedure WrathRuneCrafter.CheckPouch();
+
+procedure TWrathRunecrafter.CheckPouch();
 begin
   if Inventory.ClickItem(Self.Pouch.Item, 'Check') then
     begin
@@ -718,7 +647,7 @@ begin
     end;
 end;
 
-procedure WrathRuneCrafter.CraftRunes();
+procedure TWrathRunecrafter.CraftRunes();
 begin
   try
     if RSObjects.RCAltar.WalkClick() then
@@ -749,239 +678,70 @@ begin
   end;
 end;
 
-procedure TMufasaBitmap.DrawTextOutline(text: String; p: TPoint; color: Int32; darkShadow: Boolean = True; size: Int32 = 1);
-var
-  shadowColor, i: Int32;
 
-begin
-  if darkShadow then shadowColor := 1
-  else shadowColor := $FFFFFF;
-  for i := 1 to size do                                        //why am i so fuzy :(
-  begin
-    Self.DrawText(text, [p.X + i, p.Y + i], shadowColor);
-    Self.DrawText(text, [p.X + i, p.Y - i], shadowColor);
-    Self.DrawText(text, [p.X - i, p.Y + i], shadowColor);
-    Self.DrawText(text, [p.X - i, p.Y - i], shadowColor);
-
-    Self.DrawText(text, [p.X + i, p.Y], shadowColor);
-    Self.DrawText(text, [p.X, p.Y + i], shadowColor);
-    Self.DrawText(text, [p.X - i, p.Y], shadowColor);
-    Self.DrawText(text, [p.X, p.Y - i], shadowColor);
-  end;
-  Self.DrawText(text, p, color);
-end;
-
-function TBaseScript.BuildTextReport(): TStringArray; override;
-var
-  elapsedTime: UInt64;
-begin
-  if Self.Action = Self.PreviousAction then
-      Exit;
-
-  Self.DebugLn(Self.Action, Self.ExtraInfo);  //add action and extra info the the log.
-  elapsedTime := Self.TimeRunning.ElapsedTime();
-
-  Result += ' Action: ' + Self.Action;
-
-  Result += ' Runtime: ' + SRL.MsToTime(elapsedTime, Time_Short).Trim();
-
-  Result += ' Runes Crafted: ' + SRL.FormatNumber(RUNESCRAFTED, 1);
-  Result += ' Runes/Hour : ' + SRL.FormatNumber(NumberPerHour(RUNESCRAFTED, elapsedTime), 2);
-
-  Result += ' Total Trips  : ' + ToStr(Self.TotalActions);
-  if Self.ActionLimit > -1 then
-    Result[High(Result)] += '/' + ToStr(Self.ActionLimit);
-
-  Result += ' Trips/Hour : ' + ToStr(NumberPerHour(Self.TotalActions, elapsedTime));
-
-  Result += ' Total Exp    : ' + SRL.FormatNumber(WL.XP.Previous - WL.XP.Start, 1);
-  Result += ' Exp/Hour   : ' + SRL.FormatNumber(NumberPerHour(WL.XP.Previous - WL.XP.Start, elapsedTime), 1);
-
-  Result += ' Total Profit : ' + SRL.FormatNumber(Self.TotalProfit, 1);
-  Result += ' Profit/Hour: ' + SRL.FormatNumber(NumberPerHour(Self.TotalProfit, elapsedTime), 2);
-
-  Result += ' ' + Self.Welcome + ' waspscripts.com';
-end;
-
-
-procedure WrathRuneCrafter.Init(maxActions: UInt32; maxTime: UInt64); override;
-var
-  HTTP, randomInt: Int32;
-  imageName, url: String;
+procedure TWrathRunecrafter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.Welcome := RELD_WELCOME_SENTENCES.RandomValue();
+  Self.MythGuildBox := Box(5161, 5025, 5274, 5100);
+  Self.MythGuildBasementBox := Box(9200, 5500, 9500, 5760);
+  Self.MythGuildIslandBox := Box(5150, 5125, 5206, 5184);
+  Self.WrathAltarBox := Box(7850, 156, 7912, 230);
+  Self.CastleWarsBox := Box(5131, 4053, 5184, 4128);
+  Self.EdgevilleBox := Box(7725, 2440, 7794, 2508);
+  Self.MythGuildLadderBox := Box(9420, 5510, 9460, 5596);
+  Self.FullMythGuildBox := Box(5101, 4930, 5300, 5200);
+  Self.NardahBox := Box(8990, 4681, 9200, 4922);
+  Self.CraftingGuildBox := Box(7095,3271,7170, 3352);
 
-  if PROGRESSBACKGROUND = RANDOMBG then
+  Self.PrayerPotion := TRSBankItem.Setup('Prayer Potion(2)', 1);
+  Self.StaminaPotion := TRSBankItem.Setup('Stamina Potion(1)', 1);
+  Self.Essence := TRSBankItem.Setup('Pure essence', Bank.QUANTITY_ALL);
+  Self.Pouch := TRSBankItem.Setup('Colossal Pouch', 1);
+  Self.DegradedPouch := 26786;
+  Self.Ring := TRSBankItem.Setup('Ring of Dueling(8)', 1);
+
+  Self.RingPrice := ItemData.GetAverage(Self.Ring.Item);
+  Self.EssPrice := ItemData.GetAverage(Self.Essence.Item);
+  Self.WrathPrice := ItemData.GetAverage('Wrath rune');
+  Self.StamPrice := ItemData.GetAverage('Stamina potion(1)');
+  Self.PrayerPrice := ItemData.GetAverage('Prayer potion(1)');
+  Self.NpcContactPrice := ItemData.GetAverage('Astral rune') +
+                          ItemData.GetAverage('Cosmic rune') +
+                          ItemData.GetAverage('Air rune') * 2;
+
+  Self.KeepItemArray := [Self.Essence.Item, 'Divine rune pouch', 'Rune pouch', 'Wrath rune',
+                         Self.Pouch.Item, Self.Ring.Item, 'Prayer potion(1)', 'Prayer potion(2)',
+                         Self.StaminaPotion.Item, 'Mythical cape', 'Crafting cape(t)', 'Crafting cape',
+                         'Desert amulet 4', 'Amulet of eternal glory', 'Amulet of glory(1)'];
+
+  if SCRIPTSPEED > 100 then
+    Mouse.Speed += (SCRIPTSPEED - 100);
+  if SCRIPTSPEED = 110 then
+    Mouse.Speed := 25;
+
+  if Antiban.BioDice() then
+    Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
+  else
+    Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
+
+  Self.RSW.Setup([RSRegions.CORSAIR_COVE_DUNGEON, Self.WrathAltarBox.Expand(70),
+                  Self.CastleWarsBox.Expand(70), Self.EdgevilleBox.Expand(70),
+                  Self.CraftingGuildBox.Expand(70), Self.FullMythGuildBox.Expand(70),
+                  Self.NardahBox.Expand(70)], 8);  //5
+
+  Self.RSW.AdaptiveWalk := ADAPTIVEWALK;
+
+  if Options.GetZoomLevel > 15 then
+    Options.SetZoomLevel(Random(3, 15));
+
+  Combat.SetAutoRetaliate(False);
+  Self.MaxHealth := Round(Minimap.GetHPLevel() / (Minimap.GetHPPercent() * 0.01)); //'dont have to open stats!
+
+  Self.Transport.Init(EFairyTeleportItem.DRAMEN, 'ardougne cloak 2');
+
+  if Equipment.Open() then
   begin
-    randomInt := Random(0,6);
-    case randomInt of
-      0: PROGRESSBACKGROUND := WASP;
-      1: PROGRESSBACKGROUND := SABER;
-      2: PROGRESSBACKGROUND := CHIKA;
-      3: PROGRESSBACKGROUND := HAYASAKA;
-      4: PROGRESSBACKGROUND := SHINOBU;
-      5: PROGRESSBACKGROUND := MEGUMIN;
-      6: PROGRESSBACKGROUND := AYAKA;
-    end;
-  end;
-
-  ProgressReport.ClientImg.setFontSize(20);
-  PRTOP := 30;
-  ProgressReport.TextColor := $FFFFFF;
-  FOOTERCOLOR := $006CFF;
-  TITLECOLOR := $FFFFFF;
-  PRSPACING := 20;
-  $006CFF;
-  if PROGRESSBACKGROUND <> WASP then
-  begin
-
-    Case PROGRESSBACKGROUND of
-      SABER:
-      begin
-        FOOTERCOLOR := $FFFFFF;
-        imageName := 'Saber';
-        url := 'https://i.imgur.com/SahoWLR.png';
-      end;
-      CHIKA:
-      begin
-        ProgressReport.TextColor := 1;
-        FOOTERCOLOR := $006CFF;
-        BGOFFSET := 100;
-        PRTOP := 25;
-        REDTEXT := False;
-        DARKSHADOW := False;
-        TITLEOFFSET := -11;
-        imageName := 'Chika';
-        url := 'https://i.imgur.com/envZEzT.png';
-      end;
-      HAYASAKA:
-      begin
-        BGOFFSET := 100;
-        PRTOP := 25;
-        REDTEXT := False;
-        TITLEOFFSET := -11;
-        imageName := 'Hayasaka';
-        url := 'https://i.imgur.com/0jLX4wF.png';
-      end;
-      SHINOBU:
-      begin
-        BGOFFSET := 100;
-        PRTOP := 25;
-        REDTEXT := False;
-        TITLEOFFSET := -11;
-        imageName := 'Shinobu';
-        url := 'https://i.imgur.com/S4E0Hoj.png';
-      end;
-      MEGUMIN:
-      begin
-        BGOFFSET := 100;
-        PRTOP := 25;
-        REDTEXT := False;
-        TITLEOFFSET := -11;
-        imageName := 'Megumin';
-        url := 'https://i.imgur.com/0yUICUl.png';
-      end;
-      AYAKA:
-      begin
-        BGOFFSET := 100;
-        PRTOP := 25;
-        REDTEXT := False;
-        TITLEOFFSET := -11;
-        imageName := 'Ayaka';
-        url := 'https://i.imgur.com/OgJ79H5.png';
-      end;
-    end;
-    if not DirectoryExists(AppPath + '\Resources\') then
-      CreateDirectory(AppPath + '\Resources');
-    if not FileExists(AppPath + '\Resources\ReldBGImage' + imageName + '.png') then
-      begin
-        Writeln('Downloading super based stat overlay....');
-        HTTP := InitializeHTTPClient(False);
-        try
-          GetHTTPPageEx(HTTP, url, AppPath + '\Resources\ReldBGImage' + imageName + '.png');
-
-        finally
-          FreeHTTPClient(HTTP);
-        end;
-      end;
-      ProgressReport.BGImg.LoadFromFile(AppPath + '\Resources\ReldBGImage' + imageName + '.png');
-    end;
-
-    Self.MythGuildBox := Box(5161, 5025, 5274, 5100);
-    Self.MythGuildBasementBox := Box(9200, 5500, 9500, 5760);
-    Self.MythGuildIslandBox := Box(5150, 5125, 5206, 5184);
-    Self.WrathAltarBox := Box(7850, 156, 7912, 230);
-    Self.CastleWarsBox := Box(5131, 4053, 5184, 4128);
-    Self.EdgevilleBox := Box(7725, 2440, 7794, 2508);
-    Self.MythGuildLadderBox := Box(9420, 5510, 9460, 5596);
-    Self.FullMythGuildBox := Box(5101, 4930, 5300, 5200);
-    Self.NardahBox := Box(8990, 4681, 9200, 4922);
-    Self.CraftingGuildBox := Box(7095,3271,7170, 3352);
-
-    Self.PrayerPotion := TRSBankItem.Setup('Prayer Potion(2)', 1);
-    Self.StaminaPotion := TRSBankItem.Setup('Stamina Potion(1)', 1);
-    Self.Essence := TRSBankItem.Setup('Pure essence', Bank.QUANTITY_ALL);
-    Self.Pouch := TRSBankItem.Setup('Colossal Pouch', 1);
-    Self.DegradedPouch := 26786;
-    Self.Ring := TRSBankItem.Setup('Ring of Dueling(8)', 1);
-
-    Self.RingPrice := ItemData.GetAverage(Self.Ring.Item);
-    Self.EssPrice := ItemData.GetAverage(Self.Essence.Item);
-    Self.WrathPrice := ItemData.GetAverage('Wrath rune');
-    Self.StamPrice := ItemData.GetAverage('Stamina potion(1)');
-    Self.PrayerPrice := ItemData.GetAverage('Prayer potion(1)');
-    Self.NpcContactPrice := ItemData.GetAverage('Astral rune') +
-                            ItemData.GetAverage('Cosmic rune') +
-                            ItemData.GetAverage('Air rune') * 2;
-
-    Self.KeepItemArray := [Self.Essence.Item, 'Divine rune pouch', 'Rune pouch', 'Wrath rune',
-                           Self.Pouch.Item, Self.Ring.Item, 'Prayer potion(1)', 'Prayer potion(2)',
-                           Self.StaminaPotion.Item, 'Mythical cape', 'Crafting cape(t)', 'Crafting cape',
-                           'Desert amulet 4', 'Amulet of eternal glory', 'Amulet of glory(1)'];
-
-    if SCRIPTSPEED > 100 then
-      Mouse.Speed += (SCRIPTSPEED - 100);
-    if SCRIPTSPEED = 110 then
-      Mouse.Speed := 25;
-
-    if Antiban.BioDice() then
-      Options.SetNPCAttackOption(ERSAttackOption.HIDDEN)
-    else
-      Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
-
-    Self.RSW.Setup([RSRegions.CORSAIR_COVE_DUNGEON, Self.WrathAltarBox.Expand(70),
-                    Self.CastleWarsBox.Expand(70), Self.EdgevilleBox.Expand(70),
-                    Self.CraftingGuildBox.Expand(70), Self.FullMythGuildBox.Expand(70),
-                    Self.NardahBox.Expand(70)], 8);  //5
-
-    Self.RSW.AdaptiveWalk := ADAPTIVEWALK;
-
-    if Options.GetZoomLevel > 15 then
-      Options.SetZoomLevel(Random(3, 15));
-
-    Combat.SetAutoRetaliate(False);
-    Self.MaxHealth := Round(Minimap.GetHPLevel() / (Minimap.GetHPPercent() * 0.01)); //'dont have to open stats!
-
-    with RSObjects.MysteriousRuins do
-    begin
-      Setup(3.5, 4,[[5176, 5148]]);
-      Setup(['Enter', 'Mysterious']);
-      Finder.Colors += CTS2(5726817, 18, 1.07, 0.20)
-    end;
-
-    with RSObjects.RCAltar do
-    begin
-      Setup(3, 4,[[7880, 180]]);
-      Setup(['Craft']);
-      Finder.Colors += CTS2(6383470, 14, 0.37, 0.30);
-      Finder.Colors += CTS2(2763823, 8, 0.75, 0.54);
-    end;
-
-    Self.Transport.Init(EFairyTeleportItem.DRAMEN, 'ardougne cloak 2');
-
-    Equipment.Open();
     if Equipment.ContainsItem('Mythical cape') then
       Self.Cape := 'Mythical cape'
     else if Equipment.ContainsItem('Crafting cape') then
@@ -993,33 +753,7 @@ begin
     else if Equipment.ContainsItem('Runecraft cape(t)') then
       Self.Cape := 'Runecraft cape(t)'
     else if Equipment.ContainsItem('max cape') then
-      Self.Cape := 'max cape'
-    else if Equipment.ContainsItem('Ardougne max cape') then
-      Self.Cape := 'Ardougne max cape'
-    else if Equipment.ContainsItem('Accumulator max cape') then
-      Self.Cape := 'Accumulator max cape'
-    else if Equipment.ContainsItem('Assembler max cape') then
-      Self.Cape := 'Assembler max cape'
-    else if Equipment.ContainsItem('Fire max cape') then
-      Self.Cape := 'Fire max cape'
-    else if Equipment.ContainsItem('Infernal max cape') then
-      Self.Cape := 'Infernal max cape'
-    else if Equipment.ContainsItem('Imbued guthix max cape') then
-      Self.Cape := 'Imbued guthix max cape'
-    else if Equipment.ContainsItem('Imbued saradomin max cape') then
-      Self.Cape := 'Imbued saradomin max cape'
-    else if Equipment.ContainsItem('Imbued zamorak max cape') then
-      Self.Cape := 'Imbued zamorak max cape'
-    else if Equipment.ContainsItem('Masori assembler max cape') then
-      Self.Cape := 'Masori assembler max cape'
-    else if Equipment.ContainsItem('Mythical max cape') then
-      Self.Cape := 'Mythical max cape'
-    else if Equipment.ContainsItem('Guthix max cape') then
-      Self.Cape := 'Guthix max cape'
-    else if Equipment.ContainsItem('Saradomin max cape') then
-      Self.Cape := 'Saradomin max cape'
-    else if Equipment.ContainsItem('Zamorak max cape') then
-      Self.Cape := 'Zamorak max cape';
+      Self.Cape := 'max cape';
 
     if Equipment.ContainsItem('Desert amulet 4') then
       Self.Amulet := 'Desert amulet 4'
@@ -1027,8 +761,10 @@ begin
       Self.Amulet := 'Amulet of eternal glory'
     else if Equipment.ContainsItem('Amulet of glory') then
       Self.Amulet := 'Amulet of glory';
+  end;
 
-    Inventory.Open();
+  if Inventory.Open() then
+  begin
     if not Inventory.FindItem(Self.Pouch.Item, Self.PouchSlot) then
       TerminateScript('Could not find colossal pouch');
 
@@ -1036,99 +772,100 @@ begin
 
     if Inventory.ContainsItem(Self.Essence.Item) then
       Self.InventoryHasEss := True;
+  end;
 
-    Self.TimeRunning.Reset();
+  Self.TimeRunning.Reset();
 end;
 
-function WrathRuneCrafter.GetState(): EState;
+function TWrathRunecrafter.GetState(): EWrathCrafterState;
 begin
-  Self.Position := RSW.GetMyPos();
+  Self.Position := Self.RSW.GetMyPos();
 
-  if not Bank.IsOpen and Mainscreen.HasInterface then
-    Exit(CLOSE_INTERFACE);
+  if MainScreen.HasInterface() then
+  begin
+    if not Bank.IsOpen() then
+      Exit(EWrathCrafterState.CLOSE_INTERFACE);
+
+    //refill pray, run energy and jewlery
+    if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+      Exit(EWrathCrafterState.EAT_FOOD);
+    if not Self.DepositedRunes and Inventory.ContainsItem('Wrath rune') then
+      Exit(EWrathCrafterState.DEPOSIT_RUNES);
+    //if Inventory.ContainsRandomItems(Self.KeepItemArray) then //this is hurting more than helping
+      //Exit(EWrathCrafterState.DEPOSIT_RANDOM);
+    if Inventory.ContainsItem('Ring of Dueling(1)') then
+      Exit(EWrathCrafterState.EQUIP_RING);
+    if Inventory.ContainsItem('Amulet of glory(1)') then
+      Exit(EWrathCrafterState.EQUIP_GLORY);
+    if Inventory.ContainsItem('Prayer potion(1..2)') then
+      Exit(EWrathCrafterState.DRINK_PRAYER);
+    if Inventory.ContainsItem(Self.StaminaPotion.Item) then
+      Exit(EWrathCrafterState.DRINK_STAMINA);
+    if PRAY and Self.LowPrayer() then
+      Exit(EWrathCrafterState.WITHDRAW_PRAYER);
+    if Self.LowEnergy() then
+      Exit(EWrathCrafterState.WITHDRAW_STAMINA);
+    if Self.LowHealth() then
+      Exit(EWrathCrafterState.WITHDRAW_FOOD);
+    if Self.WithdrawRing then
+      Exit(EWrathCrafterState.WITHDRAW_RING);
+    if Self.WithdrawGlory then
+      Exit(EWrathCrafterState.WITHDRAW_GLORY);
+    //fill rune pouch
+    if not Self.PouchFull and Inventory.IsFull() then
+      Exit(EWrathCrafterState.FILL_POUCH);
+    if Self.PouchFull and Inventory.IsFull() then
+      Exit(EWrathCrafterState.CLOSE_INTERFACE);
+
+    Exit(EWrathCrafterState.WITHDRAW_ESS);
+  end;
 
   if Self.InBox(Self.NardahBox) and (Self.NeedsStatue or Self.ShouldTeleportNardah()) then
-    Exit(CLICK_STATUE);
+    Exit(EWrathCrafterState.CLICK_STATUE);
   //At Bank
   if Self.NearBank() then
   begin
     //dark mage
     if Chat.GetChatTitle() = 'Dark Mage' then
-      Exit(TALK_MAGE);
+      Exit(EWrathCrafterState.TALK_MAGE);
     if Self.PouchDegraded and Bank.IsOpen() then
-      Exit(CLOSE_INTERFACE);
+      Exit(EWrathCrafterState.CLOSE_INTERFACE);
     if Self.PouchDegraded then
-      Exit(CALL_MAGE);
-    //bank open
-    if Bank.IsOpen() then
-    begin
-    //refill pray, run energy and jewlery
-      if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-        Exit(EAT_FOOD);
-      if not Self.DepositedRunes and Inventory.ContainsItem('Wrath rune') then
-        Exit(DEPOSIT_RUNES);
-      //if Inventory.ContainsRandomItems(Self.KeepItemArray) then //this is hurting more than helping
-        //Exit(DEPOSIT_RANDOM);
-      if Inventory.ContainsItem('Ring of Dueling(1)') then
-        Exit(EQUIP_RING);
-      if Inventory.ContainsItem('Amulet of glory(1)') then
-        Exit(EQUIP_GLORY);
-      if Inventory.ContainsItem('Prayer potion(1..2)') then
-        Exit(DRINK_PRAYER);
-      if Inventory.ContainsItem(Self.StaminaPotion.Item) then
-        Exit(DRINK_STAMINA);
-      if PRAY and Self.LowPrayer() then
-        Exit(WITHDRAW_PRAYER);
-      if Self.LowEnergy() then
-        Exit(WITHDRAW_STAMINA);
-      if Self.LowHealth() then
-        Exit(WITHDRAW_FOOD);
-      if Self.WithdrawRing then
-        Exit(WITHDRAW_RING);
-      if Self.WithdrawGlory then
-        Exit(WITHDRAW_GLORY);
-      //fill rune pouch
-      if not Self.PouchFull and Inventory.IsFull() then
-        Exit(FILL_POUCH);
-      if Self.PouchFull and Inventory.IsFull() then
-        Exit(CLOSE_INTERFACE);
-
-      Exit(WITHDRAW_ESS);
-    end;
+      Exit(EWrathCrafterState.CALL_MAGE);
 
     if Self.PouchFull and Self.InventoryHasEss then
-      Exit(TELEPORT_GUILD);
+      Exit(EWrathCrafterState.TELEPORT_GUILD);
 
-    Exit(OPEN_BANK);
+    Exit(EWrathCrafterState.OPEN_BANK);
   end;
 
   //Travel to Altar
   if Self.InBox(Self.MythGuildBox) then
-    Exit(ENTER_STATUE);
+    Exit(EWrathCrafterState.ENTER_STATUE);
   if Self.InBox(Self.MythGuildBasementBox) then
   begin
     if ADAPTIVEWALK and Self.InBox(Self.MythGuildLadderBox) then
-      Exit(NAVIGATE_CORNER);
-    Exit(ENTER_CAVE);
+      Exit(EWrathCrafterState.NAVIGATE_CORNER);
+    Exit(EWrathCrafterState.ENTER_CAVE);
   end;
   if Self.InBox(Self.MythGuildIslandBox) then
-    Exit(ENTER_RUINS);
+    Exit(EWrathCrafterState.ENTER_RUINS);
   //At Altar
   if Self.InBox(Self.WrathAltarBox) then
   begin
     if Self.InventoryHasEss then
-      Exit(CRAFT_RUNES);
+      Exit(EWrathCrafterState.CRAFT_RUNES);
     if Self.PouchCount > 0 then
-      Exit(EMPTY_POUCH);
+      Exit(EWrathCrafterState.EMPTY_POUCH);
   end;
 
   if DESERTAMULET and Self.ShouldTeleportNardah() then
-    Exit(TELEPORT_NARDAH);
+    Exit(EWrathCrafterState.TELEPORT_NARDAH);
 
-  Exit(TELEPORT_BANK);
+  Exit(EWrathCrafterState.TELEPORT_BANK);
 end;
 
-procedure WrathRuneCrafter.SlowDown();
+procedure TWrathRunecrafter.SlowDown();
 var
   reverseSpeed, waitTime, maxWaitTime: Int32;
 begin
@@ -1143,92 +880,71 @@ begin
   Wait(waitTime);
 end;
 
-function WrathRuneCrafter.ShouldStop(): Boolean; override;
+
+procedure TWrathRunecrafter.Run(maxActions: UInt32; maxTime: UInt64);
 begin
-  if Self.InBox(Self.MythGuildBasementBox) then
-    Exit(False);
-
-  Result := ((Self.ActionLimit > -1) and (Self.TotalActions >= Self.ActionLimit)) or
-            ((Self.TimeLimit > -1) and (Self.TimeRunning.ElapsedTime >= Self.TimeLimit));
-
-  if Result then
-    SaveScreenshot('ScriptEnding/shouldstop' + Self.Name, True);
-end;
-
-
-procedure WrathRuneCrafter.Run(maxActions: Int32; maxTime: Int64);
-begin
-
-  try
   Self.Init(maxActions, maxTime);
-    repeat
-      Self.State := Self.GetState();
-      Self.SetAction(ToStr(Self.State));
 
-      case State of
-        ENTER_STATUE: Self.EnterStatue();
-        ENTER_CAVE: Self.EnterCave();
-        ENTER_RUINS: Self.EnterRuins();
-        CRAFT_RUNES: Self.CraftRunes();
-        EMPTY_POUCH: Self.EmptyPouch();
-        TELEPORT_BANK: Self.TeleportBank();
-        OPEN_BANK: Self.OpenBank();
-        DRINK_PRAYER: Self.DrinkPrayerPotion();
-        WITHDRAW_PRAYER: Self.Withdraw(Self.PrayerPotion);
-        DRINK_STAMINA: Self.DrinkPotion(Self.StaminaPotion.Item);
-        WITHDRAW_STAMINA: Self.Withdraw(Self.StaminaPotion);
-        CLOSE_INTERFACE: Mainscreen.CloseInterface();
-        WITHDRAW_ESS: Self.WithdrawEss();
-        FILL_POUCH: Self.FillPouch();
-        EQUIP_RING: Self.EquipRing();
-        UNEQUIP_GLORY: Self.DoUnequipGlory();
-        EQUIP_GLORY: Self.EquipGlory();
-        WITHDRAW_RING: Self.BankWithdrawRing();
-        WITHDRAW_GLORY: Self.BankWithdrawGlory();
-        TELEPORT_GUILD: Self.TeleportGuild();
-        TALK_MAGE: Self.TalkMage();
-        CALL_MAGE: Self.CallMage();
-        CLICK_STATUE: Self.ClickStatue();
-        TELEPORT_NARDAH: Self.TeleportNardah();
-        WITHDRAW_FOOD: Self.WithdrawFood();
-        EAT_FOOD: Self.EatFood();
-        DEPOSIT_RUNES: Self.DepositRunes();
-        NAVIGATE_CORNER: Self.NavigateCorner();
-        DEPOSIT_RANDOM: Bank.DepositRandomItems(Self.KeepItemArray);
-      end;
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
-      Self.SlowDown();
-      Self.Position := RSW.GetMyPos();
+    case Self.State of
+      EWrathCrafterState.ENTER_STATUE: Self.EnterStatue();
+      EWrathCrafterState.ENTER_CAVE: Self.EnterCave();
+      EWrathCrafterState.ENTER_RUINS: Self.EnterRuins();
+      EWrathCrafterState.CRAFT_RUNES: Self.CraftRunes();
+      EWrathCrafterState.EMPTY_POUCH: Self.EmptyPouch();
+      EWrathCrafterState.TELEPORT_BANK: Self.TeleportBank();
+      EWrathCrafterState.OPEN_BANK: Self.OpenBank();
+      EWrathCrafterState.DRINK_PRAYER: Self.DrinkPrayerPotion();
+      EWrathCrafterState.WITHDRAW_PRAYER: Self.Withdraw(Self.PrayerPotion);
+      EWrathCrafterState.DRINK_STAMINA: Self.DrinkPotion(Self.StaminaPotion.Item);
+      EWrathCrafterState.WITHDRAW_STAMINA: Self.Withdraw(Self.StaminaPotion);
+      EWrathCrafterState.CLOSE_INTERFACE: Mainscreen.CloseInterface();
+      EWrathCrafterState.WITHDRAW_ESS: Self.WithdrawEss();
+      EWrathCrafterState.FILL_POUCH: Self.FillPouch();
+      EWrathCrafterState.EQUIP_RING: Self.EquipRing();
+      EWrathCrafterState.UNEQUIP_GLORY: Self.DoUnequipGlory();
+      EWrathCrafterState.EQUIP_GLORY: Self.EquipGlory();
+      EWrathCrafterState.WITHDRAW_RING: Self.BankWithdrawRing();
+      EWrathCrafterState.WITHDRAW_GLORY: Self.BankWithdrawGlory();
+      EWrathCrafterState.TELEPORT_GUILD: Self.TeleportGuild();
+      EWrathCrafterState.TALK_MAGE: Self.TalkMage();
+      EWrathCrafterState.CALL_MAGE: Self.CallMage();
+      EWrathCrafterState.CLICK_STATUE: Self.ClickStatue();
+      EWrathCrafterState.TELEPORT_NARDAH: Self.TeleportNardah();
+      EWrathCrafterState.WITHDRAW_FOOD: Self.WithdrawFood();
+      EWrathCrafterState.EAT_FOOD: Self.EatFood();
+      EWrathCrafterState.DEPOSIT_RUNES: Self.DepositRunes();
+      EWrathCrafterState.NAVIGATE_CORNER: Self.NavigateCorner();
+      EWrathCrafterState.DEPOSIT_RANDOM: Bank.DepositRandomItems(Self.KeepItemArray);
+    end;
 
-      if not Self.InBox(Self.MythGuildBasementBox) then
-        Self.DoAntiban();
+    Self.SlowDown();
+    Self.Position := RSW.GetMyPos();
 
-    until Self.ShouldStop();
-  except
-      Self.SendWebHook('Wrath Runecrafter has terminated unexpectedly' +
-                        LineEnding + GetExceptionMessage());
-      RaiseException(GetExceptionMessage());
-  end;
-  if Self.ShouldStop() then
-    Self.SendWebHook('Wrath Runecrafter has terminated successfully');
+    if Self.InBox(Self.MythGuildBasementBox) then
+      Continue;
+    Self.DoAntiban();
+  until Self.ShouldStop();
 end;
 
 var
-  Script: WrathRuneCrafter;
+  WrathRunecrafter: TWrathRunecrafter;
 
 {$IFDEF SCRIPT_GUI}
 type
-  TConfig = record(TScriptForm)
-    Selector, BankTeleportSelector, BackgroundSelector: TLabeledCombobox;
+  TWrathRunecrafterConfig = record(TScriptForm)
+    Selector, BankTeleportSelector: TLabeledCombobox;
     NardahCheckBox, PrayCheckBox, AnimeCheckBox: TLabeledCheckBox;
     SpeedBar: TTrackBar;
     SpeedBarLabel, SpeedBarLabel2: TLabel;
   end;
 
-procedure TConfig.StartScript(sender: TObject); override;
+procedure TWrathRunecrafterConfig.StartScript(sender: TObject); override;
 begin
   TELEPORTITEM := TeleportItemType(Self.BankTeleportSelector.GetItemIndex());
-  PROGRESSBACKGROUND := Background(Self.BackgroundSelector.GetItemIndex());
 
   DESERTAMULET := Self.NardahCheckBox.IsChecked();
   PRAY := Self.PrayCheckBox.IsChecked();
@@ -1237,7 +953,7 @@ begin
   inherited;
 end;
 
-procedure TConfig.Run(); override;
+procedure TWrathRunecrafterConfig.Run(); override;
 var
   tab: TTabSheet;
 begin
@@ -1248,11 +964,8 @@ begin
   tab := Self.Tabs[High(Self.Tabs)];
 
   Self.CreateAccountManager(tab);
-
   Self.CreateVersionPanel(tab);
-
   Self.CreateAntibanManager();
-
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
 
@@ -1311,30 +1024,19 @@ begin
     Create(tab);
     SetTop(Self.SpeedBar.GetTop() + TControl.AdjustToDPI(20));
     SetLeft(TControl.AdjustToDPI(25));
-    SetCaption('Slow                          Medium                Fast    Turbo');
-  end;
-
-  with Self.BackgroundSelector do
-  begin
-    Create(tab);
-    SetCaption("Overlay Background:");
-    SetLeft(TControl.AdjustToDPI(30));
-    SetTop(Self.SpeedBarLabel2.GetTop() + TControl.AdjustToDPI(30));
-    SetStyle(csDropDownList);
-    AddItemArray(['Wasp', 'Random', 'Saber', 'Chika', 'Hayasaka', 'Shinobu', 'Megumin', 'Ayaka']);
-    SetItemIndex(Ord(PROGRESSBACKGROUND));
+    SetCaption('Slow' + ' ' * 26 +'Medium' + ' ' * 16 +'Fast' + ' ' * 4 + 'Turbo');
   end;
 
   inherited;
 end;
 
 var
-  Config: TConfig;
+  WrathRunecrafterConfig: TWrathRunecrafterConfig;
 {$ENDIF}
 
 begin
   {$IFDEF SCRIPT_GUI}
-  Sync(@Config.Run);
+  WrathRunecrafterConfig.Run();
   {$ENDIF}
-  Script.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+  WrathRunecrafter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
 end.
