@@ -1,3 +1,12 @@
+## [2.10.20](https://github.com/Torwent/wasp-free/compare/v2.10.19...v2.10.20) (2023-12-11)
+
+
+### Bug Fixes
+
+* **reld wrath runecrafter:** refactor ([eb45062](https://github.com/Torwent/wasp-free/commit/eb45062a02264386539c7829030e8a93f89b97d5))
+
+
+
 ## [2.10.19](https://github.com/Torwent/wasp-free/compare/v2.10.18...v2.10.19) (2023-12-10)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **pickpocketer:** Shadow veil attempts now reset to 0 once the spell is properly cast ([1ab9a54](https://github.com/Torwent/wasp-free/commit/1ab9a54971bcb73826669630d86e436b107def19))
-
-
-
-## [2.10.15](https://github.com/Torwent/wasp-free/compare/v2.10.14...v2.10.15) (2023-11-29)
-
-
-### Bug Fixes
-
-* **pickpocketer:** added a failsafe to shadowveil ([33e8b6f](https://github.com/Torwent/wasp-free/commit/33e8b6f9bde86e5ccc8880b080d3717da075e0ae))
 
 
 
