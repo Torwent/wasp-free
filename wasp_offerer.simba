@@ -4,10 +4,6 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
   ERSRemains = (
     FIENDISH_ASHES, VILE_ASHES, MALICIOUS_ASHES, ABYSSAL_ASHES, INFERNAL_ASHES,
@@ -36,6 +32,7 @@ type
     WAIT_STATE,
     HANDLE_LEVEL,
 
+    NO_RUNES,
     OUT_OF_SUPPLIES,
     END_SCRIPT
   );
@@ -125,11 +122,15 @@ function TRemainOfferer.CastSpell(): Boolean;
 begin
   Result := Magic.CastSpell(Self.OfferSpell);
 
+  if Result then
+    WL.Activity.Restart();
+
   Self.SpellCooldown := True;
 
   Self.RemainsLeft -= 3;
   Self.TotalActions += 1;
   Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+
 end;
 
 procedure TRemainOfferer.WaitCoolDown();
@@ -164,7 +165,19 @@ begin
     else
       begin
         Self.SpellCooldown := not WaitUntil(Magic.CanActivate(Self.OfferSpell), 300, 7000);
-        Self.NoRunes := Self.SpellCooldown and Magic.IsOpen();
+
+        if Chat.LeveledUp() then
+          Exit;
+
+        if SpellCooldown then
+        begin
+          Inventory.Open();
+          if Magic.Open() then
+            Self.NoRunes := not WaitUntil(Magic.CanActivate(Self.OfferSpell), 300, 7000);
+        end;
+
+        if Self.NoRunes then
+          SaveScreenshot('offerer' + DIRECTORYSEPARATOR + 'norunes');
         Wait(0, 2400, EWaitDir.wdLeft);
       end;
   end;
@@ -177,7 +190,7 @@ begin
     Exit(EOffererState.END_SCRIPT);
 
   if Self.NoRunes then
-    Exit(EOffererState.OUT_OF_SUPPLIES);
+    Exit(EOffererState.NO_RUNES);
 
   if MainScreen.HasInterface() then
   begin
@@ -260,7 +273,8 @@ begin
       EOffererState.WAIT_STATE: Self.WaitCoolDown();
       EOffererState.HANDLE_LEVEL: Chat.HandleLevelUp();
 
-      EOffererState.OUT_OF_SUPPLIES, END_SCRIPT: Break;
+      EOffererState.NO_RUNES, EOffererState.OUT_OF_SUPPLIES,
+      EOffererState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();
