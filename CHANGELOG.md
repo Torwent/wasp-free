@@ -1,3 +1,12 @@
+## [2.10.21](https://github.com/Torwent/wasp-free/compare/v2.10.20...v2.10.21) (2023-12-16)
+
+
+### Bug Fixes
+
+* **offerer:** shouldnt't crash every few hours anymore ([e522baa](https://github.com/Torwent/wasp-free/commit/e522baa828886cfb28dfa901bd795df946861bc5))
+
+
+
 ## [2.10.20](https://github.com/Torwent/wasp-free/compare/v2.10.19...v2.10.20) (2023-12-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **NMZ:** read notes ([54900e1](https://github.com/Torwent/wasp-free/commit/54900e1db259628bcb74dcd4e4dd12f52864b2a4))
-
-
-
-## [2.10.16](https://github.com/Torwent/wasp-free/compare/v2.10.15...v2.10.16) (2023-11-30)
-
-
-### Bug Fixes
-
-* **pickpocketer:** Shadow veil attempts now reset to 0 once the spell is properly cast ([1ab9a54](https://github.com/Torwent/wasp-free/commit/1ab9a54971bcb73826669630d86e436b107def19))
 
 
 
