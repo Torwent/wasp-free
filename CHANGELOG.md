@@ -1,3 +1,12 @@
+## [2.10.22](https://github.com/Torwent/wasp-free/compare/v2.10.21...v2.10.22) (2023-12-20)
+
+
+### Bug Fixes
+
+* same exact update wasp-premium had ([58f8dd8](https://github.com/Torwent/wasp-free/commit/58f8dd889833dc12cd5607afa30ecb47d4b34b22))
+
+
+
 ## [2.10.21](https://github.com/Torwent/wasp-free/compare/v2.10.20...v2.10.21) (2023-12-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **kraken:** looting works again ([77bde1a](https://github.com/Torwent/wasp-free/commit/77bde1a724f3a60439ba0c6d027dd595f0572bdb))
-
-
-
-## [2.10.17](https://github.com/Torwent/wasp-free/compare/v2.10.16...v2.10.17) (2023-12-04)
-
-
-### Bug Fixes
-
-* **NMZ:** read notes ([54900e1](https://github.com/Torwent/wasp-free/commit/54900e1db259628bcb74dcd4e4dd12f52864b2a4))
 
 
 
