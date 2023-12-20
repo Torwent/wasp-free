@@ -4,23 +4,16 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
-  ENPC = (
-    MAN, MASTER_FARMER,
-    GUARD, ELF, TZHAAR_CITY
-  );
+  ENPC = (MAN, MASTER_FARMER, GUARD, ELF, TZHAAR_CITY);
 
 var
-  PickedNPC: ENPC := ENPC.ELF;       //Use one of the above NPCs.
-  SuicideMode: Boolean := True;      //Pickpocket until death. Useful if you respawn nearby.
-  DiaryLevel: Int32 := 4;
-  FoodAmount: Int32 := 10;
-  NeckAmount: Int32 := 4;
-  MinHealth: Int32 := 20;
+  PickedNPC: ENPC = ENPC.ELF;       //Use one of the above NPCs.
+  SuicideMode: Boolean = True;      //Pickpocket until death. Useful if you respawn nearby.
+  DiaryLevel: Int32 = 4;
+  FoodAmount: Int32 := Random(8, 12);
+  NeckAmount: Int32 := Random(3, 5);
+  MinHealth: Int32 := Random(20, 40);
 
 type
   EThieverState = (
@@ -399,7 +392,6 @@ begin
 end;
 
 
-
 function TThiever.EquipRogue(): Boolean;
 var
   Item: TRSItem;
@@ -447,7 +439,7 @@ function TThiever.IsLowHP(): Boolean;
 begin
   if Self.NextHeal < 1 then
   begin
-    Self.NextHeal := MinHealth + Random(-Self.MaxHit, Self.MaxHit) * Round(Antiban.GetUniqueNumber(2, 0, 4));
+    Self.NextHeal := MinHealth + Random(-Self.MaxHit, Self.MaxHit) * Antiban.GetUniqueInt(2, 0, 4);
     Self.NextHeal := EnsureRange(Self.NextHeal, Self.MaxHit + 1, Round(Stats.GetLevel(ERSSkill.HITPOINTS) * 0.8));
   end;
 

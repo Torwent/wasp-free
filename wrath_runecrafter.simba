@@ -235,17 +235,17 @@ end;
 
 function TWrathRunecrafter.LowHealth(): Boolean;
 begin
-  Result := Minimap.GetHPLevel() < Antiban.GetUniqueNumber(35, 45, 65);
+  Result := Minimap.GetHPLevel() < Antiban.GetUniqueInt(35, 45, 65);
 end;
 
 function TWrathRunecrafter.LowEnergy(): Boolean;
 begin
-  Result := not Minimap.HasStamina() and (Minimap.GetRunEnergy() < Antiban.GetUniqueNumber(35, 30, 50));
+  Result := not Minimap.HasStamina() and (Minimap.GetRunEnergy() < Antiban.GetUniqueInt(35, 30, 50));
 end;
 
 function TWrathRunecrafter.LowPrayer(): Boolean;
 begin
-  Result := Minimap.GetPrayerLevel() < Antiban.GetUniqueNumber(35, PRAYERTHRESHOLD - 5, PRAYERTHRESHOLD + 10);
+  Result := Minimap.GetPrayerLevel() < Antiban.GetUniqueInt(35, PRAYERTHRESHOLD - 5, PRAYERTHRESHOLD + 10);
 end;
 
 
@@ -282,12 +282,12 @@ procedure TWrathRunecrafter.UseCraftingCape();
 var
   slots: TIntegerArray;
 begin
-  if (Self.cape = 'Crafting cape') or (Self.cape = 'Crafting cape(t)') then
+  if (Self.Cape = 'Crafting cape') or (Self.Cape = 'Crafting cape(t)') then
     Equipment.ClickItem(Self.cape, 'Teleport')
   else
   begin
-    Inventory.FindItems(['Crafting cape(t)', 'Crafting cape'], slots);
-    Inventory.ClickSlot(slots[0], 'Teleport');
+    if Inventory.FindItems(['Crafting cape(t)', 'Crafting cape'], slots) then
+      Inventory.ClickSlot(slots[0], 'Teleport');
   end;
 
   Self.WaitMinimapChange();

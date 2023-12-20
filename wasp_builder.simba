@@ -4,10 +4,6 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
   ERSNPC = (PHIALS, SERVANT);
   ERSFurniture = (REGULAR_LARDER, OAK_LARDER, MYTH_CAPE);
@@ -68,7 +64,7 @@ begin
         ServantNPC.Filter.MinimapDot := True;
 
         ServantNPC.ShapeArray += [[1, 1, 7], 0];
-        ServantNPC.Setup(['Talk-to']);
+        ServantNPC.SetupUpText(['Talk-to']);
       end;
   end;
 end;
@@ -102,25 +98,25 @@ begin
   ERSFurniture.MYTH_CAPE:
     begin
       Self.BuiltFurniture.Setup(0.3, 4, [[1860, 139]]);
-      Self.BuiltFurniture.Setup(['Teleport']);
+      Self.BuiltFurniture.SetupUpText(['Teleport']);
       Self.BuiltFurniture.Finder.Colors += CTS2(15198185, 9, 0.29, 0.68);
       Self.BuiltFurniture.Finder.Colors += CTS2(13083513, 7, 0.03, 1.71);
       Self.BuiltFurniture.Finder.Colors += CTS2(5799055, 10, 0.07, 0.85);
 
       Self.FurnitureSpace.Setup(0.3, 4, [[1860, 139]]);
-      Self.FurnitureSpace.Setup(['2 more']);
+      Self.FurnitureSpace.SetupUpText(['2 more']);
       Self.FurnitureSpace.Finder.Colors += CTS2(13293015, 14, 0.23, 0.37);
     end;
 
   ERSFurniture.REGULAR_LARDER, ERSFurniture.OAK_LARDER:
     begin
       Self.BuiltFurniture.Setup(1.5, 7, [[1856, 115]]);
-      Self.BuiltFurniture.Setup(['Larder']);
+      Self.BuiltFurniture.SetupUpText(['Larder']);
       Self.BuiltFurniture.Filter.Finder := False;
       Self.BuiltFurniture.Filter.UpText := False;
 
       Self.FurnitureSpace.Setup(1.5, 7, [[1856, 115]]);
-      Self.FurnitureSpace.Setup(['2 more']);
+      Self.FurnitureSpace.SetupUpText(['2 more']);
       Self.FurnitureSpace.Filter.Finder := False;
     end;
   end;
@@ -548,8 +544,8 @@ begin
     Keyboard.PressKey(VK_ESCAPE);
 
     //Antiban stuff.
-    if Random() < Antiban.GetUniqueNumber(0.15, 0.1, 0.2) then
-      for i := 0 to Round(Antiban.GetUniqueNumber(2, 1, 3)) do
+    if Random() < Antiban.GetUniqueDouble(0.15, 0.1, 0.2) then
+      for i := 0 to Antiban.GetUniqueInt(2, 1, 3) do
       begin
         if not Keyboard.IsKeyDown(VK_ESCAPE) then
         begin

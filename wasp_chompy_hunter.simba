@@ -5,10 +5,6 @@
 {$I WaspLib/osr.simba}
 {$I WaspLib/osr/handlers/combathandler.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
   EChompyState = (
     WAIT_STATE,

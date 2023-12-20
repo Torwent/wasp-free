@@ -6,10 +6,6 @@
 {$I WaspLib/osr/handlers/combathandler.simba}
 {$SCOPEDENUMS ON}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
   EKrakenState = (
     WAIT_STATE,

@@ -4,15 +4,11 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 var
-  DiaryLevel: Int32 := 3;
-  FoodAmount: Int32 := 20;
-  NeckAmount: Int32 := 5;
-  MinHealth: Int32 := 20;
+  DiaryLevel: Int32 = 4;
+  FoodAmount: Int32 := Random(16, 20);
+  NeckAmount: Int32 := Random(3, 5);
+  MinHealth: Int32 := Random(20, 40);
 
 const
   BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
@@ -199,7 +195,7 @@ var
   p: TPoint;
 begin
   p := [6006, 3315];
-  Self.Knight.Setup([p]);
+  Self.Knight.SetupCoordinates([p]);
   Self.Knight.DotFilter.Setup(BANK_POLYGON, True);
   Self.Knight.ShapeArray.SetShape([1, 1, 6]);
   Self.Knight.Setup(['Knight', 'of', 'Ardougne']);
@@ -278,7 +274,7 @@ function TKnightsThiever.IsLowHP(): Boolean;
 begin
   if Self.NextHeal < 1 then
   begin
-    Self.NextHeal := MinHealth + Random(-Self.MaxHit, Self.MaxHit) * Round(Antiban.GetUniqueNumber(2, 0, 4));
+    Self.NextHeal := MinHealth + Random(-Self.MaxHit, Self.MaxHit) * Antiban.GetUniqueInt(2, 0, 4);
     Self.NextHeal := EnsureRange(Self.NextHeal, Self.MaxHit, Round(Stats.GetLevel(ERSSkill.HITPOINTS) * 0.8));
   end;
 

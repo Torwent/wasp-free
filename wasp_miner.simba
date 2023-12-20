@@ -4,10 +4,6 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
   ERSBank = (
     POWER_MINE, VARROCK_E, VARROCK_W,
@@ -143,7 +139,7 @@ begin
   if not Self.UseBank then
   begin
     Self.RSRock.Filter.Skip := False;
-    Self.RSRock.Setup(['Mine', 'Rocks']);
+    Self.RSRock.SetupUpText(['Mine', 'Rocks']);
   end;
 
   RSRock.Filter.UpText := False;

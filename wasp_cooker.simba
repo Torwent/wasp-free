@@ -4,14 +4,10 @@
   {$DEFINE SCRIPT_GUI}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
-
-begin
-  Login.PlayerIndex := 0;
-end;
 {$ENDIF}
 
 type
-  ERSLocation = (HOSIDIUS, ROGUES_DEN);
+  ERSLocation = (HOSIDIUS, ROGUES_DEN, MYTHS_GUILD);
 
 const
   RawFood: TRSItemArray = [
@@ -86,7 +82,7 @@ var
   burntFish: TStringArray;
 begin
   Self.Food := CurrentFood;
-  ItemFinder.Similarity := 0.9999;
+  ItemFinder.Similarity := 0.99999;
 
   cookedPrefix := ['chicken', 'rabbit', 'meat', 'crab meat',
                    'karambwan', 'chompy', 'fishcake', 'jubbly', 'sweetcorn'];
@@ -141,6 +137,12 @@ begin
         RSObjects.EternalFire.Filter.UpText := False;
         CookingObj := RSObjects.EternalFire;
       end;
+
+    ERSLocation.MYTHS_GUILD:
+      begin
+        RSW.Setup([RSRegions.MYTHS_GUILD_MID_FLOOR]);
+        CookingObj := RSObjects.MythGuildRange;
+      end;
   end;
 
 end;
@@ -174,7 +176,7 @@ end;
 function TCooker.OpenBank(): Boolean;
 begin
   case CurrentLocation of
-    ERSLocation.HOSIDIUS:   Result := Bank.WalkOpen();
+    ERSLocation.HOSIDIUS, ERSLocation.MYTHS_GUILD:   Result := Bank.WalkOpen();
     ERSLocation.ROGUES_DEN: Result := Bank.WalkOpen(RSNPCs.EmeraldBenedict);
   end;
 end;
@@ -425,8 +427,7 @@ begin
     SetTop(TControl.AdjustToDPI(200));
     SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
-    AddItem('Hosidius kitchen');
-    AddItem('Rogues den');
+    AddItemArray(['Hosidius kitchen', 'Rogues den', 'Myth''s guild']);
     SetItemIndex(Ord(CurrentLocation));
   end;
 

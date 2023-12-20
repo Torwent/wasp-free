@@ -5,16 +5,12 @@
 {$I WaspLib/osr.simba}
 {$I WaspLib/osr/interfaces/optional/lectern.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
   ERSNPC = (PHIALS, SERVANT);
 
 var
-  CurrentNPC: ERSNPC := ERSNPC.PHIALS;
-  CurrentTab: ERSSpellTab := ERSSpellTab.HOUSE_TELEPORT;
+  CurrentNPC: ERSNPC = ERSNPC.PHIALS;
+  CurrentTab: ERSSpellTab = ERSSpellTab.HOUSE_TELEPORT;
 
 type
   ETabMakerState = (
@@ -56,7 +52,7 @@ begin
         ServantNPC.Filter.MinimapDot := True;
 
         ServantNPC.ShapeArray += [[1, 1, 7], 0];
-        ServantNPC.Setup(['Talk-to']);
+        ServantNPC.SetupUpText(['Talk-to']);
       end;
   end;
 end;
@@ -88,7 +84,7 @@ end;
 procedure TTabMaker.SetupLectern();
 begin
   Self.LecternObj.Setup(0.7, 5, [[1871, 102]]);
-  Self.LecternObj.Setup(['Study', 'Lectern']);
+  Self.LecternObj.SetupUpText(['Study', 'Lectern']);
   Self.LecternObj.Filter.Finder := False;
 end;
 

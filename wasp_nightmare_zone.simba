@@ -6,20 +6,12 @@
 {$I WaspLib/osr/handlers/combathandler.simba}
 {$SCOPEDENUMS ON}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
-  ERSNMZPotion = (
-    OVERLOAD_POTION,
-    SUPER_RANGING_POTION,
-    SUPER_MAGIC_POTION
-  );
+  ERSNMZPotion = (OVERLOAD_POTION, SUPER_RANGING_POTION, SUPER_MAGIC_POTION);
 
 var
   CurrentPotion := ERSNMZPotion.OVERLOAD_POTION;
-  BoostAmount: Int32 = 8;
+  BoostAmount: Int32 := Random(6, 10);
 
 type
   ENMZState = (

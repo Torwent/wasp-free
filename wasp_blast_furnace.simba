@@ -4,10 +4,6 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
   EBarType = (
     BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANTITE, RUNITE
@@ -538,7 +534,7 @@ begin
   Result := Minimap.EnableRun();
 
   if Result then
-    Self.MinEnergy := Round(Antiban.GetUniqueNumber(50, 20, 60));
+    Self.MinEnergy := Antiban.GetUniqueInt(50, 20, 60);
 end;
 
 

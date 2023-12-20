@@ -4,18 +4,10 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
-begin
-  Login.PlayerIndex := 0;
-end;
-
 type
-  ERSStall = (
-    TEA_STALL,
-    SILK_STALL,
-    FRUIT_STALL
-  );
+  ERSStall = (TEA_STALL, SILK_STALL, FRUIT_STALL);
 var
-  CurrentStall: ERSStall := ERSStall.FRUIT_STALL;
+  CurrentStall: ERSStall = ERSStall.FRUIT_STALL;
 
 type
   EStallRobberState = (
