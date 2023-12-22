@@ -108,7 +108,7 @@ begin
         Self.Plank := 'Teak plank';
         Self.PlankSawmillPrice := 500;
         Self.SawmillString := 'Teak - 500gp';
-        Self.TreeTimer.Setup(12000);
+        Self.TreeTimer.Setup(9300);
       end;
 
     ERSTree.MAHOGANY_TREE:
@@ -234,25 +234,58 @@ begin
   end;
 end;
 
-
-function TWoodcutter.CutTree(): Boolean;
+function TCuboidExArray.ToBoxArray() : TBoxArray;
 var
-  i: Int32;
+  cuboid : TCuboidEx;
+  i : Int32;
 begin
-  Result := RSTree.WalkClick();
-  if Result then
+  SetLength(Result, Length(Self));
+  for i to High(Self) do
   begin
-    for i := 0 to High(Self.TreeCuboids) do
-      if Self.TreeCuboids[i].Bounds().Contains(Mouse.Position) then
-        Self.TreeWalkerCoord := Self.RSW.MSToWorld(Self.TreeCuboids[i].Bottom.Mean(), 0);
-    Minimap.WaitMoving();
-    XPBar.EarnedXP();
-    Self.Woodcutting := True;
-    Self.TreeTimer.Restart();
-    Wait(2400, 3200);
+    Result[i] := Self[i].Bounds();
   end;
 end;
 
+function TWoodcutter.CutTree(): Boolean;
+var
+  Trees: T2DPointArray;
+  iterItem : TPointArray;
+  searchBox : TBox;
+  MScuboids : TCuboidExArray;
+  cuboidBoxArr : TBoxArray;
+
+begin
+  MScuboids := Self.RSW.GetCuboidArrayMS(Self.RSW.GetMyPos(), Self.RSTree.Coordinates, Self.RSTree.ShapeArray, [-2, 0]);
+  cuboidBoxArr := MScuboids.ToBoxArray();
+  cuboidBoxArr.SortFromMidPoint(MainScreen.GetPlayerBox.Middle);
+
+  for searchBox in cuboidBoxArr do
+  begin
+    Trees += MainScreen.FindObject(Self.RSTree.Finder, searchBox);
+  end;
+
+  if Trees.Len() < 1 then
+  begin
+    Minimap.SetCompassAngle(Minimap.GetCompassAngle() + Random(-50, 50), 10);
+    Exit;
+  end;
+
+  for iterItem in Trees do
+  begin
+    Mouse.Move(iterItem.Median);
+    if MainScreen.IsUpText(Self.RSTree.UpText) then
+    begin
+      Mouse.Click(MOUSE_LEFT);
+      Minimap.WaitMoving();
+      Self.TreeWalkerCoord := Self.RSW.MSToWorld(Mouse.Position(), Round(Self.RSTree.ShapeArray[0].Tile.Z/2));
+      Result := True;
+      XPBar.EarnedXP();
+      Self.Woodcutting := True;
+      Self.TreeTimer.Restart();
+      Exit;
+    end;
+  end;
+end;
 
 function TWoodcutter.EquipGear(): Boolean;
 var
@@ -430,7 +463,9 @@ function TWoodcutter.IsCutting(): Boolean;
 var
   gotXP: Boolean;
 begin
-  if Self.TreeTimer.IsFinished() or Inventory.IsFull() then
+  if Self.TreeTimer.IsFinished()
+    or Inventory.IsFull()
+    or (SRL.Dice(37) and not Mainscreen.IsUpText(Self.RSTree.UpText)) then
   begin
     Self.Woodcutting := False;
     Exit;
@@ -555,7 +590,7 @@ begin
   Self.Init(maxActions, maxTime);
 
   repeat
-    State := Self.GetState();
+    Self.State := Self.GetState();
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
