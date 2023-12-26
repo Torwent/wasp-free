@@ -97,13 +97,13 @@ begin
   case CurrentFurniture of
   ERSFurniture.MYTH_CAPE:
     begin
-      Self.BuiltFurniture.Setup(0.3, 4, [[1860, 139]]);
+      Self.BuiltFurniture.Setup(0.3, 4, [[1858, 138]]);
       Self.BuiltFurniture.SetupUpText(['Teleport']);
       Self.BuiltFurniture.Finder.Colors += CTS2(15198185, 9, 0.29, 0.68);
       Self.BuiltFurniture.Finder.Colors += CTS2(13083513, 7, 0.03, 1.71);
       Self.BuiltFurniture.Finder.Colors += CTS2(5799055, 10, 0.07, 0.85);
 
-      Self.FurnitureSpace.Setup(0.3, 4, [[1860, 139]]);
+      Self.FurnitureSpace.Setup(0.3, 4, [[1858, 138]]);
       Self.FurnitureSpace.SetupUpText(['2 more']);
       Self.FurnitureSpace.Finder.Colors += CTS2(13293015, 14, 0.23, 0.37);
     end;

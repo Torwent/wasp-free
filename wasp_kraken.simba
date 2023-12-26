@@ -11,8 +11,11 @@ type
     WAIT_STATE,
 
     //Outside
+    ENTER_COVE,
     ENTER_CREVICE,
     HANDLE_CHAT,
+    HANDLE_PIN,
+    HANDLE_WARNING,
 
     //Inside
     WALK_BRIDGE,
@@ -133,19 +136,28 @@ begin
   Result := MainScreen.InMultiCombat();
 end;
 
+function TKrakenKiller.EnterCove(): Boolean;
+begin
+  if RSObjects.KrakenCoveEntrance.WalkClick() then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(not Minimap.OnGroundLevel(), 300, 5000);
+  end;
+end;
+
 function TKrakenKiller.EnterCrevice(): Boolean;
 begin
-  if RSObjects.KrakenEntrance.WalkSelectOption(['Private']) then
+  if RSObjects.KrakenCrevice.WalkSelectOption(['Private']) then
   begin
     Minimap.WaitMoving;
-    Result := WaitUntil('Pay' in Chat.GetChatTitle, 100, 5000);
+    Result := WaitUntil(('Pay' in Chat.GetChatTitle()) or BankPin.IsOpen(), 300, 5000);
   end;
 end;
 
 function TKrakenKiller.HandlePayment(): Boolean;
 begin
   Chat.ClickOption('Yes', BioHash);
-  Result := WaitUntil(Self.InsideBossRoom, 100, 8000);
+  Result := WaitUntil(Self.InsideBossRoom() or Chat.HasContinue(), 300, 8000);
 end;
 
 
@@ -191,8 +203,12 @@ end;
 
 function TKrakenKiller.WakeKraken(): Boolean;
 begin
+  if MainScreen.IsUpText('>') then
+    ChooseOption.Select('Cancel');
+
   if not Inventory.SetSelectedItem('Fishing explosive') then
     Exit;
+
   Mouse.Move(Self.SleepyKraken);
   if MainScreen.IsUpText('Whirl') then
   begin
@@ -246,29 +262,19 @@ begin
   IsAttacking := False
 end;
 
-
-function TRSMainScreen.GetPlayerFloorBox(): TBox;
-var
-  A: Double := Minimap.GetCompassAngle(False);
-  Center: TPoint := Minimap.Center();
-  TPA: TPointArray;
-begin
-  TPA := [Minimap.VecToMS(Vec3(Center.X - 1, Center.Y, 3), A),
-          Minimap.VecToMS(Vec3(Center.X + 1, Center.Y, -3), A)];
-
-  Result := TPA.Bounds();
-end;
-
 function TKrakenKiller.CheckLoot(): Boolean;
 var
-  b: TBox := MainScreen.GetPlayerFloorBox();
+  rect: TRectangle;
 begin
+  if MainScreen.IsUpText('>') then
+    ChooseOption.Select('Cancel');
+
   while Inventory.IsFull() and Inventory.ContainsConsumable(ERSConsumable.FOOD) do
     Inventory.Consume(ERSConsumable.FOOD);
 
   Result := CheckedLoot := True;
-
-  while CombatHandler.LootHandler.CheckLoot(b, 1) and Inventory.HasSpace(1) do
+  rect := Minimap.GetTileMS(Minimap.Center(), [1,1,0]);
+  while CombatHandler.LootHandler.CheckLoot(rect) and Inventory.HasSpace(1) do
     Wait(400, 600);
 end;
 
@@ -276,32 +282,46 @@ end;
 function TKrakenKiller.GetState(): EKrakenState;
 var
   health: Int32;
+  pos: TPoint;
 begin
   if WL.Activity.IsFinished() and not MainScreen.InCombat() then
     Exit(EKrakenState.END_SCRIPT);
 
+  pos := Self.RSW.GetMyPos();
   if not Self.InsideBossRoom() then
   begin
+    if BankPin.IsOpen() then
+      Exit(EKrakenState.HANDLE_PIN);
+
     if 'Pay' in Chat.GetChatTitle ()then
       Exit(EKrakenState.HANDLE_CHAT);
-    Exit(EKrakenState.ENTER_CREVICE);
+
+    if Chat.HasContinue() then
+      Exit(EKrakenState.HANDLE_WARNING);
+
+    case Self.RSW.RegionIndex of
+      0: Exit(EKrakenState.ENTER_CREVICE);
+      1: Exit(EKrakenState.ENTER_COVE);
+    end;
   end;
 
   health := Minimap.GetHPLevel();
   if health <= 40 then
   begin
-    if Self.HasBloodSpells then
+    if Self.FindRagingKraken() then
     begin
-      if not MainScreen.IsUpText('Blood') then
+      if Self.HasBloodSpells then
       begin
-        if (health <= 25) and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-          Exit(EKrakenState.EAT_FOOD);
+        if not MainScreen.IsUpText('Blood') then
+        begin
+          if (health <= 25) and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+            Exit(EKrakenState.EAT_FOOD);
 
-        Exit(EKrakenState.SELECT_SPELL);
-      end;
+          Exit(EKrakenState.SELECT_SPELL);
+        end;
 
-      if Self.FindRagingKraken() then
         Exit(EKrakenState.CAST_BLOOD);
+      end;
     end;
 
     if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
@@ -324,7 +344,7 @@ begin
   if not Minimap.IsPrayerEnabled() and (Minimap.GetPrayerLevel() > 0) then
     Exit(EKrakenState.ENABLE_QPRAY);
 
-  if not RSW.AtTile(Self.Bridge, 5) then
+  if not pos.WithinDistance(Self.Bridge, 5) then
     Exit(EKrakenState.WALK_BRIDGE);
 
   if Self.FindRagingKraken() then
@@ -349,13 +369,16 @@ begin
   Self.Init(maxActions, maxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case Self.State of
       //Outside
+      EKrakenState.ENTER_COVE: Self.EnterCove();
       EKrakenState.ENTER_CREVICE: Self.EnterCrevice();
+      EKrakenState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
       EKrakenState.HANDLE_CHAT: Self.HandlePayment();
+      EKrakenState.HANDLE_WARNING: Chat.ClickContinue(BioHash);
 
       //Inside
       EKrakenState.WALK_BRIDGE: RSW.WebWalk(Bridge, 5, 0.2);
@@ -374,7 +397,7 @@ begin
       EKrakenState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban(True, False);
+    Self.DoAntiban(not Self.FindRagingKraken(), False);
   until Self.ShouldStop();
 end;
 
@@ -390,6 +413,29 @@ begin
     KrakenKiller.IsAttacking := False;
 end;
 
+function TConsumableHandler.FindInInventory(): TRSConsumableArray; override;
+var
+  consumable: TRSConsumable;
+  item: TRSItem;
+begin
+  Self.DebugLn('Setting up consumable of type: ' + ToStr(Self.ConsumableType));
+
+  for item in CONSUMABLE_ARRAYS[Self.ConsumableType] do
+  begin
+    if item = 'Sanfew serum(1..4)' then
+      Continue;
+    if Self.ConsumableArray.Contains(item) then //avoid resetting leftover items.
+      Continue;
+
+    if Inventory.ContainsItem(item) then
+    begin
+      Self.DebugLn('Consumable found: ' + ToStr(item));
+      consumable := Self.Setup(item);
+
+      Result += consumable;
+    end;
+  end;
+end;
 {$IFDEF SCRIPT_GUI}
 type
   TKrakenConfig = record(TScriptForm)
