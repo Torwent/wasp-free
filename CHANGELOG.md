@@ -1,3 +1,12 @@
+## [2.10.24](https://github.com/Torwent/wasp-free/compare/v2.10.23...v2.10.24) (2023-12-26)
+
+
+### Bug Fixes
+
+* all scripts updated their deprecated methods ([74707fd](https://github.com/Torwent/wasp-free/commit/74707fd468cfa435eb711087815cb806b177c9eb))
+
+
+
 ## [2.10.23](https://github.com/Torwent/wasp-free/compare/v2.10.22...v2.10.23) (2023-12-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **reld wrath runecrafter:** refactor ([eb45062](https://github.com/Torwent/wasp-free/commit/eb45062a02264386539c7829030e8a93f89b97d5))
-
-
-
-## [2.10.19](https://github.com/Torwent/wasp-free/compare/v2.10.18...v2.10.19) (2023-12-10)
-
-
-### Bug Fixes
-
-* **wrath runecrafter:** read notes ([4162f37](https://github.com/Torwent/wasp-free/commit/4162f37d31c4699068e2fc6d0844e074864dd8d6))
 
 
 
