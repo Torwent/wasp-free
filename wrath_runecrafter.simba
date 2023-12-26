@@ -725,7 +725,7 @@ begin
   else
     Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_RIGHT_CLICK);
 
-  Self.RSW.Setup([RSRegions.CORSAIR_COVE_DUNGEON, Self.WrathAltarBox.Expand(70),
+  Self.RSW.SetupRegions([RSRegions.CORSAIR_COVE_DUNGEON, Self.WrathAltarBox.Expand(70),
                   Self.CastleWarsBox.Expand(70), Self.EdgevilleBox.Expand(70),
                   Self.CraftingGuildBox.Expand(70), Self.FullMythGuildBox.Expand(70),
                   Self.NardahBox.Expand(70)], 8);  //5

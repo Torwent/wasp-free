@@ -206,7 +206,7 @@ procedure TKnightsThiever.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.RSW.Setup([RSRegions.ARDOUGNE]);
+  Self.RSW.SetupRegions([RSRegions.ARDOUGNE]);
   Self.SetupKnight();
 
   if DiaryLevel = 4 then

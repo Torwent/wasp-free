@@ -85,7 +85,7 @@ begin
   case PickedNPC of
     MAN:
       begin
-        Self.RSW.Setup([RSRegions.LUMBRIDGE]);
+        Self.RSW.SetupRegions([RSRegions.LUMBRIDGE]);
         Self.CurrentNPC := RSNPCs.Man;
 
         Self.LootArray += Self.CoinPouch;
@@ -103,7 +103,7 @@ begin
 
     MASTER_FARMER:
       begin
-        Self.RSW.Setup([RSRegions.DRAYNOR_VILLAGE]);
+        Self.RSW.SetupRegions([RSRegions.DRAYNOR_VILLAGE]);
         Self.CurrentNPC := RSNPCs.MasterFarmer;
         Self.LootArray := [
           'Potato seed', 'Onion seed', 'Cabbage seed', 'Tomato seed',
@@ -150,7 +150,7 @@ begin
 
     GUARD:
       begin
-        Self.RSW.Setup([RSRegions.FALADOR]);
+        Self.RSW.SetupRegions([RSRegions.FALADOR]);
         Self.CurrentNPC := RSNPCs.Guard;
 
         Self.LootArray += CoinPouch;
@@ -164,7 +164,7 @@ begin
 
     ELF:
       begin
-        Self.RSW.Setup([RSRegions.PRIFDDINAS]);
+        Self.RSW.SetupRegions([RSRegions.PRIFDDINAS]);
         Self.CurrentNPC := RSNPCs.Elf;
 
         Self.LootArray := [
@@ -188,7 +188,7 @@ begin
 
     TZHAAR_CITY:
       begin
-        Self.RSW.Setup([RSRegions.MOR_UL_REK]);
+        Self.RSW.SetupRegions([RSRegions.MOR_UL_REK]);
         Self.CurrentNPC := RSNPCs.TzhaarHur;
         Self.LootArray := [
           'Tokkul', 'Uncut sapphire', 'Uncut emerald',

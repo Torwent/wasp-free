@@ -59,7 +59,7 @@ begin
   inherited;
 
   if WalkGE then
-    Self.RSW.Setup([RSRegions.GRAND_EXCHANGE]);
+    Self.RSW.SetupRegions([RSRegions.GRAND_EXCHANGE]);
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');

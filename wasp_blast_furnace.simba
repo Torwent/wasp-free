@@ -201,7 +201,7 @@ procedure TBlastFurnace.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.RSW.Setup([RSRegions.BLAST_FURNACE]);
+  Self.RSW.SetupRegions([RSRegions.BLAST_FURNACE]);
   Self.SetupVariables();
   Self.SetMoneyBounds();
 

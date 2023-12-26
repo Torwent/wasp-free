@@ -43,7 +43,7 @@ begin
   case CurrentStall of
     ERSStall.TEA_STALL:
       begin
-        RSW.Setup([RSRegions.VARROCK_EAST]);
+        RSW.SetupRegions([RSRegions.VARROCK_EAST]);
         Stall := RSObjects.TeaStall;
         StallCooldown.Init(7000);
         SafeSpot := [8465, 2808];
@@ -52,7 +52,7 @@ begin
 
     ERSStall.SILK_STALL:
       begin
-        RSW.Setup([RSRegions.ARDOUGNE]);
+        RSW.SetupRegions([RSRegions.ARDOUGNE]);
         Stall := RSObjects.SilkStall;
         StallCooldown.Init(5000);
         SafeSpot := [6042, 3182];
@@ -61,7 +61,7 @@ begin
 
     ERSStall.FRUIT_STALL:
       begin
-        RSW.Setup([RSRegions.HOSIDIUS_FRUIT_STALL_HOUSE]);
+        RSW.SetupRegions([RSRegions.HOSIDIUS_FRUIT_STALL_HOUSE]);
         Stall := RSObjects.FruitStall;
         StallCooldown.Init(2000);
         DropList := [

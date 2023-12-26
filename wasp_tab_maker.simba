@@ -101,7 +101,7 @@ procedure TTabMaker.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.RSW.Setup([RSRegions.RIMMINGTON, RSRegions.POH]);
+  Self.RSW.SetupRegions([RSRegions.RIMMINGTON, RSRegions.POH]);
 
   Self.SetupNPC();
   Self.SetupLectern();

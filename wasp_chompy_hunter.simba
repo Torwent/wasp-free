@@ -36,7 +36,7 @@ begin
   inherited;
 
   ItemFinder.Similarity := 0.9999;
-  RSW.Setup([RSRegions.CASTLE_WARS]);
+  RSW.SetupRegions([RSRegions.CASTLE_WARS]);
 
   CombatHandler.Setup(RSMonsters.Chompy, 2000);
   Toad := RSNPCs.SwampToad;

@@ -188,15 +188,15 @@ begin
   Self.UseBank := not PowerCut;
 
   case TreeLocation of
-    ETreeLocation.WOODCUT_GUILD:   Self.RSW.Setup([RSRegions.WOODCUTTING_GUILD]);
-    ETreeLocation.VARROCK_EAST:    Self.RSW.Setup([RSRegions.VARROCK_EAST]);
-    ETreeLocation.VARROCK_WEST:    Self.RSW.Setup([RSRegions.VARROCK_WEST]);
-    ETreeLocation.EDGEVILLE:       Self.RSW.Setup([RSRegions.EDGEVILLE]);
-    ETreeLocation.PRIFDDINAS:      Self.RSW.Setup([RSRegions.PRIFDDINAS]);
-    ETreeLocation.ISLE_OF_SOULS:   Self.RSW.Setup([RSRegions.ISLE_OF_SOULS]);
-    ETreeLocation.CASTLE_WARS:     Self.RSW.Setup([RSRegions.CASTLE_WARS]);
-    ETreeLocation.DRAYNOR_VILLAGE: Self.RSW.Setup([RSRegions.DRAYNOR_VILLAGE]);
-    ETreeLocation.SEERS_VILLAGE:   Self.RSW.Setup([RSRegions.SEERS_VILLAGE]);
+    ETreeLocation.WOODCUT_GUILD:   Self.RSW.SetupRegions([RSRegions.WOODCUTTING_GUILD]);
+    ETreeLocation.VARROCK_EAST:    Self.RSW.SetupRegions([RSRegions.VARROCK_EAST]);
+    ETreeLocation.VARROCK_WEST:    Self.RSW.SetupRegions([RSRegions.VARROCK_WEST]);
+    ETreeLocation.EDGEVILLE:       Self.RSW.SetupRegions([RSRegions.EDGEVILLE]);
+    ETreeLocation.PRIFDDINAS:      Self.RSW.SetupRegions([RSRegions.PRIFDDINAS]);
+    ETreeLocation.ISLE_OF_SOULS:   Self.RSW.SetupRegions([RSRegions.ISLE_OF_SOULS]);
+    ETreeLocation.CASTLE_WARS:     Self.RSW.SetupRegions([RSRegions.CASTLE_WARS]);
+    ETreeLocation.DRAYNOR_VILLAGE: Self.RSW.SetupRegions([RSRegions.DRAYNOR_VILLAGE]);
+    ETreeLocation.SEERS_VILLAGE:   Self.RSW.SetupRegions([RSRegions.SEERS_VILLAGE]);
   end;
 
   //Remove cooking guild banks

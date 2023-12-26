@@ -96,7 +96,7 @@ procedure TKrakenKiller.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.RSW.Setup([RSRegions.KRAKEN_COVE]);
+  Self.RSW.SetupRegions([RSRegions.KRAKEN_COVE, RSRegions.PISCATORIS]);
   Self.Bridge := [10391, 1145];
   Self.BossRoomTPA := [
     [10369, 1085], [10420, 1086], [10440, 1107],

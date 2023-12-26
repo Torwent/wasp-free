@@ -179,25 +179,25 @@ begin
   case BankLocation of
     MINE_GUILD:
       begin
-        RSW.Setup([RSRegions.MINING_GUILD]);
+        RSW.SetupRegions([RSRegions.MINING_GUILD]);
         UseBank := True;
       end;
 
     CRAFTING_GUILD_MINE:
       begin
-        RSW.Setup([RSRegions.CRAFTING_GUILD]);
+        RSW.SetupRegions([RSRegions.CRAFTING_GUILD]);
         UseBank := True;
       end;
 
     VARROCK_E:
       begin
-        RSW.Setup([RSRegions.VARROCK_EAST]);
+        RSW.SetupRegions([RSRegions.VARROCK_EAST]);
         UseBank := True;
       end;
 
     VARROCK_W:
       begin
-        RSW.Setup([RSRegions.VARROCK_WEST]);
+        RSW.SetupRegions([RSRegions.VARROCK_WEST]);
         UseBank := True;
       end;
 

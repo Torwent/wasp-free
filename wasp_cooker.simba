@@ -124,13 +124,13 @@ begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
       begin
-        RSW.Setup([RSRegions.HOSIDIUS_KITCHEN]);
+        RSW.SetupRegions([RSRegions.HOSIDIUS_KITCHEN]);
         CookingObj := RSObjects.HosidiusKitchenOven;
       end;
 
     ERSLocation.ROGUES_DEN:
       begin
-        RSW.Setup([RSRegions.ROGUES_DEN]);
+        RSW.SetupRegions([RSRegions.ROGUES_DEN]);
         RSNPCs.EmeraldBenedict.Filter.Finder := False;
 
         RSObjects.EternalFire.Filter.Finder := False;
@@ -140,7 +140,7 @@ begin
 
     ERSLocation.MYTHS_GUILD:
       begin
-        RSW.Setup([RSRegions.MYTHS_GUILD_MID_FLOOR]);
+        RSW.SetupRegions([RSRegions.MYTHS_GUILD_MID_FLOOR]);
         CookingObj := RSObjects.MythGuildRange;
       end;
   end;

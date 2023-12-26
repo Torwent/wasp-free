@@ -58,7 +58,7 @@ var
 begin
   inherited;
 
-  Self.RSW.Setup([RSRegions.VARROCK]);
+  Self.RSW.SetupRegions([RSRegions.VARROCK]);
 
   Self.Coins := 'Coins';
   Self.Ring := 'Ring of the elements';

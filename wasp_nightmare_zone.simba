@@ -184,7 +184,7 @@ procedure TNMZFighter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.RSW.Setup([RSRegions.YANILLE, RSRegions.KBD_AND_NMZ]);
+  Self.RSW.SetupRegions([RSRegions.YANILLE, RSRegions.KBD_AND_NMZ]);
 
   Self.SetupPotions();
   Self.SetupBarrels();
