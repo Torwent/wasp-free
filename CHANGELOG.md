@@ -1,3 +1,12 @@
+## [2.10.23](https://github.com/Torwent/wasp-free/compare/v2.10.22...v2.10.23) (2023-12-26)
+
+
+### Bug Fixes
+
+* read notes ([eae2c3c](https://github.com/Torwent/wasp-free/commit/eae2c3c6e5df24de2640459722f1cd38685bfbbc))
+
+
+
 ## [2.10.22](https://github.com/Torwent/wasp-free/compare/v2.10.21...v2.10.22) (2023-12-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **wrath runecrafter:** read notes ([4162f37](https://github.com/Torwent/wasp-free/commit/4162f37d31c4699068e2fc6d0844e074864dd8d6))
-
-
-
-## [2.10.18](https://github.com/Torwent/wasp-free/compare/v2.10.17...v2.10.18) (2023-12-08)
-
-
-### Bug Fixes
-
-* **kraken:** looting works again ([77bde1a](https://github.com/Torwent/wasp-free/commit/77bde1a724f3a60439ba0c6d027dd595f0572bdb))
 
 
 
