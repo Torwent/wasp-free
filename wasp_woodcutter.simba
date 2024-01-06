@@ -272,8 +272,8 @@ begin
 
   for iterItem in Trees do
   begin
-    Mouse.Move(iterItem.Median);
-    if MainScreen.IsUpText(Self.RSTree.UpText) then
+    Mouse.Move(iterItem.Mean());
+    if MainScreen.IsUpText(Self.RSTree.UpText, 500) then
     begin
       Mouse.Click(MOUSE_LEFT);
       Minimap.WaitMoving();
@@ -427,10 +427,9 @@ function TWoodcutter.EmptySack():Boolean;
 begin
   if Inventory.ClickItem('Plank sack', 'Empty') then
     Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 300, 3000);
-
+    
   Self.PlankSackFull := False;
 end;
-
 
 function TWoodCutter.AtTree(): Boolean;
 var
@@ -440,7 +439,7 @@ var
   tpa: TPointArray;
 begin
   cuboid := Self.RSW.GetCuboidMS(Self.TreeWalkerCoord, Self.RSTree.ShapeArray[0]);
-  searchBox := cuboid.Bounds();
+  searchBox := cuboid.Bounds().Expand(2);
   atpa := MainScreen.FindObject(Self.RSTree.Finder, searchBox);
   if atpa = [] then
   begin
@@ -465,7 +464,8 @@ var
 begin
   if Self.TreeTimer.IsFinished()
     or Inventory.IsFull()
-    or (SRL.Dice(37) and not Mainscreen.IsUpText(Self.RSTree.UpText)) then
+    or (PowerCut
+        and not Mainscreen.IsUpText(Self.RSTree.UpText)) then
   begin
     Self.Woodcutting := False;
     Exit;
