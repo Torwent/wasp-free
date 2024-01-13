@@ -1,3 +1,12 @@
+## [2.10.25](https://github.com/Torwent/wasp-free/compare/v2.10.24...v2.10.25) (2024-01-13)
+
+
+### Bug Fixes
+
+* **chompy hunter:** should not leave the area anymore, requires latest WL ([f6ef6cc](https://github.com/Torwent/wasp-free/commit/f6ef6cc6ae006ca9bd30d9971b3996b3d98499ee))
+
+
+
 ## [2.10.24](https://github.com/Torwent/wasp-free/compare/v2.10.23...v2.10.24) (2023-12-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **offerer:** shouldnt't crash every few hours anymore ([e522baa](https://github.com/Torwent/wasp-free/commit/e522baa828886cfb28dfa901bd795df946861bc5))
-
-
-
-## [2.10.20](https://github.com/Torwent/wasp-free/compare/v2.10.19...v2.10.20) (2023-12-11)
-
-
-### Bug Fixes
-
-* **reld wrath runecrafter:** refactor ([eb45062](https://github.com/Torwent/wasp-free/commit/eb45062a02264386539c7829030e8a93f89b97d5))
 
 
 
