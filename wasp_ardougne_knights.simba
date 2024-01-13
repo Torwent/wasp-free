@@ -710,10 +710,10 @@ begin
     y := TControl.AdjustToDPI(15);
 
   case consumableType of
-    ERSConsumable.FOOD:   typeStr := 'Food';
+    ERSConsumable.FOOD: typeStr := 'Food';
     ERSConsumable.FOOD: typeStr := 'Prayer';
     ERSConsumable.FOOD: typeStr := 'Energy';
-    ERSConsumable.FOOD:  typeStr := 'Boost';
+    ERSConsumable.FOOD: typeStr := 'Boost';
   end;
 
   Result := inherited;

@@ -105,7 +105,7 @@ begin
   Mouse.Click(FinalTPA.RandomValue(), MOUSE_LEFT);
 
   Minimap.WaitMoving();
-  Result := not Minimap.HasDotUnder;
+  Result := not Minimap.HasDotUnder();
 end;
 
 function TChompyHunter.PlaceToad(): Boolean;
@@ -125,7 +125,7 @@ var
   count: Int32;
 begin
   count := Inventory.Count();
-  if Self.Toad.Click(True, 10) then
+  if Self.Toad.WalkClick(True, 10) then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(count < Inventory.Count(), 300, 5000);
@@ -145,7 +145,7 @@ function TChompyHunter.ClickChompy(): Boolean;
 var
   featherCount: Int32;
 begin
-  if CombatHandler.Monster.SelectOption(['Attack', 'Pluck']) then
+  if CombatHandler.Monster.WalkSelectOption(['Attack', 'Pluck']) then
   begin
     featherCount := Inventory.CountItemStack('Feather');
     Minimap.WaitMoving();
