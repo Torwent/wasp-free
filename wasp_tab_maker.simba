@@ -10,7 +10,8 @@ type
 
 var
   CurrentNPC: ERSNPC = ERSNPC.PHIALS;
-  CurrentTab: ERSSpellTab = ERSSpellTab.HOUSE_TELEPORT;
+  CurrentLectern: ERSLecternType = ERSLecternType.STANDARD;
+  CurrentTablet: TRSItem = 'Teleport to house';
 
 type
   ETabMakerState = (
@@ -61,24 +62,7 @@ procedure TTabMaker.SetupItems();
 begin
   Self.SoftClay := 'Soft clay';
   Self.NotedSoftClay := 'Noted soft clay';
-
-  case CurrentTab of
-    ERSSpellTab.ENCHANT_ONYX:        Self.SpellTab := 'Enchant onyx';
-    ERSSpellTab.ENCHANT_DIAMOND:     Self.SpellTab := 'Enchant diamond';
-    ERSSpellTab.LUMBRIDGE_TELEPORT:  Self.SpellTab := 'Lumbridge teleport';
-    ERSSpellTab.WATCHTOWER_TELEPORT: Self.SpellTab := 'Watchtower teleport';
-    ERSSpellTab.HOUSE_TELEPORT:      Self.SpellTab := 'Teleport to house';
-    ERSSpellTab.ENCHANT_EMERALD:     Self.SpellTab := 'Enchant emerald or jade';
-    ERSSpellTab.ENCHANT_SAPPHIRE:    Self.SpellTab := 'Enchant sapphire or opal';
-    ERSSpellTab.FALADOR_TELEPORT:    Self.SpellTab := 'Falador teleport';
-    ERSSpellTab.ARDOUGNE_TELEPORT:   Self.SpellTab := 'Ardougne teleport';
-    ERSSpellTab.BONES_TO_BANANAS:    Self.SpellTab := 'Bones to bananas';
-    ERSSpellTab.ENCHANT_DRAGONSTONE: Self.SpellTab := 'Enchant dragonstone';
-    ERSSpellTab.ENCHANT_RUBY:        Self.SpellTab := 'Enchant ruby or topaz';
-    ERSSpellTab.VARROCK_TELEPORT:    Self.SpellTab := 'Varrock teleport';
-    ERSSpellTab.CAMELOT_TELEPORT:    Self.SpellTab := 'Camelot teleport';
-    ERSSpellTab.BONES_TO_PEACHES:    Self.SpellTab := 'Bones to peaches';
-  end;
+  Self.SpellTab := CurrentTablet;
 end;
 
 procedure TTabMaker.SetupLectern();
@@ -207,7 +191,7 @@ end;
 
 function TTabMaker.HandleLectern(): Boolean;
 begin
-  Result := Lectern.ClickSpellTab(CurrentTab) and XPBar.WaitXP(5000);
+  Result := Lectern.MakeTablet(CurrentTablet) and XPBar.WaitXP(5000);
   Self.IsTabbing := Result;
 end;
 
@@ -432,8 +416,9 @@ end;
 {$IFDEF SCRIPT_GUI}
 type
   TTabMakerConfig = record(TScriptForm)
+    LecternSelector: TLabeledCombobox;
     NPCSelector: TLabeledCombobox;
-    SpellTabSelector: TLabeledCombobox;
+    TabletSelector: TLabeledCombobox;
     LayoutInfo, TabMakerInfo: TLabel;
     ImagePanel: TPanel;
   end;
@@ -441,8 +426,18 @@ type
 procedure TTabMakerConfig.StartScript(sender: TObject); override;
 begin
   CurrentNPC := ERSNPC(Self.NPCSelector.GetItemIndex());
-  CurrentTab := ERSSpellTab(Self.SpellTabSelector.GetItemIndex());
+  CurrentTablet := Lectern.TABLETS[CurrentLectern][Self.TabletSelector.GetItemIndex()];
   inherited;
+end;
+
+procedure TTabMakerConfig.LecternSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+  CurrentLectern := ERSLecternType(combobox.getItemIndex() + 1);
+  Self.NPCSelector.SetVisible(CurrentLectern = ERSLecternType.STANDARD);
+  Self.TabletSelector.SetItemIndex(Lectern.TABLETS[CurrentLectern].Find(LowerCase(CurrentTablet)));
 end;
 
 procedure TTabMakerConfig.NPCSelectorOnChange(sender: TObject);
@@ -470,7 +465,7 @@ end;
 procedure TTabMakerConfig.Run(); override;
 var
   tab: TTabSheet;
-  spell: ERSSpellTab;
+  i: Int32;
 begin
   Self.Setup('Wasp TabMaker');
   Self.Start.SetOnClick(@Self.StartScript);
@@ -480,28 +475,42 @@ begin
 
   Self.CreateAccountManager(tab);
 
+  with Self.LecternSelector do
+  begin
+    Create(tab);
+    SetCaption('Lectern:');
+    SetLeft(TControl.AdjustToDPI(20));
+    SetTop(TControl.AdjustToDPI(150));
+    SetStyle(csDropDownList);
+    AddItemArray(['Standard', 'Ancient', 'Lunar', 'Arceuus']);
+    SetItemIndex(Ord(CurrentLectern)-1);
+    Combobox.SetOnChange(@Self.LecternSelectorOnChange);
+    SetEnabled(False);
+  end;
+
   with Self.NPCSelector do
   begin
     Create(tab);
     SetCaption('Method:');
-    SetLeft(TControl.AdjustToDPI(40));
-    SetTop(TControl.AdjustToDPI(150));
+    SetLeft(Self.LecternSelector.GetLeft());
+    SetTop(Self.LecternSelector.GetBottom() + TControl.AdjustToDPI(10));
     SetStyle(csDropDownList);
     AddItemArray(['Phials', 'Demon butler']);
     SetItemIndex(Ord(CurrentNPC));
     Combobox.SetOnChange(@Self.NPCSelectorOnChange);
   end;
 
-  with Self.SpellTabSelector do
+  with Self.TabletSelector do
   begin
     Create(tab);
     SetCaption('Spell tab:');
-    SetTop(Self.NPCSelector.GetTop());
-    SetLeft(Self.NPCSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetTop(Self.LecternSelector.GetTop());
+    SetLeft(Self.LecternSelector.GetRight() + TControl.AdjustToDPI(15));
     SetStyle(csDropDownList);
-    for spell := ERSSpellTab(0) to High(ERSSpellTab) do
-      AddItem(ToStr(spell).Lower().Capitalize().Replace('_', ' '));
-    SetItemIndex(Ord(CurrentTab));
+    for i := 0 to High(Lectern.TABLETS[CurrentLectern]) do
+    begin
+      AddItem(ToStr(Lectern.TABLETS[CurrentLectern][i]).SentenceCase());
+    end;
   end;
 
   with Self.LayoutInfo do
@@ -539,8 +548,8 @@ begin
   with Self.ImagePanel do
   begin
     Create(tab);
-    SetTop(Self.SpellTabSelector.GetTop() + TControl.AdjustToDPI(15));
-    SetLeft(Self.SpellTabSelector.GetRight() + TControl.AdjustToDPI(90));
+    SetTop(Self.TabletSelector.GetTop() + TControl.AdjustToDPI(15));
+    SetLeft(Self.TabletSelector.GetRight() + TControl.AdjustToDPI(90));
     SetWidth(TControl.AdjustToDPI(240));
     SetHeight(TControl.AdjustToDPI(240));
     SetHint('House layout. Make sure your house layout looks like this!');
@@ -553,6 +562,7 @@ begin
   Self.CreateAPISettings();
 
   Self.NPCSelectorOnChange(Self.NPCSelector.ComboBox);
+  Self.LecternSelectorOnChange(Self.LecternSelector.ComboBox);
 
   inherited;
 end;
