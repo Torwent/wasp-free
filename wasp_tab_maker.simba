@@ -236,10 +236,11 @@ begin
     Exit(ETabMakerState.HANDLE_SERVANT);
 
   if MainScreen.HasInterface() then
+  begin
+    if Lectern.IsOpen() then
+      Exit(ETabMakerState.HANDLE_TAB_UI);
     Exit(ETabMakerState.CLOSE_INTERFACE);
-
-  if Lectern.IsOpen() then
-    Exit(ETabMakerState.HANDLE_TAB_UI);
+  end;
 
   if not Minimap.InPOH() then
   begin
