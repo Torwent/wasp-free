@@ -1,3 +1,12 @@
+## [2.10.26](https://github.com/Torwent/wasp-free/compare/v2.10.25...v2.10.26) (2024-01-16)
+
+
+### Bug Fixes
+
+* **tab maker:** should work again. didn't test. required latest WaspLib ([2bdfbaf](https://github.com/Torwent/wasp-free/commit/2bdfbaf9bd48c97df25356028045273282bd5d19))
+
+
+
 ## [2.10.25](https://github.com/Torwent/wasp-free/compare/v2.10.24...v2.10.25) (2024-01-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * same exact update wasp-premium had ([58f8dd8](https://github.com/Torwent/wasp-free/commit/58f8dd889833dc12cd5607afa30ecb47d4b34b22))
-
-
-
-## [2.10.21](https://github.com/Torwent/wasp-free/compare/v2.10.20...v2.10.21) (2023-12-16)
-
-
-### Bug Fixes
-
-* **offerer:** shouldnt't crash every few hours anymore ([e522baa](https://github.com/Torwent/wasp-free/commit/e522baa828886cfb28dfa901bd795df946861bc5))
 
 
 
