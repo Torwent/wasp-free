@@ -1,3 +1,12 @@
+## [2.10.29](https://github.com/Torwent/wasp-free/compare/v2.10.28...v2.10.29) (2024-01-21)
+
+
+### Bug Fixes
+
+* **blast furnace:** compatibility with latest wasplib ([30068e9](https://github.com/Torwent/wasp-free/commit/30068e9fa932dbda02cc28f72f108838fa4bb8a9))
+
+
+
 ## [2.10.28](https://github.com/Torwent/wasp-free/compare/v2.10.27...v2.10.28) (2024-01-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **chompy hunter:** should not leave the area anymore, requires latest WL ([f6ef6cc](https://github.com/Torwent/wasp-free/commit/f6ef6cc6ae006ca9bd30d9971b3996b3d98499ee))
-
-
-
-## [2.10.24](https://github.com/Torwent/wasp-free/compare/v2.10.23...v2.10.24) (2023-12-26)
-
-
-### Bug Fixes
-
-* all scripts updated their deprecated methods ([74707fd](https://github.com/Torwent/wasp-free/commit/74707fd468cfa435eb711087815cb806b177c9eb))
 
 
 
