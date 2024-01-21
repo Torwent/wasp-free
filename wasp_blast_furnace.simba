@@ -311,15 +311,14 @@ var
 begin
   if MainScreen.HasInterface() then
   begin
-    if Bank.IsOpen() then
+    if Bank.IsOpen() or BankPin.IsOpen() then
       Exit(True);
     MainScreen.CloseInterface();
   end;
 
-  if rsobject = [] then
-    rsobject := RSObjects.Banks.GetClosest();
+  rsobject := PRSObject(WalkerObjects.Banks.GetClosest())^;
 
-  if rsobject.WalkClick() or (MainScreen.IsUpText('Banker') and ChooseOption.Select(['Bank B', 'Bank E'])) then
+  if rsobject.WalkClick() then
   begin
     if Inventory.ContainsItem(Self.Bar) then
       Inventory.MouseItem(Self.Bar)
