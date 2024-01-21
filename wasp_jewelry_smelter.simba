@@ -5,6 +5,8 @@
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
 {$ENDIF}
+{$I WaspLib/optional/interfaces/mainscreen/craftscreen.simba}
+{$I WaspLib/optional/interfaces/mainscreen/silverscreen.simba}
 
 type
   ERSMetalType = (SILVER, GOLD);

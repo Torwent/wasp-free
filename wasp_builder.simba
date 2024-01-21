@@ -135,7 +135,7 @@ procedure TBuilder.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  RSW.Setup([RSRegions.RIMMINGTON, RSRegions.POH]);
+  RSW.SetupRegions([RSRegions.RIMMINGTON, RSRegions.POH]);
   Self.LastPoint := [0, 0];
   Self.SetupNPC();
   Self.SetupObjects();
