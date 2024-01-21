@@ -1,3 +1,12 @@
+## [2.10.28](https://github.com/Torwent/wasp-free/compare/v2.10.27...v2.10.28) (2024-01-21)
+
+
+### Bug Fixes
+
+* **tab maker:** compatibility update with latest wasplib ([c331f5c](https://github.com/Torwent/wasp-free/commit/c331f5cc35d894e0fab43cde42038a197c7c098e))
+
+
+
 ## [2.10.27](https://github.com/Torwent/wasp-free/compare/v2.10.26...v2.10.27) (2024-01-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * all scripts updated their deprecated methods ([74707fd](https://github.com/Torwent/wasp-free/commit/74707fd468cfa435eb711087815cb806b177c9eb))
-
-
-
-## [2.10.23](https://github.com/Torwent/wasp-free/compare/v2.10.22...v2.10.23) (2023-12-26)
-
-
-### Bug Fixes
-
-* read notes ([eae2c3c](https://github.com/Torwent/wasp-free/commit/eae2c3c6e5df24de2640459722f1cd38685bfbbc))
 
 
 
