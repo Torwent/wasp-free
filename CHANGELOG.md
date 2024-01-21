@@ -1,3 +1,12 @@
+## [2.10.30](https://github.com/Torwent/wasp-free/compare/v2.10.29...v2.10.30) (2024-01-21)
+
+
+### Bug Fixes
+
+* scripts now use optional files from the optional directory ([40b62da](https://github.com/Torwent/wasp-free/commit/40b62da086e8042f3a54a8911ac7cc8d684bf704))
+
+
+
 ## [2.10.29](https://github.com/Torwent/wasp-free/compare/v2.10.28...v2.10.29) (2024-01-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **tab maker:** should work again. didn't test. required latest WaspLib ([2bdfbaf](https://github.com/Torwent/wasp-free/commit/2bdfbaf9bd48c97df25356028045273282bd5d19))
-
-
-
-## [2.10.25](https://github.com/Torwent/wasp-free/compare/v2.10.24...v2.10.25) (2024-01-13)
-
-
-### Bug Fixes
-
-* **chompy hunter:** should not leave the area anymore, requires latest WL ([f6ef6cc](https://github.com/Torwent/wasp-free/commit/f6ef6cc6ae006ca9bd30d9971b3996b3d98499ee))
 
 
 
