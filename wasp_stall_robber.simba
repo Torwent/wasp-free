@@ -43,7 +43,7 @@ begin
   case CurrentStall of
     ERSStall.TEA_STALL:
       begin
-        RSW.SetupRegions([RSRegions.VARROCK_EAST]);
+        Self.RSW.SetupRegions([RSRegions.VARROCK_EAST]);
         Stall := RSObjects.TeaStall;
         StallCooldown.Init(7000);
         SafeSpot := [8465, 2808];
@@ -52,7 +52,7 @@ begin
 
     ERSStall.SILK_STALL:
       begin
-        RSW.SetupRegions([RSRegions.ARDOUGNE]);
+        Self.RSW.SetupRegions([RSRegions.ARDOUGNE]);
         Stall := RSObjects.SilkStall;
         StallCooldown.Init(5000);
         SafeSpot := [6042, 3182];
@@ -61,13 +61,13 @@ begin
 
     ERSStall.FRUIT_STALL:
       begin
-        RSW.SetupRegions([RSRegions.HOSIDIUS_FRUIT_STALL_HOUSE]);
+        Self.RSW.SetupRegions([RSRegions.HOSIDIUS_FRUIT_STALL_HOUSE]);
         Stall := RSObjects.FruitStall;
         StallCooldown.Init(2000);
-        DropList := [
+        Self.DropList := [
           'Cooking apple', 'Banana', 'Jangerberries', 'Lemon', 'Redberries',
           'Pineapple', 'Lime', 'Strawberry', 'Strange fruit',
-          'Golovanova fruit top', 'Papaya fruit', 'Silk'
+          'Papaya fruit', 'Silk'//, 'Golovanova fruit top'
         ];
       end;
   end;
@@ -109,8 +109,8 @@ function TStallRobber.DropItems(): Boolean;
 var
   Slots: TIntegerArray;
 begin
-  Inventory.FindItems(DropList, Slots);
-  Result := Inventory.ShiftDrop(DropList, DROP_PATTERN_SNAKE);
+  Inventory.FindItems(Self.DropList, Slots);
+  Result := Inventory.ShiftDrop(Self.DropList, DROP_PATTERN_SNAKE);
 
   if Result then
     TotalActions += Length(Slots);
@@ -134,10 +134,10 @@ begin
   if not StallCooldown.IsFinished() then
     Exit(WAIT_STATE);
 
-  if (SafeSpot <> []) and not RSW.AtTile(SafeSpot, 5) then
+  if (SafeSpot <> []) and not Self.RSW.AtTile(SafeSpot, 5) then
     Exit(WALK_SPOT);
 
-  if RSW.AtTile(Stall.Coordinates) then
+  if Self.RSW.AtTile(Stall.Coordinates) then
     Exit(FIND_STALL);
 end;
 
@@ -154,7 +154,7 @@ begin
       DROP_LOOT:  Self.DropItems();
       FIND_STALL, ROB_STALL: Self.RobStall();
       WAIT_STATE: Wait(100, 200);
-      WALK_SPOT:  RSW.WebWalk(SafeSpot, 3, 0.2);
+      WALK_SPOT:  Self.RSW.WebWalk(SafeSpot, 3, 0.2);
       END_SCRIPT: Break;
     end;
 

@@ -4,7 +4,7 @@
   {$DEFINE SCRIPT_GUI}
   {$I SRL-T/osr.simba}
   {$I WaspLib/osr.simba}
-  {$I WaspLib/osr/handlers/alchhandler.simba}
+  {$I WaspLib/optional/handlers/alchhandler.simba}
 {$ENDIF}
 
 var
