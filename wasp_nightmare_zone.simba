@@ -609,7 +609,7 @@ begin
   if Self.PrayFlick and Self.PrayFlickTimer.IsFinished() then
     Exit(ENMZState.FLICK_PRAYER);
 
-  if not MainScreen.WaitInCombat(800) then
+  if not MainScreen.WaitInCombat(1200) then
     Exit(ENMZState.ATTACK_NPC);
 
   if CombatHandler.CanSpec() then
