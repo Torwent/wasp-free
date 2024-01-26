@@ -1,3 +1,12 @@
+## [2.10.32](https://github.com/Torwent/wasp-free/compare/v2.10.31...v2.10.32) (2024-01-26)
+
+
+### Bug Fixes
+
+* **builder:** compatibility with latest wasplib ([1ebb349](https://github.com/Torwent/wasp-free/commit/1ebb349b01888decc68a6008d18d26a3b48eeb11))
+
+
+
 ## [2.10.31](https://github.com/Torwent/wasp-free/compare/v2.10.30...v2.10.31) (2024-01-25)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **tab maker:** compatibility update with latest wasplib ([c331f5c](https://github.com/Torwent/wasp-free/commit/c331f5cc35d894e0fab43cde42038a197c7c098e))
-
-
-
-## [2.10.27](https://github.com/Torwent/wasp-free/compare/v2.10.26...v2.10.27) (2024-01-16)
-
-
-### Bug Fixes
-
-* **tab maker:** fix GetState() logic ([af9fbe9](https://github.com/Torwent/wasp-free/commit/af9fbe918c47d556a451cb9cfa9ed26442d1676d))
 
 
 
