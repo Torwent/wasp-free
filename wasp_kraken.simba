@@ -134,6 +134,8 @@ end;
 function TKrakenKiller.InsideBossRoom(): Boolean;
 begin
   Result := MainScreen.InMultiCombat();
+  if not Result then
+    Self.CheckedLoot := True;
 end;
 
 function TKrakenKiller.EnterCove(): Boolean;
@@ -305,33 +307,6 @@ begin
     end;
   end;
 
-  health := Minimap.GetHPLevel();
-  if health <= 40 then
-  begin
-    if Self.FindRagingKraken() then
-    begin
-      if Self.HasBloodSpells then
-      begin
-        if not MainScreen.IsUpText('Blood') then
-        begin
-          if (health <= 25) and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-            Exit(EKrakenState.EAT_FOOD);
-
-          Exit(EKrakenState.SELECT_SPELL);
-        end;
-
-        Exit(EKrakenState.CAST_BLOOD);
-      end;
-    end;
-
-    if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-      Exit(EKrakenState.EAT_FOOD);
-    if Self.FindRagingKraken() then
-      Exit(EKrakenState.ATTACK_KRAKEN);
-    if health <= 25 then
-      TerminateScript('OUT OF FOOD AND HEALTH');
-  end;
-
   if (Minimap.GetPrayerLevel() <= 30) and Inventory.ContainsItem('Prayer potion(1..4)') then
     Exit(EKrakenState.DRINK_PRAYER);
 
@@ -347,11 +322,42 @@ begin
   if not pos.WithinDistance(Self.Bridge, 5) then
     Exit(EKrakenState.WALK_BRIDGE);
 
+  health := Minimap.GetHPLevel();
+
   if Self.FindRagingKraken() then
   begin
+    if health <= 40 then
+    begin
+      if Self.HasBloodSpells then
+      begin
+        if not MainScreen.IsUpText('Blood') then
+        begin
+          if (health <= 25) and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+            Exit(EKrakenState.EAT_FOOD);
+
+          Exit(EKrakenState.SELECT_SPELL);
+        end;
+
+        Exit(EKrakenState.CAST_BLOOD);
+      end;
+
+      if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+        Exit(EKrakenState.EAT_FOOD);
+      if health <= 25 then
+        TerminateScript('OUT OF FOOD AND HEALTH WHILE FIGHTING');
+    end;
+
     if Self.IsAttacking then
       Exit(EKrakenState.WAIT_STATE);
     Exit(EKrakenState.ATTACK_KRAKEN);
+  end;
+
+  if health <= 75 then
+  begin                         Self.CheckedLoot
+    if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+      Exit(EKrakenState.EAT_FOOD);
+    if health <= 40 then
+      TerminateScript('OUT OF FOOD AND HEALTH');
   end;
 
   if not Self.CheckedLoot then
