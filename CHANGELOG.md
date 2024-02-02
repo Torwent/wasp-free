@@ -1,3 +1,12 @@
+## [2.10.33](https://github.com/Torwent/wasp-free/compare/v2.10.32...v2.10.33) (2024-02-02)
+
+
+### Bug Fixes
+
+* **kraken:** several tweaks to how we handle healing ([ca85c02](https://github.com/Torwent/wasp-free/commit/ca85c02cf6a8c91d3e901aa442ac4f1899934f4a))
+
+
+
 ## [2.10.32](https://github.com/Torwent/wasp-free/compare/v2.10.31...v2.10.32) (2024-01-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** compatibility with latest wasplib ([30068e9](https://github.com/Torwent/wasp-free/commit/30068e9fa932dbda02cc28f72f108838fa4bb8a9))
-
-
-
-## [2.10.28](https://github.com/Torwent/wasp-free/compare/v2.10.27...v2.10.28) (2024-01-21)
-
-
-### Bug Fixes
-
-* **tab maker:** compatibility update with latest wasplib ([c331f5c](https://github.com/Torwent/wasp-free/commit/c331f5cc35d894e0fab43cde42038a197c7c098e))
 
 
 
