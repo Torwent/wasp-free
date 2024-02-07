@@ -236,11 +236,10 @@ end;
 
 function TCuboidExArray.ToBoxArray() : TBoxArray;
 var
-  cuboid : TCuboidEx;
-  i : Int32;
+  i: Int32;
 begin
   SetLength(Result, Length(Self));
-  for i to High(Self) do
+  for i := 0 to High(Self) do
   begin
     Result[i] := Self[i].Bounds();
   end;
@@ -257,7 +256,7 @@ var
 begin
   MScuboids := Self.RSW.GetCuboidArrayMS(Self.RSW.GetMyPos(), Self.RSTree.Coordinates, Self.RSTree.ShapeArray, [-2, 0]);
   cuboidBoxArr := MScuboids.ToBoxArray();
-  cuboidBoxArr.SortFromMidPoint(MainScreen.GetPlayerBox.Middle);
+  cuboidBoxArr.SortFromMidPoint(MainScreen.GetPlayerBox().Center());
 
   for searchBox in cuboidBoxArr do
   begin

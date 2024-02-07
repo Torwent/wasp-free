@@ -326,7 +326,7 @@ begin
       Inventory.MouseItem(Self.CoalBag);
 
     Minimap.WaitMoving();
-    Result := WaitUntil(Bank.IsOpen(), RandomLeft(50, 1500), 3000);
+    Result := WaitUntil(Bank.IsOpen(), SRL.TruncatedGauss(50, 1500), 3000);
   end;
 end;
 

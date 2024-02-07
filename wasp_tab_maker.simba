@@ -315,14 +315,14 @@ end;
 var
   TabMaker: TTabMaker;
 
-function TRSWalker.GetCleanMinimap(): TMufasaBitmap; override;
+function TRSWalker.GetCleanMinimap(): TMufasaBitmap; static; override;
 var
   Bitmap: TMufasaBitmap;
 begin
   Bitmap := GetMufasaBitmap(BitmapFromClient(Minimap.Bounds));
   Bitmap.ReplaceColor(0, 1); // We need zero to be unique
 
-  Self.CleanMinimap(Bitmap);
+  TRSWalker.CleanMinimap(Bitmap);
   Bitmap.ReplaceColor(1, $32A072);
 
   Result.Init();
@@ -395,7 +395,7 @@ begin
   b.Y2 -= 21;
 
   Mouse.Click(b, MOUSE_LEFT);
-  Result := WaitUntil(not Self.IsHouseOptionsOpen(), RandomLeft(50, 1500), 5000);
+  Result := WaitUntil(not Self.IsHouseOptionsOpen(), SRL.TruncatedGauss(50, 1500), 5000);
 end;
 
 
