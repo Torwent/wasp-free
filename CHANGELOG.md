@@ -1,3 +1,12 @@
+## [2.10.34](https://github.com/Torwent/wasp-free/compare/v2.10.33...v2.10.34) (2024-02-07)
+
+
+### Bug Fixes
+
+* compatibility with latest SRL-T and WL ([891d653](https://github.com/Torwent/wasp-free/commit/891d65384fea6c2c192365997c2d5d771345efc9))
+
+
+
 ## [2.10.33](https://github.com/Torwent/wasp-free/compare/v2.10.32...v2.10.33) (2024-02-02)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * scripts now use optional files from the optional directory ([40b62da](https://github.com/Torwent/wasp-free/commit/40b62da086e8042f3a54a8911ac7cc8d684bf704))
-
-
-
-## [2.10.29](https://github.com/Torwent/wasp-free/compare/v2.10.28...v2.10.29) (2024-01-21)
-
-
-### Bug Fixes
-
-* **blast furnace:** compatibility with latest wasplib ([30068e9](https://github.com/Torwent/wasp-free/commit/30068e9fa932dbda02cc28f72f108838fa4bb8a9))
 
 
 
