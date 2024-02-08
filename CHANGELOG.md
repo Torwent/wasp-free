@@ -1,3 +1,12 @@
+## [2.10.35](https://github.com/Torwent/wasp-free/compare/v2.10.34...v2.10.35) (2024-02-08)
+
+
+### Bug Fixes
+
+* **stall thiever:** re-add golo thing fruit to the drop list ([ef43b36](https://github.com/Torwent/wasp-free/commit/ef43b3661173a9d53ba3d1b7b0e1038a9fac689a))
+
+
+
 ## [2.10.34](https://github.com/Torwent/wasp-free/compare/v2.10.33...v2.10.34) (2024-02-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility with latest WaspLib ([84bf227](https://github.com/Torwent/wasp-free/commit/84bf227e6a02fa76c2f54110a8d27e0bf5877b56))
-
-
-
-## [2.10.30](https://github.com/Torwent/wasp-free/compare/v2.10.29...v2.10.30) (2024-01-21)
-
-
-### Bug Fixes
-
-* scripts now use optional files from the optional directory ([40b62da](https://github.com/Torwent/wasp-free/commit/40b62da086e8042f3a54a8911ac7cc8d684bf704))
 
 
 
