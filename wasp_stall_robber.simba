@@ -67,7 +67,7 @@ begin
         Self.DropList := [
           'Cooking apple', 'Banana', 'Jangerberries', 'Lemon', 'Redberries',
           'Pineapple', 'Lime', 'Strawberry', 'Strange fruit',
-          'Papaya fruit', 'Silk'//, 'Golovanova fruit top'
+          'Papaya fruit', 'Silk', 'Golovanova fruit top'
         ];
       end;
   end;
