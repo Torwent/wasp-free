@@ -738,8 +738,6 @@ begin
   Combat.SetAutoRetaliate(False);
   Self.MaxHealth := Round(Minimap.GetHPLevel() / (Minimap.GetHPPercent() * 0.01)); //'dont have to open stats!
 
-  Self.Transport.Init(EFairyTeleportItem.DRAMEN, 'ardougne cloak 2');
-
   if Equipment.Open() then
   begin
     if Equipment.ContainsItem('Mythical cape') then
