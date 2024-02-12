@@ -1,3 +1,12 @@
+## [2.10.36](https://github.com/Torwent/wasp-free/compare/v2.10.35...v2.10.36) (2024-02-12)
+
+
+### Bug Fixes
+
+* **wrath runecrafter:** compiles again ([e54ab83](https://github.com/Torwent/wasp-free/commit/e54ab832a0e4ea8d60e463dab363c6b53abcdae3))
+
+
+
 ## [2.10.35](https://github.com/Torwent/wasp-free/compare/v2.10.34...v2.10.35) (2024-02-08)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **builder:** compatibility with latest wasplib ([1ebb349](https://github.com/Torwent/wasp-free/commit/1ebb349b01888decc68a6008d18d26a3b48eeb11))
-
-
-
-## [2.10.31](https://github.com/Torwent/wasp-free/compare/v2.10.30...v2.10.31) (2024-01-25)
-
-
-### Bug Fixes
-
-* compatibility with latest WaspLib ([84bf227](https://github.com/Torwent/wasp-free/commit/84bf227e6a02fa76c2f54110a8d27e0bf5877b56))
 
 
 
