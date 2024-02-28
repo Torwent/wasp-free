@@ -234,9 +234,6 @@ begin
   if not Make.IsOpen() then //not sure if I can remove this.
     Exit;                 //it's probably not needed.
 
-  if 'arambwan' in Self.Food then
-    i := 1;
-
   Result := Make.Select(i, Make.QUANTITY_ALL, Antiban.BioDice());
   Self.Cooking := Result;
 
