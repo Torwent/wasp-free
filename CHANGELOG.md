@@ -1,3 +1,12 @@
+## [2.10.37](https://github.com/Torwent/wasp-free/compare/v2.10.36...v2.10.37) (2024-03-01)
+
+
+### Bug Fixes
+
+* **nmz:** should stop spam attacking ([758baf7](https://github.com/Torwent/wasp-free/commit/758baf77e22030c34116d3f98b440536f6dbbfd7))
+
+
+
 ## [2.10.36](https://github.com/Torwent/wasp-free/compare/v2.10.35...v2.10.36) (2024-02-12)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **kraken:** several tweaks to how we handle healing ([ca85c02](https://github.com/Torwent/wasp-free/commit/ca85c02cf6a8c91d3e901aa442ac4f1899934f4a))
-
-
-
-## [2.10.32](https://github.com/Torwent/wasp-free/compare/v2.10.31...v2.10.32) (2024-01-26)
-
-
-### Bug Fixes
-
-* **builder:** compatibility with latest wasplib ([1ebb349](https://github.com/Torwent/wasp-free/commit/1ebb349b01888decc68a6008d18d26a3b48eeb11))
 
 
 
