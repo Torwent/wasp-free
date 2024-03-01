@@ -625,7 +625,7 @@ begin
   begin
     if Self.PowerUpAvailable() then
       Exit(ENMZState.USE_POWER);
-    if not MainScreen.InCombat() then
+    if not MainScreen.WaitInCombat(1200) then
       Exit(ENMZState.ATTACK_NPC);
 
     Exit(ENMZState.WAIT_CENTER);
