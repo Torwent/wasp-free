@@ -326,7 +326,7 @@ begin
   end;
 
   GearAmount := Equipment.CountGear();
-  if not Equipment.IsSlotUsed(ERSEquipmentButton.AMULET) then
+  if not Equipment.IsSlotUsed(ERSEquipmentSlot.AMULET) then
     GearAmount += 1;
 
   ActionProfit += Round(ActionProfit * ProfitMultiplier);

@@ -29,6 +29,7 @@ type
     DRINK_PRAYER,
     ENABLE_QPRAY,
     ALCH_DROP,
+    EQUIP_WEAPON,
     EQUIP_BRACELET,
     END_SCRIPT
   );
@@ -45,6 +46,8 @@ type
     AnotherPLayer, IsAttacking, CheckedLoot, UseImbuedHeart,
     HasBloodSpells: Boolean;
     BloodSpell: ERSSpell;
+
+    Weapon: TRSItemArray;
 
     ImbuedHeart: TCountDown;
   end;
@@ -123,7 +126,9 @@ begin
 
   Self.HasBloodSpells :=  Self.CanCastBloodSpells();
 
-  if not Equipment.ContainsItem('Sanguinesti staff') then
+  Self.Weapon := Equipment.Discover(ERSEquipmentSlot.WEAPON);
+
+  if not Self.Weapon.Contains('Sanguinesti staff') then
   begin
     CombatHandler.LootHandler.Loot.UpText += 'Shark';
     CombatHandler.LootHandler.Drops += ['Shark', '', False, False, 5];
@@ -281,6 +286,15 @@ begin
 end;
 
 
+function TKrakenKiller.EquipWeapon(): Boolean;
+var
+  item: TRSItem;
+begin
+  for item in Self.Weapon do
+    if Inventory.ClickItem(item) then
+      Exit(True);
+end;
+
 function TKrakenKiller.GetState(): EKrakenState;
 var
   health: Int32;
@@ -321,6 +335,9 @@ begin
 
   if not pos.WithinDistance(Self.Bridge, 5) then
     Exit(EKrakenState.WALK_BRIDGE);
+
+  if Inventory.ContainsAny(Self.Weapon) then
+    Exit(EKrakenState.EQUIP_WEAPON);
 
   health := Minimap.GetHPLevel();
 
@@ -399,6 +416,7 @@ begin
       EKrakenState.DRINK_PRAYER: Inventory.Consume(ERSConsumable.PRAYER);
       EKrakenState.ENABLE_QPRAY: Minimap.EnablePrayer();
       EKrakenState.ALCH_DROP: RSAlchHandler.CastAlchemy(True, True);
+      EKrakenState.EQUIP_WEAPON: Self.EquipWeapon();
       EKrakenState.EQUIP_BRACELET: CombatHandler.EquipBracelet();
       EKrakenState.END_SCRIPT: Break;
     end;
