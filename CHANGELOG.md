@@ -1,3 +1,12 @@
+## [2.10.38](https://github.com/Torwent/wasp-free/compare/v2.10.37...v2.10.38) (2024-03-09)
+
+
+### Bug Fixes
+
+* read notes ([c6da52b](https://github.com/Torwent/wasp-free/commit/c6da52b39d8298ed53e1e6006cdcbbf965af25af))
+
+
+
 ## [2.10.37](https://github.com/Torwent/wasp-free/compare/v2.10.36...v2.10.37) (2024-03-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility with latest SRL-T and WL ([891d653](https://github.com/Torwent/wasp-free/commit/891d65384fea6c2c192365997c2d5d771345efc9))
-
-
-
-## [2.10.33](https://github.com/Torwent/wasp-free/compare/v2.10.32...v2.10.33) (2024-02-02)
-
-
-### Bug Fixes
-
-* **kraken:** several tweaks to how we handle healing ([ca85c02](https://github.com/Torwent/wasp-free/commit/ca85c02cf6a8c91d3e901aa442ac4f1899934f4a))
 
 
 
