@@ -6,7 +6,7 @@
 
 type
   ERSNPC = (PHIALS, SERVANT);
-  ERSFurniture = (REGULAR_LARDER, OAK_LARDER, MYTH_CAPE);
+  ERSFurniture = (REGULAR_LARDER, OAK_LARDER, MYTH_CAPE, MAHOGANY_TABLE);
 
 var
   CurrentNPC: ERSNPC := PHIALS;
@@ -89,6 +89,12 @@ begin
         Self.Plank := 'Teak plank';
         Self.MinPlankCount := 3;
       end;
+
+    MAHOGANY_TABLE:
+	    begin
+        Self.Plank := 'Mahogany plank';
+        Self.MinPlankCount := 6;
+      end;
   end;
 end;
 
@@ -106,6 +112,19 @@ begin
       Self.FurnitureSpace.Setup(0.3, 4, [[1858, 138]]);
       Self.FurnitureSpace.SetupUpText(['2 more']);
       Self.FurnitureSpace.Finder.Colors += CTS2(13293015, 14, 0.23, 0.37);
+    end;
+
+  ERSFurniture.MAHOGANY_TABLE:
+    begin
+      Self.BuiltFurniture.Setup(1.3, 5, [[1848, 127]]);
+      Self.BuiltFurniture.Setup(['2 more']);
+      Self.BuiltFurniture.Filter.Finder := False;
+      Self.BuiltFurniture.Filter.UpText := False;
+
+      Self.FurnitureSpace.Setup(1.3, 5, [[1848, 127]]);
+      Self.FurnitureSpace.Setup(['2 more']);
+      Self.FurnitureSpace.Filter.Finder := False;
+      Self.FurnitureSpace.Filter.UpText := False;
     end;
 
   ERSFurniture.REGULAR_LARDER, ERSFurniture.OAK_LARDER:
@@ -150,6 +169,7 @@ begin
       ERSFurniture.REGULAR_LARDER: Inventory.FindItem('noted Plank', NotedPlanksSlot);
       ERSFurniture.OAK_LARDER: Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
       ERSFurniture.MYTH_CAPE: Inventory.FindItem('noted Teak plank', NotedPlanksSlot);
+      ERSFurniture.MAHOGANY_TABLE: Inventory.FindItem('noted Mahogany plank', NotedPlanksSlot);
     end;
 
   if WLSettings.RemoteInput.HUDDebug then
@@ -195,13 +215,13 @@ begin
     Mouse.Move(tpa);
   end;
 
-  if Self.FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu']) then
+  if Self.FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu', 'Build Ta']) then
   begin
     Minimap.WaitMoving();
     Exit(WaitUntil(MainScreen.IsClassicOpen(), 200, 5000));
   end;
 
-  if ChooseOption.HasOption(['Remove La', 'Remove My']) then
+  if ChooseOption.HasOption(['Remove La', 'Remove My', 'Remove Ma']) then
   begin
     ChooseOption.Close();
     FurnitureIsBuilt := True;
@@ -223,13 +243,13 @@ begin
     Mouse.Move(tpa);
   end;
 
-  if Self.BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My']) then
+  if Self.BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My', 'Remove Ma']) then
   begin
     Minimap.WaitMoving();
     Exit(WaitUntil(Chat.GetChatTitle() = 'Really remove it?', 200, 3000));
   end;
 
-  if ChooseOption.HasOption(['Build La', 'Build Gu']) or Inventory.ContainsItem('Mythical cape') then
+  if ChooseOption.HasOption(['Build La', 'Build Gu', 'Build Ta']) or Inventory.ContainsItem('Mythical cape') then
   begin
     ChooseOption.Close();
     FurnitureIsBuilt := False;
@@ -346,6 +366,7 @@ begin
     ERSFurniture.REGULAR_LARDER: Keyboard.PressKey(VK_1);
     ERSFurniture.OAK_LARDER: Keyboard.PressKey(VK_2);
     ERSFurniture.MYTH_CAPE: Keyboard.PressKey(VK_4);
+    ERSFurniture.MAHOGANY_TABLE: Keyboard.PressKey(VK_6);
   end;
 
   if (Self.LastPoint <> [0, 0]) then
@@ -774,7 +795,7 @@ begin
     SetTop(Self.NPCSelector.GetTop());
     SetLeft(Self.NPCSelector.GetRight() + TControl.AdjustToDPI(15));
     SetStyle(csDropDownList);
-    AddItemArray(['Regular larder', 'Oak larder', 'Myth cape']);
+    AddItemArray(['Regular larder', 'Oak larder', 'Myth cape', 'Mahogany table']);
     SetItemIndex(Ord(CurrentFurniture));
     ComboBox.setOnChange(@Self.FurnitureSelectorOnChange);
   end;
