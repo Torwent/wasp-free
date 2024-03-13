@@ -535,6 +535,11 @@ begin
   FreshNeck := HasNeck := Result;
 end;
 
+function TThiever.WithdrawNecks(): Boolean;
+begin
+  if Result := Bank.WithdrawItem([Necklace, NeckAmount - Inventory.CountItem(Necklace), False], False) then Wait(300, 400);
+end;
+
 function TThiever.CheckNeck(): Boolean;
 begin
   Result := HasNeck := Equipment.ContainsItem(Necklace);
@@ -771,7 +776,7 @@ begin
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_LOOT: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(ERSConsumable.FOOD);
-      WITHDRAW_NECKLACES: Bank.WithdrawItem([Necklace, NeckAmount, False], False);
+      WITHDRAW_NECKLACES: Self.WithdrawNecks();
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
