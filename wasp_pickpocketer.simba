@@ -537,7 +537,7 @@ end;
 
 function TThiever.WithdrawNecks(): Boolean;
 begin
-  if Result := Bank.WithdrawItem([Necklace, NeckAmount - Inventory.CountItem(Necklace), False], False) then Wait(300, 400);
+  if Result := Bank.WithdrawItem([Necklace, NeckAmount - Inventory.CountItem(Necklace), False], False) then Wait(1000, 1400);
 end;
 
 function TThiever.CheckNeck(): Boolean;
