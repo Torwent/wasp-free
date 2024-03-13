@@ -504,7 +504,7 @@ begin
   begin
     Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
     Self.TotalActions += pouchCount;
-    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+    Self.TotalProfit += pouchCount * Self.ActionProfit;
     WL.Activity.Restart();
   end;
 end;
