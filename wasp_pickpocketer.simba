@@ -771,7 +771,7 @@ begin
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_LOOT: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(ERSConsumable.FOOD);
-      WITHDRAW_NECKLACES: Self.Withdraw([Necklace, NeckAmount, False]);
+      WITHDRAW_NECKLACES: Bank.WithdrawItem([Necklace, NeckAmount, False], False);
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
