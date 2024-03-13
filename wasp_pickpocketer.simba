@@ -599,7 +599,7 @@ begin
   Result := Bank.DepositRandomItems(Self.StackableArray);
   if ItemCount > 0 then
   begin
-    if Inventory.CountItem(ValuableItem) = 0 then
+    if Inventory.CountItem(ValuableItem) > 0 then
       TotalProfit += (ItemCount * ValuableItemValue);
   end;
 end;
