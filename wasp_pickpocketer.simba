@@ -504,7 +504,7 @@ begin
   begin
     Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
     Self.TotalActions += pouchCount;
-    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+    Self.TotalProfit += pouchCount * Self.ActionProfit;
     WL.Activity.Restart();
   end;
 end;
@@ -533,6 +533,11 @@ begin
   if Result := Inventory.ClickItem(Necklace) then Wait(300, 400);
 
   FreshNeck := HasNeck := Result;
+end;
+
+function TThiever.WithdrawNecks(): Boolean;
+begin
+  if Result := Bank.WithdrawItem([Necklace, NeckAmount - Inventory.CountItem(Necklace), False], False) then Wait(1000, 1400);
 end;
 
 function TThiever.CheckNeck(): Boolean;
@@ -599,7 +604,7 @@ begin
   Result := Bank.DepositRandomItems(Self.StackableArray);
   if ItemCount > 0 then
   begin
-    if Inventory.CountItem(ValuableItem) = 0 then
+    if Inventory.CountItem(ValuableItem) > 0 then
       TotalProfit += (ItemCount * ValuableItemValue);
   end;
 end;
@@ -771,7 +776,7 @@ begin
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_LOOT: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(ERSConsumable.FOOD);
-      WITHDRAW_NECKLACES: Self.Withdraw([Necklace, NeckAmount, False]);
+      WITHDRAW_NECKLACES: Self.WithdrawNecks();
       CLOSE_INTERFACE: MainScreen.CloseInterface();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
