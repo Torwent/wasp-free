@@ -1,3 +1,12 @@
+## [2.10.40](https://github.com/Torwent/wasp-free/compare/v2.10.39...v2.10.40) (2024-03-20)
+
+
+### Bug Fixes
+
+* **woodcutter:** Remove FILL_PLANK_SACK state ([116af4a](https://github.com/Torwent/wasp-free/commit/116af4ad53167eb1fee9569a04ab14f2f3418dcc))
+
+
+
 ## [2.10.39](https://github.com/Torwent/wasp-free/compare/v2.10.38...v2.10.39) (2024-03-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **wrath runecrafter:** compiles again ([e54ab83](https://github.com/Torwent/wasp-free/commit/e54ab832a0e4ea8d60e463dab363c6b53abcdae3))
-
-
-
-## [2.10.35](https://github.com/Torwent/wasp-free/compare/v2.10.34...v2.10.35) (2024-02-08)
-
-
-### Bug Fixes
-
-* **stall thiever:** re-add golo thing fruit to the drop list ([ef43b36](https://github.com/Torwent/wasp-free/commit/ef43b3661173a9d53ba3d1b7b0e1038a9fac689a))
 
 
 
