@@ -42,7 +42,6 @@ type
     FLETCH,
     OPEN_SAWMILL,
     HANDLE_MAKE,
-    FILL_PLANK_SACK,
 
     DROP_ITEMS,
     END_SCRIPT
@@ -366,6 +365,10 @@ begin
 end;
 
 function TWoodcutter.MakePlanks(): Boolean;
+var
+  logCount: Int32;
+  plankCount: Int32;
+  planksInSackCount: Int32;
 begin
   if DoFletch then
   begin
@@ -376,23 +379,23 @@ begin
     Exit(Self.IsFletching);
   end;
 
+  logCount := Inventory.CountItem(Self.Logs);
+
   if Make.Select(Self.SawmillString, Make.QUANTITY_ALL, SRL.Dice(95)) then
-    Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 10000);
+    Result := WaitUntil(not Inventory.ContainsItem(Self.Logs), 200, 10000);
 
   if Result then
-    Self.TotalProfit += Self.PlankSawmillPrice * Inventory.CountItem(Self.Plank);
-end;
+  begin
+    // Planks are placed directly in the sack. Count missing planks as in the sack.
+    plankCount := Inventory.CountItem(self.Plank);
+    planksInSackCount := logCount - plankCount;
 
-function TWoodcutter.FillPlankSack(): Boolean;
-var
-  count: Int32;
-begin
-  count := Inventory.Count();
-  if Inventory.ClickItem('Plank sack', 'Fill') then
-    Result := WaitUntil(Inventory.Count() < count, 300, 3000);
+    TotalProfit -= (plankCount + planksInSackCount) * Self.PlankSawmillPrice;
 
-  if Result then
-    Self.PlankSackFull := True;
+    if planksInSackCount > 0 then
+      Self.PlankSackFull := True;
+
+  end;
 end;
 
 function TWoodcutter.Deposit(): Boolean;
@@ -400,11 +403,7 @@ var
   count: Int32;
 begin
   if UseSawmill then
-  begin
-    count := Inventory.CountItem(Self.Plank);
-    if Self.UsePlankSack then
-      count += 27;
-  end
+    count := Inventory.CountItem(Self.Plank)
   else
     count := Inventory.CountItem(Self.Logs);
 
@@ -424,9 +423,10 @@ end;
 
 function TWoodcutter.EmptySack():Boolean;
 begin
+  // This withdraws 26 of 28 planks.
   if Inventory.ClickItem('Plank sack', 'Empty') then
     Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 300, 3000);
-    
+
   Self.PlankSackFull := False;
 end;
 
@@ -557,10 +557,7 @@ begin
       begin
         if not Self.UsePlankSack or Self.PlankSackFull then
           Exit(EWoodcutterState.OPEN_BANK);
-
-        Exit(EWoodcutterState.FILL_PLANK_SACK);
       end;
-
       if Self.HasEnoughMoney() then
         Exit(EWoodcutterState.OPEN_SAWMILL);
     end;
@@ -607,7 +604,6 @@ begin
       EWoodcutterState.FLETCH: Self.Fletch();
       EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill();
       EWoodcutterState.HANDLE_MAKE: Self.MakePlanks();
-      EWoodcutterState.FILL_PLANK_SACK: Self.FillPlankSack();
       EWoodcutterState.DROP_ITEMS: Self.DropItems();
       EWoodcutterState.END_SCRIPT: Break;
     end;
