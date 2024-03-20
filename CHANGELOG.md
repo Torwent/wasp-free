@@ -1,3 +1,12 @@
+## [2.10.39](https://github.com/Torwent/wasp-free/compare/v2.10.38...v2.10.39) (2024-03-20)
+
+
+### Bug Fixes
+
+* removed wrath rcer since reld is maintaining it again ([fa89a79](https://github.com/Torwent/wasp-free/commit/fa89a79654266aad01708f2a1850953b3e6d99ec))
+
+
+
 ## [2.10.38](https://github.com/Torwent/wasp-free/compare/v2.10.37...v2.10.38) (2024-03-09)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **stall thiever:** re-add golo thing fruit to the drop list ([ef43b36](https://github.com/Torwent/wasp-free/commit/ef43b3661173a9d53ba3d1b7b0e1038a9fac689a))
-
-
-
-## [2.10.34](https://github.com/Torwent/wasp-free/compare/v2.10.33...v2.10.34) (2024-02-07)
-
-
-### Bug Fixes
-
-* compatibility with latest SRL-T and WL ([891d653](https://github.com/Torwent/wasp-free/commit/891d65384fea6c2c192365997c2d5d771345efc9))
 
 
 
