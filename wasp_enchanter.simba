@@ -8,15 +8,11 @@
 
 const
   GEM_TYPE: TStringArray = [
-    'Opal', 'Jade', 'Red topaz',
-    'Sapphire', 'Emerald', 'Ruby',
-    'Diamond', 'Dragonstone', 'Onyx',
-    'Zenyte'
+    'Opal', 'Jade', 'Red topaz', 'Sapphire', 'Emerald', 'Ruby',
+    'Diamond', 'Dragonstone', 'Onyx', 'Zenyte'
   ];
 
-  JEWELRY_TYPE: TStringArray = [
-    'Ring', 'Necklace', 'Bracelet', 'Amulet'
-  ];
+  JEWELRY_TYPE: TStringArray = ['Ring', 'Necklace', 'Bracelet', 'Amulet'];
 
 var
   CurrentJewel: TRSItem = 'Ruby necklace';

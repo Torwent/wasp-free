@@ -198,6 +198,9 @@ begin
     ETreeLocation.SEERS_VILLAGE:   Self.RSW.SetupRegions([RSRegions.SEERS_VILLAGE]);
   end;
 
+  //WC Guild
+  RSObjects.BankWood1.Filter.Finder := False;
+
   //Remove cooking guild banks
   RSObjects.BankWood3.Coordinates.Remove([7981, 2651], True);
   RSObjects.BankWood3.Coordinates.Remove([7985, 2651], True);
@@ -232,6 +235,7 @@ begin
     DebugMMDotArray += RSNPCs.SawmillOperator;
   end;
 end;
+
 
 function TCuboidExArray.ToBoxArray() : TBoxArray;
 var
@@ -489,6 +493,20 @@ begin
   Result := WaitUntil(not Self.IsCutting(), 300, 20000);
 end;
 
+
+function TWoodcutter.WalkOpenBank(): Boolean;
+var
+  tpa: TPointArray;
+begin
+  if TreeLocation <> ETreeLocation.WOODCUT_GUILD then
+    Exit(Bank.WalkOpen());
+
+  tpa := [[1756, 2547]];
+  if Self.RSW.WebWalk(tpa.Grow(6).RandomValue(), 8, 0.2) then
+    Result := Bank.Open();
+end;
+
+
 function TWoodcutter.GetState(): EWoodcutterState;
 var
   me: TPoint;
@@ -590,7 +608,7 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      EWoodcutterState.OPEN_BANK: Bank.WalkOpen();
+      EWoodcutterState.OPEN_BANK: Self.WalkOpenBank();
       EWoodcutterState.DEPOSIT_ITEMS: Self.Deposit();
       EWoodcutterState.EMPTY_SACK: Self.EmptySack();
       EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();

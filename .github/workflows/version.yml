@@ -36,6 +36,7 @@ jobs:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
           MODIFIED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          
       - name: Commit and push changes
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
         run: |
