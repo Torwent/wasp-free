@@ -1,8 +1,9 @@
-## [2.10.40](https://github.com/Torwent/wasp-free/compare/v2.10.39...v2.10.40) (2024-03-20)
+## [2.10.41](https://github.com/Torwent/wasp-free/compare/v2.10.40...v2.10.41) (2024-04-01)
 
 
 ### Bug Fixes
 
+* **wc:** tweaks to wc guild banking ([f99506c](https://github.com/Torwent/wasp-free/commit/f99506c3de91df79869a661b52332e494bcb7def))
 * **woodcutter:** Remove FILL_PLANK_SACK state ([116af4a](https://github.com/Torwent/wasp-free/commit/116af4ad53167eb1fee9569a04ab14f2f3418dcc))
 
 
@@ -31,15 +32,6 @@
 ### Bug Fixes
 
 * **nmz:** should stop spam attacking ([758baf7](https://github.com/Torwent/wasp-free/commit/758baf77e22030c34116d3f98b440536f6dbbfd7))
-
-
-
-## [2.10.36](https://github.com/Torwent/wasp-free/compare/v2.10.35...v2.10.36) (2024-02-12)
-
-
-### Bug Fixes
-
-* **wrath runecrafter:** compiles again ([e54ab83](https://github.com/Torwent/wasp-free/commit/e54ab832a0e4ea8d60e463dab363c6b53abcdae3))
 
 
 
