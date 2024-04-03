@@ -1,3 +1,12 @@
+## [2.10.42](https://github.com/Torwent/wasp-free/compare/v2.10.41...v2.10.42) (2024-04-03)
+
+
+### Bug Fixes
+
+* **wcer:** add a coordinate filter for trees outside of the WC Guild ([ff25538](https://github.com/Torwent/wasp-free/commit/ff25538c7bade3702d8b209297fcd672d0dcd668))
+
+
+
 ## [2.10.41](https://github.com/Torwent/wasp-free/compare/v2.10.40...v2.10.41) (2024-04-01)
 
 
@@ -23,15 +32,6 @@
 ### Bug Fixes
 
 * read notes ([c6da52b](https://github.com/Torwent/wasp-free/commit/c6da52b39d8298ed53e1e6006cdcbbf965af25af))
-
-
-
-## [2.10.37](https://github.com/Torwent/wasp-free/compare/v2.10.36...v2.10.37) (2024-03-01)
-
-
-### Bug Fixes
-
-* **nmz:** should stop spam attacking ([758baf7](https://github.com/Torwent/wasp-free/commit/758baf77e22030c34116d3f98b440536f6dbbfd7))
 
 
 
