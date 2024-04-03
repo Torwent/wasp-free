@@ -183,11 +183,24 @@ begin
 end;
 
 procedure TWoodcutter.SetupBank();
+const
+  FILTER: TPointArray = [[1647, 2473], [1703, 2469], [1721, 2448], [1826, 2450], [1854, 2402], [1888, 2387], [2007, 2396], [2012, 2473], [1984, 2504], [1925, 2504], [1905, 2487], [1888, 2488], [1860, 2512], [1838, 2512], [1816, 2468], [1780, 2533], [1768, 2565], [1746, 2566], [1711, 2548], [1647, 2547]];
+var
+  filtered: TPointArray;
+  p: TPoint;
 begin
   Self.UseBank := not PowerCut;
 
   case TreeLocation of
-    ETreeLocation.WOODCUT_GUILD:   Self.RSW.SetupRegions([RSRegions.WOODCUTTING_GUILD]);
+    ETreeLocation.WOODCUT_GUILD:
+    begin
+      Self.RSW.SetupRegions([RSRegions.WOODCUTTING_GUILD]);
+      for p in Self.RSTree.Coordinates do
+        if SRL.PointInPoly(p, FILTER) then
+          filtered += p;
+      Self.RSTree.Coordinates := filtered;
+    end;
+
     ETreeLocation.VARROCK_EAST:    Self.RSW.SetupRegions([RSRegions.VARROCK_EAST]);
     ETreeLocation.VARROCK_WEST:    Self.RSW.SetupRegions([RSRegions.VARROCK_WEST]);
     ETreeLocation.EDGEVILLE:       Self.RSW.SetupRegions([RSRegions.EDGEVILLE]);
