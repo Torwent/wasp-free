@@ -1,3 +1,12 @@
+## [2.10.43](https://github.com/Torwent/wasp-free/compare/v2.10.42...v2.10.43) (2024-04-08)
+
+
+### Bug Fixes
+
+* remove version panel from all scripts ([010939e](https://github.com/Torwent/wasp-free/commit/010939e50eff1890985ab6a093511b25dbb21490))
+
+
+
 ## [2.10.42](https://github.com/Torwent/wasp-free/compare/v2.10.41...v2.10.42) (2024-04-03)
 
 
@@ -23,15 +32,6 @@
 ### Bug Fixes
 
 * removed wrath rcer since reld is maintaining it again ([fa89a79](https://github.com/Torwent/wasp-free/commit/fa89a79654266aad01708f2a1850953b3e6d99ec))
-
-
-
-## [2.10.38](https://github.com/Torwent/wasp-free/compare/v2.10.37...v2.10.38) (2024-03-09)
-
-
-### Bug Fixes
-
-* read notes ([c6da52b](https://github.com/Torwent/wasp-free/commit/c6da52b39d8298ed53e1e6006cdcbbf965af25af))
 
 
 
