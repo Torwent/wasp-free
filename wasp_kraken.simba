@@ -47,7 +47,7 @@ type
     HasBloodSpells: Boolean;
     BloodSpell: ERSSpell;
 
-    Weapon: TRSItemArray;
+    Gear: TRSItemArray;
 
     ImbuedHeart: TCountDown;
   end;
@@ -126,9 +126,9 @@ begin
 
   Self.HasBloodSpells :=  Self.CanCastBloodSpells();
 
-  Self.Weapon := Equipment.Discover(ERSEquipmentSlot.WEAPON);
+  Self.Gear := Equipment.DiscoverAll();
 
-  if not Self.Weapon.Contains('Sanguinesti staff') then
+  if not Self.Gear.Contains('Sanguinesti staff') then
   begin
     CombatHandler.LootHandler.Loot.UpText += 'Shark';
     CombatHandler.LootHandler.Drops += ['Shark', '', False, False, 5];
@@ -290,7 +290,7 @@ function TKrakenKiller.EquipWeapon(): Boolean;
 var
   item: TRSItem;
 begin
-  for item in Self.Weapon do
+  for item in Self.Gear do
     if Inventory.ClickItem(item) then
       Exit(True);
 end;
@@ -336,7 +336,7 @@ begin
   if not pos.WithinDistance(Self.Bridge, 5) then
     Exit(EKrakenState.WALK_BRIDGE);
 
-  if Inventory.ContainsAny(Self.Weapon) then
+  if Inventory.ContainsAny(Self.Gear) then
     Exit(EKrakenState.EQUIP_WEAPON);
 
   health := Minimap.GetHPLevel();
