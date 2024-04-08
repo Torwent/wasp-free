@@ -971,7 +971,6 @@ begin
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(40));
   end;
 
-  Self.CreateVersionPanel(tab);
 
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();

@@ -263,7 +263,6 @@ begin
     SetChecked(WalkGE);
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAlchemyPanel();
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();

@@ -777,7 +777,6 @@ begin
   foodAmountEdit.SetVisible(True);
   minHealthEdit.SetText(ToStr(MinHealth));
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

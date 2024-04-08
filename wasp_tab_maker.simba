@@ -557,7 +557,6 @@ begin
     SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png');
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

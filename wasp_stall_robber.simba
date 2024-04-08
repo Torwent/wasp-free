@@ -203,7 +203,6 @@ begin
     SetItemIndex(Ord(CurrentStall));
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

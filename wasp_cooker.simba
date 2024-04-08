@@ -452,7 +452,6 @@ begin
     SetVisible(Self.FoodSelector.GetText() = 'Custom');
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

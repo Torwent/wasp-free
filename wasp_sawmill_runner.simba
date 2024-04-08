@@ -316,7 +316,6 @@ begin
     SetItemIndex(2);
   end;
 
-  Self.CreateVersionPanel(tab);
 
   Self.CreateAntibanManager();
   Self.CreateBankSettings();

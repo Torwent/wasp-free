@@ -512,7 +512,6 @@ begin
 
   Self.RockSelectorOnChange(Self.RockSelector.ComboBox);
 
-  Self.CreateVersionPanel(tab);
 
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();

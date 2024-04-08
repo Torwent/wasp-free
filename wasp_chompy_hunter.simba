@@ -251,7 +251,6 @@ begin
     SetTop(TControl.AdjustToDPI(200));
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

@@ -999,7 +999,6 @@ begin
     SetChecked(UseEnergyBoosts);
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

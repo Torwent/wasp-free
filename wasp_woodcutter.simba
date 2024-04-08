@@ -857,7 +857,6 @@ begin
     CheckBox.setOnChange(@Self._CheckBoxToggle);
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

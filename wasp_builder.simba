@@ -826,7 +826,6 @@ begin
     setHint('House layout. Make sure your house layout looks like this!');
   end;
 
-  Self.CreateVersionPanel(tab);
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
