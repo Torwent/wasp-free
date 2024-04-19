@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := '0fb23f9b-3bc2-41cd-8670-3fec0eb256f1'}
-{$DEFINE SCRIPT_REVISION := '54'}
+{$DEFINE SCRIPT_REVISION := '55'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -46,7 +46,8 @@ type
     WAIT_STATE,
 
     OUT_OF_SUPPLIES,
-    END_SCRIPT
+    END_SCRIPT,
+    CAST_SHADOW_VEIL
   );
 
 //script record, all variables of the script should go here.
@@ -64,11 +65,13 @@ type
     BankArray: TRSItemArray;
     RogueEquipment: TRSItemArray;
 
-    NeckTimer: TCountDown;
+    NeckTimer, ShadowVeilTimer: TCountDown;
 
     //run variables (to be used while the script is running)
     HasNeck: Boolean;
     FreshNeck: Boolean;
+    UseShadowVeil: Boolean;
+    VeilAttempts: Int32;
 
     CoinPouchLimit: Int32;
     MaxHit: Int32;
@@ -198,7 +201,7 @@ begin
   Self.Knight.SetupCoordinates([p]);
   Self.Knight.DotFilter.Setup(BANK_POLYGON, True);
   Self.Knight.ShapeArray.SetShape([1, 1, 6]);
-  Self.Knight.Setup(['Knight', 'of', 'Ardougne']);
+  Self.Knight.SetupUpText(['Knight', 'of', 'Ardougne']);
   Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
 end;
 
@@ -234,12 +237,43 @@ begin
   Self.CheckRogueEquipment();
   Self.HasNeck := Equipment.ContainsItem(Self.Necklace.Item);
 
+  if Magic.Open() and Magic.ContainsSpell(ERSSpell.SHADOW_VEIL) then
+  begin
+    Self.UseShadowVeil := True;
+    Magic.CastSpell(ERSSpell.SHADOW_VEIL);
+    Self.ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetLevel(ERSSkill.MAGIC)));
+  end;
+
   if WLSettings.RemoteInput.HUDDebug then
     DebugMMDotArray += Self.Knight;
 
   XPBar.EarnedXP();
 end;
 
+function TKnightsThiever.CastShadowVeil(): Boolean;
+begin
+  if not Magic.Open() then
+    Exit;
+
+  if not Magic.CanActivate(ERSSpell.SHADOW_VEIL) then
+  begin
+    if Self.VeilAttempts > 2 then
+    begin
+      Self.DebugLn('Disabling shadow veil.');
+      Self.UseShadowVeil := Result;
+      Exit;
+    end;
+
+    Self.DebugLn('Shadow veil is not available yet.');
+    Self.ShadowVeilTimer.Restart(Random(-5000, 5000));
+    Self.VeilAttempts += 1;
+    Exit;
+  end;
+
+  Result := Magic.CastSpell(ERSSpell.SHADOW_VEIL);
+  Self.ShadowVeilTimer.Restart(Random(-5000, 5000));
+  Self.VeilAttempts := 0;
+end;
 
 function TKnightsThiever.HasRogue(): Boolean;
 begin
@@ -608,6 +642,9 @@ begin
     Exit(OPEN_BANK);
   end;
 
+  if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
+  Exit(EThieverState.CAST_SHADOW_VEIL);
+
   if not Minimap.OnGroundLevel() then
     Exit(IS_UPSTAIRS);
 
@@ -641,6 +678,7 @@ begin
       PICKPOCKET: Self.StealKnight();
       OPEN_POUCH: Self.OpenCoinPouch();
 
+      CAST_SHADOW_VEIL: Self.CastShadowVeil();
       EAT_FOOD: Self.Heal();
       EQUIP_NECK: Self.EquipNeck();
       CHECK_NECK: Self.CheckNeck();
