@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'a17eeda7-b3e7-4aba-9d9a-cc2d338e41ba'}
-{$DEFINE SCRIPT_REVISION := '12'}
+{$DEFINE SCRIPT_REVISION := '13'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -13,6 +13,7 @@ var
   CurrentBar: EBarType = EBarType.GOLD;
   UseCoalBag: Boolean = False;
   UseEnergyBoosts: Boolean = False;
+  UseSmithsGloves: Boolean = False;
 
 type
   EBFState = (
@@ -78,7 +79,12 @@ begin
   Self.CoalBag := 'Coal bag';
   ItemFinder.AddItemName('Coal bag', '24480');
   Self.GoldGloves := 'Goldsmith gauntlets';
-  Self.IceGloves := 'Ice gloves';
+
+  if UseSmithsGloves = False then
+    Self.IceGloves := 'Ice gloves';
+
+  if UseSmithsGloves = True then
+    Self.IceGloves := 'Smiths gloves (i)';
 
   Self.CoalRatio := 0;
   Self.AvailableSlots := 28;
@@ -221,7 +227,6 @@ begin
   Self.ReSyncPot();
 end;
 
-
 function TBlastFurnace.OpenPot(): Boolean;
 begin
   if RSObjects.BlastFurnaceMeltingPot.WalkClick() then
@@ -255,7 +260,6 @@ begin
   Self.OutOfSync := False;
 end;
 
-
 function TBlastFurnace.GaugeIsOpen(): Boolean;
 begin
   Result :=
@@ -277,7 +281,6 @@ begin
   Mouse.Click(tpa.Bounds(), MOUSE_LEFT);
   Result := WaitUntil(not Self.GaugeIsOpen(), 300, 2000);
 end;
-
 
 function TBlastFurnace.CountMoney(attempt: Int32 = 0): Int32;
 begin
@@ -304,7 +307,6 @@ begin
   end;
 end;
 
-
 function TBlastFurnace.WalkOpenBank(): Boolean;
 var
   rsobject: TRSObject;
@@ -327,6 +329,19 @@ begin
 
     Minimap.WaitMoving();
     Result := WaitUntil(Bank.IsOpen(), SRL.TruncatedGauss(50, 1500), 3000);
+
+    if Bank.CountItemStack(Self.ore) <= 28 then
+    begin
+      MainScreen.CloseInterface();
+      Logout.ClickLogout();
+      TerminateScript('We do not have enough ore for a full inventory.');
+    end
+    else if ((CurrentBar = BRONZE) or (CurrentBar = STEEL) or (CurrentBar = MITHRIL) or (CurrentBar = ADAMANTITE) or (CurrentBar = RUNITE)) and (Bank.CountItemStack(Self.coal) <= 28) then
+    begin
+      MainScreen.CloseInterface();
+      Logout.ClickLogout();
+      TerminateScript('We do not have enough coal for a full inventory.');
+    end;
   end;
 end;
 
@@ -357,7 +372,6 @@ begin
     Self.TotalProfit += count * Self.BarPrice;
   end;
 end;
-
 
 function TBlastFurnace.PotReady(): Boolean;
 var
@@ -430,7 +444,6 @@ begin
   if UseCoalBag and Inventory.ContainsItem(Self.CoalBag) then
     Inventory.MouseItem(Self.CoalBag);
 end;
-
 
 procedure TBlastFurnace.WaitMoving(doAntiban: Boolean = True; change: Boolean = False);
 var
@@ -512,7 +525,6 @@ begin
 
   end;
 end;
-
 
 function TBlastFurnace.EquipIceGloves(): Boolean;
 var
@@ -612,7 +624,6 @@ begin
     Self.RightClickCoalBag();
 end;
 
-
 function TBlastFurnace.ClickCoffer(): Boolean;
 begin
   if RSObjects.BlastFurnaceCoffer.WalkClick() then
@@ -657,7 +668,6 @@ begin
     Result := WaitUntil(currentMoney < Self.CountMoney(), 300, 5000);
 end;
 
-
 function TBlastFurnace.GetState(): EBFState;
 begin
   if WL.Activity.IsFinished() then
@@ -694,10 +704,10 @@ begin
         if Inventory.ContainsRandomItems(Self.ItemList) then
           Exit(EBFState.DEPOSIT_RANDOM_ITEMS);
 
-        if Self.HasGloves and not Inventory.ContainsAny([Self.GoldGloves, Self.IceGloves]) then
+        if (CurrentBar = GOLD) and not Self.HasGloves and not Inventory.ContainsAny([Self.GoldGloves, Self.IceGloves]) then
           Exit(EBFState.WITHDRAW_GLOVES);
 
-        if UseCoalBag and not Inventory.ContainsItem(Self.CoalBag) then
+        if (UseCoalBag and not Inventory.ContainsItem(Self.CoalBag)) or (UseCoalBag and Bank.ContainsItem(Self.CoalBag)) then
           Exit(EBFState.WITHDRAW_BAG);
 
         if Boolean(Self.CoalRatio) and UseCoalBag and not Self.CoalBagFull() then
@@ -930,7 +940,7 @@ end;
 type
   TBlastFurnaceConfig = record(TScriptForm)
     BarSelector: TLabeledCombobox;
-    CoalBagCheckbox, EnergyBoostsCheckbox: TLabeledCheckBox;
+    CoalBagCheckbox, EnergyBoostsCheckbox, SmithsGlovesCheckbox: TLabeledCheckBox;
   end;
 
 procedure TBlastFurnaceConfig.StartScript(sender: TObject); override;
@@ -938,6 +948,7 @@ begin
   CurrentBar      := EBarType(Self.BarSelector.getItemIndex());
   UseCoalBag      := Self.CoalBagCheckbox.IsChecked();
   UseEnergyBoosts := Self.EnergyBoostsCheckbox.IsChecked();
+  UseSmithsGloves := Self.SmithsGlovesCheckbox.IsChecked();
 
   inherited;
 end;
@@ -994,9 +1005,18 @@ begin
   begin
     Create(tab);
     SetCaption('Energy boosts');
-    SetLeft(Self.CoalBagCheckbox.GetRight() + TControl.AdjustToDPI(10));
-    SetTop(Self.CoalBagCheckbox.GetTop());
+    SetLeft(Self.BarSelector.GetRight() + TControl.AdjustToDPI(10));
+    SetTop(Self.BarSelector.GetTop() + TControl.AdjustToDPI(35));
     SetChecked(UseEnergyBoosts);
+  end;
+
+  with Self.SmithsGlovesCheckbox do
+  begin
+    Create(tab);
+    SetCaption('Using Smith''s gloves (i)');
+    SetLeft(Self.BarSelector.GetRight() + TControl.AdjustToDPI(10));
+    SetTop(Self.BarSelector.GetTop() + TControl.AdjustToDPI(55));
+    SetChecked(UseSmithsGloves);
   end;
 
   Self.CreateAntibanManager();
