@@ -1,3 +1,12 @@
+## [2.10.45](https://github.com/Torwent/wasp-free/compare/v2.10.44...v2.10.45) (2024-04-22)
+
+
+### Bug Fixes
+
+* **ardy knights:** update deprecated method ([ef4b724](https://github.com/Torwent/wasp-free/commit/ef4b72478c59bd41191448fe1d478477de82fb7d))
+
+
+
 ## [2.10.44](https://github.com/Torwent/wasp-free/compare/v2.10.43...v2.10.44) (2024-04-08)
 
 
@@ -31,7 +40,6 @@
 ### Bug Fixes
 
 * **wc:** tweaks to wc guild banking ([f99506c](https://github.com/Torwent/wasp-free/commit/f99506c3de91df79869a661b52332e494bcb7def))
-* **woodcutter:** Remove FILL_PLANK_SACK state ([116af4a](https://github.com/Torwent/wasp-free/commit/116af4ad53167eb1fee9569a04ab14f2f3418dcc))
 
 
 
