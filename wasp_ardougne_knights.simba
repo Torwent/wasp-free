@@ -198,7 +198,7 @@ begin
   Self.Knight.SetupCoordinates([p]);
   Self.Knight.DotFilter.Setup(BANK_POLYGON, True);
   Self.Knight.ShapeArray.SetShape([1, 1, 6]);
-  Self.Knight.Setup(['Knight', 'of', 'Ardougne']);
+  Self.Knight.SetupUpText(['Knight', 'of', 'Ardougne']);
   Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
 end;
 
