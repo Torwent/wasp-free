@@ -129,7 +129,7 @@ end;
 
 function TSawmillRunner.InGE(p: TPoint): Boolean;
 begin
-  Result := p.WithinDistance(RSObjects.GEBank.Coordinates, 200);
+  Result := p.AnyInRange(RSObjects.GEBank.Coordinates, 200);
 end;
 
 function TSawmillRunner.VarrockTeleport(): Boolean;

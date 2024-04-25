@@ -816,7 +816,7 @@ begin
         Exit(EBFState.GET_BARS);
       end;
 
-      if not Self.DispenserCoordinate.WithinDistance(Self.RSW.GetMyPos(), 16) then
+      if not Self.DispenserCoordinate.InRange(Self.RSW.GetMyPos(), 16) then
         Exit(EBFState.WALK_DISPENSER);
 
       Exit(EBFState.WAIT_EXPERIENCE);

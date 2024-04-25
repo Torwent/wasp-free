@@ -333,7 +333,7 @@ begin
   if not Minimap.IsPrayerEnabled() and (Minimap.GetPrayerLevel() > 0) then
     Exit(EKrakenState.ENABLE_QPRAY);
 
-  if not pos.WithinDistance(Self.Bridge, 5) then
+  if not pos.InRange(Self.Bridge, 5) then
     Exit(EKrakenState.WALK_BRIDGE);
 
   if Inventory.ContainsAny(Self.Gear) then
