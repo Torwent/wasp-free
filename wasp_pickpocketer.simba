@@ -603,10 +603,7 @@ begin
     ItemCount := Inventory.CountItem(Self.ValuableItem);
   Result := Bank.DepositRandomItems(Self.StackableArray);
   if ItemCount > 0 then
-  begin
-    if Inventory.CountItem(ValuableItem) > 0 then
-      TotalProfit += (ItemCount * ValuableItemValue);
-  end;
+	TotalProfit += (ItemCount * ValuableItemValue);
 end;
 
 function TThiever.WithdrawAny(items: TRSItemArray; quantity: Int32): Boolean;
