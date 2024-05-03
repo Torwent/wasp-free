@@ -472,7 +472,7 @@ var
   p: TPoint;
   tpa: TPointArray;
 begin
-  tpa := PopulateTile(Self.DispenserCoordinate, 2);
+  tpa := PopulateTile(Self.DispenserCoordinate, 1);
   tpa.Remove(Self.DispenserCoordinate);
   p := Self.RSW.WorldToMM(tpa.RandomValue());
 
