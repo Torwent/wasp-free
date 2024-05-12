@@ -706,7 +706,7 @@ begin
        'Make sure you have planks in your bank and you have previously' +
        LineEnding +
        'asked the buttler to fetch you 24 planks.' +
-       LineEnding +
+       LineEnding + LineEnding +
        'You also need money in your servant''s money bag and you need to' +
        LineEnding +
        'replenish it MANUALLY once in a while.'
@@ -720,14 +720,22 @@ var
 begin
   combobox := sender;
 
-  DownloadToFile(
-    'https://enqlpchobniylwpsjcqc.supabase.co/storage/v1/object/public/imgs/scripts/bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15/assets/hall.png',
+  if (not FileExists(WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png')) then
+    DownloadToFile(
+      'https://i.imgur.com/CWkZ6ct.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png'
   );
 
+  if (not FileExists(WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png')) then
   DownloadToFile(
-    'https://enqlpchobniylwpsjcqc.supabase.co/storage/v1/object/public/imgs/scripts/bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15/assets/kitchen.png',
+    'https://i.imgur.com/DNtg4MX.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png'
+  );
+
+  if (not FileExists(WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png')) then
+  DownloadToFile(
+    'https://i.imgur.com/0AKBiN5.png',
+    WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png'
   );
 
   case combobox.getItemIndex() of
@@ -739,7 +747,7 @@ begin
           + LineEnding +
           'If you have more rooms move them 2 or 3 squares away with the house options.'
           + LineEnding +
-          'You may be able to use other rooms instead of these but I cannot guarantee it will work.'
+          'You may be able to use other rooms but I cannot guarantee it will work.'
           + LineEnding + LineEnding +
           'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
           + LineEnding + LineEnding +
@@ -759,6 +767,19 @@ begin
           'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
           + LineEnding + LineEnding +
           'Have your cape mount in the SOUTHEAST side of the hall.'
+        );
+      end;
+    3:
+      begin
+        ImagePanel.SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png');
+        Self.LayoutInfo.setCaption(
+          'Your POH layout must look like this on the minimap, no other room should be seen.'
+          + LineEnding +
+          'If you have more rooms move them 2 or 3 squares away with the house options.'
+          + LineEnding +
+          'You may be able to use other rooms but I cannot guarantee it will work.'
+          + LineEnding + LineEnding +
+          'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
         );
       end;
   end;
@@ -821,8 +842,8 @@ begin
     Create(tab);
     SetTop(Self.FurnitureSelector.GetTop() + TControl.AdjustToDPI(15));
     SetLeft(Self.FurnitureSelector.GetRight() + TControl.AdjustToDPI(90));
-    SetWidth(TControl.AdjustToDPI(240));
-    SetHeight(TControl.AdjustToDPI(240));
+    SetWidth(TControl.AdjustToDPI(253));
+    SetHeight(TControl.AdjustToDPI(245));
     setHint('House layout. Make sure your house layout looks like this!');
   end;
 
