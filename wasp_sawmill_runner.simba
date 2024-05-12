@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'b6feb67b-9949-45f4-a175-e92f219dfa46'}
-{$DEFINE SCRIPT_REVISION := '14'}
+{$DEFINE SCRIPT_REVISION := '15'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -129,7 +129,7 @@ end;
 
 function TSawmillRunner.InGE(p: TPoint): Boolean;
 begin
-  Result := p.WithinDistance(RSObjects.GEBank.Coordinates, 200);
+  Result := p.AnyInRange(RSObjects.GEBank.Coordinates, 200);
 end;
 
 function TSawmillRunner.VarrockTeleport(): Boolean;

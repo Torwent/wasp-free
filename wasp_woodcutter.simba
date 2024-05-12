@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := '207b1ab4-561d-4543-8467-705cdfce98ec'}
-{$DEFINE SCRIPT_REVISION := '60'}
+{$DEFINE SCRIPT_REVISION := '61'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -558,7 +558,7 @@ begin
   if UseBank then
     me := Self.RSW.GetMyPos();
 
-  if UseBank and not me.WithinDistance(Self.RSTree.Coordinates, 40) then
+  if UseBank and not me.AnyInRange(Self.RSTree.Coordinates, 40) then
   begin
     if UseSawmill then
     begin
@@ -569,7 +569,7 @@ begin
       Exit(EWoodcutterState.OPEN_BANK);
   end;
 
-  if UseBank and not me.WithinDistance(Self.RSTree.Coordinates, 40) and Self.UsePlankSack and Self.PlankSackFull then
+  if UseBank and not me.AnyInRange(Self.RSTree.Coordinates, 40) and Self.UsePlankSack and Self.PlankSackFull then
     Exit(EWoodcutterState.EMPTY_SACK);
 
   if Inventory.IsFull() then
@@ -604,7 +604,7 @@ begin
     Exit(EWoodcutterState.WAIT_STATE);
   end;
 
-  if UseBank and not me.WithinDistance(Self.RSTree.Coordinates, 15) then
+  if UseBank and not me.AnyInRange(Self.RSTree.Coordinates, 15) then
     Exit(EWoodcutterState.WALK_SPOT);
 
   if Minimap.IsSpecWeapon() and (Minimap.GetSpecLevel() = 100) then

@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'a398a083-63fd-4f13-936b-3963354fb4c1'}
-{$DEFINE SCRIPT_REVISION := '34'}
+{$DEFINE SCRIPT_REVISION := '35'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -333,7 +333,7 @@ begin
   if not Minimap.IsPrayerEnabled() and (Minimap.GetPrayerLevel() > 0) then
     Exit(EKrakenState.ENABLE_QPRAY);
 
-  if not pos.WithinDistance(Self.Bridge, 5) then
+  if not pos.InRange(Self.Bridge, 5) then
     Exit(EKrakenState.WALK_BRIDGE);
 
   if Inventory.ContainsAny(Self.Gear) then
