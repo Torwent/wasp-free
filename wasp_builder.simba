@@ -720,19 +720,16 @@ var
 begin
   combobox := sender;
 
-  if (not FileExists(WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png')) then
-    DownloadToFile(
-      'https://i.imgur.com/CWkZ6ct.png',
+  DownloadToFile(
+    'https://i.imgur.com/CWkZ6ct.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png'
   );
 
-  if (not FileExists(WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png')) then
   DownloadToFile(
     'https://i.imgur.com/DNtg4MX.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png'
   );
 
-  if (not FileExists(WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png')) then
   DownloadToFile(
     'https://i.imgur.com/0AKBiN5.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png'
