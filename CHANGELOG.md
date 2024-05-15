@@ -1,3 +1,19 @@
+# [2.11.0](https://github.com/Torwent/wasp-free/compare/v2.10.46...v2.11.0) (2024-05-15)
+
+
+### Bug Fixes
+
+* **TRSNPC:** Updated from .Setup to .SetupUpText + feat: Added Shadow Veil support ([b47d717](https://github.com/Torwent/wasp-free/commit/b47d71765a8e0d7467920ccff7f7c977612bebe6))
+* Update wasp builder images ([7a41194](https://github.com/Torwent/wasp-free/commit/7a41194b5948a27d3e53020194fb43f50fa55d52))
+* Update wasp builder images ([c68312c](https://github.com/Torwent/wasp-free/commit/c68312cbd8c04844620bb6e40720f2b9e8a6becb))
+
+
+### Features
+
+* Smith's gloves (i) and ore/coal check ([293eddc](https://github.com/Torwent/wasp-free/commit/293eddc280aa93adbc558da428c83e51eeb0ecdd))
+
+
+
 ## [2.10.46](https://github.com/Torwent/wasp-free/compare/v2.10.45...v2.10.46) (2024-04-25)
 
 
@@ -31,15 +47,6 @@
 ### Bug Fixes
 
 * remove version panel from all scripts ([010939e](https://github.com/Torwent/wasp-free/commit/010939e50eff1890985ab6a093511b25dbb21490))
-
-
-
-## [2.10.42](https://github.com/Torwent/wasp-free/compare/v2.10.41...v2.10.42) (2024-04-03)
-
-
-### Bug Fixes
-
-* **wcer:** add a coordinate filter for trees outside of the WC Guild ([ff25538](https://github.com/Torwent/wasp-free/commit/ff25538c7bade3702d8b209297fcd672d0dcd668))
 
 
 
