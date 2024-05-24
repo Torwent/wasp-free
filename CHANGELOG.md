@@ -1,3 +1,12 @@
+## [2.11.2](https://github.com/Torwent/wasp-free/compare/v2.11.1...v2.11.2) (2024-05-24)
+
+
+### Bug Fixes
+
+* **blast furnace:** some fixes ([51fddf4](https://github.com/Torwent/wasp-free/commit/51fddf42d1d378c4c9a4b08c4655dd614b3168f3))
+
+
+
 ## [2.11.1](https://github.com/Torwent/wasp-free/compare/v2.11.0...v2.11.1) (2024-05-15)
 
 
@@ -30,15 +39,6 @@
 ### Bug Fixes
 
 * **ardy knights:** update deprecated method ([ef4b724](https://github.com/Torwent/wasp-free/commit/ef4b72478c59bd41191448fe1d478477de82fb7d))
-
-
-
-## [2.10.44](https://github.com/Torwent/wasp-free/compare/v2.10.43...v2.10.44) (2024-04-08)
-
-
-### Bug Fixes
-
-* **kraken:** should now reequip all gear ([a180187](https://github.com/Torwent/wasp-free/commit/a1801875032cfcae91e663ef6326eec7f2391c5a))
 
 
 
