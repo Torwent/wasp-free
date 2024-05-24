@@ -329,19 +329,6 @@ begin
 
     Minimap.WaitMoving();
     Result := WaitUntil(Bank.IsOpen(), SRL.TruncatedGauss(50, 1500), 3000);
-
-    if Bank.CountItemStack(Self.ore) <= 28 then
-    begin
-      MainScreen.CloseInterface();
-      Logout.ClickLogout();
-      TerminateScript('We do not have enough ore for a full inventory.');
-    end
-    else if ((CurrentBar = BRONZE) or (CurrentBar = STEEL) or (CurrentBar = MITHRIL) or (CurrentBar = ADAMANTITE) or (CurrentBar = RUNITE)) and (Bank.CountItemStack(Self.coal) <= 28) then
-    begin
-      MainScreen.CloseInterface();
-      Logout.ClickLogout();
-      TerminateScript('We do not have enough coal for a full inventory.');
-    end;
   end;
 end;
 
@@ -714,7 +701,14 @@ begin
           Exit(EBFState.FILL_COAL_BAG);
 
         if Self.PotReady() then
+        begin
+          if Bank.CountItemStack(Self.ore) <= 28 then
+            Exit(EBFState.OUT_OF_SUPPLIES);
           Exit(EBFState.WITHDRAW_ORE);
+        end;
+
+        if Bank.CountItemStack(Self.coal) <= 28 then
+          Exit(EBFState.OUT_OF_SUPPLIES);
 
         Exit(EBFState.WITHDRAW_COAL);
       end;
@@ -915,6 +909,7 @@ begin
 
     Self.DoAntiban();
   until Self.ShouldStop();
+
   Logout.ClickLogout();
 end;
 
