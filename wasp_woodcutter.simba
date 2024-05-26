@@ -7,7 +7,7 @@
 type
   ETreeLocation = (
     VARROCK_WEST, VARROCK_EAST, EDGEVILLE, SEERS_VILLAGE, DRAYNOR_VILLAGE,
-    WOODCUT_GUILD, PRIFDDINAS, ISLE_OF_SOULS, CASTLE_WARS
+    WOODCUT_GUILD, PRIFDDINAS, ISLE_OF_SOULS, CASTLE_WARS, RUINS_OF_UZER
   );
 
   ERSTree = (
@@ -201,15 +201,18 @@ begin
       Self.RSTree.Coordinates := filtered;
     end;
 
-    ETreeLocation.VARROCK_EAST:    Self.RSW.SetupRegions([RSRegions.VARROCK_EAST]);
-    ETreeLocation.VARROCK_WEST:    Self.RSW.SetupRegions([RSRegions.VARROCK_WEST]);
-    ETreeLocation.EDGEVILLE:       Self.RSW.SetupRegions([RSRegions.EDGEVILLE]);
-    ETreeLocation.PRIFDDINAS:      Self.RSW.SetupRegions([RSRegions.PRIFDDINAS]);
-    ETreeLocation.ISLE_OF_SOULS:   Self.RSW.SetupRegions([RSRegions.ISLE_OF_SOULS]);
-    ETreeLocation.CASTLE_WARS:     Self.RSW.SetupRegions([RSRegions.CASTLE_WARS]);
-    ETreeLocation.DRAYNOR_VILLAGE: Self.RSW.SetupRegions([RSRegions.DRAYNOR_VILLAGE]);
-    ETreeLocation.SEERS_VILLAGE:   Self.RSW.SetupRegions([RSRegions.SEERS_VILLAGE]);
+    ETreeLocation.VARROCK_EAST:    Self.RSW.SetupRegion(RSRegions.VARROCK_EAST);
+    ETreeLocation.VARROCK_WEST:    Self.RSW.SetupRegion(RSRegions.VARROCK_WEST);
+    ETreeLocation.EDGEVILLE:       Self.RSW.SetupRegion(RSRegions.EDGEVILLE);
+    ETreeLocation.PRIFDDINAS:      Self.RSW.SetupRegion(RSRegions.PRIFDDINAS);
+    ETreeLocation.ISLE_OF_SOULS:   Self.RSW.SetupRegion(RSRegions.ISLE_OF_SOULS);
+    ETreeLocation.CASTLE_WARS:     Self.RSW.SetupRegion(RSRegions.CASTLE_WARS);
+    ETreeLocation.DRAYNOR_VILLAGE: Self.RSW.SetupRegion(RSRegions.DRAYNOR_VILLAGE);
+    ETreeLocation.SEERS_VILLAGE:   Self.RSW.SetupRegion(RSRegions.SEERS_VILLAGE);
+    ETreeLocation.RUINS_OF_UZER:   Self.RSW.SetupRegion(RSRegions.RUINS_OF_UZER);
   end;
+
+  RSHeightMap.Disabled := TreeLocation = ETreeLocation.RUINS_OF_UZER;
 
   //WC Guild
   RSObjects.BankWood1.Filter.Finder := False;
@@ -716,7 +719,8 @@ begin
     'Woodcutting guild': TreeLocation := ETreeLocation.WOODCUT_GUILD;
     'Prifddinas':        TreeLocation := ETreeLocation.PRIFDDINAS;
     'Isle of souls':     TreeLocation := ETreeLocation.ISLE_OF_SOULS;
-    'Castle wars':      TreeLocation := ETreeLocation.CASTLE_WARS;
+    'Castle wars':       TreeLocation := ETreeLocation.CASTLE_WARS;
+    'Ruins of Uzer':     TreeLocation := ETreeLocation.RUINS_OF_UZER;
   end;
 
   PowerCut := Self.PowerCutState.IsChecked();
@@ -755,7 +759,7 @@ begin
                         'Varrock west', 'Varrock east', 'Woodcutting guild'
                       ]);
     ERSTree.WILLOW_TREE: Self.LocationSelector.AddItemArray(['Draynor']);
-    ERSTree.TEAK_TREE: Self.LocationSelector.AddItemArray(['Prifddinas', 'Isle of souls', 'Castle wars']);
+    ERSTree.TEAK_TREE: Self.LocationSelector.AddItemArray(['Prifddinas', 'Isle of souls', 'Castle wars', 'Ruins of Uzer']);
     ERSTree.MAPLE_TREE: Self.LocationSelector.AddItemArray([
                   'Seers'' village', 'Woodcutting guild'
                 ]);
