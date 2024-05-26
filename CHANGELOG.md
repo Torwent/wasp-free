@@ -1,3 +1,12 @@
+## [2.11.3](https://github.com/Torwent/wasp-free/compare/v2.11.2...v2.11.3) (2024-05-26)
+
+
+### Bug Fixes
+
+* **wc:** add ruins of uzer teaks ([19fae0e](https://github.com/Torwent/wasp-free/commit/19fae0ed9da9767c047eb759e9081320976db599))
+
+
+
 ## [2.11.2](https://github.com/Torwent/wasp-free/compare/v2.11.1...v2.11.2) (2024-05-24)
 
 
@@ -30,15 +39,6 @@
 ### Bug Fixes
 
 * compatibility with latest SRL-T and WaspLib ([66327f1](https://github.com/Torwent/wasp-free/commit/66327f1ae419780845f6e2fc0dc5ec4d5a204b81))
-
-
-
-## [2.10.45](https://github.com/Torwent/wasp-free/compare/v2.10.44...v2.10.45) (2024-04-22)
-
-
-### Bug Fixes
-
-* **ardy knights:** update deprecated method ([ef4b724](https://github.com/Torwent/wasp-free/commit/ef4b72478c59bd41191448fe1d478477de82fb7d))
 
 
 
