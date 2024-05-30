@@ -152,7 +152,7 @@ begin
   for p in Self.RSTree.Coordinates do
   begin
     RSGroundItems.BirdNest.Coordinates += p;
-    RSGroundItems.BirdNest.DotFilter.Setup([p.X, p.Y, 16], True);
+    RSGroundItems.BirdNest.DotFilter.SetupCircle([p.X, p.Y, 16], True);
   end;
   RSGroundItems.BirdNest.ShapeArray.SetShape([1, 1, 1]);
   RSGroundItems.BirdNest.Filter.Walker := True;
