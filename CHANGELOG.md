@@ -1,3 +1,12 @@
+## [2.11.4](https://github.com/Torwent/wasp-free/compare/v2.11.3...v2.11.4) (2024-05-30)
+
+
+### Bug Fixes
+
+* compatibility with latest libs ([963f000](https://github.com/Torwent/wasp-free/commit/963f000811dc55fe568712be9397c132427b59bb))
+
+
+
 ## [2.11.3](https://github.com/Torwent/wasp-free/compare/v2.11.2...v2.11.3) (2024-05-26)
 
 
@@ -30,15 +39,6 @@
 ### Features
 
 * Smith's gloves (i) and ore/coal check ([293eddc](https://github.com/Torwent/wasp-free/commit/293eddc280aa93adbc558da428c83e51eeb0ecdd))
-
-
-
-## [2.10.46](https://github.com/Torwent/wasp-free/compare/v2.10.45...v2.10.46) (2024-04-25)
-
-
-### Bug Fixes
-
-* compatibility with latest SRL-T and WaspLib ([66327f1](https://github.com/Torwent/wasp-free/commit/66327f1ae419780845f6e2fc0dc5ec4d5a204b81))
 
 
 
