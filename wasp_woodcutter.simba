@@ -547,7 +547,7 @@ begin
     Self.IsFletching := False;
   end;
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     Self.Woodcutting := False;
     if Bank.IsOpen() and Inventory.ContainsAny(Self.BankList) then
@@ -627,7 +627,7 @@ begin
       EWoodcutterState.OPEN_BANK: Self.WalkOpenBank();
       EWoodcutterState.DEPOSIT_ITEMS: Self.Deposit();
       EWoodcutterState.EMPTY_SACK: Self.EmptySack();
-      EWoodcutterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EWoodcutterState.CLOSE_INTERFACE: RSInterface.Close();
       EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree.Coordinates, 10, 0.2);
       EWoodcutterState.WAIT_STATE: Self.WaitCutting();
       EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp();

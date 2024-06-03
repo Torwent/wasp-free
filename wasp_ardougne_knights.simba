@@ -572,7 +572,7 @@ begin
   if ChooseOption.IsOpen() then
     Exit(CLOSE_CONTEXT);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     if Bank.IsOpen() then
     begin
@@ -669,7 +669,7 @@ begin
       WITHDRAW_NECK: Self.Withdraw(Self.Necklace);
       DEPOSIT_NECK: Bank.DepositItem(Self.Necklace, False);
       FIX_INVENTORY: Self.FixInventory();
-      CLOSE_INTERFACE: MainScreen.CloseInterface();
+      CLOSE_INTERFACE: RSInterface.Close();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
       CHANGE_CHAT_OFF: ChatButtons.ChangeState(ERSChatButton.PUBLIC_CHAT, ERSChatButtonState.DISABLED);

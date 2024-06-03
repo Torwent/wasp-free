@@ -288,7 +288,7 @@ begin
     Exit(ESmelterState.LEVEL_UP);
   end;
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     Self.Smelting := False;
     Self.HoveringBank := False;
@@ -378,7 +378,7 @@ begin
       ESmelterState.SMELT_BAR: Self.SmeltBar();
       ESmelterState.WAIT_SMELT: Self.WaitSmelt();
 
-      ESmelterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      ESmelterState.CLOSE_INTERFACE: RSInterface.Close();
       ESmelterState.CLOSE_CONTEXT: ChooseOption.Close();
       ESmelterState.LEVEL_UP: Chat.HandleLevelUp();
 

@@ -329,7 +329,7 @@ begin
     Exit(EMinerState.LEVEL_UP);
   end;
 
-  if MainScreen.HasInterface then
+  if RSInterface.IsOpen then
   begin
     if Bank.IsOpen and Inventory.ContainsAny(BankList) then
       Exit(EMinerState.DEPOSIT_ITEMS);
@@ -378,7 +378,7 @@ begin
     case Self.State of
       EMinerState.OPEN_BANK: Bank.WalkOpen();
       EMinerState.DEPOSIT_ITEMS: Self.Deposit();
-      EMinerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EMinerState.CLOSE_INTERFACE: RSInterface.Close();
       EMinerState.WALK_SPOT: RSW.WebWalk(RSRock.Coordinates, 5, 0.2);
       EMinerState.WAIT_STATE: Self.WaitMining();
       EMinerState.LEVEL_UP: Chat.HandleLevelUp();

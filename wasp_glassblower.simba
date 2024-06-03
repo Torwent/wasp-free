@@ -139,7 +139,7 @@ begin
   DepositSlots := Slots.Difference(Inventory.GetUsedSlots);
 
   repeat
-    if Result := Bank.DepositSlot([DepositSlots[i], BANK_DEPOSIT_ALL], True) then
+    if Result := Bank.DepositSlot([DepositSlots[i], Bank.QUANTITY_ALL], True) then
       WaitUntil(not Inventory.IsSlotUsed(DepositSlots[i]), 100, 2000);
     DepositSlots := Slots.Difference(Inventory.GetUsedSlots);
   until Result := (DepositSlots = []);
@@ -242,7 +242,7 @@ begin
   if Make.IsOpen() then
     Exit(EBlowerState.HANDLE_MAKE);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     Self.Blowing := False;
     Self.HoveringBank := False;
@@ -329,7 +329,7 @@ begin
 
       EBlowerState.OPEN_COLLECT: CollectBox.WalkOpen();
       EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox([Tool.Item, Material.Item]);
-      EBlowerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EBlowerState.CLOSE_INTERFACE: RSInterface.Close();
 
       EBlowerState.DO_GLASS: Self.DoGlass();
       EBlowerState.HANDLE_MAKE: Self.HandleMake();

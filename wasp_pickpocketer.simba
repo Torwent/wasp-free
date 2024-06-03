@@ -692,7 +692,7 @@ begin
   if MainScreen.FindGrave() then
     Exit(EThieverState.LOOT_GRAVE);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     if Bank.IsOpen() then
     begin
@@ -774,7 +774,7 @@ begin
       DEPOSIT_LOOT: Self.Deposit();
       WITHDRAW_FOOD: Bank.WithdrawConsumable(ERSConsumable.FOOD);
       WITHDRAW_NECKLACES: Self.WithdrawNecks();
-      CLOSE_INTERFACE: MainScreen.CloseInterface();
+      CLOSE_INTERFACE: RSInterface.Close();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
       CHANGE_CHAT_FILTER: ChatButtons.ChangeState(ERSChatButton.GAME_CHAT, ERSChatButtonState.ENABLED);

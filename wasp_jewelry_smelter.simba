@@ -301,7 +301,7 @@ begin
     Exit(EJewelCrafterState.LEVEL_UP);
   end;
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     Self.IsCrafting := False;
     Self.HoveringBank := False;
@@ -403,7 +403,7 @@ begin
       EJewelCrafterState.CRAFT_JEWEL: Self.CraftJewel();
       EJewelCrafterState.WAIT_CRAFT: Self.WaitCraft();
 
-      EJewelCrafterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EJewelCrafterState.CLOSE_INTERFACE: RSInterface.Close();
       EJewelCrafterState.CLOSE_CONTEXT: ChooseOption.Close();
       EJewelCrafterState.LEVEL_UP: Chat.HandleLevelUp();
 

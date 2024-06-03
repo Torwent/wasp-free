@@ -218,7 +218,7 @@ begin
   if Self.FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu', 'Build Ta']) then
   begin
     Minimap.WaitMoving();
-    Exit(WaitUntil(MainScreen.IsClassicOpen(), 200, 5000));
+    Exit(WaitUntil(RSInterface.IsOpen(ERSInterfaceType.CLASSIC), 200, 5000));
   end;
 
   if ChooseOption.HasOption(['Remove La', 'Remove My', 'Remove Ma']) then
@@ -376,7 +376,7 @@ begin
     ASyncMouse.Move(tpa);
   end;
 
-  Result := WaitUntil(not MainScreen.IsClassicOpen(), 100, 3000);
+  Result := WaitUntil(not RSInterface.IsOpen(ERSInterfaceType.CLASSIC), 100, 3000);
   Self.FurnitureIsBuilt := Result;
 
   XPBar.EarnedXP();
@@ -394,7 +394,7 @@ begin
     WL.Activity.Restart();
     Wait(600, 800);
   end else
-    MainScreen.CloseInterface();
+    RSInterface.Close();
 end;
 
 function TBuilder.HandlePhialsChat(): Boolean;
@@ -444,7 +444,7 @@ begin
   if s.Contains('Repeat') then
     Exit(EBuilderState.HANDLE_SERVANT);
 
-  if MainScreen.IsClassicOpen() then
+  if RSInterface.IsOpen(ERSInterfaceType.CLASSIC) then
   begin
     if BankPin.IsOpen() then
       Exit(EBuilderState.HANDLE_PIN);
@@ -510,7 +510,7 @@ begin
       EBuilderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
       EBuilderState.HANDLE_SERVANT: Self.HandleServant();
       EBuilderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
-      EBuilderState.CLOSE_INTERFACE: MainScreen.CloseInterface(True);
+      EBuilderState.CLOSE_INTERFACE: RSInterface.Close(True);
 
       EBuilderState.CALL_SERVANT: Self.CallServant();
       EBuilderState.TALK_SERVANT: Self.TalkServant();
@@ -550,17 +550,18 @@ begin
   Bitmap.Free();
 end;
 
-function TRSMainScreen.ClickCloseButton(PressEscape: Boolean = False): Boolean; override;
+function TRSInterfaceArea.ClickClose(pressEscape: Boolean = False): Boolean; override;
 var
-  closeButton: TRSButton := Self.GetButton();
+  button: TRSButton;
   i: Int32;
 begin
-  Result := closeButton <> [];
+  button := Self.GetCloseButton();
+  Result := button <> [];
 
-  if not Result and Minimap.InPOH() or not Self.HasInterface() then
+  if not Result and Minimap.InPOH() or not Self.IsOpen() then
     Exit;
 
-  if not Result or (PressEscape and EscapeCloseEnabled) then
+  if not Result or (pressEscape and Self.EscapeEnabled) then
   begin
     Keyboard.PressKey(VK_ESCAPE);
 
@@ -591,7 +592,7 @@ begin
     Exit;
   end;
 
-  Result := closeButton.Click();
+  Result := button.Click();
 end;
 
 function TRSWalkerObject.FindOnMainScreen(cuboidArray: TCuboidExArray): T2DPointArray; override;

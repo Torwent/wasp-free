@@ -278,7 +278,7 @@ begin
     Exit(EEnchanterState.LEVEL_UP);
   end;
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     Self.Enchanting := False;
     Self.HoveringBank := False;
@@ -365,7 +365,7 @@ begin
 
       EEnchanterState.OPEN_COLLECT: CollectBox.WalkOpen();
       EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox([Self.RegularJewel.Item, Self.CosmicRune.Item]);
-      EEnchanterState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EEnchanterState.CLOSE_INTERFACE: RSInterface.Close();
 
       EEnchanterState.WAIT_ENCHANT: Self.Enchanting := XPBar.WaitXP(5000);
       EEnchanterState.LEVEL_UP: Chat.HandleLevelUp();

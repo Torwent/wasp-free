@@ -193,7 +193,7 @@ begin
   if WL.Activity.IsFinished() then
     Exit(ESawmillRunnerState.END_SCRIPT);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     if not Self.BankEmpty and Bank.IsOpen() then
     begin
@@ -263,7 +263,7 @@ begin
       ESawmillRunnerState.DEPOSIT_RANDOM_ITEMS: Bank.DepositRandomItems(Self.NeededItems);
       ESawmillRunnerState.OPEN_COLLECT: CollectBox.WalkOpen();
       ESawmillRunnerState.HANDLE_COLLECT: Self.HandleCollectBox([]);
-      ESawmillRunnerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      ESawmillRunnerState.CLOSE_INTERFACE: RSInterface.Close();
 
       ESawmillRunnerState.TELEPORT_SAWMILL: Self.SawmillTeleport();
       ESawmillRunnerState.TELEPORT_GE: Self.VarrockTeleport();

@@ -282,7 +282,7 @@ begin
   if Make.IsOpen() then
     Exit(ECookerState.HANDLE_MAKE);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     Self.Cooking := False;
     Self.HoveringBank := False;
@@ -345,7 +345,7 @@ begin
 
       ECookerState.OPEN_COLLECT: CollectBox.WalkOpen();
       ECookerState.HANDLE_COLLECT: Self.HandleCollectBox([Self.Ingredient.Item]);
-      ECookerState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      ECookerState.CLOSE_INTERFACE: RSInterface.Close();
 
       ECookerState.LEVEL_UP: Chat.HandleLevelUp();
       ECookerState.DO_COOKING: Self.DoCooking();

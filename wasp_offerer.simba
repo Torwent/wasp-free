@@ -192,7 +192,7 @@ begin
   if Self.NoRunes then
     Exit(EOffererState.NO_RUNES);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     Self.SpellCooldown := False;
 
@@ -266,7 +266,7 @@ begin
       EOffererState.OPEN_COLLECT:   CollectBox.WalkOpen();
       EOffererState.HANDLE_COLLECT: Self.HandleCollectBox([Self.WrathRune.Item, Self.AltRune.Item, Self.Remains.Item]);
 
-      EOffererState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EOffererState.CLOSE_INTERFACE: RSInterface.Close();
 
       EOffererState.OPEN_MAGIC: Magic.Open();
       EOffererState.CAST_SPELL: Self.CastSpell();

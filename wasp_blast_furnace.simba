@@ -311,11 +311,11 @@ function TBlastFurnace.WalkOpenBank(): Boolean;
 var
   rsobject: TRSObject;
 begin
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     if Bank.IsOpen() or BankPin.IsOpen() then
       Exit(True);
-    MainScreen.CloseInterface();
+    RSInterface.Close();
   end;
 
   rsobject := PRSObject(WalkerObjects.Banks.GetClosest())^;
@@ -453,7 +453,7 @@ begin
 
     if changeGloves and Inventory.ContainsAll([Self.GoldGloves, 'Gold Ore']) then
     begin
-      if not MainScreen.HasInterface() and Inventory.ClickItem(Self.GoldGloves) then
+      if not RSInterface.IsOpen() and Inventory.ClickItem(Self.GoldGloves) then
       begin
         TRSWalkerObject.RedClicked := False;
         Exit;
@@ -666,7 +666,7 @@ begin
   if Self.GaugeIsOpen() then
     Exit(EBFState.CLOSE_GAUGE);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     if not Self.BankEmpty and Bank.IsOpen() then
     begin
@@ -872,7 +872,7 @@ begin
 
       EBFState.OPEN_COLLECT: CollectBox.WalkOpen();
       EBFState.HANDLE_COLLECT: Self.HandleCollectBox([Self.Ore, Self.Coal]);
-      EBFState.CLOSE_BANK, CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EBFState.CLOSE_BANK, CLOSE_INTERFACE: RSInterface.Close();
 
       EBFState.CLOSE_GAUGE: Self.CloseGauge();
       EBFState.CLOSE_CONTEXT_MENU: ChooseOption.Close();

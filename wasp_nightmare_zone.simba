@@ -263,7 +263,7 @@ begin
   if RSObjects.NMZChest.WalkClick() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(MainScreen.IsClassicOpen(), 100, 5000);
+    Result := WaitUntil(RSInterface.IsOpen(ERSInterfaceType.CLASSIC), 100, 5000);
   end;
 end;
 
@@ -372,7 +372,7 @@ begin
   if RSObjects.NMZPotion.WalkClick then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(MainScreen.IsClassicOpen, 100, 5000);
+    Result := WaitUntil(RSInterface.IsOpen(ERSInterfaceType.CLASSIC), 100, 5000);
   end;
 end;
 
@@ -658,7 +658,7 @@ begin
   if not Self.CofferChecked then
     Exit(ENMZState.CHECK_COFFER);
 
-  if MainScreen.IsClassicOpen() then
+  if RSInterface.IsOpen(ERSInterfaceType.CLASSIC) then
   begin
     if BankPin.IsOpen() then
       Exit(ENMZState.UNLOCK_COFFER);
@@ -787,7 +787,7 @@ begin
 
       ENMZState.OPEN_NMZSETUP: Self.OpenNMZSetup();
       ENMZState.HANDLE_NMZSETUP: Self.HandleNMZSetup();
-      ENMZState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      ENMZState.CLOSE_INTERFACE: RSInterface.Close();
 
       //Inside Dream.
       ENMZState.DRINK_BOOST: Self.DrinkPotion(Self.BoostPotion);

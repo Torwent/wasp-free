@@ -125,7 +125,7 @@ begin
   if ChooseOption.IsOpen() then
     Exit(EAlcherState.CLOSE_CONTEXT);
 
-  if MainScreen.HasInterface() then
+  if RSInterface.IsOpen() then
   begin
     if Bank.IsOpen() then
     begin
@@ -178,7 +178,7 @@ begin
 
       EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen();
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
-      EAlcherState.CLOSE_INTERFACE: MainScreen.CloseInterface();
+      EAlcherState.CLOSE_INTERFACE: RSInterface.Close();
 
       EAlcherState.WAIT_ALCH: Wait(100);
       EAlcherState.CAST_ALCHEMY: Self.CastAlchemy();
