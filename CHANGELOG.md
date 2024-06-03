@@ -1,3 +1,12 @@
+## [2.11.5](https://github.com/Torwent/wasp-free/compare/v2.11.4...v2.11.5) (2024-06-03)
+
+
+### Bug Fixes
+
+* replace deprecated methods ([48b3ef6](https://github.com/Torwent/wasp-free/commit/48b3ef6e3b074511c482f0fe5566807926da0614))
+
+
+
 ## [2.11.4](https://github.com/Torwent/wasp-free/compare/v2.11.3...v2.11.4) (2024-05-30)
 
 
@@ -31,14 +40,6 @@
 ### Bug Fixes
 
 * **builder:** remove redundant check from baconadors PR ([a452ff3](https://github.com/Torwent/wasp-free/commit/a452ff36fb0bfe84c16d51267b583ae30c6e2065))
-* **TRSNPC:** Updated from .Setup to .SetupUpText + feat: Added Shadow Veil support ([b47d717](https://github.com/Torwent/wasp-free/commit/b47d71765a8e0d7467920ccff7f7c977612bebe6))
-* Update wasp builder images ([7a41194](https://github.com/Torwent/wasp-free/commit/7a41194b5948a27d3e53020194fb43f50fa55d52))
-* Update wasp builder images ([c68312c](https://github.com/Torwent/wasp-free/commit/c68312cbd8c04844620bb6e40720f2b9e8a6becb))
-
-
-### Features
-
-* Smith's gloves (i) and ore/coal check ([293eddc](https://github.com/Torwent/wasp-free/commit/293eddc280aa93adbc558da428c83e51eeb0ecdd))
 
 
 
