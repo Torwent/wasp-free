@@ -916,7 +916,7 @@ end;
 var
   BlastFurnace: TBlastFurnace;
 
-procedure TRSMinimap.WaitMoving(doAntiban: Boolean = True); override;
+procedure TRSMinimap.WaitMoving(doAntiban: Boolean); override;
 begin
   BlastFurnace.WaitMoving(doAntiban, Antiban.BioDice());
 end;

@@ -461,20 +461,10 @@ begin
   searchBox := cuboid.Bounds().Expand(2);
   atpa := MainScreen.FindObject(Self.RSTree.Finder, searchBox);
   if atpa = [] then
-  begin
-    RSClient.Clear(MainScreen.Bounds());
     Exit;
-  end;
 
   tpa := cuboid.Filter(atpa.Merge());
   Result := tpa <> [];
-
-  RSClient.Clear(MainScreen.Bounds());
-  if Result then
-  begin
-    RSClient.DrawCuboid(cuboid, $FFFFFF);
-    RSClient.DrawTPA(tpa);
-  end;
 end;
 
 function TWoodcutter.IsCutting(): Boolean;
@@ -661,38 +651,24 @@ begin
   cuboidArray := MainScreen.Filter(cuboidArray);
   Woodcutter.TreeCuboids := cuboidArray;
 
-  RSClient.Clear(MainScreen.Bounds());
-
   for i := 0 to High(cuboidArray) do
   begin
     if Self.Filter.Finder then
     begin
-      RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
-
       tpa := MainScreen.FindObject(tempFinder, cuboidArray[i].Bounds()).Merge();
       if tpa = [] then
         Continue;
 
       tpa := cuboidArray[i].Filter(tpa);
       if tpa <> [] then
-      begin
         Result += tpa;
-        RSClient.DrawTPA(tpa, $0000FF);
-      end;
 
       Continue;
     end;
 
     tpa := cuboidArray[i].ShapeFill();
     if tpa <> [] then
-    begin
-      if WLSettings.RemoteInput.HUDDebug then
-      begin
-        RSClient.DrawTPA(tpa, $0000FF);
-        RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
-      end;
       Result += tpa;
-    end;
   end;
 end;
 

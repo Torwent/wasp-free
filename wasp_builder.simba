@@ -211,7 +211,6 @@ begin
   if Self.LastPoint <> [0, 0] then
   begin
     tpa := TPAGrow([Self.LastPoint], 6);
-    RSClient.DrawTPA(tpa, $00FF00);
     Mouse.Move(tpa);
   end;
 
@@ -239,7 +238,6 @@ begin
   if Self.LastPoint <> [0, 0] then
   begin
     tpa := TPAGrow([Self.LastPoint], 6);
-    RSClient.DrawTPA(tpa, $00FF00);
     Mouse.Move(tpa);
   end;
 
@@ -339,7 +337,6 @@ begin
     begin
       tpa := TPAGrow([Self.LastPoint], 6);
       ASyncMouse.Move(tpa);
-      RSClient.DrawTPA(tpa, $00FF00);
     end;
     Result := WaitUntil(Chat.GetChatTitle() <> 'Really remove it?', 200, 3000);
   end;
@@ -372,7 +369,6 @@ begin
   if (Self.LastPoint <> [0, 0]) then
   begin
     tpa := TPAGrow([Self.LastPoint], 6);
-    RSClient.DrawTPA(tpa, $00FF00);
     ASyncMouse.Move(tpa);
   end;
 
@@ -608,18 +604,14 @@ begin
   tempFinder := Self.Finder.Unlimited();
   cuboidArray := MainScreen.Filter(cuboidArray);
 
-  RSClient.Clear(MainScreen.Bounds());
-
   for i := 0 to High(cuboidArray) do
   begin
-    RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
     tpa := MainScreen.FindObject(tempFinder, cuboidArray[i].Bounds()).Merge();
     if tpa <> [] then
     begin
       tpa := cuboidArray[i].Filter(tpa);
       if tpa <> [] then
       begin
-        RSClient.DrawTPA(tpa, $0000FF);
         Result += tpa;
         Continue;
       end;
@@ -627,11 +619,7 @@ begin
 
     tpa := cuboidArray[i].ShapeFill();
     if tpa <> [] then
-    begin
-      RSClient.DrawTPA(tpa, $0000FF);
-      RSClient.DrawCuboid(cuboidArray[i], $FFFFFF, 0.8);
       Result += tpa;
-    end;
   end;
 end;
 
