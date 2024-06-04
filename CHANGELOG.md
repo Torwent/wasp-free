@@ -1,3 +1,12 @@
+## [2.11.6](https://github.com/Torwent/wasp-free/compare/v2.11.5...v2.11.6) (2024-06-04)
+
+
+### Bug Fixes
+
+* compatibility with latest SRL-T and WaspLib ([cc97883](https://github.com/Torwent/wasp-free/commit/cc978838360299a07ddade9e7f13650c7d3f0838))
+
+
+
 ## [2.11.5](https://github.com/Torwent/wasp-free/compare/v2.11.4...v2.11.5) (2024-06-03)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** some fixes ([51fddf4](https://github.com/Torwent/wasp-free/commit/51fddf42d1d378c4c9a4b08c4655dd614b3168f3))
-
-
-
-## [2.11.1](https://github.com/Torwent/wasp-free/compare/v2.11.0...v2.11.1) (2024-05-15)
-
-
-### Bug Fixes
-
-* **builder:** remove redundant check from baconadors PR ([a452ff3](https://github.com/Torwent/wasp-free/commit/a452ff36fb0bfe84c16d51267b583ae30c6e2065))
 
 
 
