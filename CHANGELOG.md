@@ -1,3 +1,12 @@
+# [2.12.0](https://github.com/Torwent/wasp-free/compare/v2.11.6...v2.12.0) (2024-06-05)
+
+
+### Features
+
+* **alcher:** now uses TRSMap ([b2f7350](https://github.com/Torwent/wasp-free/commit/b2f73507882cdf4a970ab1bce8256e92c53b5880))
+
+
+
 ## [2.11.6](https://github.com/Torwent/wasp-free/compare/v2.11.5...v2.11.6) (2024-06-04)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **wc:** add ruins of uzer teaks ([19fae0e](https://github.com/Torwent/wasp-free/commit/19fae0ed9da9767c047eb759e9081320976db599))
-
-
-
-## [2.11.2](https://github.com/Torwent/wasp-free/compare/v2.11.1...v2.11.2) (2024-05-24)
-
-
-### Bug Fixes
-
-* **blast furnace:** some fixes ([51fddf4](https://github.com/Torwent/wasp-free/commit/51fddf42d1d378c4c9a4b08c4655dd614b3168f3))
 
 
 
