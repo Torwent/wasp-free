@@ -14,25 +14,18 @@ var
 
 type
   EAlcherState = (
-    OPEN_BANK,
-    WITHDRAW_NATS,
-    WITHDRAW_MONEY,
+    OPEN_BANK, WITHDRAW_NATS, WITHDRAW_MONEY,
 
-    OPEN_COLLECT,
-    HANDLE_COLLECT,
+    OPEN_COLLECT, HANDLE_COLLECT,
 
     CLOSE_INTERFACE,
 
-    CAST_ALCHEMY,
-    WAIT_ALCH,
-    WALK_ALCH,
+    CAST_ALCHEMY, WAIT_ALCH, WALK_ALCH,
 
     CLOSE_CONTEXT,
 
     SWITCH_ITEM,
-    OUT_OF_ITEMS,
-    OUT_OF_NATURES,
-    END_SCRIPT
+    OUT_OF_ITEMS, OUT_OF_NATURES, END_SCRIPT
   );
 
   TAlcher = record(TBaseBankScript)
@@ -40,10 +33,8 @@ type
     AlchItem: TRSItem;
     NatureRune, Coins: TRSBankItem;
     InGE: Boolean;
+    GEObj: TRSObjectV2;
   end;
-
-const
-  VARROCK_BOUNDS: TPointArray = [[7941, 2831], [7941, 2363], [8337, 2370], [8341, 2837]];
 
 procedure TAntiban.Setup(); override;
 begin
@@ -59,7 +50,11 @@ begin
   inherited;
 
   if WalkGE then
-    Self.RSW.SetupRegions([RSRegions.GRAND_EXCHANGE]);
+  begin
+    Map.SetupChunk(ERSChunk.VARROCK);
+    Objects.Setup(Map.Objects(), @Map.Walker);
+    Self.GEObj := Objects.Get('Grand Exchange booth');
+  end;
 
   if not Magic.IsSpellBook(ERSSpellBook.STANDARD) then
     Self.Fatal('Not on Standard Spell Book');
@@ -150,7 +145,7 @@ begin
 
   if WalkGE and not Self.InGE then
   begin
-    Self.InGE := Self.RSW.AtTile(RSObjects.GEBank.Coordinates, 30);
+    Self.InGE := Map.InRange(Self.GEObj.Coordinates, 30);
     if not Self.InGE then
       Exit(EAlcherState.WALK_ALCH);
   end;
@@ -170,13 +165,13 @@ begin
     Self.SetAction(ToStr(State));
 
     case Self.State of
-      EAlcherState.WALK_ALCH: InGe := Self.RSW.WebWalk(RSObjects.GEBank.Coordinates, 10, 0.2);
+      EAlcherState.WALK_ALCH: InGe := Map.Walker.WebWalk(Self.GEObj.Coordinates, 10, 0.2);
 
-      EAlcherState.OPEN_BANK: Bank.WalkOpen();
+      EAlcherState.OPEN_BANK: Bank.WalkOpenV2();
       EAlcherState.WITHDRAW_NATS: Self.Withdraw(Self.NatureRune);
       EAlcherState.WITHDRAW_MONEY: Self.Withdraw(Self.Coins);
 
-      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpenV2();
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
       EAlcherState.CLOSE_INTERFACE: RSInterface.Close();
 
