@@ -1,3 +1,12 @@
+## [2.12.1](https://github.com/Torwent/wasp-free/compare/v2.12.0...v2.12.1) (2024-06-20)
+
+
+### Bug Fixes
+
+* compatibility with latest SRL-T ([f922b71](https://github.com/Torwent/wasp-free/commit/f922b713e699ab5fb365440ef97ef3ad90d8c03b))
+
+
+
 # [2.12.0](https://github.com/Torwent/wasp-free/compare/v2.11.6...v2.12.0) (2024-06-05)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility with latest libs ([963f000](https://github.com/Torwent/wasp-free/commit/963f000811dc55fe568712be9397c132427b59bb))
-
-
-
-## [2.11.3](https://github.com/Torwent/wasp-free/compare/v2.11.2...v2.11.3) (2024-05-26)
-
-
-### Bug Fixes
-
-* **wc:** add ruins of uzer teaks ([19fae0e](https://github.com/Torwent/wasp-free/commit/19fae0ed9da9767c047eb759e9081320976db599))
 
 
 
