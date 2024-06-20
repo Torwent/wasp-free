@@ -17,11 +17,9 @@ type
     OPEN_BANK, WITHDRAW_NATS, WITHDRAW_MONEY,
 
     OPEN_COLLECT, HANDLE_COLLECT,
-
     CLOSE_INTERFACE,
 
     CAST_ALCHEMY, WAIT_ALCH, WALK_ALCH,
-
     CLOSE_CONTEXT,
 
     SWITCH_ITEM,
@@ -167,11 +165,11 @@ begin
     case Self.State of
       EAlcherState.WALK_ALCH: InGe := Map.Walker.WebWalk(Self.GEObj.Coordinates, 10, 0.2);
 
-      EAlcherState.OPEN_BANK: Bank.WalkOpenV2();
+      EAlcherState.OPEN_BANK: Banks.WalkOpen();
       EAlcherState.WITHDRAW_NATS: Self.Withdraw(Self.NatureRune);
       EAlcherState.WITHDRAW_MONEY: Self.Withdraw(Self.Coins);
 
-      EAlcherState.OPEN_COLLECT: CollectBox.WalkOpenV2();
+      EAlcherState.OPEN_COLLECT: CollectBoxes.WalkOpen();
       EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
       EAlcherState.CLOSE_INTERFACE: RSInterface.Close();
 
