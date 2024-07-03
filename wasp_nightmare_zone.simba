@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e'}
-{$DEFINE SCRIPT_REVISION := '55'}
+{$DEFINE SCRIPT_REVISION := '56'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -12,6 +12,7 @@ type
 var
   CurrentPotion := ERSNMZPotion.OVERLOAD_POTION;
   BoostAmount: Int32 := Random(6, 10);
+  UsePrayerPots: Boolean := False;
 
 type
   ENMZState = (
@@ -43,6 +44,7 @@ type
     DRINK_BOOST,
     DRINK_ANTIPOISON,
     DRINK_ABSORPTION,
+    DRINK_PRAYER,
 
     WALK_MIDDLE,
     ATTACK_NPC,
@@ -58,6 +60,7 @@ type
 
     LOWER_HEALTH,
     FLICK_PRAYER,
+    ENABLE_PRAYER,
 
     OUT_OF_MONEY,
     BARREL_EMPTY,
@@ -217,6 +220,17 @@ begin
 
     DebugMMDotArray += RSNPCs.DominicOnion;
   end;
+
+  if UsePrayerPots then
+    begin
+      QuickPrayer.DeselectPrayer(ERSPrayer.RAPID_HEAL);
+      Quickprayer.SelectPrayer(ERSPrayer.PROTECT_FROM_MELEE);
+    end
+  else
+    begin
+      QuickPrayer.SelectPrayer(ERSPrayer.RAPID_HEAL);
+      Quickprayer.DeselectPrayer(ERSPrayer.PROTECT_FROM_MELEE);
+    end
 end;
 
 
@@ -292,12 +306,15 @@ end;
 
 function TNMZFighter.HasEnoughBoost(): Boolean;
 begin
-  Result := Inventory.CountItem(Self.BoostPotion[3]) = BoostAmount;
+  Result := Inventory.IsFull or (Inventory.CountItem(Self.BoostPotion[3]) = BoostAmount);
 end;
 
 function TNMZFighter.HasEnoughAbs(): Boolean;
 begin
-  Result := Inventory.IsFull or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount);
+  if not UsePrayerPots then
+    Result := Inventory.IsFull or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount)
+  else
+    Result := True;
 end;
 
 
@@ -445,7 +462,10 @@ end;
 
 function TNMZFighter.NeedAbsorption(): Boolean;
 begin
-  Result := (Self.GetAbsorptionPoints() < Self.MinAbsPoints) and Inventory.ContainsAny(Self.AbsPotion);
+  if not UsePrayerPots then
+    Result := (Self.GetAbsorptionPoints() < Self.MinAbsPoints) and Inventory.ContainsAny(Self.AbsPotion)
+  else
+    Result := False;
 end;
 
 function TNMZFighter.NeedLowerHP(hpLevel: Int32 = -1): Boolean;
@@ -597,17 +617,23 @@ begin
   if Self.NeedAbsorption() then
     Exit(ENMZState.DRINK_ABSORPTION);
 
+  if (Minimap.GetPrayerPercent < 50) and Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
+    Exit(ENMZState.DRINK_PRAYER);
+
   if Chat.LeveledUp() then
     Exit(ENMZState.WAIT_LEVEL);
 
   if Self.NeedBoost() then
     Exit(ENMZState.DRINK_BOOST);
 
-  if Self.NeedLowerHP() then
+  if Self.NeedLowerHP() and not UsePrayerPots then
     Exit(ENMZState.LOWER_HEALTH);
 
-  if Self.PrayFlick and Self.PrayFlickTimer.IsFinished() then
+  if Self.PrayFlick and Self.PrayFlickTimer.IsFinished() and not UsePrayerPots then
     Exit(ENMZState.FLICK_PRAYER);
+
+  if UsePrayerPots and not Minimap.IsPrayerEnabled and Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
+    Exit(ENMZState.ENABLE_PRAYER);
 
   if not MainScreen.WaitInCombat(1200) then
     Exit(ENMZState.ATTACK_NPC);
@@ -644,6 +670,9 @@ var
   chatCache: String;
 begin
   if WL.Activity.IsFinished() then
+    Exit(ENMZState.END_SCRIPT);
+
+  if UsePrayerPots and not Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
     Exit(ENMZState.END_SCRIPT);
 
   if Self.WithdrawFails > 2 then
@@ -793,6 +822,7 @@ begin
       ENMZState.DRINK_BOOST: Self.DrinkPotion(Self.BoostPotion);
       ENMZState.DRINK_ABSORPTION: Self.DrinkPotion(Self.AbsPotion);
       ENMZState.DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON);
+      ENMZState.DRINK_PRAYER: Inventory.Consume(ERSconsumable.PRAYER);
 
       ENMZState.WALK_MIDDLE: if Self.RSW.WebWalk(Self.DreamMiddle, 5, 0.2) then Self.WalkMiddleTimer.Restart();
       ENMZState.ATTACK_NPC: CombatHandler.AttackMonster();
@@ -805,6 +835,7 @@ begin
 
       ENMZState.LOWER_HEALTH: Self.LowerHealth();
       ENMZState.FLICK_PRAYER: Self.FlickPrayer();
+      ENMZState.ENABLE_PRAYER: Minimap.EnablePrayer();
 
       ENMZState.OUT_OF_MONEY,
       ENMZState.BARREL_EMPTY,
@@ -920,12 +951,14 @@ type
     PotionSelector: TLabeledCombobox;
     BoostAmountEdit: TLabeledEdit;
     NMZInfo: TLabel;
+    cb_Prayer: TLabeledCheckBox;
   end;
 
 procedure TNMZConfig.StartScript(Sender: TObject); override;
 begin
   CurrentPotion := ERSNMZPotion(Self.PotionSelector.GetItemIndex());
   BoostAmount := StrToInt(BoostAmountEdit.GetText());
+  UsePrayerPots := cb_Prayer.IsChecked;
   inherited;
 end;
 
@@ -944,7 +977,7 @@ begin
   with Self.PotionSelector do
   begin
     Create(tab);
-    SetCaption('NMZ Potion:');
+    SetCaption('NMZ Boost Potion:');
     SetLeft(TControl.AdjustToDPI(40));
     SetTop(TControl.AdjustToDPI(170));
     SetStyle(csDropDownList);
@@ -961,16 +994,29 @@ begin
     SetText(IntToStr(BoostAmount));
   end;
 
+  with Self.cb_Prayer do
+  begin
+    Create(tab);
+    SetLeft(Self.PotionSelector.GetLeft());
+    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
+    SetName('cb_prayer');
+    SetCaption('Use Prayer potions instead of Absorption potions.');
+    SetChecked(False);
+  end;
+
   with Self.NMZInfo do
   begin
     Create(tab);
-    SetCaption('Should work with most setups.' + LineEnding +
+    SetCaption(
+               'The prayer potion option is intended for those who do not have points to buy absorption potions ' + LineEnding +
+               'when running Nightmare Zone for the first time. Have the amount of prayer potions you want ' + LineEnding +
+               'to use in your inventory. The script will not withdraw more prayer potions from the bank.' + LineEnding + LineEnding + LineEnding +
+               'Should work with most setups.' + LineEnding +
                'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
 
     SetLeft(Self.PotionSelector.GetLeft());
-    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(40));
+    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(60));
   end;
-
 
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
