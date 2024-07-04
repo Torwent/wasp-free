@@ -1,3 +1,12 @@
+# [2.13.0](https://github.com/Torwent/wasp-free/compare/v2.12.1...v2.13.0) (2024-07-04)
+
+
+### Features
+
+* NMZ prayer pots & auto quick-prayers ([01d7ee6](https://github.com/Torwent/wasp-free/commit/01d7ee6e5cdcbeab7aea251246c5cb339257b978))
+
+
+
 ## [2.12.1](https://github.com/Torwent/wasp-free/compare/v2.12.0...v2.12.1) (2024-06-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * replace deprecated methods ([48b3ef6](https://github.com/Torwent/wasp-free/commit/48b3ef6e3b074511c482f0fe5566807926da0614))
-
-
-
-## [2.11.4](https://github.com/Torwent/wasp-free/compare/v2.11.3...v2.11.4) (2024-05-30)
-
-
-### Bug Fixes
-
-* compatibility with latest libs ([963f000](https://github.com/Torwent/wasp-free/commit/963f000811dc55fe568712be9397c132427b59bb))
 
 
 
