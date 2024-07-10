@@ -1,4 +1,9 @@
-# [2.13.0](https://github.com/Torwent/wasp-free/compare/v2.12.1...v2.13.0) (2024-07-04)
+## [2.13.1](https://github.com/Torwent/wasp-free/compare/v2.13.0...v2.13.1) (2024-07-10)
+
+
+### Bug Fixes
+
+* **builder:** compatibility with latest srl-t ([d697b2e](https://github.com/Torwent/wasp-free/commit/d697b2e88b08a7b80146677bda5cd636fb8d698a))
 
 
 ### Features
@@ -31,15 +36,6 @@
 ### Bug Fixes
 
 * compatibility with latest SRL-T and WaspLib ([cc97883](https://github.com/Torwent/wasp-free/commit/cc978838360299a07ddade9e7f13650c7d3f0838))
-
-
-
-## [2.11.5](https://github.com/Torwent/wasp-free/compare/v2.11.4...v2.11.5) (2024-06-03)
-
-
-### Bug Fixes
-
-* replace deprecated methods ([48b3ef6](https://github.com/Torwent/wasp-free/commit/48b3ef6e3b074511c482f0fe5566807926da0614))
 
 
 
