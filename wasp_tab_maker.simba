@@ -399,7 +399,7 @@ begin
 end;
 
 
-procedure TRSMinimap.SetCompassAngle(degrees: Double; accuracy: Double = 5); override;
+procedure TRSMinimap.SetCompassAngleEx(degrees, accuracy: Double); override;
 begin
   if MainScreen.IsUpText('>') then
     ChooseOption.Select('Cancel');

@@ -383,15 +383,6 @@ begin
 end;
 
 
-function TRSInventory.CountItems(items: TRSItemArray): Int32;
-var
-  item: TRSItem;
-begin
-  for item in items do
-    Result += Self.CountItem(item);
-end;
-
-
 function TThiever.EquipRogue(): Boolean;
 var
   Item: TRSItem;
