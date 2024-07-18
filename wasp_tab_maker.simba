@@ -315,19 +315,20 @@ end;
 var
   TabMaker: TTabMaker;
 
-function TRSWalker.GetCleanMinimap(): TMufasaBitmap; static; override;
+function TRSMinimap.GetCleanMinimap(angle: Double = $FFFF): TMufasaBitmap; override;
 var
   Bitmap: TMufasaBitmap;
 begin
   Bitmap := GetMufasaBitmap(BitmapFromClient(Minimap.Bounds));
   Bitmap.ReplaceColor(0, 1); // We need zero to be unique
 
-  TRSWalker.CleanMinimap(Bitmap);
+  Self.CleanMinimap(Bitmap);
   Bitmap.ReplaceColor(1, $32A072);
 
   Result.Init();
-
-  Bitmap.RotateBitmapEx(Minimap.GetCompassAngle(False), False, True, Result);
+  if angle = $FFFF then
+    angle := Self.GetCompassAngle(False);
+  Bitmap.RotateBitmapEx(angle, False, True, Result);
   Bitmap.Free();
 end;
 
