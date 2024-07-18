@@ -1,3 +1,12 @@
+## [2.13.3](https://github.com/Torwent/wasp-free/compare/v2.13.2...v2.13.3) (2024-07-18)
+
+
+### Bug Fixes
+
+* compatibility with latest srl-t ([65b7e38](https://github.com/Torwent/wasp-free/commit/65b7e38c602a733ae243866666072f19a7178410))
+
+
+
 ## [2.13.2](https://github.com/Torwent/wasp-free/compare/v2.13.1...v2.13.2) (2024-07-11)
 
 
@@ -27,15 +36,6 @@
 ### Bug Fixes
 
 * compatibility with latest SRL-T ([f922b71](https://github.com/Torwent/wasp-free/commit/f922b713e699ab5fb365440ef97ef3ad90d8c03b))
-
-
-
-# [2.12.0](https://github.com/Torwent/wasp-free/compare/v2.11.6...v2.12.0) (2024-06-05)
-
-
-### Features
-
-* **alcher:** now uses TRSMap ([b2f7350](https://github.com/Torwent/wasp-free/commit/b2f73507882cdf4a970ab1bce8256e92c53b5880))
 
 
 
