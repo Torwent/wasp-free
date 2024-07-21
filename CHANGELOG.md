@@ -1,3 +1,12 @@
+## [2.13.4](https://github.com/Torwent/wasp-free/compare/v2.13.3...v2.13.4) (2024-07-21)
+
+
+### Bug Fixes
+
+* **blast furnace:** small tweak by Enjoy ([a881cca](https://github.com/Torwent/wasp-free/commit/a881cca58f9b183ce2dbdbeeb95978a4d3c3bafe))
+
+
+
 ## [2.13.3](https://github.com/Torwent/wasp-free/compare/v2.13.2...v2.13.3) (2024-07-18)
 
 
@@ -27,15 +36,6 @@
 ### Features
 
 * NMZ prayer pots & auto quick-prayers ([01d7ee6](https://github.com/Torwent/wasp-free/commit/01d7ee6e5cdcbeab7aea251246c5cb339257b978))
-
-
-
-## [2.12.1](https://github.com/Torwent/wasp-free/compare/v2.12.0...v2.12.1) (2024-06-20)
-
-
-### Bug Fixes
-
-* compatibility with latest SRL-T ([f922b71](https://github.com/Torwent/wasp-free/commit/f922b713e699ab5fb365440ef97ef3ad90d8c03b))
 
 
 
