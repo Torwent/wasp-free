@@ -300,7 +300,7 @@ function TBlastFurnace.WaitXP(): Boolean;
 begin
   Self.PotFull := False;
   Result := XPBar.WaitXP(8000);
-  if Result then
+  if Result or not Inventory.ContainsItem(Self.Ore) then
   begin
     Self.DispenserFull := True;
     Self.PotFull := True;
