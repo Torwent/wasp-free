@@ -1,3 +1,12 @@
+## [2.13.5](https://github.com/Torwent/wasp-free/compare/v2.13.4...v2.13.5) (2024-07-22)
+
+
+### Bug Fixes
+
+* **nmz:** added more randomization in a ton of places ([fe30d32](https://github.com/Torwent/wasp-free/commit/fe30d3285ce688416f48c306c05fa371297b61d1))
+
+
+
 ## [2.13.4](https://github.com/Torwent/wasp-free/compare/v2.13.3...v2.13.4) (2024-07-21)
 
 
@@ -31,11 +40,6 @@
 ### Bug Fixes
 
 * **builder:** compatibility with latest srl-t ([d697b2e](https://github.com/Torwent/wasp-free/commit/d697b2e88b08a7b80146677bda5cd636fb8d698a))
-
-
-### Features
-
-* NMZ prayer pots & auto quick-prayers ([01d7ee6](https://github.com/Torwent/wasp-free/commit/01d7ee6e5cdcbeab7aea251246c5cb339257b978))
 
 
 
