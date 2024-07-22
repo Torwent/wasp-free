@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e'}
-{$DEFINE SCRIPT_REVISION := '57'}
+{$DEFINE SCRIPT_REVISION := '56'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -17,55 +17,30 @@ var
 type
   ENMZState = (
     //Outside Dream.
-    CHECK_COFFER,
-    OPEN_COFFER,
-    UNLOCK_COFFER,
-    OPEN_NMZREWARD,
-    BUY_POTS,
+    CHECK_COFFER, OPEN_COFFER,UNLOCK_COFFER, OPEN_NMZREWARD, BUY_POTS,
 
-    WITHDRAW_BOOST,
-    WITHDRAW_ABSORPTION,
-    ANSWER_BOOST,
-    ANSWER_ABSORPTION,
-    DEPOSIT_BOOST,
-    DEPOSIT_ABSORPTION,
+    WITHDRAW_BOOST, WITHDRAW_ABSORPTION,
+    ANSWER_BOOST, ANSWER_ABSORPTION,
+    DEPOSIT_BOOST, DEPOSIT_ABSORPTION,
     HANDLE_DEPOSIT,
 
-    TALK_DOMINIC,
-    CHOOSE_DREAM,
-    HANDLE_DOMINIC,
-    PAY_DOMINIC,
+    TALK_DOMINIC, CHOOSE_DREAM,  HANDLE_DOMINIC, PAY_DOMINIC,
 
-    OPEN_NMZSETUP,
-    HANDLE_NMZSETUP,
-    CLOSE_INTERFACE,
+    OPEN_NMZSETUP, HANDLE_NMZSETUP, CLOSE_INTERFACE,
 
     //Inside Dream.
-    DRINK_BOOST,
-    DRINK_ANTIPOISON,
-    DRINK_ABSORPTION,
-    DRINK_PRAYER,
+    DRINK_BOOST, DRINK_ANTIPOISON, DRINK_ABSORPTION, DRINK_PRAYER,
 
-    WALK_MIDDLE,
-    ATTACK_NPC,
-    WAIT_LEVEL,
-    WAIT_SPEC,
-    WAIT_CENTER,
-    WAIT_STATE,
+    WALK_MIDDLE, ATTACK_NPC,
+    WAIT_LEVEL, WAIT_SPEC, WAIT_CENTER, WAIT_STATE,
 
-    USE_POWER,
-    USE_SPEC,
-    REEQUIP_GEAR,
-    LEVELED_UP,
+    USE_POWER, USE_SPEC,
+    REEQUIP_GEAR, LEVELED_UP,
 
-    LOWER_HEALTH,
-    FLICK_PRAYER,
+    LOWER_HEALTH, FLICK_PRAYER,
     ENABLE_PRAYER,
 
-    OUT_OF_MONEY,
-    BARREL_EMPTY,
-    DREAM_NOT_SET,
-    END_SCRIPT
+    OUT_OF_MONEY, BARREL_EMPTY, DREAM_NOT_SET, END_SCRIPT
   );
 
   TNMZFighter = record(TBaseWalkerScript)
@@ -306,13 +281,13 @@ end;
 
 function TNMZFighter.HasEnoughBoost(): Boolean;
 begin
-  Result := Inventory.IsFull or (Inventory.CountItem(Self.BoostPotion[3]) = BoostAmount);
+  Result := Inventory.IsFull() or (Inventory.CountItem(Self.BoostPotion[3]) = BoostAmount);
 end;
 
 function TNMZFighter.HasEnoughAbs(): Boolean;
 begin
   if not UsePrayerPots then
-    Result := Inventory.IsFull or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount)
+    Result := Inventory.IsFull() or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount)
   else
     Result := True;
 end;
@@ -330,7 +305,9 @@ begin
   if Barrel.WalkSelectOption([Str]) then
   begin
     Minimap.WaitMoving();
-    Result := Chat.FindQuery('How many doses', 5000, 100);
+    Result := Chat.FindQuery('How many doses', 300, 5000);
+
+    Wait(SRL.TruncatedGauss(0, 5000, 16));
 
     if not Result then
       Self.WithdrawFails += 1;
@@ -345,7 +322,8 @@ begin
   if Barrel.WalkSelectOption(['Store']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
+    Result := WaitUntil('Store' in Chat.GetChatTitle(), 300, 5000);
+    Wait(SRL.TruncatedGauss(0, 5000, 16));
   end;
 end;
 
@@ -372,7 +350,8 @@ begin
   if RSNPCs.DominicOnion.WalkSelectOption(['Dream']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
+    Result := WaitUntil('dream would' in Chat.GetChatTitle(), 100, 3000);
+    Wait(SRL.TruncatedGauss(0, 5000, 16));
   end;
 end;
 
@@ -386,9 +365,10 @@ end;
 
 function TNMZFighter.OpenNMZSetup(): Boolean;
 begin
-  if RSObjects.NMZPotion.WalkClick then
+  if RSObjects.NMZPotion.WalkClick() then
   begin
     Minimap.WaitMoving();
+    Wait(SRL.TruncatedGauss(0, 3000, 16));
     Result := WaitUntil(RSInterface.IsOpen(ERSInterfaceType.CLASSIC), 100, 5000);
   end;
 end;
@@ -397,9 +377,9 @@ function TNMZFighter.HandleNMZSetup(): Boolean;
 var
   TPA: TPointArray;
 begin
-  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds) then
+  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds()) then
   begin
-    Mouse.Move(TPA.Bounds);
+    Mouse.Move(TPA.Bounds().Expand(10));
     MainScreen.IsUpText('Continue');
     Mouse.Click(MOUSE_LEFT);
     Result := WaitUntil(Self.InDream, 200, 10000);
@@ -409,7 +389,7 @@ end;
 
 function TNMZFighter.CheckCoffer(): Boolean;
 begin
-  if RSObjects.NMZCoffer.WalkHover then
+  if RSObjects.NMZCoffer.WalkHover() then
   begin
     Result := Self.CofferLocked := MainScreen.IsUpText('Unlock');
     Self.CofferChecked := True;
@@ -418,7 +398,7 @@ end;
 
 function TNMZFighter.OpenCoffer(): Boolean;
 begin
-  if RSObjects.NMZCoffer.WalkClick then
+  if RSObjects.NMZCoffer.WalkClick() then
   begin
     Minimap.WaitMoving();
     Result := Self.CofferLocked := BankPin.IsOpen(10000);
@@ -513,7 +493,7 @@ begin
       slotOption := 'Guzzle';
 
     if Inventory.ClickSlot(slot, slotOption) then
-      Wait(SRL.TruncatedGauss(100, 900));
+      Wait(SRL.TruncatedGauss(100, 900, 16));
 
     if not WaitUntil(currentHP > (newHP := Minimap.GetHPLevel()), 100, 1500) then
       Antiban.SmallRandomMouse();
@@ -557,7 +537,7 @@ begin
 
   if not isBoost then
   begin
-    Self.MinAbsPoints := SRL.TruncatedGauss(Random(300, 500), 940);
+    Self.MinAbsPoints := SRL.TruncatedGauss(Random(250, 500), 940);
     Exit;
   end;
 
@@ -827,7 +807,7 @@ begin
 
       ENMZState.TALK_DOMINIC: Self.TalkWithDominic();
       ENMZState.CHOOSE_DREAM: Chat.ClickOption('Previous', False);
-      ENMZState.HANDLE_DOMINIC: Chat.ClickContinue();
+      ENMZState.HANDLE_DOMINIC: if Chat.ClickContinue(BioHash) then Wait(SRL.TruncatedGauss(0, 3000, 16));
       ENMZState.PAY_DOMINIC: Self.HandlePayment();
 
       ENMZState.OPEN_NMZSETUP: Self.OpenNMZSetup();
@@ -853,9 +833,7 @@ begin
       ENMZState.FLICK_PRAYER: Self.FlickPrayer();
       ENMZState.ENABLE_PRAYER: Minimap.EnablePrayer();
 
-      ENMZState.OUT_OF_MONEY,
-      ENMZState.BARREL_EMPTY,
-      ENMZState.DREAM_NOT_SET,
+      ENMZState.OUT_OF_MONEY, ENMZState.BARREL_EMPTY, ENMZState.DREAM_NOT_SET,
       ENMZState.END_SCRIPT: Break;
     end;
 
