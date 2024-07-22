@@ -13,6 +13,7 @@ var
   CurrentPotion := ERSNMZPotion.OVERLOAD_POTION;
   BoostAmount: Int32 := Random(6, 10);
   UsePrayerPots: Boolean := False;
+  UsePowerUps: Boolean := True;
 
 type
   ENMZState = (
@@ -645,7 +646,7 @@ begin
 
   if Self.RSW.AtTile(Self.DreamMiddle, 50) or not Self.WalkMiddleTimer.IsFinished() then
   begin
-    if Self.PowerUpAvailable() then
+    if UsePowerUps and Self.PowerUpAvailable() then
       Exit(ENMZState.USE_POWER);
     if not MainScreen.WaitInCombat(1200) then
       Exit(ENMZState.ATTACK_NPC);
@@ -944,15 +945,16 @@ type
   TNMZConfig = record(TScriptForm)
     PotionSelector: TLabeledCombobox;
     BoostAmountEdit: TLabeledEdit;
-    NMZInfo: TLabel;
-    cb_Prayer: TLabeledCheckBox;
+    NMZInfo, prayer_hint: TLabel;
+    cb_Prayer, cb_Powerups: TLabeledCheckBox;
   end;
 
 procedure TNMZConfig.StartScript(Sender: TObject); override;
 begin
   CurrentPotion := ERSNMZPotion(Self.PotionSelector.GetItemIndex());
-  BoostAmount := StrToInt(BoostAmountEdit.GetText());
+  BoostAmount   := StrToInt(BoostAmountEdit.GetText());
   UsePrayerPots := cb_Prayer.IsChecked;
+  UsePowerUps   := cb_Powerups.IsChecked;
   inherited;
 end;
 
@@ -983,7 +985,7 @@ begin
   begin
     Create(tab);
     SetCaption('Boost amount (full pots):');
-    SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(40));
+    SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(70));
     SetTop(TControl.AdjustToDPI(170));
     SetText(IntToStr(BoostAmount));
   end;
@@ -994,22 +996,40 @@ begin
     SetLeft(Self.PotionSelector.GetLeft());
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
     SetName('cb_prayer');
-    SetCaption('Use Prayer potions instead of Absorption potions.');
-    SetChecked(False);
+    SetCaption('Use Prayer potions instead of Absorption potions');
+    SetChecked(UsePrayerPots);
   end;
 
-  with Self.NMZInfo do
+  with Self.prayer_hint do
   begin
     Create(tab);
-    SetCaption(
-               'The prayer potion option is intended for those who do not have points to buy absorption potions ' + LineEnding +
-               'when running Nightmare Zone for the first time. Have the amount of prayer potions you want ' + LineEnding +
-               'to use in your inventory. The script will not withdraw more prayer potions from the bank.' + LineEnding + LineEnding + LineEnding +
-               'Should work with most setups.' + LineEnding +
+    SetCaption('( ? )');
+    setHint(
+       'The prayer potion option is intended for those who do not have points to buy' + LineEnding +
+       'absorption potions when running Nightmare Zone for the first time. Have the ' + LineEnding +
+       'amount of prayer potions you want to use in your inventory.'     + LineEnding + LineEnding +
+       'Note: The script will not withdraw more prayer potions from the bank.');
+    SetLeft(Self.cb_Prayer.GetRight() + TControl.AdjustToDPI(1));
+    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
+  end;
+    with Self.NMZInfo do
+  begin
+    Create(tab);
+    SetCaption('Should work with most setups.' + LineEnding +
                'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
-
-    SetLeft(Self.PotionSelector.GetLeft());
+    SetLeft(Self.cb_Prayer.GetLeft);
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(60));
+  end;
+
+  with Self.cb_Powerups do
+  begin
+    Create(tab);
+    SetLeft(Self.cb_Prayer.GetRight() + TControl.AdjustToDPI(35));
+    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
+    SetName('cb_powerups');
+    SetCaption('Use power-up');
+    SetHint('Use power-ups for active play or disable for AFK');
+    SetChecked(UsePowerUps);
   end;
 
   Self.CreateAntibanManager();
