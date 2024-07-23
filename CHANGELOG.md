@@ -1,3 +1,12 @@
+# [2.14.0](https://github.com/Torwent/wasp-free/compare/v2.13.6...v2.14.0) (2024-07-23)
+
+
+### Features
+
+* **nmz:** powerups ([825bda3](https://github.com/Torwent/wasp-free/commit/825bda396d981121cfe0d5b200559f29995b803c))
+
+
+
 ## [2.13.6](https://github.com/Torwent/wasp-free/compare/v2.13.5...v2.13.6) (2024-07-22)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility with latest srl-t ([65b7e38](https://github.com/Torwent/wasp-free/commit/65b7e38c602a733ae243866666072f19a7178410))
-
-
-
-## [2.13.2](https://github.com/Torwent/wasp-free/compare/v2.13.1...v2.13.2) (2024-07-11)
-
-
-### Bug Fixes
-
-* SRL-T compatibility ([6b4281d](https://github.com/Torwent/wasp-free/commit/6b4281d15c544cf65b3f7625e0af6ae893e40015))
 
 
 
