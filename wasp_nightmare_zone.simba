@@ -35,7 +35,7 @@ type
     WALK_MIDDLE, ATTACK_NPC,
     WAIT_LEVEL, WAIT_SPEC, WAIT_CENTER, WAIT_STATE,
 
-    USE_POWER, USE_SPEC,
+    USE_POWER, TOGGLE_POWERUPS, USE_SPEC,
     REEQUIP_GEAR, LEVELED_UP,
 
     LOWER_HEALTH, FLICK_PRAYER,
@@ -62,19 +62,11 @@ type
     DamageItem: TRSItem;
 
     PowerSurgeTimer, ZapperTimer, BoostTimer, PrayFlickTimer,
-    WalkMiddleTimer: TCountDown;
+    WalkMiddleTimer, PowerUpToggleTimer: TCountDown;
 
-    CofferLocked, CofferChecked: Boolean;
+    CofferLocked, CofferChecked, UsingPowerUps: Boolean;
   end;
 
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.TOTAL];
-  Self.MinZoom := 5;
-  Self.MaxZoom := 25;
-
-  inherited;
-end;
 
 procedure TNMZFighter.SetupPotions();
 var
@@ -178,6 +170,9 @@ begin
 
   Self.PrayFlick := Stats.GetLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers();
+
+  Self.UsingPowerUps := UsePowerUps;
+  Self.PowerUpToggleTimer.Init(20 * ONE_MINUTE);
 
   if WLSettings.RemoteInput.HUDDebug then
   begin
@@ -603,6 +598,12 @@ begin
   end;
 end;
 
+procedure TNMZFighter.TogglePowerUps();
+begin
+  Self.PowerUpToggleTimer.Restart(SRL.TruncatedGauss(-10*ONE_MINUTE, -20*ONE_MINUTE), SRL.TruncatedGauss(5*ONE_MINUTE, 20*ONE_MINUTE));
+  Self.UsingPowerUps := not Self.UsingPowerUps;
+end;
+
 
 function TNMZFighter.GetDreamState(): ENMZState;
 begin
@@ -646,8 +647,12 @@ begin
 
   if Self.RSW.AtTile(Self.DreamMiddle, 50) or not Self.WalkMiddleTimer.IsFinished() then
   begin
-    if UsePowerUps and Self.PowerUpAvailable() then
+    if UsePowerUps and Self.PowerUpToggleTimer.IsFinished() then
+      Exit(ENMZState.TOGGLE_POWERUPS);
+
+    if Self.UsingPowerUps and Self.PowerUpAvailable() then
       Exit(ENMZState.USE_POWER);
+
     if not MainScreen.WaitInCombat(1200) then
       Exit(ENMZState.ATTACK_NPC);
 
@@ -827,6 +832,7 @@ begin
       ENMZState.WAIT_CENTER, ENMZState.WAIT_STATE : XPBar.WaitXP(1200);
 
       ENMZState.USE_POWER: Self.GetPowerUp();
+      ENMZState.TOGGLE_POWERUPS: Self.TogglePowerUps();
       ENMZState.USE_SPEC: CombatHandler.DoSpec();
       ENMZState.REEQUIP_GEAR: CombatHandler.ReGear();
 
@@ -850,6 +856,15 @@ end;
 
 var
   NMZFighter: TNMZFighter;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ERSSkill.TOTAL];
+  Self.MinZoom := 5;
+  Self.MaxZoom := 25;
+
+  inherited;
+end;
 
 function TRSLogin.LoginPlayer(): Boolean; override;
 begin
@@ -945,16 +960,23 @@ type
   TNMZConfig = record(TScriptForm)
     PotionSelector: TLabeledCombobox;
     BoostAmountEdit: TLabeledEdit;
-    NMZInfo, prayer_hint: TLabel;
-    cb_Prayer, cb_Powerups: TLabeledCheckBox;
+    NMZHint, PrayerHint: TLabel;
+    PrayerCheckbox, PowerUpsCheckbox: TLabeledCheckBox;
+    Config: TConfigJSON;
   end;
 
 procedure TNMZConfig.StartScript(Sender: TObject); override;
 begin
   CurrentPotion := ERSNMZPotion(Self.PotionSelector.GetItemIndex());
   BoostAmount   := StrToInt(BoostAmountEdit.GetText());
-  UsePrayerPots := cb_Prayer.IsChecked;
-  UsePowerUps   := cb_Powerups.IsChecked;
+  UsePrayerPots := PrayerCheckbox.IsChecked;
+  UsePowerUps   := PowerUpsCheckbox.IsChecked;
+
+  Self.Config.Put('potion', Ord(CurrentPotion));
+  Self.Config.Put('amount', BoostAmount);
+  Self.Config.Put('prayer', UsePrayerPots);
+  Self.Config.Put('power_ups', UsePowerUps);
+
   inherited;
 end;
 
@@ -963,6 +985,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Nightmare Zone');
+  Self.Config.Setup('wasp-nightmare-zone');
   Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -978,7 +1001,10 @@ begin
     SetTop(TControl.AdjustToDPI(170));
     SetStyle(csDropDownList);
     AddItemArray(['Overload', 'Super ranging', 'Super magic']);
-    SetItemIndex(Ord(CurrentPotion));
+    if Self.Config.Has('potion') then
+      SetItemIndex(Self.Config.GetInt('potion'))
+    else
+      SetItemIndex(Ord(CurrentPotion));
   end;
 
   with Self.BoostAmountEdit do
@@ -987,20 +1013,25 @@ begin
     SetCaption('Boost amount (full pots):');
     SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(70));
     SetTop(TControl.AdjustToDPI(170));
-    SetText(IntToStr(BoostAmount));
+    if Self.Config.Has('amount') then
+      SetText(IntToStr(Self.Config.GetInt('amount')))
+    else
+      SetText(IntToStr(BoostAmount));
   end;
 
-  with Self.cb_Prayer do
+  with Self.PrayerCheckbox do
   begin
     Create(tab);
     SetLeft(Self.PotionSelector.GetLeft());
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
-    SetName('cb_prayer');
     SetCaption('Use Prayer potions instead of Absorption potions');
-    SetChecked(UsePrayerPots);
+    if Self.Config.Has('prayer') then
+      SetChecked(Self.Config.GetBoolean('prayer'))
+    else
+      SetChecked(UsePrayerPots);
   end;
 
-  with Self.prayer_hint do
+  with Self.PrayerHint do
   begin
     Create(tab);
     SetCaption('( ? )');
@@ -1009,27 +1040,30 @@ begin
        'absorption potions when running Nightmare Zone for the first time. Have the ' + LineEnding +
        'amount of prayer potions you want to use in your inventory.'     + LineEnding + LineEnding +
        'Note: The script will not withdraw more prayer potions from the bank.');
-    SetLeft(Self.cb_Prayer.GetRight() + TControl.AdjustToDPI(1));
+    SetLeft(Self.PrayerCheckbox.GetRight() + TControl.AdjustToDPI(1));
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
   end;
-    with Self.NMZInfo do
+
+  with Self.NMZHint do
   begin
     Create(tab);
     SetCaption('Should work with most setups.' + LineEnding +
                'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
-    SetLeft(Self.cb_Prayer.GetLeft);
+    SetLeft(Self.PrayerCheckbox.GetLeft);
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(60));
   end;
 
-  with Self.cb_Powerups do
+  with Self.PowerUpsCheckbox do
   begin
     Create(tab);
-    SetLeft(Self.cb_Prayer.GetRight() + TControl.AdjustToDPI(35));
+    SetLeft(Self.PrayerCheckbox.GetRight() + TControl.AdjustToDPI(35));
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
-    SetName('cb_powerups');
     SetCaption('Use power-up');
     SetHint('Use power-ups for active play or disable for AFK');
-    SetChecked(UsePowerUps);
+    if Self.Config.Has('power_ups') then
+      SetChecked(Self.Config.GetBoolean('power_ups'))
+    else
+      SetChecked(UsePowerUps);
   end;
 
   Self.CreateAntibanManager();
