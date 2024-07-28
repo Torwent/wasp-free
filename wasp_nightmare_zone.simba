@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'b97a7bdf-4d8b-4cfb-ae20-736a5f238c1e'}
-{$DEFINE SCRIPT_REVISION := '56'}
+{$DEFINE SCRIPT_REVISION := '60'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -13,59 +13,35 @@ var
   CurrentPotion := ERSNMZPotion.OVERLOAD_POTION;
   BoostAmount: Int32 := Random(6, 10);
   UsePrayerPots: Boolean := False;
+  UsePowerUps: Boolean := True;
 
 type
   ENMZState = (
     //Outside Dream.
-    CHECK_COFFER,
-    OPEN_COFFER,
-    UNLOCK_COFFER,
-    OPEN_NMZREWARD,
-    BUY_POTS,
+    CHECK_COFFER, OPEN_COFFER,UNLOCK_COFFER, OPEN_NMZREWARD, BUY_POTS,
 
-    WITHDRAW_BOOST,
-    WITHDRAW_ABSORPTION,
-    ANSWER_BOOST,
-    ANSWER_ABSORPTION,
-    DEPOSIT_BOOST,
-    DEPOSIT_ABSORPTION,
+    WITHDRAW_BOOST, WITHDRAW_ABSORPTION,
+    ANSWER_BOOST, ANSWER_ABSORPTION,
+    DEPOSIT_BOOST, DEPOSIT_ABSORPTION,
     HANDLE_DEPOSIT,
 
-    TALK_DOMINIC,
-    CHOOSE_DREAM,
-    HANDLE_DOMINIC,
-    PAY_DOMINIC,
+    TALK_DOMINIC, CHOOSE_DREAM,  HANDLE_DOMINIC, PAY_DOMINIC,
 
-    OPEN_NMZSETUP,
-    HANDLE_NMZSETUP,
-    CLOSE_INTERFACE,
+    OPEN_NMZSETUP, HANDLE_NMZSETUP, CLOSE_INTERFACE,
 
     //Inside Dream.
-    DRINK_BOOST,
-    DRINK_ANTIPOISON,
-    DRINK_ABSORPTION,
-    DRINK_PRAYER,
+    DRINK_BOOST, DRINK_ANTIPOISON, DRINK_ABSORPTION, DRINK_PRAYER,
 
-    WALK_MIDDLE,
-    ATTACK_NPC,
-    WAIT_LEVEL,
-    WAIT_SPEC,
-    WAIT_CENTER,
-    WAIT_STATE,
+    WALK_MIDDLE, ATTACK_NPC,
+    WAIT_LEVEL, WAIT_SPEC, WAIT_CENTER, WAIT_STATE,
 
-    USE_POWER,
-    USE_SPEC,
-    REEQUIP_GEAR,
-    LEVELED_UP,
+    USE_POWER, TOGGLE_POWERUPS, USE_SPEC,
+    REEQUIP_GEAR, LEVELED_UP,
 
-    LOWER_HEALTH,
-    FLICK_PRAYER,
+    LOWER_HEALTH, FLICK_PRAYER,
     ENABLE_PRAYER,
 
-    OUT_OF_MONEY,
-    BARREL_EMPTY,
-    DREAM_NOT_SET,
-    END_SCRIPT
+    OUT_OF_MONEY, BARREL_EMPTY, DREAM_NOT_SET, END_SCRIPT
   );
 
   TNMZFighter = record(TBaseWalkerScript)
@@ -73,7 +49,7 @@ type
 
     InsideDream, WasInDream, DreamSetup, Boosted, PrayFlick: Boolean;
 
-    DreamMiddle: TPoint;
+    DreamMiddle, WalkPoint: TPoint;
 
     Potion: String;
     BoostPotion: TRSItemArray;
@@ -81,28 +57,16 @@ type
 
     BoostBarrel, AbsBarrel: TRSObject;
 
-    AbsAmount, MinAbsPoints, WithdrawFails: Int32;
+    AbsAmount, MinAbsPoints, WithdrawFails, MinPrayer: Int32;
 
     DamageItem: TRSItem;
 
-    PowerSurgeTimer: TCountDown;
-    ZapperTimer: TCountDown;
-    BoostTimer: TCountDown;
-    PrayFlickTimer: TCountDown;
-    WalkMiddleTimer: TCountDown;
+    PowerSurgeTimer, ZapperTimer, BoostTimer, PrayFlickTimer,
+    WalkMiddleTimer, PowerUpToggleTimer: TCountDown;
 
-    CofferLocked: Boolean;
-    CofferChecked: Boolean;
+    CofferLocked, CofferChecked, UsingPowerUps: Boolean;
   end;
 
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.TOTAL];
-  Self.MinZoom := 5;
-  Self.MaxZoom := 25;
-
-  inherited;
-end;
 
 procedure TNMZFighter.SetupPotions();
 var
@@ -152,11 +116,11 @@ end;
 
 procedure TNMZFighter.SetupTimers();
 begin
-  DreamMiddle := [5456, 453];
+  Self.DreamMiddle := [5456, 453];
+  Self.WalkPoint := Self.DreamMiddle.Random(44, 44, True);
 
-  if PrayFlick then
-    PrayFlickTimer.Setup(60000);
-  WalkMiddleTimer.Setup(190000 - Round(20000 * BioHash));
+  if Self.PrayFlick then Self.PrayFlickTimer.Setup(60000);
+  Self.WalkMiddleTimer.Setup(190000 - Round(20000 * BioHash));
 end;
 
 
@@ -207,6 +171,9 @@ begin
   Self.PrayFlick := Stats.GetLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers();
 
+  Self.UsingPowerUps := UsePowerUps;
+  Self.PowerUpToggleTimer.Init(20 * ONE_MINUTE);
+
   if WLSettings.RemoteInput.HUDDebug then
   begin
     DebugObjectArray += BoostBarrel;
@@ -222,15 +189,19 @@ begin
   end;
 
   if UsePrayerPots then
-    begin
-      QuickPrayer.DeselectPrayer(ERSPrayer.RAPID_HEAL);
+  begin
+    QuickPrayer.DeselectPrayer(ERSPrayer.RAPID_HEAL);
+    if Stats.GetLevel(ERSSkill.PRAYER) > 43 then
       Quickprayer.SelectPrayer(ERSPrayer.PROTECT_FROM_MELEE);
-    end
+    Self.MinPrayer := Antiban.GetUniqueInt(30, 20, 50);
+  end
   else
-    begin
+  begin
+    if Stats.GetLevel(ERSSkill.PRAYER) > 21 then
       QuickPrayer.SelectPrayer(ERSPrayer.RAPID_HEAL);
+    if Stats.GetLevel(ERSSkill.PRAYER) > 43 then
       Quickprayer.DeselectPrayer(ERSPrayer.PROTECT_FROM_MELEE);
-    end
+  end;
 end;
 
 
@@ -306,13 +277,13 @@ end;
 
 function TNMZFighter.HasEnoughBoost(): Boolean;
 begin
-  Result := Inventory.IsFull or (Inventory.CountItem(Self.BoostPotion[3]) = BoostAmount);
+  Result := Inventory.IsFull() or (Inventory.CountItem(Self.BoostPotion[3]) = BoostAmount);
 end;
 
 function TNMZFighter.HasEnoughAbs(): Boolean;
 begin
   if not UsePrayerPots then
-    Result := Inventory.IsFull or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount)
+    Result := Inventory.IsFull() or (Inventory.CountItem(AbsPotion[3]) >= AbsAmount)
   else
     Result := True;
 end;
@@ -330,7 +301,9 @@ begin
   if Barrel.WalkSelectOption([Str]) then
   begin
     Minimap.WaitMoving();
-    Result := Chat.FindQuery('How many doses', 5000, 100);
+    Result := Chat.FindQuery('How many doses', 300, 5000);
+
+    Wait(SRL.TruncatedGauss(0, 5000, 16));
 
     if not Result then
       Self.WithdrawFails += 1;
@@ -345,7 +318,8 @@ begin
   if Barrel.WalkSelectOption(['Store']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('Store' in Chat.GetChatTitle, 5000, 100);
+    Result := WaitUntil('Store' in Chat.GetChatTitle(), 300, 5000);
+    Wait(SRL.TruncatedGauss(0, 5000, 16));
   end;
 end;
 
@@ -372,7 +346,8 @@ begin
   if RSNPCs.DominicOnion.WalkSelectOption(['Dream']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('dream would' in Chat.GetChatTitle, 100, 3000);
+    Result := WaitUntil('dream would' in Chat.GetChatTitle(), 100, 3000);
+    Wait(SRL.TruncatedGauss(0, 5000, 16));
   end;
 end;
 
@@ -386,9 +361,10 @@ end;
 
 function TNMZFighter.OpenNMZSetup(): Boolean;
 begin
-  if RSObjects.NMZPotion.WalkClick then
+  if RSObjects.NMZPotion.WalkClick() then
   begin
     Minimap.WaitMoving();
+    Wait(SRL.TruncatedGauss(0, 3000, 16));
     Result := WaitUntil(RSInterface.IsOpen(ERSInterfaceType.CLASSIC), 100, 5000);
   end;
 end;
@@ -397,9 +373,9 @@ function TNMZFighter.HandleNMZSetup(): Boolean;
 var
   TPA: TPointArray;
 begin
-  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds) then
+  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds()) then
   begin
-    Mouse.Move(TPA.Bounds);
+    Mouse.Move(TPA.Bounds().Expand(10));
     MainScreen.IsUpText('Continue');
     Mouse.Click(MOUSE_LEFT);
     Result := WaitUntil(Self.InDream, 200, 10000);
@@ -409,7 +385,7 @@ end;
 
 function TNMZFighter.CheckCoffer(): Boolean;
 begin
-  if RSObjects.NMZCoffer.WalkHover then
+  if RSObjects.NMZCoffer.WalkHover() then
   begin
     Result := Self.CofferLocked := MainScreen.IsUpText('Unlock');
     Self.CofferChecked := True;
@@ -418,7 +394,7 @@ end;
 
 function TNMZFighter.OpenCoffer(): Boolean;
 begin
-  if RSObjects.NMZCoffer.WalkClick then
+  if RSObjects.NMZCoffer.WalkClick() then
   begin
     Minimap.WaitMoving();
     Result := Self.CofferLocked := BankPin.IsOpen(10000);
@@ -489,25 +465,31 @@ function TNMZFighter.LowerHealth(): Boolean;
 var
   slot: Int32;
   slotOption: String;
-  currentHP, newHP: Int32;
+  currentHP, newHP, v: Int32;
 begin
   if not Inventory.Open() then
     Exit;
 
   if ToStr(Self.DamageItem) <> 'Locator orb' then
-    slotOption := 'Guzzle';
+    if Antiban.BioDice(66) then slotOption := 'Guzzle';
 
   currentHP := Minimap.GetHPLevel();
 
   if not Inventory.FindItem(Self.DamageItem, slot) then
     Exit(currentHP = 1);
 
+  v := Random(3, 7);
+
   while Self.NeedLowerHP(currentHP) do
   begin
     if (Self.Potion = 'Overload') and Self.HasBoostPot() and (currentHP > 50) then
-      Exit;                
-    Inventory.ClickSlot(slot, slotOption);
-    Wait(100);
+      Exit;
+
+    if (currentHP < v) and (ToStr(Self.DamageItem) <> 'Locator orb') then
+      slotOption := 'Guzzle';
+
+    if Inventory.ClickSlot(slot, slotOption) then
+      Wait(SRL.TruncatedGauss(100, 900, 16));
 
     if not WaitUntil(currentHP > (newHP := Minimap.GetHPLevel()), 100, 1500) then
       Antiban.SmallRandomMouse();
@@ -530,8 +512,7 @@ begin
   slot := slots[0];
   isOvl := Self.Potion = 'Overload';
 
-  if isOvl then
-    currentHP := Minimap.GetHPLevel();
+  if isOvl then currentHP := Minimap.GetHPLevel();
 
   doseCount := Self.CountDoses(potionArray);
   if Inventory.ClickSlot(slot) then
@@ -552,7 +533,7 @@ begin
 
   if not isBoost then
   begin
-    Self.MinAbsPoints := Random(300, 940);
+    Self.MinAbsPoints := SRL.TruncatedGauss(Random(250, 500), 940);
     Exit;
   end;
 
@@ -567,15 +548,15 @@ end;
 function TNMZFighter.FlickPrayer(): Boolean;
 begin
   if Minimap.IsPrayerEnabled then
-    Result := Minimap.DisablePrayer
-  else if Minimap.EnablePrayer then
+    Result := Minimap.DisablePrayer()
+  else if Minimap.EnablePrayer() then
   begin
-    Wait(600, 800);
-    Result := Minimap.DisablePrayer;
+    Wait(600, 1200);
+    Result := Minimap.DisablePrayer();
   end;
 
-  if Result and PrayFlick then
-    PrayFlickTimer.Restart(Random(-20000, 20000));
+  if Result and Self.PrayFlick then
+    Self.PrayFlickTimer.Restart(-20000, 20000);
 end;
 
 
@@ -607,6 +588,23 @@ begin
 end;
 
 
+function TNMZFighter.WalkMiddle(): Boolean;
+begin
+  if Self.RSW.WebWalk(Self.WalkPoint, 5, 0.2) then
+  begin
+    Self.WalkMiddleTimer.Restart();
+    Self.WalkPoint := Self.DreamMiddle.Random(44, 44, True);
+    Result := True;
+  end;
+end;
+
+procedure TNMZFighter.TogglePowerUps();
+begin
+  Self.PowerUpToggleTimer.Restart(SRL.TruncatedGauss(-10*ONE_MINUTE, -20*ONE_MINUTE), SRL.TruncatedGauss(5*ONE_MINUTE, 20*ONE_MINUTE));
+  Self.UsingPowerUps := not Self.UsingPowerUps;
+end;
+
+
 function TNMZFighter.GetDreamState(): ENMZState;
 begin
   Self.DreamSetup := False;
@@ -617,7 +615,7 @@ begin
   if Self.NeedAbsorption() then
     Exit(ENMZState.DRINK_ABSORPTION);
 
-  if (Minimap.GetPrayerPercent < 50) and Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
+  if UsePrayerPots and (Minimap.GetPrayerPercent() < Self.MinPrayer) and Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
     Exit(ENMZState.DRINK_PRAYER);
 
   if Chat.LeveledUp() then
@@ -647,10 +645,14 @@ begin
   if CombatHandler.NeedRegear() then
     Exit(ENMZState.REEQUIP_GEAR);
 
-  if Self.RSW.AtTile(Self.DreamMiddle, 30) or not Self.WalkMiddleTimer.IsFinished() then
+  if Self.RSW.AtTile(Self.DreamMiddle, 50) or not Self.WalkMiddleTimer.IsFinished() then
   begin
-    if Self.PowerUpAvailable() then
+    if UsePowerUps and Self.PowerUpToggleTimer.IsFinished() then
+      Exit(ENMZState.TOGGLE_POWERUPS);
+
+    if Self.UsingPowerUps and Self.PowerUpAvailable() then
       Exit(ENMZState.USE_POWER);
+
     if not MainScreen.WaitInCombat(1200) then
       Exit(ENMZState.ATTACK_NPC);
 
@@ -809,9 +811,9 @@ begin
       ENMZState.DEPOSIT_ABSORPTION: Self.DepositPotion(AbsBarrel);
       ENMZState.HANDLE_DEPOSIT: Chat.ClickOption('Yes');
 
-      ENMZState.TALK_DOMINIC: Self.TalkWithDominic;
+      ENMZState.TALK_DOMINIC: Self.TalkWithDominic();
       ENMZState.CHOOSE_DREAM: Chat.ClickOption('Previous', False);
-      ENMZState.HANDLE_DOMINIC: Chat.ClickContinue();
+      ENMZState.HANDLE_DOMINIC: if Chat.ClickContinue(BioHash) then Wait(SRL.TruncatedGauss(0, 3000, 16));
       ENMZState.PAY_DOMINIC: Self.HandlePayment();
 
       ENMZState.OPEN_NMZSETUP: Self.OpenNMZSetup();
@@ -822,14 +824,15 @@ begin
       ENMZState.DRINK_BOOST: Self.DrinkPotion(Self.BoostPotion);
       ENMZState.DRINK_ABSORPTION: Self.DrinkPotion(Self.AbsPotion);
       ENMZState.DRINK_ANTIPOISON: Inventory.Consume(ERSConsumable.POISON);
-      ENMZState.DRINK_PRAYER: Inventory.Consume(ERSconsumable.PRAYER);
+      ENMZState.DRINK_PRAYER: if Inventory.Consume(ERSconsumable.PRAYER) then Self.MinPrayer := Antiban.GetUniqueInt(30, 20, 50);
 
-      ENMZState.WALK_MIDDLE: if Self.RSW.WebWalk(Self.DreamMiddle, 5, 0.2) then Self.WalkMiddleTimer.Restart();
+      ENMZState.WALK_MIDDLE: Self.WalkMiddle();
       ENMZState.ATTACK_NPC: CombatHandler.AttackMonster();
       ENMZState.WAIT_LEVEL, ENMZState.WAIT_SPEC,
       ENMZState.WAIT_CENTER, ENMZState.WAIT_STATE : XPBar.WaitXP(1200);
 
       ENMZState.USE_POWER: Self.GetPowerUp();
+      ENMZState.TOGGLE_POWERUPS: Self.TogglePowerUps();
       ENMZState.USE_SPEC: CombatHandler.DoSpec();
       ENMZState.REEQUIP_GEAR: CombatHandler.ReGear();
 
@@ -837,9 +840,7 @@ begin
       ENMZState.FLICK_PRAYER: Self.FlickPrayer();
       ENMZState.ENABLE_PRAYER: Minimap.EnablePrayer();
 
-      ENMZState.OUT_OF_MONEY,
-      ENMZState.BARREL_EMPTY,
-      ENMZState.DREAM_NOT_SET,
+      ENMZState.OUT_OF_MONEY, ENMZState.BARREL_EMPTY, ENMZState.DREAM_NOT_SET,
       ENMZState.END_SCRIPT: Break;
     end;
 
@@ -855,6 +856,15 @@ end;
 
 var
   NMZFighter: TNMZFighter;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ERSSkill.TOTAL];
+  Self.MinZoom := 5;
+  Self.MaxZoom := 25;
+
+  inherited;
+end;
 
 function TRSLogin.LoginPlayer(): Boolean; override;
 begin
@@ -930,7 +940,7 @@ begin
     'Granite maul', '4153', '12848':
       begin
         Result := Self.DoingSpec := True;
-        Wait(50, 100);
+        Wait(50, 130);
       end;
     else
       Wait(300, 400);
@@ -950,15 +960,23 @@ type
   TNMZConfig = record(TScriptForm)
     PotionSelector: TLabeledCombobox;
     BoostAmountEdit: TLabeledEdit;
-    NMZInfo: TLabel;
-    cb_Prayer: TLabeledCheckBox;
+    NMZHint, PrayerHint: TLabel;
+    PrayerCheckbox, PowerUpsCheckbox: TLabeledCheckBox;
+    Config: TConfigJSON;
   end;
 
 procedure TNMZConfig.StartScript(Sender: TObject); override;
 begin
   CurrentPotion := ERSNMZPotion(Self.PotionSelector.GetItemIndex());
-  BoostAmount := StrToInt(BoostAmountEdit.GetText());
-  UsePrayerPots := cb_Prayer.IsChecked;
+  BoostAmount   := StrToInt(BoostAmountEdit.GetText());
+  UsePrayerPots := PrayerCheckbox.IsChecked;
+  UsePowerUps   := PowerUpsCheckbox.IsChecked;
+
+  Self.Config.Put('potion', Ord(CurrentPotion));
+  Self.Config.Put('amount', BoostAmount);
+  Self.Config.Put('prayer', UsePrayerPots);
+  Self.Config.Put('power_ups', UsePowerUps);
+
   inherited;
 end;
 
@@ -967,6 +985,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Nightmare Zone');
+  Self.Config.Setup('wasp-nightmare-zone');
   Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -982,40 +1001,69 @@ begin
     SetTop(TControl.AdjustToDPI(170));
     SetStyle(csDropDownList);
     AddItemArray(['Overload', 'Super ranging', 'Super magic']);
-    SetItemIndex(Ord(CurrentPotion));
+    if Self.Config.Has('potion') then
+      SetItemIndex(Self.Config.GetInt('potion'))
+    else
+      SetItemIndex(Ord(CurrentPotion));
   end;
 
   with Self.BoostAmountEdit do
   begin
     Create(tab);
     SetCaption('Boost amount (full pots):');
-    SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(40));
+    SetLeft(Self.PotionSelector.GetRight() + TControl.AdjustToDPI(70));
     SetTop(TControl.AdjustToDPI(170));
-    SetText(IntToStr(BoostAmount));
+    if Self.Config.Has('amount') then
+      SetText(IntToStr(Self.Config.GetInt('amount')))
+    else
+      SetText(IntToStr(BoostAmount));
   end;
 
-  with Self.cb_Prayer do
+  with Self.PrayerCheckbox do
   begin
     Create(tab);
     SetLeft(Self.PotionSelector.GetLeft());
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
-    SetName('cb_prayer');
-    SetCaption('Use Prayer potions instead of Absorption potions.');
-    SetChecked(False);
+    SetCaption('Use Prayer potions instead of Absorption potions');
+    if Self.Config.Has('prayer') then
+      SetChecked(Self.Config.GetBoolean('prayer'))
+    else
+      SetChecked(UsePrayerPots);
   end;
 
-  with Self.NMZInfo do
+  with Self.PrayerHint do
   begin
     Create(tab);
-    SetCaption(
-               'The prayer potion option is intended for those who do not have points to buy absorption potions ' + LineEnding +
-               'when running Nightmare Zone for the first time. Have the amount of prayer potions you want ' + LineEnding +
-               'to use in your inventory. The script will not withdraw more prayer potions from the bank.' + LineEnding + LineEnding + LineEnding +
-               'Should work with most setups.' + LineEnding +
-               'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
+    SetCaption('( ? )');
+    setHint(
+       'The prayer potion option is intended for those who do not have points to buy' + LineEnding +
+       'absorption potions when running Nightmare Zone for the first time. Have the ' + LineEnding +
+       'amount of prayer potions you want to use in your inventory.'     + LineEnding + LineEnding +
+       'Note: The script will not withdraw more prayer potions from the bank.');
+    SetLeft(Self.PrayerCheckbox.GetRight() + TControl.AdjustToDPI(1));
+    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
+  end;
 
-    SetLeft(Self.PotionSelector.GetLeft());
+  with Self.NMZHint do
+  begin
+    Create(tab);
+    SetCaption('Should work with most setups.' + LineEnding +
+               'Start with Main Weapon + Shield equipped and Spec Weapon in the inventory.');
+    SetLeft(Self.PrayerCheckbox.GetLeft);
     SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(60));
+  end;
+
+  with Self.PowerUpsCheckbox do
+  begin
+    Create(tab);
+    SetLeft(Self.PrayerCheckbox.GetRight() + TControl.AdjustToDPI(35));
+    SetTop(Self.PotionSelector.GetBottom() + TControl.AdjustToDPI(20));
+    SetCaption('Use power-up');
+    SetHint('Use power-ups for active play or disable for AFK');
+    if Self.Config.Has('power_ups') then
+      SetChecked(Self.Config.GetBoolean('power_ups'))
+    else
+      SetChecked(UsePowerUps);
   end;
 
   Self.CreateAntibanManager();
