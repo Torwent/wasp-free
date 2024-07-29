@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15'}
-{$DEFINE SCRIPT_REVISION := '65'}
+{$DEFINE SCRIPT_REVISION := '66'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -280,7 +280,7 @@ begin
      RSNPCs.Phials.SelectOption(['Use']) then
   begin
     Minimap.WaitFlag();
-    Result := WaitUntil(Chat.GetChatTitle() = 'Select an Option', 100, 15000);
+    Result := WaitUntil(Chat.GetChatTitle() = 'Select an option', 100, 15000);
   end;
 end;
 
