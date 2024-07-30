@@ -1,3 +1,12 @@
+## [2.14.1](https://github.com/Torwent/wasp-free/compare/v2.14.0...v2.14.1) (2024-07-30)
+
+
+### Bug Fixes
+
+* compatibility fix ([8666b76](https://github.com/Torwent/wasp-free/commit/8666b765b8a5ecb345fae71ab8b5f2ebfe153f16))
+
+
+
 # [2.14.0](https://github.com/Torwent/wasp-free/compare/v2.13.6...v2.14.0) (2024-07-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** small tweak by Enjoy ([a881cca](https://github.com/Torwent/wasp-free/commit/a881cca58f9b183ce2dbdbeeb95978a4d3c3bafe))
-
-
-
-## [2.13.3](https://github.com/Torwent/wasp-free/compare/v2.13.2...v2.13.3) (2024-07-18)
-
-
-### Bug Fixes
-
-* compatibility with latest srl-t ([65b7e38](https://github.com/Torwent/wasp-free/commit/65b7e38c602a733ae243866666072f19a7178410))
 
 
 
