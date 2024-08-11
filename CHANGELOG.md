@@ -1,3 +1,12 @@
+# [2.15.0](https://github.com/Torwent/wasp-free/compare/v2.14.1...v2.15.0) (2024-08-11)
+
+
+### Features
+
+* read notes ([57f44ad](https://github.com/Torwent/wasp-free/commit/57f44ada625712af42af07bc8b7d2ebf6b18f948))
+
+
+
 ## [2.14.1](https://github.com/Torwent/wasp-free/compare/v2.14.0...v2.14.1) (2024-07-30)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** added more randomization in a ton of places ([fe30d32](https://github.com/Torwent/wasp-free/commit/fe30d3285ce688416f48c306c05fa371297b61d1))
-
-
-
-## [2.13.4](https://github.com/Torwent/wasp-free/compare/v2.13.3...v2.13.4) (2024-07-21)
-
-
-### Bug Fixes
-
-* **blast furnace:** small tweak by Enjoy ([a881cca](https://github.com/Torwent/wasp-free/commit/a881cca58f9b183ce2dbdbeeb95978a4d3c3bafe))
 
 
 
