@@ -5,16 +5,17 @@
 {$I WaspLib/osr.simba}
 
 type
-  ERSStall = (TEA_STALL, SILK_STALL, FRUIT_STALL);
+  ERSStall = (TEA_STALL, FOOD_STALL, SILK_STALL, FRUIT_STALL);
 var
   CurrentStall: ERSStall = ERSStall.FRUIT_STALL;
+  UseBank: Boolean = True;
 
 type
   EStallRobberState = (
     FIND_STALL,
     LEVELED_UP,
     ROB_STALL,
-    DROP_LOOT,
+    DROP_LOOT, OPEN_BANK, DEPOSIT_ITEMS, CLOSE_INTERFACE,
     WALK_SPOT,
     WAIT_STATE,
     END_SCRIPT
@@ -23,9 +24,9 @@ type
   TStallRobber = record(TBaseWalkerScript)
     State: EStallRobberState;
 
-    Stall: TRSObject;
+    Stall: TRSObjectV2;
     SafeSpot: TPoint;
-    DropList: TRSItemArray;
+    StealList, DropList: TRSItemArray;
     StallCooldown: TCountDown;
   end;
 
@@ -43,36 +44,74 @@ begin
   case CurrentStall of
     ERSStall.TEA_STALL:
       begin
-        Self.RSW.SetupRegions([RSRegions.VARROCK_EAST]);
-        Stall := RSObjects.TeaStall;
-        StallCooldown.Init(7000);
-        SafeSpot := [8465, 2808];
-        DropList := ['Cup of tea'];
+        Map.SetupChunk([[50,54,51,52], [0]]); 
+        Objects.Setup(Map.Objects(), @Map.Walker);
+
+        Self.Stall.Walker := @Map.Walker;
+        Self.Stall.SetupEx([1.5, 2, 4], [[8983, 36786]]);
+        Self.Stall.SetupUpText('Tea stall');
+        Self.Stall.Finder.Colors += CTS2(9939895, 8, 0.07, 0.64);
+        Self.StallCooldown.Init(7000);
+        Self.SafeSpot := [8465, 2808];
+        Self.StealList := ['Cup of tea'];
+      end;
+
+    ERSStall.FOOD_STALL:
+      begin
+        GENERATED_GRAPH.Spacing := 14;
+        Map.SetupChunk([[40,52,42,51], [0]]);
+        Objects.Setup(Map.Objects(), @Map.Walker);
+
+        Self.Stall.Walker := @Map.Walker;
+        Self.Stall.SetupEx([1.5, 2, 4], [[6574, 37185]]);
+        Self.Stall.SetupUpText('Baker''s stall');
+        Self.Stall.Finder.Colors += CTS2(9216171, 8, 0.10, 0.67);
+
+        Self.StallCooldown.Init(7000);
+        Self.SafeSpot := [6580, 37190];
+        Self.StealList := ['Bread', 'Cake', 'Chocolate slice'];
+        Self.DropList := ['Bread', 'Chocolate slice'];
       end;
 
     ERSStall.SILK_STALL:
       begin
-        Self.RSW.SetupRegions([RSRegions.ARDOUGNE]);
-        Stall := RSObjects.SilkStall;
-        StallCooldown.Init(5000);
-        SafeSpot := [6042, 3182];
-        DropList := ['Silk'];
+        GENERATED_GRAPH.Spacing := 14;
+        Map.SetupChunk([[40,52,42,51], [0]]);
+        Objects.Setup(Map.Objects(), @Map.Walker);
+
+        Self.Stall.Walker := @Map.Walker;
+        Self.Stall.SetupEx([2, 1.5, 4], [[6554, 37172]]);
+        Self.Stall.SetupUpText('Silk stall');
+        Self.Stall.Finder.Colors += CTS2(9939895, 8, 0.07, 0.64);
+        Self.StallCooldown.Init(5000);
+        Self.SafeSpot := [6552, 37166];
+        Self.StealList := ['Silk'];
       end;
 
     ERSStall.FRUIT_STALL:
       begin
-        Self.RSW.SetupRegions([RSRegions.HOSIDIUS_FRUIT_STALL_HOUSE]);
-        Stall := RSObjects.FruitStall;
-        StallCooldown.Init(2000);
-        Self.DropList := [
+        Map.SetupChunk([[27,56,28,55], [0]]);
+        Objects.Setup(Map.Objects(), @Map.Walker);
+
+        Self.Stall.Walker := @Map.Walker;
+        Self.Stall.SetupEx([1.5, 2, 4], [[3084, 36000], [3108, 36000]]);
+        Self.Stall.SetupUpText('Fruit Stall');
+        Self.Stall.Finder.Colors += CTS2(3566426, 9, 0.19, 1.19);
+        Self.Stall.Finder.Colors += CTS2(8687792, 14, 0.12, 0.65);
+        Self.Stall.Finder.Colors += CTS2(2568331, 19, 0.03, 0.29);
+        Self.Stall.Finder.ColorClusters += [CTS2(1666610, 20, 0.33, 2), CTS2(4805477, 11, 0.04, 0.48), 5];
+        Self.StallCooldown.Init(2400);
+        Self.StealList := [
           'Cooking apple', 'Banana', 'Jangerberries', 'Lemon', 'Redberries',
           'Pineapple', 'Lime', 'Strawberry', 'Strange fruit',
-          'Papaya fruit', 'Silk', 'Golovanova fruit top'
+          'Papaya fruit', 'Golovanova fruit top'
+        ];
+        Self.DropList := [
+          'Cooking apple', 'Banana', 'Jangerberries',
+          'Lemon', 'Redberries', 'Pineapple', 'Lime'
         ];
       end;
   end;
-
-  StallCooldown.Timeout := GetTickCount();
 end;
 
 procedure TStallRobber.Init(maxActions: UInt32; maxTime: UInt64); override;
@@ -80,18 +119,9 @@ begin
   inherited;
 
   Self.SetupStall();
-
-  if WLSettings.RemoteInput.HUDDebug then
-    DebugObjectArray += Stall;
+  Self.StallCooldown.Timeout := GetTickCount();
 end;
 
-
-function TStallRobber.HasLoot(): Boolean;
-var
-  Slots: TIntegerArray;
-begin
-  Result := Inventory.FindItems(DropList, Slots);
-end;
 
 function TStallRobber.RobStall(): Boolean;
 begin
@@ -107,38 +137,71 @@ end;
 
 function TStallRobber.DropItems(): Boolean;
 var
-  Slots: TIntegerArray;
+  slots: TIntegerArray;
 begin
-  Inventory.FindItems(Self.DropList, Slots);
-  Result := Inventory.ShiftDrop(Self.DropList, DROP_PATTERN_SNAKE);
+  if UseBank then
+    Inventory.FindItems(Self.DropList, slots)
+  else
+    Inventory.FindItems(Self.StealList, slots);
+
+  Result := Inventory.ShiftDrop(slots, Inventory.RandomPattern());
 
   if Result then
-    TotalActions += Length(Slots);
+  begin
+    Self.TotalActions += Length(slots);
+    Self.StallCooldown.Timeout := GetTickCount();
+  end;
+end;
+
+function TStallRobber.BankItems(): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.Count();
+  Result := Bank.DepositAll();
+  if Result then
+    Self.TotalActions += (count - Inventory.Count());
 end;
 
 
 function TStallRobber.GetState(): EStallRobberState;
 begin
   if WL.Activity.IsFinished() then
-    Exit(END_SCRIPT);
+    Exit(EStallRobberState.END_SCRIPT);
 
   if Chat.LeveledUp() then
-    Exit(LEVELED_UP);
+    Exit(EStallRobberState.LEVELED_UP);
 
-  if Inventory.IsFull() and Self.HasLoot() then
-    Exit(DROP_LOOT);
+  if RSInterface.IsOpen() then
+  begin
+    if UseBank and Bank.IsOpen() and Inventory.ContainsAny(Self.StealList) then
+      Exit(EStallRobberState.DEPOSIT_ITEMS);
+
+    Exit(EStallRobberState.CLOSE_INTERFACE);
+  end;
+
+  if Inventory.IsFull() then
+  begin
+    if Inventory.ContainsAny(Self.DropList) then
+      Exit(EStallRobberState.DROP_LOOT);
+
+    if UseBank then
+      Exit(EStallRobberState.OPEN_BANK);
+
+    Exit(EStallRobberState.DROP_LOOT);
+  end;
 
   if MainScreen.IsUpText('Steal-from') then
-    Exit(ROB_STALL);
+    Exit(EStallRobberState.ROB_STALL);
 
-  if not StallCooldown.IsFinished() then
-    Exit(WAIT_STATE);
+  if not Self.StallCooldown.IsFinished() then
+    Exit(EStallRobberState.WAIT_STATE);
 
-  if (SafeSpot <> []) and not Self.RSW.AtTile(SafeSpot, 5) then
-    Exit(WALK_SPOT);
+  if (Self.SafeSpot <> []) and not Map.InRange(Self.SafeSpot, 5) then
+    Exit(EStallRobberState.WALK_SPOT);
 
-  if Self.RSW.AtTile(Stall.Coordinates) then
-    Exit(FIND_STALL);
+  if Map.InRange(Self.Stall.Coordinates, 14) then
+    Exit(EStallRobberState.FIND_STALL);
 end;
 
 procedure TStallRobber.Run(maxActions: UInt32; maxTime: UInt64);
@@ -146,19 +209,25 @@ begin
   Self.Init(maxActions, maxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      LEVELED_UP: Chat.HandleLevelUp();
-      DROP_LOOT:  Self.DropItems();
-      FIND_STALL, ROB_STALL: Self.RobStall();
-      WAIT_STATE: Wait(100, 200);
-      WALK_SPOT:  Self.RSW.WebWalk(SafeSpot, 3, 0.2);
-      END_SCRIPT: Break;
+      EStallRobberState.LEVELED_UP: if Chat.HandleLevelUp() then Self.StallCooldown.Timeout := GetTickCount();
+      EStallRobberState.DROP_LOOT:  Self.DropItems();
+      EStallRobberState.FIND_STALL, ROB_STALL: Self.RobStall();
+      EStallRobberState.WAIT_STATE: Wait(100, 200);
+      EStallRobberState.WALK_SPOT:  Map.Walker.WebWalk(Self.SafeSpot, 3, 0.2);
+
+      EStallRobberState.OPEN_BANK: Banks.WalkOpen();
+      EStallRobberState.DEPOSIT_ITEMS: Self.BankItems();
+      EStallRobberState.CLOSE_INTERFACE: RSInterface.Close();
+
+      EStallRobberState.END_SCRIPT: Break;
     end;
 
-    Self.DoAntiban();
+    if Self.DoAntiban() then
+      Self.StallCooldown.Timeout := GetTickCount();
   until Self.ShouldStop();
 end;
 
@@ -169,11 +238,18 @@ var
 type
   TStallRobberConfig = record(TScriptForm)
     StallSelector: TLabeledCombobox;
+    BankCheckbox: TLabeledCheckBox;
+    Config: TConfigJSON;
   end;
 
 procedure TStallRobberConfig.StartScript(sender: TObject); override;
 begin
   CurrentStall := ERSStall(Self.StallSelector.GetItemIndex());
+  UseBank := Self.BankCheckbox.IsChecked();
+
+  Self.Config.Put('stall', Self.StallSelector.GetItemIndex());
+  Self.Config.Put('bank', UseBank);
+
   inherited;
 end;
 
@@ -181,6 +257,7 @@ procedure TStallRobberConfig.Run(); override;
 var
   tab: TTabSheet;
 begin
+  Self.Config.Setup('wasp-stall-robber');
   Self.Setup('Wasp Stall Robber');
   Self.Start.SetOnClick(@Self.StartScript);
 
@@ -197,10 +274,28 @@ begin
     SetTop(TControl.AdjustToDPI(200));
     SetWidth(TControl.AdjustToDPI(300));
     SetStyle(csDropDownList);
-    AddItemArray(['Tea stall (East Varrock)',
-                  'Silk stall (Ardougne market, safe spot knights!)',
-                  'Fruit stall (Hosidius east of the market)']);
-    SetItemIndex(Ord(CurrentStall));
+    AddItemArray([
+      'Tea stall (East Varrock)',
+      'Food stall (Ardougne market)',
+      'Silk stall (Ardougne market, safe spot knights!)',
+      'Fruit stall (Hosidius east of the market)'
+    ]);
+    if Self.Config.Has('stall') then
+      SetItemIndex(Self.Config.GetInt('stall'))
+    else
+      SetItemIndex(Ord(CurrentStall));
+  end;
+
+  with Self.BankCheckbox do
+  begin
+    Create(tab);
+    SetCaption('Bank loot');
+    SetLeft(TControl.AdjustToDPI(20));
+    SetTop(TControl.AdjustToDPI(260));
+    if Self.Config.Has('bank') then
+      SetChecked(Self.Config.GetBoolean('bank'))
+    else
+      SetChecked(UseBank);
   end;
 
   Self.CreateAntibanManager();

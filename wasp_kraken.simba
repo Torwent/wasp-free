@@ -10,44 +10,40 @@ type
   EKrakenState = (
     WAIT_STATE,
 
+    OPEN_BANK, DEPOSIT_LOOT, WITHDRAW_FOOD, HANDLE_PIN, CLOSE_INTERFACE,
+
     //Outside
-    ENTER_COVE,
-    ENTER_CREVICE,
-    HANDLE_CHAT,
-    HANDLE_PIN,
-    HANDLE_WARNING,
+    ENTER_COVE, ENTER_CREVICE,
+    HANDLE_CHAT, HANDLE_WARNING,
 
     //Inside
     WALK_BRIDGE,
     CHECK_LOOT,
-    WAKE_KRAKEN,
-    ATTACK_KRAKEN,
-    SELECT_SPELL,
-    CAST_BLOOD,
-    BOOST,
-    EAT_FOOD,
-    DRINK_PRAYER,
-    ENABLE_QPRAY,
+    WAKE_KRAKEN, ATTACK_KRAKEN, SELECT_SPELL, CAST_BLOOD,
+    BOOST, EAT_FOOD, DRINK_PRAYER, ENABLE_QPRAY,
+    OUT_OF_FOOD,
     ALCH_DROP,
-    EQUIP_WEAPON,
-    EQUIP_BRACELET,
+
+    EQUIP_GEAR, EQUIP_BRACELET,
     END_SCRIPT
   );
 
   TKrakenKiller = record(TBaseScript)
     State: EKrakenState;
 
-    RSW: TRSWalker;
     Bridge: TPoint;
-    BossRoomTPA, SleepyKraken, KrakenTPA: TPointArray;
+    SleepyKraken, KrakenTPA: TPointArray;
 
+    Kraken: TRSNPCV2;
     KrakenFinder: TRSObjectFinder;
+
+    Crevice, CaveEntrance: TRSObjectV2;
 
     AnotherPLayer, IsAttacking, CheckedLoot, UseImbuedHeart,
     HasBloodSpells: Boolean;
     BloodSpell: ERSSpell;
 
-    Gear: TRSItemArray;
+    Loot, Gear: TRSItemArray;
 
     ImbuedHeart: TCountDown;
   end;
@@ -96,17 +92,22 @@ begin
 end;
 
 procedure TKrakenKiller.Init(maxActions: UInt32; maxTime: UInt64); override;
+var
+  i: Int32;
 begin
   inherited;
 
-  Self.RSW.SetupRegions([RSRegions.KRAKEN_COVE, RSRegions.PISCATORIS]);
-  Self.Bridge := [10391, 1145];
-  Self.BossRoomTPA := [
-    [10369, 1085], [10420, 1086], [10440, 1107],
-    [10440, 1149], [10415, 1155], [10411, 1187],
-    [10373, 1187], [10367, 1156], [10345, 1148],
-    [10345, 1105]
-  ];
+  Map.SetupChunks([[[35,56,36,56], [0]], [[35,156,35,156], [0]], [[48,54,50,53], [0]]]);
+  Objects.Setup(Map.Objects(), @Map.Walker);
+
+  Self.Crevice := Objects.Get('Crevice');
+  Self.CaveEntrance := Objects.Get('Cave Entrance');
+
+  Self.Kraken.Setup(14, 4, 14, [[5024, 10286]]);
+  Self.Kraken.SetupUpText('Kraken');
+  Self.Kraken.Finder.Colors += CTS2(14407349, 13, 0.13, 1.43);
+
+  Self.Bridge := [5024, 10304];
 
   FoodHandler.MinInvPoints := 10;
   FoodHandler.MinInvPoints := 90;
@@ -122,7 +123,7 @@ begin
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
-  CombatHandler.Setup(False, RSMonsters.Kraken, 5000, 4000);
+  CombatHandler.Setup(False, Self.Kraken, 5000, 4000);
 
   Self.HasBloodSpells :=  Self.CanCastBloodSpells();
 
@@ -132,6 +133,24 @@ begin
   begin
     CombatHandler.LootHandler.Loot.UpText += 'Shark';
     CombatHandler.LootHandler.Drops += ['Shark', '', False, False, 5];
+  end;
+
+  i := Self.Gear.Find('expeditious bracelet');
+  if i > -1 then Delete(Self.Gear, i, 1);
+  i := Self.Gear.Find('bracelet of slaughter');
+  if i > -1 then Delete(Self.Gear, i, 1);
+  i := Self.Gear.Find('ring of recoil');
+  if i > -1 then Delete(Self.Gear, i, 1);
+
+  for i := 0 to High(CombatHandler.LootHandler.Drops) do
+  begin
+    if CombatHandler.LootHandler.Drops[i].Item = 'Shark' then
+      Continue;
+
+    if CombatHandler.LootHandler.Drops[i].Noted then
+      Self.Loot += 'noted ' + CombatHandler.LootHandler.Drops[i].Item
+    else
+      Self.Loot += CombatHandler.LootHandler.Drops[i].Item;
   end;
 end;
 
@@ -145,7 +164,7 @@ end;
 
 function TKrakenKiller.EnterCove(): Boolean;
 begin
-  if RSObjects.KrakenCoveEntrance.WalkClick() then
+  if Self.CaveEntrance.WalkSelectOption(['Enter']) then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(not Minimap.OnGroundLevel(), 300, 5000);
@@ -154,7 +173,7 @@ end;
 
 function TKrakenKiller.EnterCrevice(): Boolean;
 begin
-  if RSObjects.KrakenCrevice.WalkSelectOption(['Private']) then
+  if Self.Crevice.WalkSelectOption(['Private']) then
   begin
     Minimap.WaitMoving;
     Result := WaitUntil(('Pay' in Chat.GetChatTitle()) or BankPin.IsOpen(), 300, 5000);
@@ -279,20 +298,53 @@ begin
   while Inventory.IsFull() and Inventory.ContainsConsumable(ERSConsumable.FOOD) do
     Inventory.Consume(ERSConsumable.FOOD);
 
-  Result := CheckedLoot := True;
+  Self.CheckedLoot := True;
+  Result := True;
+
   rect := Minimap.GetTileMS(Minimap.Center(), [1,1,0]);
   while CombatHandler.LootHandler.CheckLoot(rect) and Inventory.HasSpace(1) do
     Wait(400, 600);
 end;
 
 
-function TKrakenKiller.EquipWeapon(): Boolean;
+function TKrakenKiller.EquipGear(): Boolean;
 var
   item: TRSItem;
 begin
   for item in Self.Gear do
     if Inventory.ClickItem(item) then
       Exit(True);
+end;
+
+
+function TKrakenKiller.InVarrock(): Boolean;
+begin
+  Map.Position();
+  Result := Map.RegionIndex = 2;
+end;
+
+
+function TKrakenKiller.TeleportOut(): Boolean;
+begin
+  if Magic.IsSpellBook(ERSSpellBook.STANDARD) then
+    Result := Magic.CastSpell(ERSSpell.VARROCK_TELEPORT)
+  else
+    Result := Inventory.ClickItem('Varrock teleport');
+
+  if not Result then
+    TerminateScript('Out of food and we failed to teleport out!');
+
+  Result := WaitUntil(Self.InVarrock(), 300, 5000);
+end;
+
+
+function TKrakenKiller.GetVarrockState(): EKrakenState;
+begin
+  if Inventory.ContainsAny(Self.Loot) or not Inventory.IsFull() then
+    Exit(EKrakenState.OPEN_BANK);
+
+  //GO BACK!
+  Result := EKrakenState.WAIT_STATE;
 end;
 
 function TKrakenKiller.GetState(): EKrakenState;
@@ -303,21 +355,36 @@ begin
   if WL.Activity.IsFinished() and not MainScreen.InCombat() then
     Exit(EKrakenState.END_SCRIPT);
 
-  pos := Self.RSW.GetMyPos();
-  if not Self.InsideBossRoom() then
+  if RSInterface.IsOpen() then
   begin
     if BankPin.IsOpen() then
       Exit(EKrakenState.HANDLE_PIN);
 
+    if Bank.IsOpen() then
+    begin
+      if Inventory.ContainsAny(Self.Loot) then
+        Exit(EKrakenState.DEPOSIT_LOOT);
+
+      if not Inventory.IsFull() then
+        Exit(EKrakenState.WITHDRAW_FOOD);
+    end;
+
+    Exit(EKrakenState.CLOSE_INTERFACE);
+  end;
+
+  pos := Map.Position();
+  if not Self.InsideBossRoom() then
+  begin
     if 'Pay' in Chat.GetChatTitle ()then
       Exit(EKrakenState.HANDLE_CHAT);
 
     if Chat.HasContinue() then
       Exit(EKrakenState.HANDLE_WARNING);
 
-    case Self.RSW.RegionIndex of
-      0: Exit(EKrakenState.ENTER_CREVICE);
-      1: Exit(EKrakenState.ENTER_COVE);
+    case Map.RegionIndex of
+      0: Exit(EKrakenState.ENTER_COVE);
+      1: Exit(EKrakenState.ENTER_CREVICE);
+      2: Exit(Self.GetVarrockState());
     end;
   end;
 
@@ -337,7 +404,10 @@ begin
     Exit(EKrakenState.WALK_BRIDGE);
 
   if Inventory.ContainsAny(Self.Gear) then
-    Exit(EKrakenState.EQUIP_WEAPON);
+    Exit(EKrakenState.EQUIP_GEAR);
+
+  if not Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+    Exit(EKrakenState.OUT_OF_FOOD);
 
   health := Minimap.GetHPLevel();
 
@@ -349,7 +419,7 @@ begin
       begin
         if not MainScreen.IsUpText('Blood') then
         begin
-          if (health <= 25) and Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+          if health <= 25 then
             Exit(EKrakenState.EAT_FOOD);
 
           Exit(EKrakenState.SELECT_SPELL);
@@ -358,10 +428,7 @@ begin
         Exit(EKrakenState.CAST_BLOOD);
       end;
 
-      if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-        Exit(EKrakenState.EAT_FOOD);
-      if health <= 25 then
-        TerminateScript('OUT OF FOOD AND HEALTH WHILE FIGHTING');
+      Exit(EKrakenState.EAT_FOOD);
     end;
 
     if Self.IsAttacking then
@@ -370,12 +437,7 @@ begin
   end;
 
   if health <= 75 then
-  begin                         Self.CheckedLoot
-    if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
-      Exit(EKrakenState.EAT_FOOD);
-    if health <= 40 then
-      TerminateScript('OUT OF FOOD AND HEALTH');
-  end;
+    Exit(EKrakenState.EAT_FOOD);
 
   if not Self.CheckedLoot then
     Exit(EKrakenState.CHECK_LOOT);
@@ -396,16 +458,21 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
+      EKrakenState.OPEN_BANK: Banks.WalkOpen();
+      EKrakenState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
+      EKrakenState.DEPOSIT_LOOT: Bank.DepositItems(Self.Loot, True);
+      EKrakenState.WITHDRAW_FOOD: Bank.WithdrawConsumable(ERSConsumable.FOOD);
+      EKrakenState.CLOSE_INTERFACE: RSInterface.Close();
+
       //Outside
       EKrakenState.ENTER_COVE: Self.EnterCove();
       EKrakenState.ENTER_CREVICE: Self.EnterCrevice();
-      EKrakenState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
       EKrakenState.HANDLE_CHAT: Self.HandlePayment();
       EKrakenState.HANDLE_WARNING: Chat.ClickContinue(BioHash);
 
       //Inside
-      EKrakenState.WALK_BRIDGE: RSW.WebWalk(Bridge, 5, 0.2);
-      EKrakenState.WAIT_STATE: WaitUntil(not Self.FindRagingKraken, 100, 3000);
+      EKrakenState.WALK_BRIDGE: Map.Walker.WebWalk(Self.Bridge, 5, 0.2);
+      EKrakenState.WAIT_STATE: WaitUntil(not Self.FindRagingKraken(), 100, 3000);
       EKrakenState.CHECK_LOOT: Self.CheckLoot();
       EKrakenState.WAKE_KRAKEN: Self.WakeKraken();
       EKrakenState.SELECT_SPELL: Magic.CastSpell(Self.BloodSpell);
@@ -415,8 +482,9 @@ begin
       EKrakenState.EAT_FOOD: Inventory.Consume(ERSConsumable.FOOD);
       EKrakenState.DRINK_PRAYER: Inventory.Consume(ERSConsumable.PRAYER);
       EKrakenState.ENABLE_QPRAY: Minimap.EnablePrayer();
+      EKrakenState.OUT_OF_FOOD: Self.TeleportOut();
       EKrakenState.ALCH_DROP: RSAlchHandler.CastAlchemy(True, True);
-      EKrakenState.EQUIP_WEAPON: Self.EquipWeapon();
+      EKrakenState.EQUIP_GEAR: Self.EquipGear();
       EKrakenState.EQUIP_BRACELET: CombatHandler.EquipBracelet();
       EKrakenState.END_SCRIPT: Break;
     end;
