@@ -4,11 +4,13 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 {$I WaspLib/optional/handlers/combathandler.simba}
+{$I WaspLib/optional/interfaces/mainscreen/fairyring.simba}
 {$SCOPEDENUMS ON}
 
 type
   EKrakenState = (
     WAIT_STATE,
+    USE_FAIRYRING,
 
     OPEN_BANK, DEPOSIT_LOOT, WITHDRAW_FOOD, HANDLE_PIN, CLOSE_INTERFACE,
 
@@ -94,6 +96,7 @@ end;
 procedure TKrakenKiller.Init(maxActions: UInt32; maxTime: UInt64); override;
 var
   i: Int32;
+  qPrayers: ERSPrayerArray;
 begin
   inherited;
 
@@ -151,6 +154,28 @@ begin
       Self.Loot += 'noted ' + CombatHandler.LootHandler.Drops[i].Item
     else
       Self.Loot += CombatHandler.LootHandler.Drops[i].Item;
+  end;
+
+  if QuickPrayer.Open() then
+  begin
+    qPrayers := QuickPrayer.GetSelectedPrayers();
+
+    for i := 0 to High(qPrayers) do
+    begin
+      if qPrayers[i] = ERSPrayer.AUGURY then Continue;
+      if qPrayers[i] = ERSPrayer.MYSTIC_MIGHT then Continue;
+      if qPrayers[i] = ERSPrayer.MYSTIC_LORE then Continue;
+      if qPrayers[i] = ERSPrayer.MYSTIC_WILL then Continue;
+      QuickPrayer.DeselectPrayer(qPrayers[i]);
+    end;
+
+    qPrayers := [ERSPrayer.AUGURY, ERSPrayer.MYSTIC_MIGHT, ERSPrayer.MYSTIC_LORE, ERSPrayer.MYSTIC_WILL];
+
+    for i := 0 to High(qPrayers) do
+      if Prayer.CanActivate(qPrayers[i]) and QuickPrayer.SelectPrayer(qPrayers[i]) then
+        Break;
+
+    QuickPrayer.Close();
   end;
 end;
 
@@ -344,7 +369,7 @@ begin
     Exit(EKrakenState.OPEN_BANK);
 
   //GO BACK!
-  Result := EKrakenState.WAIT_STATE;
+  Result := EKrakenState.USE_FAIRYRING;
 end;
 
 function TKrakenKiller.GetState(): EKrakenState;
@@ -458,6 +483,7 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
+      EKrakenState.USE_FAIRYRING: FairyRing.WalkTeleport('AKQ');
       EKrakenState.OPEN_BANK: Banks.WalkOpen();
       EKrakenState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
       EKrakenState.DEPOSIT_LOOT: Bank.DepositItems(Self.Loot, True);
