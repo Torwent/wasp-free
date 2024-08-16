@@ -1,3 +1,12 @@
+## [2.15.1](https://github.com/Torwent/wasp-free/compare/v2.15.0...v2.15.1) (2024-08-16)
+
+
+### Bug Fixes
+
+* **kraken:** initial fairy ring support ([b9e8be2](https://github.com/Torwent/wasp-free/commit/b9e8be2b071c54c8bf19d5733f5e793e9879f30e))
+
+
+
 # [2.15.0](https://github.com/Torwent/wasp-free/compare/v2.14.1...v2.15.0) (2024-08-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** even more randomization (update WL) ([97ecd47](https://github.com/Torwent/wasp-free/commit/97ecd47ba2ad6c30feff6aa12c9f9e36d64e00e1))
-
-
-
-## [2.13.5](https://github.com/Torwent/wasp-free/compare/v2.13.4...v2.13.5) (2024-07-22)
-
-
-### Bug Fixes
-
-* **nmz:** added more randomization in a ton of places ([fe30d32](https://github.com/Torwent/wasp-free/commit/fe30d3285ce688416f48c306c05fa371297b61d1))
 
 
 
