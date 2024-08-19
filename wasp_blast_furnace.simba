@@ -213,16 +213,12 @@ begin
   begin
     count := Self.ItemInterface.CountStack(item);
     if count <> -1 then
-    begin
-      Result := count;
-      Break; // Exit the loop if a valid count is found
-    end;
+      Exit(count);
   end;
 end;
 
 procedure TBlastFurnace.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
-
   WLSettings.GetObject('antiban').getJSONObject('tasks').Put('bank', False);
   WLSettings.GetObject('remote_input').Put('block_real_input', True);
 
