@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'a17eeda7-b3e7-4aba-9d9a-cc2d338e41ba'}
-{$DEFINE SCRIPT_REVISION := '19'}
+{$DEFINE SCRIPT_REVISION := '20'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -62,13 +62,14 @@ type
 
     DispenserCoordinate: TPoint;
     MoneyBounds: TBox;
+
   end;
 
 procedure TAntiban.Setup(); override;
 begin
   Self.Skills := [ERSSkill.SMITHING, ERSSkill.TOTAL];
-  Self.MinZoom := 5;
-  Self.MaxZoom := 30;
+  Self.MinZoom := 10;
+  Self.MaxZoom := 20;
 
   inherited;
 end;
@@ -80,11 +81,10 @@ begin
   ItemFinder.AddItemName('Coal bag', '24480');
   Self.GoldGloves := 'Goldsmith gauntlets';
 
-  if UseSmithsGloves = False then
-    Self.IceGloves := 'Ice gloves';
-
   if UseSmithsGloves = True then
-    Self.IceGloves := 'Smiths gloves (i)';
+    Self.IceGloves := 'Smiths gloves (i)'
+  else
+    Self.IceGloves := 'Ice gloves';
 
   Self.CoalRatio := 0;
   Self.AvailableSlots := 28;
@@ -183,18 +183,18 @@ begin
     Self.Fee := 0.02;
 end;
 
-procedure TBlastFurnace.SetMoneyBounds();
-begin
+procedure TBlastFurnace.SetMoneyBounds();           //updated bounds
+begin                                               // 17 August 2024
   Self.MoneyBounds := InterfaceArea.Bounds();
-  Self.MoneyBounds.Y1 += 60;
-  Self.MoneyBounds.X2 -= 7;
-  Self.MoneyBounds.X1 := Self.MoneyBounds.X2 - 40;
-  Self.MoneyBounds.Y2 := Self.MoneyBounds.Y1 + 42;
+  Self.MoneyBounds.Y1 += 48;
+  Self.MoneyBounds.X2 -= 4;
+  Self.MoneyBounds.X1 := Self.MoneyBounds.X2 - 43;
+  Self.MoneyBounds.Y2 := Self.MoneyBounds.Y1 + 53;
 end;
 
 function TBlastFurnace.ContainsOverlay(): Boolean;
 begin
-  Result := SRL.CountColor(CTS0(4148052, 1), Self.MoneyBounds) > 0;
+  Result := SRL.CountColor(CTS0(4148052, 1), Self.MoneyBounds) > 0;    // for some reason has 2 different browns. 4213588 & 4082259, 4148052 the combo and is only present in the overlay
 end;
 
 procedure TBlastFurnace.ReSyncPot();
@@ -203,11 +203,29 @@ begin
   Self.DispenserFull := True;
 end;
 
+function TRSBank.CountItemStack(item: TRSItem): Int32; override
+var
+  i: Integer;
+  count: Int32;
+begin
+  Result := -1; // Default value in case all attempts fail
+  for i := 1 to 200 do  // Count item stack 200 times in case item is faded for too long.
+  begin
+    count := Self.ItemInterface.CountStack(item);
+    if count <> -1 then
+      Exit(count);
+  end;
+end;
+
 procedure TBlastFurnace.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  WLSettings.GetObject('antiban').getJSONObject('tasks').Put('bank', False);
+  WLSettings.GetObject('remote_input').Put('block_real_input', True);
+
   inherited;
 
   Self.RSW.SetupRegions([RSRegions.BLAST_FURNACE]);
+
   Self.SetupVariables();
   Self.SetMoneyBounds();
 
@@ -232,7 +250,7 @@ begin
   if RSObjects.BlastFurnaceMeltingPot.WalkClick() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('Ore' in Chat.GetChat(), 300, 5000);
+    Result := WaitUntil('Ore' in Chat.GetChat(), 100, 2000);   //100 lower interval
   end;
 end;
 
@@ -289,7 +307,7 @@ begin
 
   Result := SRL.GetItemAmount(Self.MoneyBounds);
 
-  if (Result = 0) and (attempt < 2) then
+  if (Result = 0) and (attempt < 20) then   // increased to 20 attemps to count money
   begin
     Wait(600);
     Exit(Self.CountMoney(attempt+1));
@@ -344,6 +362,7 @@ begin
   if Bank.WithdrawItem(item, True) then
     Result := WaitUntil(invCount <> Inventory.Count(), 300, 3000);
 end;
+
 
 function TBlastFurnace.DepositBars(): Boolean;
 var
@@ -405,6 +424,7 @@ begin
 
   if UseCoalBag and Inventory.ContainsItem(Self.CoalBag) then
     Inventory.MouseItem(Self.CoalBag);
+
 end;
 
 function TBlastFurnace.LoadCoal(): Boolean;
@@ -418,7 +438,7 @@ begin
   if RSObjects.BlastFurnaceConveyorBelt.WalkClick() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil((newCount := Inventory.Count()) < count, 300, 5000);
+    Result := WaitUntil((newCount := Inventory.Count()) < count, 100, 6000);
   end;
 
   if not Result then
@@ -490,7 +510,7 @@ begin
   if RSObjects.BlastFurnaceBarDispenser.WalkClick() then
   begin
     Self.WaitMoving(True, False);
-    Result := Make.IsOpen(5000);
+    Result := Make.IsOpen(5000, 100);
 
     if not Result then
       Self.WalkDispenser();
@@ -565,7 +585,7 @@ begin
   if Inventory.ClickItem(Self.CoalBag, 'Empty ') then
     RSObjects.BlastFurnaceConveyorBelt.Hover();
 
-  if WaitUntil(count <> (tmp := Inventory.CountEmptySlots()), 300, 4000) then
+  if WaitUntil(count <> (tmp := Inventory.CountEmptySlots()), 100, 6000) then
     Self.CoalBagAmount -= count - tmp
   else
     Self.CoalBagAmount := 0;
@@ -702,14 +722,21 @@ begin
 
         if Self.PotReady() then
         begin
-          if Bank.CountItemStack(Self.ore) <= 28 then
-            Exit(EBFState.OUT_OF_SUPPLIES);
+          if (Bank.CountItemStack(Self.ore) <= 28) then
+            begin
+              Writeln('Out of Ore OOS');
+              Exit(EBFState.OUT_OF_SUPPLIES);
+            end;
           Exit(EBFState.WITHDRAW_ORE);
         end;
-
-        if Bank.CountItemStack(Self.coal) <= 28 then
-          Exit(EBFState.OUT_OF_SUPPLIES);
-
+        if (CurrentBar in [BRONZE, STEEL, MITHRIL, ADAMANTITE, RUNITE]) then
+        begin
+          if (Bank.CountItemStack(Self.coal) <= 28) then
+            begin
+              Writeln('Out of Coal OOS');
+              Exit(EBFState.OUT_OF_SUPPLIES);
+            end;
+        end;
         Exit(EBFState.WITHDRAW_COAL);
       end;
 
@@ -788,12 +815,6 @@ begin
       Exit(EBFState.DRINK_ENERGY);
   end;
 
-  if not Self.ContainsOverlay() then
-    Exit(EBFState.BAD_WORLD);
-
-  if (Self.CountMoney() = 0) then
-    Exit(EBFState.OUT_OF_MONEY);
-
   if Inventory.ContainsItem(Self.Ore) then
   begin
     if (CurrentBar = EBarType.GOLD) and Inventory.ContainsItem(Self.GoldGloves) then
@@ -829,7 +850,10 @@ begin
     if Self.BankEmpty then
     begin
       if Self.CollectEmpty then
-        Exit(EBFState.OUT_OF_SUPPLIES);
+        begin
+          Writeln('CollectEmpty OOS');
+          Exit(EBFState.OUT_OF_SUPPLIES);
+        end;
 
       Exit(EBFState.OPEN_COLLECT);
     end;
@@ -837,6 +861,11 @@ begin
     Exit(EBFState.OPEN_BANK);
   end;
 
+  if not Self.ContainsOverlay() then
+    Exit(EBFState.BAD_WORLD);
+
+  if (Self.CountMoney() = 0) then
+    Exit(EBFState.OUT_OF_MONEY);
 
   if (CurrentBar = EBarType.GOLD) and XPBar.EarnedXP() then
     Exit(EBFState.RESYNC_POT);
