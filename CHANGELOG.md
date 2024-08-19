@@ -1,3 +1,13 @@
+## [2.15.2](https://github.com/Torwent/wasp-free/compare/v2.15.1...v2.15.2) (2024-08-19)
+
+
+### Bug Fixes
+
+* roll back coal back change ([6cd5933](https://github.com/Torwent/wasp-free/commit/6cd59336c9b0533b24559e80ac0ef5872efa578a))
+* tweaks ([40eb120](https://github.com/Torwent/wasp-free/commit/40eb1206ba107c39c685d7670a94bb0c58603b32))
+
+
+
 ## [2.15.1](https://github.com/Torwent/wasp-free/compare/v2.15.0...v2.15.1) (2024-08-16)
 
 
@@ -31,15 +41,6 @@
 ### Features
 
 * **nmz:** powerups ([825bda3](https://github.com/Torwent/wasp-free/commit/825bda396d981121cfe0d5b200559f29995b803c))
-
-
-
-## [2.13.6](https://github.com/Torwent/wasp-free/compare/v2.13.5...v2.13.6) (2024-07-22)
-
-
-### Bug Fixes
-
-* **nmz:** even more randomization (update WL) ([97ecd47](https://github.com/Torwent/wasp-free/commit/97ecd47ba2ad6c30feff6aa12c9f9e36d64e00e1))
 
 
 
