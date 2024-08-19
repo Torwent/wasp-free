@@ -77,8 +77,8 @@ end;
 procedure TBlastFurnace.SetupVariables();
 begin
   Self.DispenserCoordinate := RSObjects.BlastFurnaceBarDispenser.Coordinates[0];
-  Self.CoalBag := 'Open coal bag';
-  ItemFinder.AddItemName('Open coal bag', '24480');
+  Self.CoalBag := 'Coal bag';
+  ItemFinder.AddItemName('Coal bag', '24480');
   Self.GoldGloves := 'Goldsmith gauntlets';
 
   if UseSmithsGloves = True then
