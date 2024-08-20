@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := '2c9e42f7-cb23-4976-827f-9ffe112a0c3f'}
-{$DEFINE SCRIPT_REVISION := '26'}
+{$DEFINE SCRIPT_REVISION := '27'}
 {$DEFINE SCRIPT_GUI}
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
@@ -52,7 +52,7 @@ begin
         Self.Stall.SetupUpText('Tea stall');
         Self.Stall.Finder.Colors += CTS2(9939895, 8, 0.07, 0.64);
         Self.StallCooldown.Init(7000);
-        Self.SafeSpot := [8465, 2808];
+        Self.SafeSpot := [8980, 36782];
         Self.StealList := ['Cup of tea'];
       end;
 
