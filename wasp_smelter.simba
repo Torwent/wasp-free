@@ -11,13 +11,11 @@ type
     BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANT, RUNITE, MOLTEN_GLASS
   );
 
-  ERSFurnace = (
-    EDGEVILLE_FURNACE, FALADOR_FURNACE
-  );
+  ERSFurnace = (EDGEVILLE, FALADOR, PRIFDDINAS);
 
 var
   CurrentBar = ERSBarType.GOLD;
-  CurrentFurnace = ERSFurnace.EDGEVILLE_FURNACE;
+  CurrentFurnace = ERSFurnace.EDGEVILLE;
 
 type
   ESmelterState = (
@@ -46,7 +44,7 @@ type
   TSmelter = record(TBaseBankScript)
     State: ESmelterState;
 
-    Furnace: TRSObject;
+    Furnace: TRSObjectV2;
 
     Ore1, Ore2, Bar: TRSBankItem;
     Materials: TRSItemArray;
@@ -63,23 +61,6 @@ begin
   Self.MaxZoom := 40;
 
   inherited;
-end;
-
-procedure TSmelter.SetupFurnaces();
-begin
-  case CurrentFurnace of
-    ERSFurnace.EDGEVILLE_FURNACE:
-      begin
-        RSW.SetupRegions([RSRegions.VARROCK]);
-        Furnace := RSObjects.EdgevilleFurnace;
-      end;
-
-    ERSFurnace.FALADOR_FURNACE:
-      begin
-        RSW.SetupRegions([RSRegions.FALADOR]);
-        Furnace := RSObjects.FaladorFurnace;
-      end;
-  end;
 end;
 
 procedure TSmelter.SetupItems();
@@ -163,11 +144,17 @@ procedure TSmelter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.SetupFurnaces();
-  Self.SetupItems();
+  case CurrentFurnace of
+    //ERSFurnace.AL_KHARID:  Map.SetupChunk(ERSChunk.AL_KHARID);
+    ERSFurnace.EDGEVILLE:  Map.SetupChunk(ERSChunk.EDGEVILLE);
+    ERSFurnace.FALADOR:    Map.SetupChunk(ERSChunk.FALADOR);
+    ERSFurnace.PRIFDDINAS: Map.SetupChunk(ERSChunk.PRIFDDINAS);
+  end;
 
-  if WLSettings.RemoteInput.HUDDebug then
-    DebugObjectArray += Furnace;
+  Objects.Setup(Map.Objects(), @Map.Walker);
+  Self.Furnace := Objects.Get('Furnace');
+
+  Self.SetupItems();
 end;
 
 
@@ -240,7 +227,7 @@ end;
 
 function TSmelter.OpenFurnace(): Boolean;
 begin
-  if Furnace.WalkSelectOption(['Smelt']) then
+  if Self.Furnace.WalkSelectOption(['Smelt']) then
   begin
     Minimap.WaitPlayerMoving(300, 10000);
     Result := Make.IsOpen(8000);
@@ -366,12 +353,12 @@ begin
 
     case Self.State of
       ESmelterState.HOVER_BANK: Self.HoverBank();
-      ESmelterState.OPEN_BANK: Bank.WalkOpen();
+      ESmelterState.OPEN_BANK: Banks.WalkOpen();
       ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw();
       ESmelterState.DEPOSIT_BAR: Self.Deposit();
       ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositRandomItems(Self.Materials);
 
-      ESmelterState.OPEN_COLLECT: CollectBox.WalkOpen();
+      ESmelterState.OPEN_COLLECT: CollectBoxes.WalkOpen();
       ESmelterState.HANDLE_COLLECT: Self.HandleCollectBox(Self.Materials);
 
       ESmelterState.OPEN_FURNACE: Self.OpenFurnace();
@@ -401,12 +388,16 @@ type
   TSmelterConfig = record(TScriptForm)
     BarTypeSelector: TLabeledCombobox;
     FurnaceSelector: TLabeledCombobox;
+    Config: TConfigJSON;
   end;
 
 procedure TSmelterConfig.StartScript(sender: TObject); override;
 begin
   CurrentBar := ERSBarType(Self.BarTypeSelector.GetItemIndex());
   CurrentFurnace := ERSFurnace(Self.FurnaceSelector.GetItemIndex());
+
+  Self.Config.Put('bar', Ord(CurrentBar));
+  Self.Config.Put('furnace', Ord(CurrentFurnace));
   inherited;
 end;
 
@@ -415,6 +406,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Smelter');
+  Self.Config.Setup('wasp-smelter');
   Self.Start.SetOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -430,7 +422,11 @@ begin
     SetTop(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
     AddItemArray(['Bronze', 'Iron', 'Silver', 'Steel', 'Gold', 'Mithril', 'Adamantite', 'Runite', 'Molten glass']);
-    SetItemIndex(Ord(CurrentBar));
+
+    if Self.Config.Has('bar') then
+      SetItemIndex(Self.Config.GetInt('bar'))
+    else
+      SetItemIndex(Ord(CurrentBar));
   end;
 
   with Self.FurnaceSelector do
@@ -440,8 +436,15 @@ begin
     SetLeft(Self.BarTypeSelector.GetRight() + TControl.AdjustToDPI(15));
     SetTop(Self.BarTypeSelector.GetTop());
     SetStyle(csDropDownList);
-    AddItemArray(['Edgeville', 'Falador']);
-    SetItemIndex(Ord(CurrentFurnace));
+    AddItemArray([
+      //'Al Kharid',
+      'Edgeville', 'Falador', 'Prifddinnas'
+    ]);
+
+    if Self.Config.Has('furnace') then
+      SetItemIndex(Self.Config.GetInt('furnace'))
+    else
+      SetItemIndex(Ord(CurrentFurnace));
   end;
 
   Self.CreateAntibanManager();

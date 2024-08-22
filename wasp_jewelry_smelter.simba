@@ -21,43 +21,34 @@ type
     NECKLACE, BRACELET, AMULET
   );
 
-  ERSFurnace = (EDGEVILLE_FURNACE, FALADOR_FURNACE, PRIFDDINAS_FURNACE);
+  ERSFurnace = (EDGEVILLE, FALADOR, PRIFDDINAS);
 
 var
   CurrentMetal = ERSMetalType.GOLD;
   CurrentStone = ERSStoneType.EMERALD;
   CurrentJewel = ERSJewelType.RING;
-  CurrentFurnace = ERSFurnace.EDGEVILLE_FURNACE;
+  CurrentFurnace = ERSFurnace.EDGEVILLE;
 
 type
   EJewelCrafterState = (
-    HOVER_BANK,
-    OPEN_BANK,
-    WITHDRAW_MOULD,
-    WITHDRAW_BARS,
-    WITHDRAW_GEMS,
-    DEPOSIT_JEWELS,
-    DEPOSIT_RANDOM_ITEM,
+    HOVER_BANK, OPEN_BANK,
+    WITHDRAW_MOULD, WITHDRAW_BARS, WITHDRAW_GEMS,
+    DEPOSIT_JEWELS, DEPOSIT_RANDOM_ITEM,
 
-    OPEN_COLLECT,
-    HANDLE_COLLECT,
+    OPEN_COLLECT, HANDLE_COLLECT,
 
-    OPEN_FURNACE,
-    CRAFT_JEWEL,
-    WAIT_CRAFT,
+    OPEN_FURNACE, CRAFT_JEWEL, WAIT_CRAFT,
 
     CLOSE_INTERFACE,
 
-    LEVEL_UP,
-    CLOSE_CONTEXT,
+    LEVEL_UP, CLOSE_CONTEXT,
 
-    END_SCRIPT,
-    OUT_OF_SUPPLIES
+    END_SCRIPT, OUT_OF_SUPPLIES
   );
 
   TJewelryCrafter = record(TBaseBankScript)
     State: EJewelCrafterState;
-    Furnace: TRSObject;
+    Furnace: TRSObjectV2;
 
     Mould, Bar, Gem, Jewel: TRSBankItem;
     Materials: TRSItemArray;
@@ -75,34 +66,11 @@ begin
   inherited;
 end;
 
-procedure TJewelryCrafter.SetupFurnaces();
-begin
-  case CurrentFurnace of
-    ERSFurnace.EDGEVILLE_FURNACE:
-      begin
-        Self.RSW.SetupRegions([RSRegions.VARROCK]);
-        Self.Furnace := RSObjects.EdgevilleFurnace;
-      end;
-
-    ERSFurnace.FALADOR_FURNACE:
-      begin
-        Self.RSW.SetupRegions([RSRegions.FALADOR]);
-        Self.Furnace := RSObjects.FaladorFurnace;
-      end;
-
-    ERSFurnace.PRIFDDINAS_FURNACE:
-      begin
-        Self.RSW.SetupRegions([RSRegions.PRIFDDINAS]);
-        Self.Furnace := RSObjects.PrifddinasFurnace;
-      end;
-  end;
-end;
-
 procedure TJewelryCrafter.SetupItems();
 begin
   case CurrentMetal of
     ERSMetalType.SILVER: Self.Bar := TRSBankItem.Setup('Silver bar', 13);
-    ERSMetalType.GOLD: Self.Bar := TRSBankItem.Setup('Gold bar', 13);
+    ERSMetalType.GOLD:   Self.Bar := TRSBankItem.Setup('Gold bar', 13);
   end;
 
   case CurrentStone of
@@ -217,16 +185,21 @@ begin
     Self.Materials += Self.Gem.Item;
 end;
 
-
 procedure TJewelryCrafter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   inherited;
 
-  Self.SetupFurnaces();
-  Self.SetupItems();
+  case CurrentFurnace of
+    //ERSFurnace.AL_KHARID:  Map.SetupChunk(ERSChunk.AL_KHARID);
+    ERSFurnace.EDGEVILLE:  Map.SetupChunk(ERSChunk.EDGEVILLE);
+    ERSFurnace.FALADOR:    Map.SetupChunk(ERSChunk.FALADOR);
+    ERSFurnace.PRIFDDINAS: Map.SetupChunk(ERSChunk.PRIFDDINAS);
+  end;
 
-  if WLSettings.RemoteInput.HUDDebug then
-    DebugObjectArray += Self.Furnace;
+  Objects.Setup(Map.Objects(), @Map.Walker);
+  Self.Furnace := Objects.Get('Furnace');
+
+  Self.SetupItems();
 end;
 
 
@@ -389,14 +362,14 @@ begin
 
     case Self.State of
       EJewelCrafterState.HOVER_BANK: Self.HoverBank();
-      EJewelCrafterState.OPEN_BANK: Bank.WalkOpen();
+      EJewelCrafterState.OPEN_BANK: Banks.WalkOpen();
       EJewelCrafterState.WITHDRAW_MOULD: Self.Withdraw(Self.Mould);
       EJewelCrafterState.WITHDRAW_BARS: Self.Withdraw(Self.Bar);
       EJewelCrafterState.WITHDRAW_GEMS: Self.Withdraw(Self.Gem);
       EJewelCrafterState.DEPOSIT_JEWELS: Bank.DepositItem(Self.Jewel, True);
       EJewelCrafterState.DEPOSIT_RANDOM_ITEM: Bank.DepositRandomItems(Self.Materials);
 
-      EJewelCrafterState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EJewelCrafterState.OPEN_COLLECT: CollectBoxes.WalkOpen();
       EJewelCrafterState.HANDLE_COLLECT: Self.HandleCollectBox(Self.Materials);
 
       EJewelCrafterState.OPEN_FURNACE: Self.OpenFurnace();
@@ -428,6 +401,7 @@ type
     StoneTypeSelector: TLabeledCombobox;
     JewelTypeSelector: TLabeledCombobox;
     FurnaceSelector: TLabeledCombobox;
+    Config: TConfigJSON;
   end;
 
 procedure TJewelryCrafterConfig.StartScript(sender: TObject); override;
@@ -484,6 +458,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Jewelry Crafter');
+  Self.Config.Setup('wasp-jewelry-crafter');
   Self.Start.SetOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -498,8 +473,15 @@ begin
     SetLeft(TControl.AdjustToDPI(50));
     SetTop(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
-    AddItemArray(['Edgeville', 'Falador', 'Prifddinnas']);
-    SetItemIndex(Ord(CurrentFurnace));
+    AddItemArray([
+      //'Al Kharid',
+      'Edgeville', 'Falador', 'Prifddinnas'
+    ]);
+
+    if Self.Config.Has('furnace') then
+      SetItemIndex(Self.Config.GetInt('furnace'))
+    else
+      SetItemIndex(Ord(CurrentFurnace));
   end;
 
   with Self.JewelTypeSelector do
@@ -513,8 +495,11 @@ begin
       'Tiara', 'Holy symbol', 'Unholy symbol', 'Bolts', 'Ring',
       'Necklace', 'Bracelet', 'Amulet'
     ]);
-    SetItemIndex(Ord(CurrentJewel));
-    ComboBox.setOnChange(@Self.JewelSelectorOnChange);
+    if Self.Config.Has('jewel') then
+      SetItemIndex(Self.Config.GetInt('jewel'))
+    else
+      SetItemIndex(Ord(CurrentJewel));
+    ComboBox.SetOnChange(@Self.JewelSelectorOnChange);
   end;
 
   with Self.StoneTypeSelector do
@@ -528,7 +513,10 @@ begin
       'None', 'Opal', 'Jade', 'Red topaz', 'Sapphire', 'Emerald',
       'Ruby', 'Diamond', 'Dragonstone', 'Onyx', 'Zenyte'
     ]);
-    SetItemIndex(Ord(CurrentStone));
+    if Self.Config.Has('stone') then
+      SetItemIndex(Self.Config.GetInt('stone'))
+    else
+      SetItemIndex(Ord(CurrentStone));
     ComboBox.SetOnChange(@Self.StoneSelectorOnChange);
   end;
 
@@ -540,7 +528,10 @@ begin
     SetTop(Self.StoneTypeSelector.GetTop());
     SetStyle(csDropDownList);
     AddItemArray(['Silver', 'Gold']);
-    SetItemIndex(Ord(CurrentMetal));
+    if Self.Config.Has('bar') then
+      SetItemIndex(Self.Config.GetInt('bar'))
+    else
+      SetItemIndex(Ord(CurrentMetal));
     SetEnabled(False);
   end;
 
