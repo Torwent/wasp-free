@@ -1,3 +1,12 @@
+## [2.15.5](https://github.com/Torwent/wasp-free/compare/v2.15.4...v2.15.5) (2024-08-28)
+
+
+### Bug Fixes
+
+* **kraken:** should have full banking support at ge now ([aa7a3b1](https://github.com/Torwent/wasp-free/commit/aa7a3b19295152710807c735a74fa958a2897df7))
+
+
+
 ## [2.15.4](https://github.com/Torwent/wasp-free/compare/v2.15.3...v2.15.4) (2024-08-22)
 
 
@@ -17,15 +26,6 @@
 ### Bug Fixes
 
 * **kraken:** initial fairy ring support ([b9e8be2](https://github.com/Torwent/wasp-free/commit/b9e8be2b071c54c8bf19d5733f5e793e9879f30e))
-
-
-
-# [2.15.0](https://github.com/Torwent/wasp-free/compare/v2.14.1...v2.15.0) (2024-08-11)
-
-
-### Features
-
-* read notes ([57f44ad](https://github.com/Torwent/wasp-free/commit/57f44ada625712af42af07bc8b7d2ebf6b18f948))
 
 
 
