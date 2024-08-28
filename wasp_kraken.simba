@@ -10,7 +10,7 @@
 type
   EKrakenState = (
     WAIT_STATE,
-    USE_FAIRYRING,
+    EQUIP_STAFF, USE_FAIRYRING,
 
     OPEN_BANK, DEPOSIT_LOOT, WITHDRAW_FOOD, HANDLE_PIN, CLOSE_INTERFACE,
 
@@ -112,8 +112,7 @@ begin
 
   Self.Bridge := [5024, 10304];
 
-  FoodHandler.MinInvPoints := 10;
-  FoodHandler.MinInvPoints := 90;
+  FoodHandler.Amount := -1;
 
   Self.KrakenFinder.ClusterDistance := 3;
   Self.KrakenFinder.Erode := 2;
@@ -126,7 +125,7 @@ begin
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
   Combat.SetAutoRetaliate(False);
-  CombatHandler.Setup(False, Self.Kraken, 5000, 4000);
+  CombatHandler.Setup(True, Self.Kraken, 5000, 4000);
 
   Self.HasBloodSpells :=  Self.CanCastBloodSpells();
 
@@ -368,7 +367,10 @@ begin
   if Inventory.ContainsAny(Self.Loot) or not Inventory.IsFull() then
     Exit(EKrakenState.OPEN_BANK);
 
-  //GO BACK!
+
+  if Inventory.ContainsAny(['Dramen staff', 'Lunar staff']) then
+    Exit(EKrakenState.EQUIP_STAFF);
+
   Result := EKrakenState.USE_FAIRYRING;
 end;
 
@@ -483,6 +485,7 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
+      EKrakenState.EQUIP_STAFF: FairyRing.HandleItem();
       EKrakenState.USE_FAIRYRING: FairyRing.WalkTeleport('AKQ');
       EKrakenState.OPEN_BANK: Banks.WalkOpen();
       EKrakenState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
