@@ -1,3 +1,12 @@
+## [2.15.6](https://github.com/Torwent/wasp-free/compare/v2.15.5...v2.15.6) (2024-09-04)
+
+
+### Bug Fixes
+
+* **smelter:** now supports alkharid ([2e37bec](https://github.com/Torwent/wasp-free/commit/2e37becaa9ea73da57a6ccabd56dd2043bf699d0))
+
+
+
 ## [2.15.5](https://github.com/Torwent/wasp-free/compare/v2.15.4...v2.15.5) (2024-08-28)
 
 
@@ -17,15 +26,6 @@
 * Tea stall safespot ([5996f36](https://github.com/Torwent/wasp-free/commit/5996f36501beb48e46d44b518af6d28da47bebd4))
 * Tea stall safespot ([39d0f7f](https://github.com/Torwent/wasp-free/commit/39d0f7f68ad4c447ca73160d16c0b9a892436220))
 * tweaks ([40eb120](https://github.com/Torwent/wasp-free/commit/40eb1206ba107c39c685d7670a94bb0c58603b32))
-
-
-
-## [2.15.1](https://github.com/Torwent/wasp-free/compare/v2.15.0...v2.15.1) (2024-08-16)
-
-
-### Bug Fixes
-
-* **kraken:** initial fairy ring support ([b9e8be2](https://github.com/Torwent/wasp-free/commit/b9e8be2b071c54c8bf19d5733f5e793e9879f30e))
 
 
 
