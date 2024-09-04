@@ -62,15 +62,6 @@ begin
   Self.OnBreaking := @OnBreakingTask;
 end;
 
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.TOTAL, ERSSkill.MAGIC, ERSSkill.HITPOINTS];
-  Self.MinZoom := 0;
-  Self.MaxZoom := 40;
-
-  inherited;
-end;
-
 function TKrakenKiller.CanCastBloodSpells(): Boolean;
 const
   BLOOD_SPELLS: array of ERSSpell = [
@@ -98,6 +89,10 @@ var
   i: Int32;
   qPrayers: ERSPrayerArray;
 begin
+  Antiban.Skills := [ERSSkill.MAGIC, ERSSkill.HITPOINTS, ERSSkill.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 40;
+
   inherited;
 
   Map.SetupChunks([[[35,56,36,56], [0]], [[35,156,35,156], [0]], [[48,54,50,53], [0]]]);

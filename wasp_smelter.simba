@@ -11,7 +11,7 @@ type
     BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANT, RUNITE, MOLTEN_GLASS
   );
 
-  ERSFurnace = (EDGEVILLE, FALADOR, PRIFDDINAS);
+  ERSFurnace = (AL_KHARID, EDGEVILLE, FALADOR, PRIFDDINAS);
 
 var
   CurrentBar = ERSBarType.GOLD;
@@ -54,14 +54,6 @@ type
   end;
 
 
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.Smithing, ERSSkill.TOTAL];
-  Self.MinZoom := 0;
-  Self.MaxZoom := 40;
-
-  inherited;
-end;
 
 procedure TSmelter.SetupItems();
 begin
@@ -139,19 +131,23 @@ begin
   end;
 end;
 
-
 procedure TSmelter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  Antiban.Skills := [ERSSkill.Smithing, ERSSkill.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 40;
+
   inherited;
 
   case CurrentFurnace of
-    //ERSFurnace.AL_KHARID:  Map.SetupChunk(ERSChunk.AL_KHARID);
+    ERSFurnace.AL_KHARID:  Map.SetupChunk(ERSChunk.AL_KHARID);
     ERSFurnace.EDGEVILLE:  Map.SetupChunk(ERSChunk.EDGEVILLE);
     ERSFurnace.FALADOR:    Map.SetupChunk(ERSChunk.FALADOR);
     ERSFurnace.PRIFDDINAS: Map.SetupChunk(ERSChunk.PRIFDDINAS);
   end;
 
   Objects.Setup(Map.Objects(), @Map.Walker);
+  NPCs.Setup(Map.NPCs(), @Map.Walker);
   Self.Furnace := Objects.Get('Furnace');
 
   Self.SetupItems();
@@ -437,7 +433,7 @@ begin
     SetTop(Self.BarTypeSelector.GetTop());
     SetStyle(csDropDownList);
     AddItemArray([
-      //'Al Kharid',
+      'Al Kharid',
       'Edgeville', 'Falador', 'Prifddinnas'
     ]);
 
