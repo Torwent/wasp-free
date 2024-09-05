@@ -5,49 +5,27 @@
 {$I WaspLib/osr.simba}
 
 var
-  DiaryLevel: Int32 = 4;
   FoodAmount: Int32 := Random(16, 20);
   NeckAmount: Int32 := Random(3, 5);
   MinHealth: Int32 := Random(20, 40);
 
-const
-  BANK_POLYGON: TPointArray = [[5987, 3297], [6015, 3297], [6015, 3330], [5987, 3330]] ;
-
 //Enum of script states. used in the GetState() function to decide what we got to do next.
 type
   EThieverState = (
-    OPEN_CHAT,
-    CHANGE_CHAT_OFF,
-    CHANGE_CHAT_FILTER,
-    IS_UPSTAIRS,
-    WALK_TO_BANK,
+    OPEN_CHAT, CHANGE_CHAT_OFF, CHANGE_CHAT_FILTER,
+    IS_UPSTAIRS, WALK_TO_BANK,
 
-    OPEN_BANK,
-    OPEN_COLLECT,
-    DEPOSIT_ITEMS,
-    WITHDRAW_NECK,
-    DEPOSIT_NECK,
-    WITHDRAW_FOOD,
-    FIX_INVENTORY,
-    HANDLE_COLLECT,
+    OPEN_BANK, OPEN_COLLECT, DEPOSIT_ITEMS, WITHDRAW_NECK,
+    DEPOSIT_NECK, WITHDRAW_FOOD, FIX_INVENTORY, HANDLE_COLLECT,
     CLOSE_INTERFACE,
 
-    EQUIP_ROGUE,
-    CHECK_NECK,
-    EQUIP_NECK,
-    EAT_FOOD,
+    EQUIP_ROGUE, CHECK_NECK, EQUIP_NECK, EAT_FOOD,
 
-    FIND_KNIGHT,
-    PICKPOCKET,
-    OPEN_POUCH,
+    FIND_KNIGHT, PICKPOCKET, OPEN_POUCH, CAST_SHADOW_VEIL,
 
-    CLOSE_CONTEXT,
+    CLOSE_CONTEXT, WAIT_STATE,
 
-    WAIT_STATE,
-
-    OUT_OF_SUPPLIES,
-    END_SCRIPT,
-    CAST_SHADOW_VEIL
+    OUT_OF_SUPPLIES, END_SCRIPT
   );
 
 //script record, all variables of the script should go here.
@@ -55,41 +33,22 @@ type
     //init variables (to be set while the script is initiates)
     State: EThieverState;
 
-    Knight: TRSNPC;
+    Knight: TRSNPCV2;
 
     CoinPouch: TRSItem;
     Necklace: TRSBankItem;
 
-    LootArray: TRSItemArray;
-    KeepArray: TRSItemArray;
-    BankArray: TRSItemArray;
-    RogueEquipment: TRSItemArray;
+    LootArray, KeepArray, BankArray, RogueEquipment: TRSItemArray;
 
     NeckTimer, ShadowVeilTimer: TCountDown;
 
     //run variables (to be used while the script is running)
-    HasNeck: Boolean;
-    FreshNeck: Boolean;
-    UseShadowVeil: Boolean;
-    VeilAttempts: Int32;
+    HasNeck, FreshNeck, UseShadowVeil: Boolean;
 
-    CoinPouchLimit: Int32;
-    MaxHit: Int32;
-    NextHeal: Int32;
-    Pattern: Int32;
+    VeilAttempts, CoinPouchLimit, MaxHit, NextHeal, Pattern, DiaryLevel: Int32;
+
+    BankBounds: TPointArray;
   end;
-
-
-//Extra antiban specifically for this script.
-
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
-  Self.MinZoom := 5;
-  Self.MaxZoom := 50;
-
-  inherited;
-end;
 
 procedure TKnightsThiever.CheckRogueEquipment();
 var
@@ -194,26 +153,29 @@ begin
 end;
 
 procedure TKnightsThiever.SetupKnight();
-var
-  p: TPoint;
 begin
-  p := [6006, 3315];
-  Self.Knight.SetupCoordinates([p]);
-  Self.Knight.DotFilter.SetupBounds(BANK_POLYGON, True);
-  Self.Knight.ShapeArray.SetShape([1, 1, 6]);
-  Self.Knight.SetupUpText(['Knight', 'of', 'Ardougne']);
+  Self.Knight.SetupCoordinates([[6516, 37294]]);
+  Self.Knight.Size := [1,1,6];
+  Self.Knight.DotFilters.SetupBounds(Self.BankBounds, True);
+  Self.Knight.SetupUpText('Knight of Ardougne');
   Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
 end;
 
 procedure TKnightsThiever.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  Antiban.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
+  Antiban.MinZoom := 5;
+  Antiban.MaxZoom := 50;
+
   inherited;
 
-  Self.RSW.SetupRegions([RSRegions.ARDOUGNE]);
+  Map.SetupChunk(ERSChunk.ARDOUGNE);
+  Objects.Setup(Map.Objects(), @Map.Walker);
+
   Self.SetupKnight();
 
-  if DiaryLevel = 4 then
-    DiaryLevel += 1;
+  Self.DiaryLevel := Max(Achievements.GetDiaryLevel(ERSAchievementDiary.ARDOUGNE), 1);
+  if Self.DiaryLevel = 4 then Self.DiaryLevel += 1;
 
   FoodHandler.Amount := FoodAmount;
 
@@ -242,12 +204,11 @@ begin
     Self.UseShadowVeil := True;
     Magic.CastSpell(ERSSpell.SHADOW_VEIL);
     Self.ShadowVeilTimer.Init(1000 * Round(0.6 * Stats.GetLevel(ERSSkill.MAGIC)));
+    Antiban.Skills += ERSSkill.MAGIC;
   end;
 
-  if WLSettings.RemoteInput.HUDDebug then
-    DebugMMDotArray += Self.Knight;
-
   XPBar.EarnedXP();
+  Self.BankBounds := Box(6500,37282,6524,37310).ToRectangle().ToTPA();
 end;
 
 function TKnightsThiever.CastShadowVeil(): Boolean;
@@ -318,7 +279,7 @@ end;
 function TKnightsThiever.IsPouchFull(): Boolean;
 begin
   if Self.CoinPouchLimit < 1 then
-    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * Self.DiaryLevel, 1);
 
   Result := Inventory.CountItemStack(Self.CoinPouch) >= Self.CoinPouchLimit;
 end;
@@ -337,7 +298,7 @@ begin
 
   if Result then
   begin
-    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * DiaryLevel, 1);
+    Self.CoinPouchLimit := SRL.TruncatedGauss(28 * Self.DiaryLevel, 1);
     Self.TotalActions += pouchCount;
     Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
     WL.Activity.Restart();
@@ -447,7 +408,7 @@ begin
     end;
 
     Mouse.Move(B);
-    Result := MainScreen.IsUpText(Self.Knight.UpText);
+    Result := MainScreen.IsUpText(Self.Knight.Name);
   end
   else if Length(Minimap.GetDots(ERSMinimapDot.PLAYER)) < 10 then
     Result := Self.Knight.Hover(0);
@@ -567,91 +528,91 @@ end;
 function TKnightsThiever.GetState(): EThieverState;
 begin
   if WL.Activity.IsFinished() then
-    Exit(END_SCRIPT);
+    Exit(EThieverState.END_SCRIPT);
 
   if ChooseOption.IsOpen() then
-    Exit(CLOSE_CONTEXT);
+    Exit(EThieverState.CLOSE_CONTEXT);
 
   if RSInterface.IsOpen() then
   begin
     if Bank.IsOpen() then
     begin
       if Self.BankEmpty then
-        Exit(OUT_OF_SUPPLIES);
+        Exit(EThieverState.OUT_OF_SUPPLIES);
 
       if Inventory.ContainsAny(Self.BankArray) then
-        Exit(DEPOSIT_ITEMS);
+        Exit(EThieverState.DEPOSIT_ITEMS);
 
       if Inventory.IsFull() then
-        Exit(FIX_INVENTORY);
+        Exit(EThieverState.FIX_INVENTORY);
 
       case Inventory.CountItem(Self.Necklace.Item) of
-        0..(NeckAmount-2): Exit(WITHDRAW_NECK);
+        0..(NeckAmount-2): Exit(EThieverState.WITHDRAW_NECK);
         (NeckAmount-2)..(NeckAmount+2): ;
-        else Exit(DEPOSIT_NECK);
+        else Exit(EThieverState.DEPOSIT_NECK);
       end;
 
       if not Inventory.HasEnoughConsumable(ERSConsumable.FOOD) then
-        Exit(WITHDRAW_FOOD);
+        Exit(EThieverState.WITHDRAW_FOOD);
     end;
 
-    Exit(CLOSE_INTERFACE);
+    Exit(EThieverState.CLOSE_INTERFACE);
   end;
 
   if Self.IsPouchFull() then
-    Exit(OPEN_POUCH);
+    Exit(EThieverState.OPEN_POUCH);
 
   if ChatButtons.GetState(ERSChatButton.PUBLIC_CHAT) <> ERSChatButtonState.DISABLED then
-    Exit(CHANGE_CHAT_OFF);
+    Exit(EThieverState.CHANGE_CHAT_OFF);
 
   if ChatButtons.GetState(ERSChatButton.GAME_CHAT) <> ERSChatButtonState.ENABLED then
-    Exit(CHANGE_CHAT_FILTER);
+    Exit(EThieverState.CHANGE_CHAT_FILTER);
 
   if not ChatButtons.IsActive(ERSChatButton.GAME_CHAT) then
-    Exit(OPEN_CHAT);
+    Exit(EThieverState.OPEN_CHAT);
 
   if Self.NeckTimer.IsFinished() then
-    Exit(CHECK_NECK);
+    Exit(EThieverState.CHECK_NECK);
 
   if Self.HasRogue() then
-    Exit(EQUIP_ROGUE);
+    Exit(EThieverState.EQUIP_ROGUE);
 
   if not Self.HasSpace() then
   begin
     if Inventory.ContainsAny(Self.BankArray) then
-      Exit(OPEN_BANK);
+      Exit(EThieverState.OPEN_BANK);
     if Inventory.FindConsumable(ERSConsumable.FOOD) then
-      Exit(EAT_FOOD);
+      Exit(EThieverState.EAT_FOOD);
 
-    Exit(OPEN_BANK);
+    Exit(EThieverState.OPEN_BANK);
   end;
 
   if (NeckAmount > 0) and not Self.FreshNeck and (not Self.HasNeck or Self.NecklaceExpired) then
   begin
     if Inventory.ContainsItem(Self.Necklace.Item) then
-      Exit(EQUIP_NECK);
+      Exit(EThieverState.EQUIP_NECK);
 
-    Exit(OPEN_BANK);
+    Exit(EThieverState.OPEN_BANK);
   end;
 
   if Self.IsLowHP() then
   begin
     if Inventory.FindConsumable(ERSConsumable.FOOD) then
-      Exit(EAT_FOOD);
+      Exit(EThieverState.EAT_FOOD);
 
-    Exit(OPEN_BANK);
+    Exit(EThieverState.OPEN_BANK);
   end;
 
   if Self.UseShadowVeil and Self.ShadowVeilTimer.IsFinished() then
-  Exit(EThieverState.CAST_SHADOW_VEIL);
+    Exit(EThieverState.CAST_SHADOW_VEIL);
 
   if not Minimap.OnGroundLevel() then
-    Exit(IS_UPSTAIRS);
+    Exit(EThieverState.IS_UPSTAIRS);
 
-  if not Self.RSW.InPoly(BANK_POLYGON) then
-    Exit(WALK_TO_BANK);
+  if not SRL.PointInPoly(Map.Position(), Self.BankBounds) then
+    Exit(EThieverState.WALK_TO_BANK);
 
-  Exit(PICKPOCKET);
+  Exit(EThieverState.PICKPOCKET);
 end;
 
 procedure TKnightsThiever.Run(maxActions: UInt32; maxTime: UInt64);
@@ -663,32 +624,31 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      OPEN_BANK: Bank.WalkOpen();
-      DEPOSIT_ITEMS: Self.Deposit();
-      WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(ERSConsumable.FOOD);
-      WITHDRAW_NECK: Self.Withdraw(Self.Necklace);
-      DEPOSIT_NECK: Bank.DepositItem(Self.Necklace, False);
-      FIX_INVENTORY: Self.FixInventory();
-      CLOSE_INTERFACE: RSInterface.Close();
+      EThieverState.OPEN_BANK: Banks.WalkOpen();
+      EThieverState.DEPOSIT_ITEMS: Self.Deposit();
+      EThieverState.WITHDRAW_FOOD: Self.BankEmpty := not Bank.WithdrawConsumable(ERSConsumable.FOOD);
+      EThieverState.WITHDRAW_NECK: Self.Withdraw(Self.Necklace);
+      EThieverState.DEPOSIT_NECK: Bank.DepositItem(Self.Necklace, False);
+      EThieverState.FIX_INVENTORY: Self.FixInventory();
+      EThieverState.CLOSE_INTERFACE: RSInterface.Close();
 
-      OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
-      CHANGE_CHAT_OFF: ChatButtons.ChangeState(ERSChatButton.PUBLIC_CHAT, ERSChatButtonState.DISABLED);
-      CHANGE_CHAT_FILTER: ChatButtons.ChangeState(ERSChatButton.GAME_CHAT, ERSChatButtonState.ENABLED);
+      EThieverState.OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
+      EThieverState.CHANGE_CHAT_OFF: ChatButtons.ChangeState(ERSChatButton.PUBLIC_CHAT, ERSChatButtonState.DISABLED);
+      EThieverState.CHANGE_CHAT_FILTER: ChatButtons.ChangeState(ERSChatButton.GAME_CHAT, ERSChatButtonState.ENABLED);
 
-      PICKPOCKET: Self.StealKnight();
-      OPEN_POUCH: Self.OpenCoinPouch();
+      EThieverState.PICKPOCKET: Self.StealKnight();
+      EThieverState.OPEN_POUCH: Self.OpenCoinPouch();
 
-      CAST_SHADOW_VEIL: Self.CastShadowVeil();
-      EAT_FOOD: Self.Heal();
-      EQUIP_NECK: Self.EquipNeck();
-      CHECK_NECK: Self.CheckNeck();
-      CLOSE_CONTEXT: ChooseOption.Close();
-      IS_UPSTAIRS: Self.HandleUpstairs();
-      WALK_TO_BANK: Self.RSW.WebWalk(Self.Knight.Coordinates, 30, 0.2);
-      EQUIP_ROGUE: Self.EquipRogue();
+      EThieverState.CAST_SHADOW_VEIL: Self.CastShadowVeil();
+      EThieverState.EAT_FOOD: Self.Heal();
+      EThieverState.EQUIP_NECK: Self.EquipNeck();
+      EThieverState.CHECK_NECK: Self.CheckNeck();
+      EThieverState.CLOSE_CONTEXT: ChooseOption.Close();
+      EThieverState.IS_UPSTAIRS: Self.HandleUpstairs();
+      EThieverState.WALK_TO_BANK: Map.Walker.WebWalk(Self.Knight.Coordinates, 30, 0.2);
+      EThieverState.EQUIP_ROGUE: Self.EquipRogue();
 
-
-      OUT_OF_SUPPLIES, END_SCRIPT: Break;
+      EThieverState.OUT_OF_SUPPLIES, EThieverState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();       //Checks for due antiban
@@ -714,8 +674,8 @@ end;
 {$IFDEF SCRIPT_GUI}
 type
   TKnightsForm = record(TScriptForm)
-    DiaryLevelSelector: TLabeledComboBox;
     NeckAmountEdit: TLabeledEdit;
+    Config: TConfigJSON;
   end;
 
 procedure TKnightsForm.StartScript(sender: TObject); override;
@@ -725,10 +685,13 @@ begin
   foodAmountEdit := Self.Form.GetChild('cm_food_amount_edit');
   minHealthEdit  := Self.Form.GetChild('cm_food_minimum_edit');
 
-  DiaryLevel := Self.DiaryLevelSelector.GetItemIndex() + 1;
-  FoodAmount := StrToInt(foodAmountEdit.GetText());
   NeckAmount := StrToInt(Self.NeckAmountEdit.GetText());
+  FoodAmount := StrToInt(foodAmountEdit.GetText());
   MinHealth  := StrToint(minHealthEdit.GetText());
+
+  Self.Config.Put('necks', NeckAmount);
+  Self.Config.Put('food_amount', FoodAmount);
+  Self.Config.Put('min_health', MinHealth);
 
   inherited;
 end;
@@ -776,6 +739,7 @@ var
   foodAmountEdit, minHealthEdit: TEdit;
 begin
   Self.Setup('Wasp Ardougne Knights');
+  Self.Config.Setup('wasp-ardougne-knights');
   Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -783,25 +747,18 @@ begin
 
   Self.CreateAccountManager(tab);
 
-  with Self.DiaryLevelSelector do
-  begin
-    Create(tab);
-    SetCaption('Ardougne diaries completed:');
-    SetLeft(TControl.AdjustToDPI(30));
-    SetTop(TControl.AdjustToDPI(180));
-    SetStyle(csDropDownList);
-    AddItemArray(['None/Easy diary', 'Medium diary', 'Hard diary', 'Elite diary']);
-    SetItemIndex(DiaryLevel - 1);
-  end;
-
   with Self.NeckAmountEdit do
   begin
     Create(tab);
     SetCaption('Necklaces amount:');
-    SetLeft(Self.DiaryLevelSelector.GetRight() + TControl.AdjustToDPI(30));
-    SetTop(Self.DiaryLevelSelector.GetTop());
+    SetLeft(TControl.AdjustToDPI(30));
+    SetTop(TControl.AdjustToDPI(180));
     SetWidth(TControl.AdjustToDPI(120));
-    SetText(ToStr(NeckAmount));
+
+    if Self.Config.Has('necks') then
+      SetText(ToStr(Self.Config.GetInt('necks')))
+    else
+      SetText(ToStr(NeckAmount));
   end;
 
   panel := Self.CreateConsumableSettings(tab, ERSConsumable.FOOD, False);
@@ -811,9 +768,17 @@ begin
   foodAmountEdit := panel.GetChild('cm_food_amount_edit');
   minHealthEdit  := panel.GetChild('cm_food_minimum_edit');
 
-  foodAmountEdit.SetText(ToStr(FoodAmount));
+  if Self.Config.Has('food_amount') then
+    foodAmountEdit.SetText(ToStr(Self.Config.GetInt('food_amount')))
+  else
+    foodAmountEdit.SetText(ToStr(FoodAmount));
+
   foodAmountEdit.SetVisible(True);
-  minHealthEdit.SetText(ToStr(MinHealth));
+
+  if Self.Config.Has('min_health') then
+    minHealthEdit.SetText(ToStr(Self.Config.GetInt('min_health')))
+  else
+    minHealthEdit.SetText(ToStr(MinHealth));
 
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();

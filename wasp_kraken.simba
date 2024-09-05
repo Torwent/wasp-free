@@ -258,7 +258,7 @@ begin
   if MainScreen.IsUpText('Whirl') then
   begin
     Mouse.Click(MOUSE_LEFT);
-    if MainScreen.DidRedClick then
+    if MainScreen.DidRedClick() then
       Result := IsAttacking := WaitUntil(Self.FindRagingKraken() or Self.FinishedSlayerTask(), 100, 7000);
   end;
 
