@@ -10,7 +10,7 @@ type
   ERSLocation = (HOSIDIUS, ROGUES_DEN, MYTHS_GUILD);
 
 const
-  RawFood: TRSItemArray = [
+  RAW_FOOD: TRSItemArray = [
     'Custom',
     'Meat',
     'Shrimps',
@@ -69,7 +69,7 @@ type
     Ingredient: TRSBankItem;
     Products: array of TRSBankItem;
 
-    CookingObj: TRSObject;
+    CookingObj: TRSObjectV2;
 
     Cooking: Boolean;
     UsingFire: Boolean;
@@ -124,47 +124,41 @@ begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
       begin
-        RSW.SetupRegions([RSRegions.HOSIDIUS_KITCHEN]);
-        CookingObj := RSObjects.HosidiusKitchenOven;
+        Map.SetupChunk(ERSChunk.HOSIDIUS_KITCHEN);
+        Objects.Setup(Map.Objects(), @Map.Walker);
+        CookingObj := Objects.Get('Clay oven');
       end;
 
     ERSLocation.ROGUES_DEN:
       begin
-        RSW.SetupRegions([RSRegions.ROGUES_DEN]);
-        RSNPCs.EmeraldBenedict.Filter.Finder := False;
-
-        RSObjects.EternalFire.Filter.Finder := False;
-        RSObjects.EternalFire.Filter.UpText := False;
-        CookingObj := RSObjects.EternalFire;
+        Map.SetupChunk(ERSChunk.ROGUES_DEN);
+        Objects.Setup(Map.Objects(), @Map.Walker);
+        NPCs.Setup(Map.NPCs(), @Map.Walker);
+        CookingObj := TRSObjectV2.Setup(0.8,1, [[21132,30538]]);
+        CookingObj.SetupUpText('Fire');
+        CookingObj.Finder.Colors += CTS2(3317724, 14, 0.23, 1.65);
+        CookingObj.Walker := @Map.Walker;
       end;
 
     ERSLocation.MYTHS_GUILD:
       begin
-        RSW.SetupRegions([RSRegions.MYTHS_GUILD_MID_FLOOR]);
-        CookingObj := RSObjects.MythGuildRange;
+        Map.SetupChunk([[38,44,38,44], [1]]);
+        Objects.Setup(Map.Objects(), @Map.Walker);
+        CookingObj := Objects.Get('Range');
       end;
   end;
-
-end;
-
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.COOKING, ERSSkill.TOTAL];
-  Self.MinZoom := 15;
-  Self.MaxZoom := 60;
-
-  inherited;
 end;
 
 procedure TCooker.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  Antiban.Skills := [ERSSkill.COOKING, ERSSkill.TOTAL];
+  Antiban.MinZoom := 15;
+  Antiban.MaxZoom := 60;
+
   inherited;
 
   Self.SetupItems();
   Self.SetupLocation();
-
-  if WLSettings.RemoteInput.HUDDebug then
-    DebugObjectArray += CookingObj;
 end;
 
 
@@ -173,13 +167,6 @@ begin
   Result := Inventory.ContainsAny([Self.Products[0].Item, Self.Products[1].Item]);
 end;
 
-function TCooker.OpenBank(): Boolean;
-begin
-  case CurrentLocation of
-    ERSLocation.HOSIDIUS, ERSLocation.MYTHS_GUILD:   Result := Bank.WalkOpen();
-    ERSLocation.ROGUES_DEN: Result := Bank.WalkOpen(RSNPCs.EmeraldBenedict);
-  end;
-end;
 
 function TCooker.Deposit(): Boolean;
 var
@@ -238,7 +225,7 @@ begin
   Self.Cooking := Result;
 
   if Result then
-    WaitUntil(not Make.IsOpen(), 100, 4000);  
+    WaitUntil(not Make.IsOpen(), 100, 4000);
 end;
 
 
@@ -339,11 +326,11 @@ begin
     Self.SetAction(ToString(Self.State));
 
     case Self.State of
-      ECookerState.OPEN_BANK: Self.OpenBank();
+      ECookerState.OPEN_BANK: Banks.WalkOpen();
       ECookerState.WITHDRAW_ITEMS: Self.Withdraw(Self.Ingredient);
       ECookerState.DEPOSIT_ITEMS: Self.Deposit();
 
-      ECookerState.OPEN_COLLECT: CollectBox.WalkOpen();
+      ECookerState.OPEN_COLLECT: CollectBoxes.WalkOpen();
       ECookerState.HANDLE_COLLECT: Self.HandleCollectBox([Self.Ingredient.Item]);
       ECookerState.CLOSE_INTERFACE: RSInterface.Close();
 
@@ -383,13 +370,20 @@ type
     LocSelector: TLabeledCombobox;
     CustomFoodName: TLabeledEdit;
     FoodSelector: TLabeledCombobox;
+    Config: TConfigJSON;
   end;
 
 procedure TCookerConfig.StartScript(sender: TObject); override;
 begin
   CurrentLocation := ERSLocation(Self.LocSelector.GetItemIndex());
-  if Self.FoodSelector.GetText() = 'Custom' then
-    CurrentFood := Self.CustomFoodName.GetText()
+  Self.Config.Put('location', Ord(CurrentLocation));
+  Self.Config.Put('food_selector', Self.FoodSelector.GetItemIndex());
+
+  if Self.FoodSelector.GetItemIndex() = 0 then
+  begin
+    CurrentFood := Self.CustomFoodName.GetText();
+    Self.Config.Put('custom', ToStr(CurrentFood));
+  end
   else
     CurrentFood := Self.FoodSelector.GetText();
 
@@ -409,6 +403,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Cooker');
+  Self.Config.Setup('wasp-cooker');
   Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -425,7 +420,10 @@ begin
     SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
     AddItemArray(['Hosidius kitchen', 'Rogues den', 'Myth''s guild']);
-    SetItemIndex(Ord(CurrentLocation));
+    if Self.Config.Has('location') then
+      SetItemIndex(Self.Config.GetInt('location'))
+    else
+      SetItemIndex(Ord(CurrentLocation));
   end;
 
   with Self.FoodSelector do
@@ -436,9 +434,12 @@ begin
     SetTop(Self.LocSelector.GetTop());
     SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
-    AddItemArray(RawFood);
-    SetItemIndex(0);
+    AddItemArray(RAW_FOOD);
     Combobox.setOnChange(@Self.FoodSelectorOnChange);
+    if Self.Config.Has('food_selector') then
+      SetItemIndex(Self.Config.GetInt('food_selector'))
+    else
+      SetItemIndex(0);
   end;
 
   with Self.CustomFoodName do
@@ -448,8 +449,11 @@ begin
     SetLeft(Self.FoodSelector.GetRight() + TControl.AdjustToDPI(20));
     SetTop(Self.LocSelector.GetTop());
     SetWidth(TControl.AdjustToDPI(200));
-    SetText(CurrentFood);
     SetVisible(Self.FoodSelector.GetText() = 'Custom');
+    if Self.Config.Has('custom') then
+      SetText(Self.Config.GetString('custom'))
+    else
+      SetText(CurrentFood);
   end;
 
   Self.CreateAntibanManager();
