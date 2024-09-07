@@ -1,3 +1,12 @@
+## [2.15.8](https://github.com/Torwent/wasp-free/compare/v2.15.7...v2.15.8) (2024-09-07)
+
+
+### Bug Fixes
+
+* **cooker:** now saves settings and updated to TRSMap and TRSWalkerV2 ([c30c0a0](https://github.com/Torwent/wasp-free/commit/c30c0a08a7a0a2dda52b0cf15585214452294a87))
+
+
+
 ## [2.15.7](https://github.com/Torwent/wasp-free/compare/v2.15.6...v2.15.7) (2024-09-05)
 
 
@@ -23,8 +32,6 @@
 ### Bug Fixes
 
 * read notes ([21f3f0f](https://github.com/Torwent/wasp-free/commit/21f3f0f2a302121d8808a1271563da66680a0b55))
-* Tea stall safespot ([5996f36](https://github.com/Torwent/wasp-free/commit/5996f36501beb48e46d44b518af6d28da47bebd4))
-* Tea stall safespot ([39d0f7f](https://github.com/Torwent/wasp-free/commit/39d0f7f68ad4c447ca73160d16c0b9a892436220))
 
 
 
