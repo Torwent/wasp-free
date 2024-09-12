@@ -633,7 +633,7 @@ begin
   if UsePrayerPots and not Minimap.IsPrayerEnabled and Inventory.ContainsConsumable(ERSConsumable.PRAYER) then
     Exit(ENMZState.ENABLE_PRAYER);
 
-  if not MainScreen.WaitInCombat(1200) then
+  if not MainScreen.WaitInCombat(3000) then
     Exit(ENMZState.ATTACK_NPC);
 
   if CombatHandler.CanSpec() then
@@ -653,7 +653,7 @@ begin
     if Self.UsingPowerUps and Self.PowerUpAvailable() then
       Exit(ENMZState.USE_POWER);
 
-    if not MainScreen.WaitInCombat(1200) then
+    if not MainScreen.WaitInCombat(3000) then
       Exit(ENMZState.ATTACK_NPC);
 
     Exit(ENMZState.WAIT_CENTER);

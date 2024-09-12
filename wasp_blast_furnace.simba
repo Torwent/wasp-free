@@ -13,7 +13,6 @@ var
   CurrentBar: EBarType = EBarType.GOLD;
   UseCoalBag: Boolean = False;
   UseEnergyBoosts: Boolean = False;
-  UseSmithsGloves: Boolean = False;
 
 type
   EBFState = (
@@ -65,26 +64,20 @@ type
 
   end;
 
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.SMITHING, ERSSkill.TOTAL];
-  Self.MinZoom := 10;
-  Self.MaxZoom := 20;
-
-  inherited;
-end;
-
 procedure TBlastFurnace.SetupVariables();
+var
+  item: TRSItem;
 begin
   Self.DispenserCoordinate := RSObjects.BlastFurnaceBarDispenser.Coordinates[0];
-  Self.CoalBag := 'Coal bag';
-  ItemFinder.AddItemName('Coal bag', '24480');
+  Self.CoalBag    := 'Coal bag';
   Self.GoldGloves := 'Goldsmith gauntlets';
+  Self.IceGloves  := 'Ice gloves';
 
-  if UseSmithsGloves = True then
-    Self.IceGloves := 'Smiths gloves (i)'
-  else
-    Self.IceGloves := 'Ice gloves';
+  for item in ItemFinder.GetItemIDs('Open coal bag') do
+    ItemFinder.AddItemName('Coal bag', item); //bind "open coal bag" to "coal bag" in itemfinder
+
+  for item in ItemFinder.GetItemIDs('Smiths gloves (i)') do
+    ItemFinder.AddItemName('Ice gloves', item); //bind "smiths gloves (i)" to "ice gloves" in itemfinder
 
   Self.CoalRatio := 0;
   Self.AvailableSlots := 28;
@@ -147,10 +140,7 @@ begin
       end;
   end;
 
-  Self.ItemList := [
-    Self.IceGloves, Self.Coal,
-    Self.Ore, Self.Bar
-  ];
+  Self.ItemList := [Self.IceGloves, Self.Coal, Self.Ore, Self.Bar ];
 
   if CurrentBar = EBarType.GOLD then
     Self.ItemList += Self.GoldGloves;
@@ -219,8 +209,9 @@ end;
 
 procedure TBlastFurnace.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
-  WLSettings.GetObject('antiban').getJSONObject('tasks').Put('bank', False);
-  WLSettings.GetObject('remote_input').Put('block_real_input', True);
+  Antiban.Skills := [ERSSkill.SMITHING, ERSSkill.TOTAL];
+  Antiban.MinZoom := 10;
+  Antiban.MaxZoom := 20;
 
   inherited;
 
@@ -244,6 +235,7 @@ begin
 
   Self.ReSyncPot();
 end;
+
 
 function TBlastFurnace.OpenPot(): Boolean;
 begin
@@ -675,6 +667,7 @@ begin
     Result := WaitUntil(currentMoney < Self.CountMoney(), 300, 5000);
 end;
 
+
 function TBlastFurnace.GetState(): EBFState;
 begin
   if WL.Activity.IsFinished() then
@@ -708,6 +701,7 @@ begin
           Exit(WITHDRAW_ENERGY);
         end;
 
+        WriteLn Self.ItemList;
         if Inventory.ContainsRandomItems(Self.ItemList) then
           Exit(EBFState.DEPOSIT_RANDOM_ITEMS);
 
@@ -942,6 +936,7 @@ begin
   Logout.ClickLogout();
 end;
 
+
 var
   BlastFurnace: TBlastFurnace;
 
@@ -964,7 +959,8 @@ end;
 type
   TBlastFurnaceConfig = record(TScriptForm)
     BarSelector: TLabeledCombobox;
-    CoalBagCheckbox, EnergyBoostsCheckbox, SmithsGlovesCheckbox: TLabeledCheckBox;
+    CoalBagCheckbox, EnergyBoostsCheckbox: TLabeledCheckBox;
+    Config: TConfigJSON;
   end;
 
 procedure TBlastFurnaceConfig.StartScript(sender: TObject); override;
@@ -972,7 +968,13 @@ begin
   CurrentBar      := EBarType(Self.BarSelector.getItemIndex());
   UseCoalBag      := Self.CoalBagCheckbox.IsChecked();
   UseEnergyBoosts := Self.EnergyBoostsCheckbox.IsChecked();
-  UseSmithsGloves := Self.SmithsGlovesCheckbox.IsChecked();
+
+  Self.Config.Put('bar', Ord(CurrentBar));
+  Self.Config.Put('coal_bag', UseCoalBag);
+  Self.Config.Put('energy_boosts', UseEnergyBoosts);
+
+  if not Self.CoalBagCheckbox.CheckBox.getEnabled() then
+    UseCoalBag := False;
 
   inherited;
 end;
@@ -987,7 +989,6 @@ begin
   i := combobox.getItemIndex();
   value := InRange(i, 0, 2) or (i = 4);
 
-  Self.CoalBagCheckbox.SetChecked(not value);
   Self.CoalBagCheckbox.SetEnabled(not value);
 end;
 
@@ -996,6 +997,7 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Blast Furnace');
+  Self.Config.Setup('wasp-blast-furnace');
   Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -1010,10 +1012,12 @@ begin
     SetLeft(TControl.AdjustToDPI(40));
     SetTop(TControl.AdjustToDPI(170));
     SetStyle(csDropDownList);
-    AddItemArray(['Bronze', 'Iron', 'Silver', 'Steel', 'Gold', 'Mithril',
-                  'Adamantite', 'Runite']);
-    SetItemIndex(Ord(CurrentBar));
+    AddItemArray(['Bronze', 'Iron', 'Silver', 'Steel', 'Gold', 'Mithril', 'Adamantite', 'Runite']);
     ComboBox.setOnChange(@Self.BarSelectorOnChange);
+    if Self.Config.Has('bar') then
+      SetItemIndex(Self.Config.GetInt('bar'))
+    else
+      SetItemIndex(Ord(CurrentBar));
   end;
 
   with Self.CoalBagCheckbox do
@@ -1022,7 +1026,10 @@ begin
     SetCaption('Coal bag');
     SetLeft(Self.BarSelector.GetRight() + TControl.AdjustToDPI(10));
     SetTop(Self.BarSelector.GetTop() + TControl.AdjustToDPI(15));
-    SetChecked(UseCoalBag);
+    if Self.Config.Has('coal_bag') then
+      SetChecked(Self.Config.GetBoolean('coal_bag'))
+    else
+      SetChecked(UseCoalBag);
   end;
 
   with Self.EnergyBoostsCheckbox do
@@ -1031,16 +1038,10 @@ begin
     SetCaption('Energy boosts');
     SetLeft(Self.BarSelector.GetRight() + TControl.AdjustToDPI(10));
     SetTop(Self.BarSelector.GetTop() + TControl.AdjustToDPI(35));
-    SetChecked(UseEnergyBoosts);
-  end;
-
-  with Self.SmithsGlovesCheckbox do
-  begin
-    Create(tab);
-    SetCaption('Using Smith''s gloves (i)');
-    SetLeft(Self.BarSelector.GetRight() + TControl.AdjustToDPI(10));
-    SetTop(Self.BarSelector.GetTop() + TControl.AdjustToDPI(55));
-    SetChecked(UseSmithsGloves);
+    if Self.Config.Has('energy_boosts') then
+      SetChecked(Self.Config.GetBoolean('energy_boosts'))
+    else
+      SetChecked(UseEnergyBoosts);
   end;
 
   Self.CreateAntibanManager();
