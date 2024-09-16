@@ -1,3 +1,12 @@
+## [2.15.10](https://github.com/Torwent/wasp-free/compare/v2.15.9...v2.15.10) (2024-09-16)
+
+
+### Bug Fixes
+
+* **blast furnace:** read notes ([5b89809](https://github.com/Torwent/wasp-free/commit/5b8980971f7aaa64b9d0dc1070d48799482d93a4))
+
+
+
 ## [2.15.9](https://github.com/Torwent/wasp-free/compare/v2.15.8...v2.15.9) (2024-09-12)
 
 
@@ -23,15 +32,6 @@
 
 * **ardy knights:** Now uses TRSMap and TRSWalkerV2 ([5723219](https://github.com/Torwent/wasp-free/commit/5723219b7ae2f2cba40cf3dca32ef879f07946a4))
 * **smelter:** now supports alkharid ([2e37bec](https://github.com/Torwent/wasp-free/commit/2e37becaa9ea73da57a6ccabd56dd2043bf699d0))
-
-
-
-## [2.15.5](https://github.com/Torwent/wasp-free/compare/v2.15.4...v2.15.5) (2024-08-28)
-
-
-### Bug Fixes
-
-* **kraken:** should have full banking support at ge now ([aa7a3b1](https://github.com/Torwent/wasp-free/commit/aa7a3b19295152710807c735a74fa958a2897df7))
 
 
 
