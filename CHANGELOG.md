@@ -1,3 +1,12 @@
+## [2.15.11](https://github.com/Torwent/wasp-free/compare/v2.15.10...v2.15.11) (2024-09-19)
+
+
+### Bug Fixes
+
+* **ardy knights:** shouldn't crash due to no walker set for knights ([6a83a81](https://github.com/Torwent/wasp-free/commit/6a83a81f8670e00d75f16b03f11695d2907ecd5e))
+
+
+
 ## [2.15.10](https://github.com/Torwent/wasp-free/compare/v2.15.9...v2.15.10) (2024-09-16)
 
 
@@ -31,7 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** Now uses TRSMap and TRSWalkerV2 ([5723219](https://github.com/Torwent/wasp-free/commit/5723219b7ae2f2cba40cf3dca32ef879f07946a4))
-* **smelter:** now supports alkharid ([2e37bec](https://github.com/Torwent/wasp-free/commit/2e37becaa9ea73da57a6ccabd56dd2043bf699d0))
 
 
 
