@@ -353,7 +353,7 @@ begin
       Inventory.MouseItem(Self.CoalBag);
 
     Minimap.WaitMoving();
-    Result := WaitUntil(Bank.IsOpen(), 300, 6000);
+    Result := WaitUntil(RSInterface.IsOpen(), 300, 6000) and (Bank.IsOpen() or BankPin.IsOpen());
   end;
 end;
 

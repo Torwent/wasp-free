@@ -152,15 +152,6 @@ begin
   Self.ActionProfit += Round(Self.ActionProfit * ProfitMultiplier);
 end;
 
-procedure TKnightsThiever.SetupKnight();
-begin
-  Self.Knight.SetupCoordinates([[6516, 37294]]);
-  Self.Knight.Size := [1,1,6];
-  Self.Knight.DotFilters.SetupBounds(Self.BankBounds, True);
-  Self.Knight.SetupUpText('Knight of Ardougne');
-  Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
-end;
-
 procedure TKnightsThiever.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
   Antiban.Skills := [ERSSkill.THIEVING, ERSSkill.TOTAL];
@@ -172,7 +163,12 @@ begin
   Map.SetupChunk(ERSChunk.ARDOUGNE);
   Objects.Setup(Map.Objects(), @Map.Walker);
 
-  Self.SetupKnight();
+  Self.Knight.SetupCoordinates([[6516, 37294]]);
+  Self.Knight.Size := [1,1,6];
+  Self.Knight.DotFilters.SetupBounds(Self.BankBounds, True);
+  Self.Knight.SetupUpText('Knight of Ardougne');
+  Self.Knight.Finder.Colors += CTS2(10620793, 19, 0.22, 0.31);
+  Self.Knight.Walker := @Map.Walker;
 
   Self.DiaryLevel := Max(Achievements.GetDiaryLevel(ERSAchievementDiary.ARDOUGNE), 1);
   if Self.DiaryLevel = 4 then Self.DiaryLevel += 1;
