@@ -415,18 +415,30 @@ begin
   if (Self.CoalBagAmount > 0) then Result := Inventory.MouseItem(Self.CoalBag);
 end;
 
+(* debug rs/ri bug
+function TRSInventory.Count(): Int32; override;
+begin
+  Result := inherited;
+
+  if InRange(Result, 2, 27) and (Result <> 10) and (Result <> 2) then
+    Debug([Point(0,0)]);
+end;
+*)
 
 function TBlastFurnace._Load(out count: Int32): Boolean;
+var
+  newCount: Int32;
 begin
   count := Inventory.Count();
+
   XPBar.EarnedXP(); //Reset xp cache.
   Self.DispenserFull := False;
 
   if Self.ConveyorBelt.WalkSelectOption(['Put-ore']) then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(Inventory.Count() < count, 300, 6000);
-    if Result then count := count - Inventory.Count();
+    Result := WaitUntil((newCount := Inventory.Count()) < 3, 300, 6000);
+    if Result then count := count - newCount;
   end;
 end;
 
