@@ -1,3 +1,12 @@
+## [2.15.12](https://github.com/Torwent/wasp-free/compare/v2.15.11...v2.15.12) (2024-09-20)
+
+
+### Bug Fixes
+
+* **blast furnace:** should be fully functional now ([18cb52c](https://github.com/Torwent/wasp-free/commit/18cb52c2b13b52e081e5efcdd89a1020ddd8eba1))
+
+
+
 ## [2.15.11](https://github.com/Torwent/wasp-free/compare/v2.15.10...v2.15.11) (2024-09-19)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** now saves settings and updated to TRSMap and TRSWalkerV2 ([c30c0a0](https://github.com/Torwent/wasp-free/commit/c30c0a08a7a0a2dda52b0cf15585214452294a87))
-
-
-
-## [2.15.7](https://github.com/Torwent/wasp-free/compare/v2.15.6...v2.15.7) (2024-09-05)
-
-
-### Bug Fixes
-
-* **ardy knights:** Now uses TRSMap and TRSWalkerV2 ([5723219](https://github.com/Torwent/wasp-free/commit/5723219b7ae2f2cba40cf3dca32ef879f07946a4))
 
 
 
