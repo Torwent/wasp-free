@@ -608,18 +608,21 @@ end;
 
 function TNMZFighter.GetPowerUp(): Boolean;
 begin
-  if RSObjects.NMZRecurrentDamage.Click() then
+  if Self.PowerUps.RecurrentDamage.Click() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil(not Self.PowerUpAvailable(), 100, 6000);
-  end
-  else if RSObjects.NMZPowerSurge.Click() then
+    Exit(WaitUntil(not Self.PowerUpAvailable(), 100, 6000));
+  end;
+
+  if Self.PowerUps.PowerSurge.Click() then
   begin
     Minimap.WaitMoving();
     if Result := WaitUntil(not Self.PowerUpAvailable(), 100, 6000) then
       PowerSurgeTimer.Restart();
-  end
-  else if Result := RSObjects.NMZZapper.Click() then
+    Exit;
+  end;
+
+  if Result := Self.PowerUps.Zapper.Click() then
   begin
     Minimap.WaitMoving();
     ZapperTimer.Restart();
