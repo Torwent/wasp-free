@@ -95,7 +95,7 @@ begin
 
   inherited;
 
-  Map.SetupChunks([[[35,56,36,56], [0]], [[35,156,35,156], [0]], [[48,54,50,53], [0]]]);
+  Map.SetupChunks([Chunk(Box(35,56,36,56), 0), Chunk(Box(35,156,35,156), 0), Chunk(Box(48,54,50,53), 0)]);
   Objects.Setup(Map.Objects(), @Map.Walker);
 
   Self.Crevice := Objects.Get('Crevice');
