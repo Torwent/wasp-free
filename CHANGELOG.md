@@ -1,3 +1,12 @@
+## [2.15.13](https://github.com/Torwent/wasp-free/compare/v2.15.12...v2.15.13) (2024-09-23)
+
+
+### Bug Fixes
+
+* **nmz:** now uses TRSMap and TRSWalkerV2 ([a298472](https://github.com/Torwent/wasp-free/commit/a298472556fb1e252d19f96e08bd3be78fc3ad5a))
+
+
+
 ## [2.15.12](https://github.com/Torwent/wasp-free/compare/v2.15.11...v2.15.12) (2024-09-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * read notes ([528de17](https://github.com/Torwent/wasp-free/commit/528de173499c3d6c60cf13328dd4f060368beb0b))
-
-
-
-## [2.15.8](https://github.com/Torwent/wasp-free/compare/v2.15.7...v2.15.8) (2024-09-07)
-
-
-### Bug Fixes
-
-* **cooker:** now saves settings and updated to TRSMap and TRSWalkerV2 ([c30c0a0](https://github.com/Torwent/wasp-free/commit/c30c0a08a7a0a2dda52b0cf15585214452294a87))
 
 
 
