@@ -1,3 +1,12 @@
+## [2.15.14](https://github.com/Torwent/wasp-free/compare/v2.15.13...v2.15.14) (2024-09-23)
+
+
+### Bug Fixes
+
+* **nmz:** powerups work again ([dca3dbb](https://github.com/Torwent/wasp-free/commit/dca3dbba75f098c5683136ac9012e8a9a31fb64e))
+
+
+
 ## [2.15.13](https://github.com/Torwent/wasp-free/compare/v2.15.12...v2.15.13) (2024-09-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** read notes ([5b89809](https://github.com/Torwent/wasp-free/commit/5b8980971f7aaa64b9d0dc1070d48799482d93a4))
-
-
-
-## [2.15.9](https://github.com/Torwent/wasp-free/compare/v2.15.8...v2.15.9) (2024-09-12)
-
-
-### Bug Fixes
-
-* read notes ([528de17](https://github.com/Torwent/wasp-free/commit/528de173499c3d6c60cf13328dd4f060368beb0b))
 
 
 
