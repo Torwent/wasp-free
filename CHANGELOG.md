@@ -1,3 +1,12 @@
+## [2.15.15](https://github.com/Torwent/wasp-free/compare/v2.15.14...v2.15.15) (2024-09-26)
+
+
+### Bug Fixes
+
+* **chompy hunter:** now uses TRSMap and TRSWalkerV2 ([870c2f2](https://github.com/Torwent/wasp-free/commit/870c2f2eed789774b77963855aed55fc1bb2a0b4))
+
+
+
 ## [2.15.14](https://github.com/Torwent/wasp-free/compare/v2.15.13...v2.15.14) (2024-09-23)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **ardy knights:** shouldn't crash due to no walker set for knights ([6a83a81](https://github.com/Torwent/wasp-free/commit/6a83a81f8670e00d75f16b03f11695d2907ecd5e))
-
-
-
-## [2.15.10](https://github.com/Torwent/wasp-free/compare/v2.15.9...v2.15.10) (2024-09-16)
-
-
-### Bug Fixes
-
-* **blast furnace:** read notes ([5b89809](https://github.com/Torwent/wasp-free/commit/5b8980971f7aaa64b9d0dc1070d48799482d93a4))
 
 
 
