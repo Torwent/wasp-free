@@ -7,17 +7,13 @@
 
 type
   EChompyState = (
-    WAIT_STATE,
-    WAIT_COMBAT,
-    FILL_TOAD,
-    FILL_BELLOWS,
-    PLACE_TOAD,
-    CLICK_CHOMPY
+    WAIT_STATE, WAIT_COMBAT, FILL_TOAD, FILL_BELLOWS, PLACE_TOAD, CLICK_CHOMPY
   );
 
   TChompyHunter = record(TBaseWalkerScript)
     State: EChompyState;
-    Toad: TRSNPC;
+    Chompy, Toad: TRSNPCV2;
+    Bubbles: TRSObjectV2;
     OgreBellows: TRSItemArray;
     FillingBellows: Boolean;
   end;
@@ -32,21 +28,36 @@ begin
 end;
 
 procedure TChompyHunter.Init(maxActions: UInt32; maxTime: UInt64); override;
+var
+  chompy: TRSNPCV2;
 begin
   inherited;
 
   ItemFinder.Similarity := 0.9999;
-  RSW.SetupRegions([RSRegions.CASTLE_WARS]);
+  Map.SetupChunk(Chunk(Box(36,48,38,47), 0));
+  Objects.Setup(Map.Objects(), @Map.Walker);
 
-  CombatHandler.Setup(RSMonsters.Chompy, 2000);
-  Toad := RSNPCs.SwampToad;
+  chompy := TRSNPCV2.Setup(70, 4, [[5488, 38238]]);
+  chompy.SetupUpText('Chompy bird');
+  chompy.Finder.Colors := [
+    CTS2(8557684, 13, 0.06, 0.32),
+    CTS2(10603982, 11, 0.04, 0.58)
+  ];
+  chompy.Walker := @Map.Walker;
 
-  OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
+  CombatHandler.Setup(chompy, 2000);
+
+  Self.Toad.SetupEx(40, [0.5, 0.5, 0], [[5488, 38238]]);
+  Self.Toad.SetupUpText(['Inflate', 'Swamp', 'toad']);
+  Self.Toad.Finder.Colors += CTS2(3373670, 17, 0.02, 0.10);
+  Self.Toad.Walker := @Map.Walker;
+
+  Self.Bubbles := Objects.Get('Swamp bubbles');
+  Self.Bubbles.Finder.Colors := [CTS2(5464637, 3, 0.23, 0.28)];
+
+  Self.OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
 
   Options.SetNPCAttackOption(ERSAttackOption.ALWAYS_LEFT_CLICK);
-
-  if WLSettings.RemoteInput.HUDDebug then
-    DebugMMDotArray += Toad;
 end;
 
 
@@ -62,12 +73,11 @@ var
   InvCount: Int32 := Self.CountBellows();
   TempCount: Int32;
 begin
-  if RSObjects.SwampBubbles.WalkClick() then
+  if Self.Bubbles.WalkClick() then
   begin
     Minimap.WaitMoving();
     Result := WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000);
   end;
-
 
   if Result then
     while Inventory.ContainsItem('Ogre bellows') do
@@ -125,6 +135,7 @@ var
   count: Int32;
 begin
   count := Inventory.Count();
+
   if Self.Toad.WalkClick(True, 10) then
   begin
     Minimap.WaitMoving();
@@ -152,35 +163,34 @@ begin
     Result := WaitUntil(Self.ClickedChompy(featherCount) or MainScreen.InCombat(), 100, 3000);
   end;
 
-  if Result then
-    TotalActions += 1;
+  if Result then TotalActions += 1;
 end;
 
 
 
 function TChompyHunter.GetState(): EChompyState;
 begin
-  if FillingBellows then
+  if Self.FillingBellows then
   begin
-    if FillingBellows := Inventory.ContainsItem('Ogre bellows') then
-      Exit(WAIT_STATE);
+    if Self.FillingBellows := Inventory.ContainsItem('Ogre bellows') then
+      Exit(EChompyState.WAIT_STATE);
 
-    Exit;
+    Exit(EChompyState.WAIT_STATE);
   end;
 
   if Inventory.ContainsItem('Bloated toad') then
-    Exit(PLACE_TOAD);
+    Exit(EChompyState.PLACE_TOAD);
 
   if MainScreen.InCombat() then
-    Exit(WAIT_COMBAT);
+    Exit(EChompyState.WAIT_COMBAT);
 
   if CombatHandler.Monster.IsVisible() then
-    Exit(CLICK_CHOMPY);
+    Exit(EChompyState.CLICK_CHOMPY);
 
   if Inventory.ContainsAny(OgreBellows) then
-    Exit(FILL_TOAD);
+    Exit(EChompyState.FILL_TOAD);
 
-  Exit(FILL_BELLOWS);
+  Exit(EChompyState.FILL_BELLOWS);
 end;
 
 procedure TChompyHunter.Run(maxActions: UInt32; maxTime: UInt64);
@@ -188,16 +198,16 @@ begin
   Self.Init(maxActions, maxTime);
 
   repeat
-    State := Self.GetState();
-    Self.SetAction(ToStr(State));
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      WAIT_STATE: Wait(1200, 2400);
-      WAIT_COMBAT: WaitUntil(not MainScreen.WaitInCombat(2400), 100, 5000);
-      FILL_TOAD: Self.FillToad();
-      FILL_BELLOWS: Self.FillBellows();
-      PLACE_TOAD: Self.PlaceToad();
-      CLICK_CHOMPY: Self.ClickChompy();
+      EChompyState.WAIT_STATE: Wait(1200, 2400);
+      EChompyState.WAIT_COMBAT: WaitUntil(not MainScreen.WaitInCombat(2400), 100, 5000);
+      EChompyState.FILL_TOAD: Self.FillToad();
+      EChompyState.FILL_BELLOWS: Self.FillBellows();
+      EChompyState.PLACE_TOAD: Self.PlaceToad();
+      EChompyState.CLICK_CHOMPY: Self.ClickChompy();
     end;
 
     Self.DoAntiban();
