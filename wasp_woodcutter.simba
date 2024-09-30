@@ -78,6 +78,7 @@ end;
 procedure TWoodcutter.SetupTree();
 var
   p: TPoint;
+  i: Int32;
 begin
   case CurrentTree of
     ERSTree.REGULAR_TREE:
@@ -113,6 +114,11 @@ begin
     ERSTree.MAHOGANY_TREE:
       begin
         Self.RSTree := RSObjects.MahoganyTree;
+
+        for i := High(Self.RSTree.Coordinates) downto 0 do
+          if Self.RSTree.Coordinates[i].X > 4070 then
+            Delete(Self.RSTree.Coordinates, i, 1);
+
         Self.Logs := 'Mahogany logs';
         Self.Plank := 'Mahogany plank';
         Self.PlankSawmillPrice := 1500;
@@ -154,6 +160,7 @@ begin
     RSGroundItems.BirdNest.Coordinates += p;
     RSGroundItems.BirdNest.DotFilter.SetupCircle([p.X, p.Y, 16], True);
   end;
+
   RSGroundItems.BirdNest.ShapeArray.SetShape([1, 1, 1]);
   RSGroundItems.BirdNest.Filter.Walker := True;
 
