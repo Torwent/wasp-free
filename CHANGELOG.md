@@ -1,3 +1,12 @@
+## [2.15.16](https://github.com/Torwent/wasp-free/compare/v2.15.15...v2.15.16) (2024-09-30)
+
+
+### Bug Fixes
+
+* **wc:** remove the eastern mahogany tree in priff ([7ec6c4f](https://github.com/Torwent/wasp-free/commit/7ec6c4fae86327a142172827cabc18f1205597c7))
+
+
+
 ## [2.15.15](https://github.com/Torwent/wasp-free/compare/v2.15.14...v2.15.15) (2024-09-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** should be fully functional now ([18cb52c](https://github.com/Torwent/wasp-free/commit/18cb52c2b13b52e081e5efcdd89a1020ddd8eba1))
-
-
-
-## [2.15.11](https://github.com/Torwent/wasp-free/compare/v2.15.10...v2.15.11) (2024-09-19)
-
-
-### Bug Fixes
-
-* **ardy knights:** shouldn't crash due to no walker set for knights ([6a83a81](https://github.com/Torwent/wasp-free/commit/6a83a81f8670e00d75f16b03f11695d2907ecd5e))
 
 
 
