@@ -123,29 +123,33 @@ procedure TCooker.SetupLocation();
 begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
-      begin
-        Map.SetupChunk(ERSChunk.HOSIDIUS_KITCHEN);
-        Objects.Setup(Map.Objects(), @Map.Walker);
-        CookingObj := Objects.Get('Clay oven');
-      end;
+    begin
+      GENERATED_GRAPH.NodeRadius := 30;
+      Map.SetupChunk(ERSChunk.HOSIDIUS_KITCHEN);
+      Objects.Setup(Map.Objects(), @Map.Walker);
+      Self.CookingObj := Objects.Get('Clay oven');
+      Delete(Self.CookingObj.Coordinates, 0, 1);
+      Delete(Self.CookingObj.Coordinates, 1, 1);
+      Delete(Self.CookingObj.Rotations, 0, 2);
+    end;
 
     ERSLocation.ROGUES_DEN:
-      begin
-        Map.SetupChunk(ERSChunk.ROGUES_DEN);
-        Objects.Setup(Map.Objects(), @Map.Walker);
-        NPCs.Setup(Map.NPCs(), @Map.Walker);
-        CookingObj := TRSObjectV2.Setup(0.8,1, [[21132,30538]]);
-        CookingObj.SetupUpText('Fire');
-        CookingObj.Finder.Colors += CTS2(3317724, 14, 0.23, 1.65);
-        CookingObj.Walker := @Map.Walker;
-      end;
+    begin
+      Map.SetupChunk(ERSChunk.ROGUES_DEN);
+      Objects.Setup(Map.Objects(), @Map.Walker);
+      NPCs.Setup(Map.NPCs(), @Map.Walker);
+      Self.CookingObj := TRSObjectV2.Setup(0.8,1, [[21132,30538]]);
+      Self.CookingObj.SetupUpText('Fire');
+      Self.CookingObj.Finder.Colors += CTS2(3317724, 14, 0.23, 1.65);
+      Self.CookingObj.Walker := @Map.Walker;
+    end;
 
     ERSLocation.MYTHS_GUILD:
-      begin
-        Map.SetupChunk([[38,44,38,44], [1]]);
-        Objects.Setup(Map.Objects(), @Map.Walker);
-        CookingObj := Objects.Get('Range');
-      end;
+    begin
+      Map.SetupChunk([[38,44,38,44], [1]]);
+      Objects.Setup(Map.Objects(), @Map.Walker);
+      Self.CookingObj := Objects.Get('Range');
+    end;
   end;
 end;
 
