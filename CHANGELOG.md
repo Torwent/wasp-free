@@ -1,3 +1,12 @@
+## [2.15.17](https://github.com/Torwent/wasp-free/compare/v2.15.16...v2.15.17) (2024-10-05)
+
+
+### Bug Fixes
+
+* **cooker:** should now work properly in hosidius ([501b656](https://github.com/Torwent/wasp-free/commit/501b65654fec1794fb5fe606926bd3d6a86a5ab2))
+
+
+
 ## [2.15.16](https://github.com/Torwent/wasp-free/compare/v2.15.15...v2.15.16) (2024-09-30)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** now uses TRSMap and TRSWalkerV2 ([a298472](https://github.com/Torwent/wasp-free/commit/a298472556fb1e252d19f96e08bd3be78fc3ad5a))
-
-
-
-## [2.15.12](https://github.com/Torwent/wasp-free/compare/v2.15.11...v2.15.12) (2024-09-20)
-
-
-### Bug Fixes
-
-* **blast furnace:** should be fully functional now ([18cb52c](https://github.com/Torwent/wasp-free/commit/18cb52c2b13b52e081e5efcdd89a1020ddd8eba1))
 
 
 
