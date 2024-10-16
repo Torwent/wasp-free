@@ -1,3 +1,12 @@
+## [2.15.18](https://github.com/Torwent/wasp-free/compare/v2.15.17...v2.15.18) (2024-10-16)
+
+
+### Bug Fixes
+
+* **blast furnace:** should be working properly for lower level bars now ([2994298](https://github.com/Torwent/wasp-free/commit/2994298089c9f399157b457c03c0f6d71f118861))
+
+
+
 ## [2.15.17](https://github.com/Torwent/wasp-free/compare/v2.15.16...v2.15.17) (2024-10-05)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **nmz:** powerups work again ([dca3dbb](https://github.com/Torwent/wasp-free/commit/dca3dbba75f098c5683136ac9012e8a9a31fb64e))
-
-
-
-## [2.15.13](https://github.com/Torwent/wasp-free/compare/v2.15.12...v2.15.13) (2024-09-23)
-
-
-### Bug Fixes
-
-* **nmz:** now uses TRSMap and TRSWalkerV2 ([a298472](https://github.com/Torwent/wasp-free/commit/a298472556fb1e252d19f96e08bd3be78fc3ad5a))
 
 
 
