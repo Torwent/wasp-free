@@ -46,15 +46,6 @@ type
     ItemChanged: Boolean;
   end;
 
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
-  Self.MinZoom := 15;
-  Self.MaxZoom := 85;
-
-  inherited;
-end;
-
 procedure TBlower.SetupProduct();
 var
   CurrentLevelItem: ERSGlassItem;
@@ -111,7 +102,12 @@ end;
 
 procedure TBlower.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  Antiban.Skills := [ERSSkill.CRAFTING, ERSSkill.TOTAL];
+  Antiban.MinZoom := 15;
+  Antiban.MaxZoom := 85;
+
   inherited;
+
   Self.RSW.SetupNamedRegion();
 
   Self.UseBestItem := CurrentGlass = ERSGlassItem.Best;

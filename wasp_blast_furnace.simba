@@ -17,9 +17,10 @@ var
 type
   EBFState = (
     OPEN_POT, READ_POT, OPEN_BANK, OPEN_BANK_TAB,
-    WITHDRAW_ORE, WITHDRAW_COAL, WITHDRAW_GLOVES, WITHDRAW_BAG, WITHDRAW_ENERGY,
+    WITHDRAW_ORE, WITHDRAW_COAL, WITHDRAW_GLOVES, WITHDRAW_COAL_BAG, WITHDRAW_ENERGY,
 
     DEPOSIT_BARS, DEPOSIT_RANDOM_ITEMS, DEPOSIT_ORE, DEPOSIT_COAL,
+    OUT_OF_ORE, OUT_OF_COAL,
 
     OPEN_COLLECT, HANDLE_COLLECT,
     CLOSE_BANK, CLOSE_INTERFACE, CLOSE_GAUGE, CLOSE_CONTEXT_MENU,
@@ -30,7 +31,8 @@ type
     FILL_COAL_BAG, REFILL_COAL_BAG, EMPTY_COAL_BAG,
 
     EQUIP_GOLD_GLOVES, EQUIP_ICE_GLOVES,
-    LOAD_ORES, LOAD_COAL, WALK_DISPENSER, HOVER_DISPENSER, WAIT_BARS, GET_BARS,
+    LOAD_ORE, LOAD_COAL, WALK_DISPENSER, HOVER_DISPENSER, WAIT_BARS, GET_BARS,
+    GET_BARS_RESYNC,
 
     HANDLE_MAKE, HANDLE_LEVEL, HANDLE_CHAT,
 
@@ -423,7 +425,7 @@ begin
   if InRange(Result, 2, 27) and (Result <> 10) and (Result <> 2) then
     Debug([Point(0,0)]);
 end;
-*)
+// *)
 
 function TBlastFurnace._Load(out count: Int32): Boolean;
 var
@@ -524,41 +526,39 @@ begin
 
   upText := MainScreen.GetUpText();
 
-  if 'Check' in upText then
-  begin
+  try
+    if upText.Contains('Check') or not upText.Contains('Take') then
+      Exit;
+    Mouse.Click(MOUSE_LEFT);
+
+    if MainScreen.DidRedClick() then
+    begin
+      Self.WaitMoving(True, False);
+      Result := Make.IsOpen(5000, 100);
+    end;
+
+  finally
+    if Result then
+    begin
+      Self.Attempts := 0;
+      Exit;
+    end;
+
+    if Inc(Self.Attempts) > 5 then
+    begin
+      Self.OutOfSync := True;
+      Self.Attempts := 0;
+      Exit;
+    end;
+
+    if Chat.HasContinue() then
+    begin
+      Chat.ClickContinue();
+      Exit;
+    end;
+
     if not Self.BarDispenser.Coordinates.AnyInRange(Map.Position(), 8) then
       Self.WalkDispenser();
-    Exit;
-  end
-  else if not ('Take' in upText) then
-    Exit;
-
-  Mouse.Click(MOUSE_LEFT);
-
-  if MainScreen.DidRedClick() then
-  begin
-    Self.WaitMoving(True, False);
-    Result := Make.IsOpen(5000, 100);
-
-    if not Result then
-    begin
-      Self.Attempts += 1;
-
-      if Self.Attempts > 5 then
-      begin
-        Self.OutOfSync := True;
-        Self.Attempts := 0;
-        Exit;
-      end;
-
-      if Chat.HasContinue() then
-      begin
-        Chat.ClickContinue();
-        Exit;
-      end;
-
-      Self.WalkDispenser();
-    end;
   end;
 end;
 
@@ -750,8 +750,17 @@ begin
 
       if not Inventory.IsFull() and not Self.OutOfSync then
       begin
-        if Inventory.ContainsItem(Self.Ore)  then Exit(EBFState.DEPOSIT_ORE);
-        if Inventory.ContainsItem(Self.Coal) then Exit(EBFState.DEPOSIT_COAL);
+        if Inventory.ContainsItem(Self.Ore) then
+        begin
+          if Self.RanOut(Self.OreB) then Exit(EBFState.OUT_OF_ORE);
+          Exit(EBFState.DEPOSIT_ORE);
+        end;
+
+        if Inventory.ContainsItem(Self.Coal) then
+        begin
+          if Self.RanOut(Self.OreB) then Exit(EBFState.OUT_OF_COAL);
+          Exit(EBFState.DEPOSIT_COAL);
+        end;
 
         if UseEnergyBoosts and (Minimap.GetRunEnergy() < Self.MinEnergy) and not Minimap.HasStamina() then
         begin
@@ -767,7 +776,7 @@ begin
           Exit(EBFState.WITHDRAW_GLOVES);
 
         if (UseCoalBag and not Inventory.ContainsItem(Self.CoalBag)) or (UseCoalBag and Bank.ContainsItem(Self.CoalBag)) then
-          Exit(EBFState.WITHDRAW_BAG);
+          Exit(EBFState.WITHDRAW_COAL_BAG);
 
         if Boolean(Self.CoalRatio) and UseCoalBag and not Self.CoalBagFull() then
           Exit(EBFState.FILL_COAL_BAG);
@@ -816,7 +825,7 @@ begin
       Exit(EBFState.OPEN_BANK);
     end;
 
-    if Self.DispenserFull then      Exit(EBFState.GET_BARS);
+    if Self.DispenserFull then      Exit(EBFState.GET_BARS_RESYNC);
     if 'Ore' in Chat.GetChat() then Exit(EBFState.READ_POT);
 
     Exit(EBFState.OPEN_POT);
@@ -844,7 +853,7 @@ begin
   begin
     if (CurrentBar = EBarType.GOLD) and Inventory.ContainsItem(Self.GoldGloves) then
       Exit(EBFState.EQUIP_GOLD_GLOVES);
-    Exit(EBFState.LOAD_ORES);
+    Exit(EBFState.LOAD_ORE);
   end;
 
   if Inventory.ContainsItem(Self.Coal) then
@@ -876,8 +885,7 @@ begin
 
     if Self.BankEmpty then
     begin
-      if Self.CollectEmpty then
-        Exit(EBFState.OUT_OF_SUPPLIES);
+      if Self.CollectEmpty then Exit(EBFState.OUT_OF_SUPPLIES);
       Exit(EBFState.OPEN_COLLECT);
     end;
 
@@ -905,6 +913,8 @@ begin
   repeat
     Self.State := Self.GetState();
 
+    WriteLn Self.State;
+    WriteLn('attempts: ', Self.Attempts);
     str := ToStr(Self.LoadedCoal);
     while Length(str) < 3 do
     begin
@@ -914,7 +924,13 @@ begin
         str := '0' + str;
     end;
 
-    Self.SetAction('[' + str + ' Coal]: ' + ToStr(Self.State));
+    str := '[' + str + ' Coal]: ' + ToStr(Self.State);
+    case Self.State of
+      EBFState.WITHDRAW_ORE, EBFState.LOAD_ORE, EBFState.DEPOSIT_ORE, EBFState.OUT_OF_ORE:
+        str.Replace('_ORE', ToStr(Self.Ore).Upper().Replace(' ', '_'));
+    end;
+
+    Self.SetAction(str);
 
     case Self.State of
       EBFState.OPEN_POT: Self.OpenPot();
@@ -922,11 +938,11 @@ begin
 
       EBFState.OPEN_BANK: Self.WalkOpenBank();
 
-      EBFState.WITHDRAW_ORE:    Self.Withdraw(Self.OreB);
-      EBFState.WITHDRAW_COAL:   Self.Withdraw(Self.CoalB);
-      EBFState.WITHDRAW_GLOVES: Self.WithdrawTool(Self.GoldGlovesB);
-      EBFState.WITHDRAW_BAG:    Self.WithdrawTool(Self.CoalBagB);
-      EBFState.WITHDRAW_ENERGY: Bank.WithdrawConsumable(ERSConsumable.ENERGY);
+      EBFState.WITHDRAW_ORE:      Self.Withdraw(Self.OreB);
+      EBFState.WITHDRAW_COAL:     Self.Withdraw(Self.CoalB);
+      EBFState.WITHDRAW_GLOVES:   Self.WithdrawTool(Self.GoldGlovesB);
+      EBFState.WITHDRAW_COAL_BAG: Self.WithdrawTool(Self.CoalBagB);
+      EBFState.WITHDRAW_ENERGY:   Bank.WithdrawConsumable(ERSConsumable.ENERGY);
 
       EBFState.DEPOSIT_BARS: Self.DepositBars();
       EBFState.DEPOSIT_ORE, DEPOSIT_COAL: Bank.DepositItems([Self.Ore, Self.Coal], True);
@@ -934,6 +950,8 @@ begin
 
       EBFState.OPEN_COLLECT:   CollectBoxes.WalkOpen();
       EBFState.HANDLE_COLLECT: Self.HandleCollectBox([Self.Ore, Self.Coal]);
+
+      EBFState.OUT_OF_ORE, EBFState.OUT_OF_COAL,
       EBFState.CLOSE_BANK, CLOSE_INTERFACE: RSInterface.Close();
 
       EBFState.CLOSE_GAUGE: Self.CloseGauge();
@@ -954,12 +972,12 @@ begin
       EBFState.ENABLE_RUN: Self.EnableRun();
       EBFState.DRINK_ENERGY: Inventory.Consume(ERSConsumable.ENERGY);
 
-      EBFState.LOAD_ORES: Self.LoadOre();
+      EBFState.LOAD_ORE: Self.LoadOre();
       EBFState.LOAD_COAL: Self.LoadCoal();
       EBFState.WALK_DISPENSER: Self.WalkDispenser();
       EBFState.HOVER_DISPENSER: Self.BarDispenser.Hover();
       EBFState.WAIT_BARS: Self.WaitBars();
-      EBFState.GET_BARS: Self.GetBars();
+      EBFState.GET_BARS, EBFState.GET_BARS_RESYNC: Self.GetBars();
 
       EBFState.HANDLE_MAKE: Self.HandleMake();
       EBFState.HANDLE_LEVEL: Chat.HandleLevelUp();
