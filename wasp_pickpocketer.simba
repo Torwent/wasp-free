@@ -250,7 +250,7 @@ begin
       Self.RogueEquipment += 'Rogue boots';
     end;
 
-    //This are not part of rogue equipment but are useful while thieving
+    //These are not part of rogue equipment but are useful while thieving
     if Inventory.ContainsItem('Thieving cape') then
       Self.RogueEquipment += 'Thieving cape'
     else if Inventory.ContainsItem('Thieving cape(t)') then
@@ -305,11 +305,13 @@ begin
     end;
 
 
-    //This are not part of rogue equipment but are useful while thieving
+    //These are not part of rogue equipment but are useful while thieving
     if Equipment.ContainsItem('Thieving cape') then
       Self.RogueEquipment += 'Thieving cape'
     else if Equipment.ContainsItem('Thieving cape(t)') then
-      Self.RogueEquipment += 'Thieving cape(t)';
+      Self.RogueEquipment += 'Thieving cape(t)'
+    else if Equipment.ContainsItem('Max cape') then
+      Self.RogueEquipment += 'Max cape'; 
 
     //Lava staves for shadow veil spell
     if Equipment.ContainsItem('Lava battlestaff') then
