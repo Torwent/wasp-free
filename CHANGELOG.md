@@ -1,3 +1,12 @@
+## [2.15.19](https://github.com/Torwent/wasp-free/compare/v2.15.18...v2.15.19) (2024-10-25)
+
+
+### Bug Fixes
+
+* **blast furnace:** clean debugging ([e041ce1](https://github.com/Torwent/wasp-free/commit/e041ce1715d8d0dfb9360d23cfb3801d0d81d275))
+
+
+
 ## [2.15.18](https://github.com/Torwent/wasp-free/compare/v2.15.17...v2.15.18) (2024-10-16)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **chompy hunter:** now uses TRSMap and TRSWalkerV2 ([870c2f2](https://github.com/Torwent/wasp-free/commit/870c2f2eed789774b77963855aed55fc1bb2a0b4))
-
-
-
-## [2.15.14](https://github.com/Torwent/wasp-free/compare/v2.15.13...v2.15.14) (2024-09-23)
-
-
-### Bug Fixes
-
-* **nmz:** powerups work again ([dca3dbb](https://github.com/Torwent/wasp-free/commit/dca3dbba75f098c5683136ac9012e8a9a31fb64e))
 
 
 
