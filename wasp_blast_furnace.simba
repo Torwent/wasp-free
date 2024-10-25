@@ -914,7 +914,7 @@ begin
     Self.State := Self.GetState();
 
     WriteLn Self.State;
-    WriteLn('attempts: ', Self.Attempts);
+
     str := ToStr(Self.LoadedCoal);
     while Length(str) < 3 do
     begin
@@ -924,13 +924,7 @@ begin
         str := '0' + str;
     end;
 
-    str := '[' + str + ' Coal]: ' + ToStr(Self.State);
-    case Self.State of
-      EBFState.WITHDRAW_ORE, EBFState.LOAD_ORE, EBFState.DEPOSIT_ORE, EBFState.OUT_OF_ORE:
-        str.Replace('_ORE', ToStr(Self.Ore).Upper().Replace(' ', '_'));
-    end;
-
-    Self.SetAction(str);
+    Self.SetAction('[' + str + ' Coal]: ' + ToStr(Self.State));
 
     case Self.State of
       EBFState.OPEN_POT: Self.OpenPot();
