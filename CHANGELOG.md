@@ -1,3 +1,12 @@
+## [2.15.20](https://github.com/Torwent/wasp-free/compare/v2.15.19...v2.15.20) (2024-11-25)
+
+
+### Bug Fixes
+
+* **kraken:** compatibility update ([fd2b471](https://github.com/Torwent/wasp-free/commit/fd2b47162a5a6262827357e1dce997c25277ac88))
+
+
+
 ## [2.15.19](https://github.com/Torwent/wasp-free/compare/v2.15.18...v2.15.19) (2024-10-25)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **wc:** remove the eastern mahogany tree in priff ([7ec6c4f](https://github.com/Torwent/wasp-free/commit/7ec6c4fae86327a142172827cabc18f1205597c7))
-
-
-
-## [2.15.15](https://github.com/Torwent/wasp-free/compare/v2.15.14...v2.15.15) (2024-09-26)
-
-
-### Bug Fixes
-
-* **chompy hunter:** now uses TRSMap and TRSWalkerV2 ([870c2f2](https://github.com/Torwent/wasp-free/commit/870c2f2eed789774b77963855aed55fc1bb2a0b4))
 
 
 
