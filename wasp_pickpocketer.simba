@@ -646,12 +646,9 @@ begin
     Minimap.WaitMoving;
   end;
 
-  if not MainScreen.WaitArrow(GraveTPA, 3000) then
-    Exit;
-
   repeat
-    if not Minimap.WaitArrow(TPA, 3000) then
-      Exit;  
+    if not Minimap.WaitArrow(TPA, 3000) then Exit;
+    if not MainScreen.WaitArrow(GraveTPA, 3000) then Exit;
     GraveTPA.SortByY(False);
     P := GraveTPA[0];
     P.Y += 5;

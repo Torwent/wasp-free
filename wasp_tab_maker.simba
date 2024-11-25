@@ -423,12 +423,18 @@ type
     TabletSelector: TLabeledCombobox;
     LayoutInfo, TabMakerInfo: TLabel;
     ImagePanel: TPanel;
+    Config: TConfigJSON;
   end;
 
 procedure TTabMakerConfig.StartScript(sender: TObject); override;
 begin
   CurrentNPC := ERSNPC(Self.NPCSelector.GetItemIndex());
   CurrentTablet := Lectern.TABLETS[CurrentLectern][Self.TabletSelector.GetItemIndex()];
+
+  Self.Config.Put('npc', Ord(CurrentNPC));
+  Self.Config.Put('lectern', Ord(CurrentLectern));
+  Self.Config.Put('tablet', ToStr(CurrentTablet));
+
   inherited;
 end;
 
@@ -470,6 +476,15 @@ var
   i: Int32;
 begin
   Self.Setup('Wasp TabMaker');
+  Self.Config.Setup('wasp-tab-maker');
+
+  if Self.Config.Has('lectern') then
+    CurrentLectern := ERSLecternType(Self.Config.GetInt('lectern'));
+  if Self.Config.Has('npc') then
+    CurrentNPC := ERSNPC(Self.Config.GetInt('npc'));
+  if Self.Config.Has('tablet') then
+    CurrentTablet := Self.Config.GetString('tablet');
+
   Self.Start.SetOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -485,8 +500,8 @@ begin
     SetTop(TControl.AdjustToDPI(150));
     SetStyle(csDropDownList);
     AddItemArray(['Standard', 'Ancient', 'Lunar', 'Arceuus']);
-    SetItemIndex(Ord(CurrentLectern)-1);
     Combobox.SetOnChange(@Self.LecternSelectorOnChange);
+    SetItemIndex(Ord(CurrentLectern)-1);
     SetEnabled(False);
   end;
 
@@ -510,9 +525,7 @@ begin
     SetLeft(Self.LecternSelector.GetRight() + TControl.AdjustToDPI(15));
     SetStyle(csDropDownList);
     for i := 0 to High(Lectern.TABLETS[CurrentLectern]) do
-    begin
       AddItem(ToStr(Lectern.TABLETS[CurrentLectern][i]).SentenceCase());
-    end;
   end;
 
   with Self.LayoutInfo do

@@ -127,10 +127,7 @@ begin
   Self.Gear := Equipment.DiscoverAll();
 
   if not Self.Gear.Contains('Sanguinesti staff') then
-  begin
-    CombatHandler.LootHandler.Loot.UpText += 'Shark';
-    CombatHandler.LootHandler.Drops += ['Shark', '', False, False, 5];
-  end;
+    LootHandler.Loot += ['Shark', '', False, False, 5];
 
   i := Self.Gear.Find('expeditious bracelet');
   if i > -1 then Delete(Self.Gear, i, 1);
@@ -139,15 +136,14 @@ begin
   i := Self.Gear.Find('ring of recoil');
   if i > -1 then Delete(Self.Gear, i, 1);
 
-  for i := 0 to High(CombatHandler.LootHandler.Drops) do
+  for i := 0 to High(LootHandler.Loot) do
   begin
-    if CombatHandler.LootHandler.Drops[i].Item = 'Shark' then
-      Continue;
+    if LootHandler.Loot[i].Item = 'Shark' then Continue;
 
-    if CombatHandler.LootHandler.Drops[i].Noted then
-      Self.Loot += 'noted ' + CombatHandler.LootHandler.Drops[i].Item
+    if LootHandler.Loot[i].Noted then
+      Self.Loot += 'noted ' + LootHandler.Loot[i].Item
     else
-      Self.Loot += CombatHandler.LootHandler.Drops[i].Item;
+      Self.Loot += LootHandler.Loot[i].Item;
   end;
 
   if QuickPrayer.Open() then
@@ -311,8 +307,7 @@ function TKrakenKiller.CheckLoot(): Boolean;
 var
   rect: TRectangle;
 begin
-  if MainScreen.IsUpText('>') then
-    ChooseOption.Select('Cancel');
+  if MainScreen.IsUpText('>') then ChooseOption.Select('Cancel');
 
   while Inventory.IsFull() and Inventory.ContainsConsumable(ERSConsumable.FOOD) do
     Inventory.Consume(ERSConsumable.FOOD);
@@ -321,7 +316,7 @@ begin
   Result := True;
 
   rect := Minimap.GetTileMS(Minimap.Center(), [1,1,0]);
-  while CombatHandler.LootHandler.CheckLoot(rect) and Inventory.HasSpace(1) do
+  while LootHandler.CheckLoot(rect) and Inventory.HasSpace(1) do
     Wait(400, 600);
 end;
 
