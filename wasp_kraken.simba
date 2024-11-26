@@ -126,9 +126,6 @@ begin
 
   Self.Gear := Equipment.DiscoverAll();
 
-  if not Self.Gear.Contains('Sanguinesti staff') then
-    LootHandler.Loot += ['Shark', '', False, False, 5];
-
   i := Self.Gear.Find('expeditious bracelet');
   if i > -1 then Delete(Self.Gear, i, 1);
   i := Self.Gear.Find('bracelet of slaughter');
@@ -291,14 +288,15 @@ end;
 
 function TKrakenKiller.BoostMagic(): Boolean;
 var
-  Slot: Int32;
+  slot: Int32;
 begin
-  Result := UseImbuedHeart := Inventory.FindItem('Imbued heart', Slot);
+  Self.UseImbuedHeart := Inventory.FindItem('Imbued heart', slot) or
+                         Inventory.FindItem('Saturated heart', slot);
 
-  if not Result then
-    Exit;
+  Result := Self.UseImbuedHeart;
+  if not Result then Exit;
 
-  Inventory.ClickSlot(Slot);
+  Inventory.ClickSlot(slot);
   ImbuedHeart.Restart(Random(3000, 35000));
   IsAttacking := False
 end;
@@ -585,6 +583,8 @@ begin
     SetTop(TControl.AdjustToDPI(200));
   end;
 
+  LootHandler.Setup('Kraken', 5000);
+  Self.CreateLootManager();
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
