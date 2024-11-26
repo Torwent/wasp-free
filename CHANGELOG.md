@@ -1,3 +1,12 @@
+## [2.15.21](https://github.com/Torwent/wasp-free/compare/v2.15.20...v2.15.21) (2024-11-26)
+
+
+### Bug Fixes
+
+* **sawmill runner:** should now work with ring of elements in the inventory ([89b7d62](https://github.com/Torwent/wasp-free/commit/89b7d627e5ed929ae83a55b1372593da8da4697f))
+
+
+
 ## [2.15.20](https://github.com/Torwent/wasp-free/compare/v2.15.19...v2.15.20) (2024-11-25)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** should now work properly in hosidius ([501b656](https://github.com/Torwent/wasp-free/commit/501b65654fec1794fb5fe606926bd3d6a86a5ab2))
-
-
-
-## [2.15.16](https://github.com/Torwent/wasp-free/compare/v2.15.15...v2.15.16) (2024-09-30)
-
-
-### Bug Fixes
-
-* **wc:** remove the eastern mahogany tree in priff ([7ec6c4f](https://github.com/Torwent/wasp-free/commit/7ec6c4fae86327a142172827cabc18f1205597c7))
 
 
 
