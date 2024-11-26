@@ -155,14 +155,28 @@ begin
       TerminateScript('Can''t find the ring of the elements.');
   end;
 
-  if (Self.TotalActions = 0) or Antiban.BioDice() then
-    option := 'Earth'
-  else
-    option := 'Last';
-
   case Self.RingPosition of
-    INV:   Result := Inventory.ClickItem(Self.Ring, option);
-    EQUIP: Result := Equipment.ClickItem(Self.Ring, option);
+    INV:
+    begin
+      if (Self.TotalActions = 0) then
+      begin
+        if not Inventory.ClickItem(Self.Ring, 'Rub') then Exit;
+        if not WaitUntil(Chat.FindOption('Earth'), 300, 4000) then Exit;
+        Result := Chat.ClickOption('Earth');
+      end
+      else
+        Result := Inventory.ClickItem(Self.Ring, 'Last');
+    end;
+
+    EQUIP:
+    begin
+      if (Self.TotalActions = 0) or Antiban.BioDice() then
+        option := 'Earth'
+      else
+        option := 'Last';
+
+      Result := Equipment.ClickItem(Self.Ring, option);
+    end;
   end;
 
   if Result then
