@@ -1,3 +1,12 @@
+## [2.15.22](https://github.com/Torwent/wasp-free/compare/v2.15.21...v2.15.22) (2024-11-26)
+
+
+### Bug Fixes
+
+* **kraken:** added the loothandler form tab to configure loot ([85cfc44](https://github.com/Torwent/wasp-free/commit/85cfc4409610f4c72c228e59038dee243fbda445))
+
+
+
 ## [2.15.21](https://github.com/Torwent/wasp-free/compare/v2.15.20...v2.15.21) (2024-11-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** should be working properly for lower level bars now ([2994298](https://github.com/Torwent/wasp-free/commit/2994298089c9f399157b457c03c0f6d71f118861))
-
-
-
-## [2.15.17](https://github.com/Torwent/wasp-free/compare/v2.15.16...v2.15.17) (2024-10-05)
-
-
-### Bug Fixes
-
-* **cooker:** should now work properly in hosidius ([501b656](https://github.com/Torwent/wasp-free/commit/501b65654fec1794fb5fe606926bd3d6a86a5ab2))
 
 
 
