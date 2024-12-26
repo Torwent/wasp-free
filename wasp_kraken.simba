@@ -241,18 +241,18 @@ end;
 
 function TKrakenKiller.WakeKraken(): Boolean;
 begin
-  if MainScreen.IsUpText('>') then
-    ChooseOption.Select('Cancel');
-
-  if not Inventory.SetSelectedItem('Fishing explosive') then
-    Exit;
+  if MainScreen.IsUpText('>') then ChooseOption.Select('Cancel');
+  if not Inventory.SetSelectedItem('Fishing explosive') then Exit;
 
   Mouse.Move(Self.SleepyKraken);
   if MainScreen.IsUpText('Whirl') then
   begin
     Mouse.Click(MOUSE_LEFT);
     if MainScreen.DidRedClick() then
-      Result := IsAttacking := WaitUntil(Self.FindRagingKraken() or Self.FinishedSlayerTask(), 100, 7000);
+    begin
+      Result := WaitUntil(Self.FindRagingKraken() or Self.FinishedSlayerTask(), 100, 7000);
+      Self.IsAttacking := Result;
+    end;
   end;
 
   if Result then

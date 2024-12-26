@@ -4,6 +4,7 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 {$I WaspLib/optional/interfaces/mainscreen/lectern.simba}
+{$I WaspLib/optional/handlers/house/house.simba}
 
 type
   ERSNPC = (PHIALS, SERVANT);
@@ -31,9 +32,10 @@ type
   TTabMaker = record(TBaseWalkerScript)
     State: ETabMakerState;
 
-    LecternObj: TRSObject;
-    ServantNPC: TRSNPC;
+    Phials, ServantNPC: TRSNPCV2;
+
     IsTabbing, UsePhials, WaitingServant: Boolean;
+    LecternObj: EHouseObject;
 
     SpellTab, SoftClay, NotedSoftClay: TRSItem;
     NotesSlot, SoftClayCount: Int32;
@@ -43,17 +45,22 @@ type
 procedure TTabMaker.SetupNPC();
 begin
   case CurrentNPC of
-    ERSNPC.PHIALS: Self.UsePhials := True;
+    ERSNPC.PHIALS:
+      begin
+        Self.Phials := TRSNPCV2.Setup(10, 1, 6, [[7704, 37582]]);
+        Self.Phials.SetupUpText(['Phials']);
+        Self.Phials.Finder.Colors += CTS2(4803153, 19, 0.12, 0.19);
+        Self.Phials.Finder.Colors += CTS2(5538225, 19, 0.02, 0.80);
+        Self.Phials.Walker := @Map.Walker;
+        Self.UsePhials := True;
+      end;
 
     ERSNPC.SERVANT:
       begin
-        ServantNPC.Filter.Skip := False;
-        ServantNPC.Filter.Finder := False;
-        ServantNPC.Filter.Walker := False;
-        ServantNPC.Filter.MinimapDot := True;
-
-        ServantNPC.ShapeArray += [[1, 1, 7], 0];
-        ServantNPC.SetupUpText(['Talk-to']);
+        Self.ServantNPC.SetupUpText(['Talk-to']);
+        Self.ServantNPC.Filter.Finder := False;
+        Self.ServantNPC.Filter.Walker := False;
+        Self.ServantNPC.Filter.Minimap := True;
       end;
   end;
 end;
@@ -65,57 +72,35 @@ begin
   Self.SpellTab := CurrentTablet;
 end;
 
-procedure TTabMaker.SetupLectern();
-begin
-  Self.LecternObj.Setup(0.7, 5, [[1871, 102]]);
-  Self.LecternObj.SetupUpText(['Study', 'Lectern']);
-  Self.LecternObj.Filter.Finder := False;
-end;
-
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
-  Self.MinZoom := 0;
-  Self.MaxZoom := 20;
-
-  inherited;
-end;
 
 procedure TTabMaker.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  Antiban.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 20;
+
   inherited;
 
-  Self.RSW.SetupRegions([RSRegions.RIMMINGTON, RSRegions.POH]);
+
+  for Self.LecternObj in STUDY_LECTERNS do
+  begin
+    WriteLn Self.LecternObj;
+    if House.Objects[Self.LecternObj].Coordinates <> [] then
+      Break;
+  end;
+
+  if Self.LecternObj > High(EHouseObject) then
+    TerminateScript('Your house doesn''t seem to have a lectern. Please configure your house layout in the house builder tab!');
+
+  if House.Objects[EHouseObject.EXIT].Coordinates = [] then
+    TerminateScript('Your house doesn''t seem to have a exit portal added. Please configure your house layout in the house builder tab!');
+
+  Map.SetupChunk(Chunk([45,51,47,49], 0));
 
   Self.SetupNPC();
-  Self.SetupLectern();
   Self.SetupItems();
 
   Self.ActionProfit := ItemData.GetAverage(Self.SpellTab) - ItemData.GetAverage(Self.SoftClay);
-
-  if WLSettings.RemoteInput.HUDDebug then
-  begin
-    DebugObjectArray += Self.LecternObj;
-    DebugObjectArray += RSObjects.POHPortal;
-    DebugMMDotArray += RSNPCs.Phials;
-    DebugMMDotArray += ServantNPC;
-  end;
-end;
-
-
-function TTabMaker.EnterHouse(): Boolean;
-  function _EnteringHouse(): Boolean;
-  begin
-    Result := (BankPin.IsOpen() and BankPin.Enter(Login.GetPlayerPin())) or MainScreen.LoadingPOH();
-  end;
-
-begin
-  if RSObjects.POHPortal.WalkSelectOption(['Home', 'Home P']) then
-  begin
-    Minimap.WaitMoving();
-    WaitUntil(_EnteringHouse(), 300, 10000);
-    Result := MainScreen.WaitLoadingPOH(10000);
-  end;
 end;
 
 
@@ -133,11 +118,11 @@ end;
 
 function TTabMaker.PhialsGetSoftClay(): Boolean;
 begin
-  if not RSNPCs.Phials.IsVisible() and not RSW.AtTile(RSNPCs.Phials.Coordinates, 8) then
-    RSW.WebWalk(RSNPCs.Phials.Coordinates, 15, 0.2);
+  if not Self.Phials.IsVisible() and not Map.InRange(Self.Phials.Coordinates, 8) then
+    Map.Walker.WebWalk(Self.Phials.Coordinates, 15, 0.2);
 
   if Inventory.SetSelectedSlot(Self.NotesSlot) and
-     RSNPCs.Phials.SelectOption(['Use']) then
+     Self.Phials.SelectOption(['Use', '>']) then
   begin
     Minimap.WaitFlag();
     Result := WaitUntil(Chat.GetChatTitle() = 'Select an option', 100, 15000);
@@ -182,7 +167,7 @@ end;
 
 function TTabMaker.OpenLectern(): Boolean;
 begin
-  if Self.LecternObj.WalkClick() then
+  if House.Objects[Self.LecternObj].WalkClick() then
   begin
     Minimap.WaitMoving();
     Result := Lectern.IsOpen(8000);
@@ -296,10 +281,10 @@ begin
 
       ETabMakerState.CALL_SERVANT: Self.CallServant();
       ETabMakerState.TALK_SERVANT: Self.TalkServant();
-      ETabMakerState.EXIT_HOUSE: Options.LeaveHouse();
+      ETabMakerState.EXIT_HOUSE: House.Leave();
       ETabMakerState.TALK_TO_PHIALS: Self.PhialsGetSoftClay();
 
-      ETabMakerState.ENTER_HOUSE: Self.EnterHouse();
+      ETabMakerState.ENTER_HOUSE: House.Enter();
 
       ETabMakerState.WAIT_SERVANT: Wait(7000, 8000);
       ETabMakerState.WAIT_TABS: Self.WaitTabs();
@@ -315,91 +300,6 @@ end;
 var
   TabMaker: TTabMaker;
 
-function TRSMinimap.GetCleanMinimap(angle: Double = $FFFF): TMufasaBitmap; override;
-var
-  Bitmap: TMufasaBitmap;
-begin
-  Bitmap := GetMufasaBitmap(BitmapFromClient(Minimap.Bounds));
-  Bitmap.ReplaceColor(0, 1); // We need zero to be unique
-
-  Self.CleanMinimap(Bitmap);
-  Bitmap.ReplaceColor(1, $32A072);
-
-  Result.Init();
-  if angle = $FFFF then
-    angle := Self.GetCompassAngle(False);
-  Bitmap.RotateBitmapEx(angle, False, True, Result);
-  Bitmap.Free();
-end;
-
-function TRSWalkerObject._SelectHelper(action: TStringArray): Boolean; override;
-begin
-  if Self.CurrentUpText <> [] then
-    Self.CurrentUpText := [];
-
-  if Self.RedClicked then
-  begin
-    Self.RedClicked := False;
-    Exit(True);
-  end;
-
-  if ChooseOption.IsOpen() and ChooseOption.Select(action) then
-    Exit(True);
-
-  if MainScreen.IsUpText(action) then
-  begin
-    Mouse.Click(MOUSE_LEFT);
-    Exit(MainScreen.DidRedClick());
-  end;
-
-  Result := ChooseOption.Select(action, MOUSE_LEFT, True, (False));
-end;
-
-//TEMP OPTION FIXES
-function TRSOptions.IsHouseOptionsOpen(): Boolean; override;
-begin
-  Result := SRL.CountColor(CTS2(4630611, 23, 0.04, 0.79), Self.Bounds()) > 115;
-end;
-
-function TRSOptions.CallServant(): Boolean; override;
-var
-  s: String;
-  b: TBox;
-begin
-  if not Self.OpenHouseOptions() then
-    Exit;
-
-  b := Self.Bounds();
-
-  b.X1 += 9;
-  b.Y1 += 185;
-  b.X2 -= 9;
-  b.Y2 -= 50;
-
-  Mouse.Click(b, MOUSE_LEFT);
-  Result := WaitUntil(((s := Chat.GetChatTitle) = 'Demon butler') or
-                       (s = 'Repeat last task?'), SRL.TruncatedGauss(50, 1500), 5000);
-end;
-
-function TRSOptions.LeaveHouse(): Boolean; override;
-var
-  b: TBox;
-begin
-  if not Self.OpenHouseOptions() then
-    Exit;
-
-  b := Self.Bounds();
-
-  b.X1 += 9;
-  b.Y1 += 214;
-  b.X2 -= 9;
-  b.Y2 -= 21;
-
-  Mouse.Click(b, MOUSE_LEFT);
-  Result := WaitUntil(not Self.IsHouseOptionsOpen(), SRL.TruncatedGauss(50, 1500), 5000);
-end;
-
-
 procedure TRSMinimap.SetCompassAngleEx(degrees, accuracy: Double); override;
 begin
   if MainScreen.IsUpText('>') then
@@ -408,20 +308,13 @@ begin
   inherited;
 end;
 
-procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
-begin
-  inherited;
-
-  TabMaker.RSW.Draw(bitmap);
-end;
-
 {$IFDEF SCRIPT_GUI}
 type
   TTabMakerConfig = record(TScriptForm)
     LecternSelector: TLabeledCombobox;
     NPCSelector: TLabeledCombobox;
     TabletSelector: TLabeledCombobox;
-    LayoutInfo, TabMakerInfo: TLabel;
+    TabMakerInfo: TLabel;
     ImagePanel: TPanel;
     Config: TConfigJSON;
   end;
@@ -528,49 +421,15 @@ begin
       AddItem(ToStr(Lectern.TABLETS[CurrentLectern][i]).SentenceCase());
   end;
 
-  with Self.LayoutInfo do
+  with Self.TabMakerInfo do
   begin
     Create(tab);
     SetLeft(Self.NPCSelector.GetLeft());
     SetTop(Self.NPCSelector.GetBottom() + TControl.AdjustToDPI(15));
-    SetHint('House layout instructions.');
-    SetCaption(
-      'Your POH layout must look like this on the minimap, no other room should be seen.'
-      + LineEnding +
-      'If you have more rooms move them 2 or 3 squares away with the house options.'
-      + LineEnding +
-      'You may be able to use other rooms instead of these but I cannot guarantee it will work.'
-      + LineEnding + LineEnding +
-      'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
-      + LineEnding + LineEnding +
-      'Have your larder in the NORTHEAST side of the kitchen.'
-    );
-  end;
-
-  with Self.TabMakerInfo do
-  begin
-    Create(tab);
-    SetLeft(Self.LayoutInfo.GetLeft());
-    SetTop(Self.LayoutInfo.GetBottom() + TControl.AdjustToDPI(95));
     SetHint('NPC mode instructions.');
   end;
 
-  DownloadToFile(
-    'https://enqlpchobniylwpsjcqc.supabase.co/storage/v1/object/public/imgs/scripts/bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15/assets/kitchen.png',
-    WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png'
-  );
-
-  with Self.ImagePanel do
-  begin
-    Create(tab);
-    SetTop(Self.TabletSelector.GetTop() + TControl.AdjustToDPI(15));
-    SetLeft(Self.TabletSelector.GetRight() + TControl.AdjustToDPI(90));
-    SetWidth(TControl.AdjustToDPI(240));
-    SetHeight(TControl.AdjustToDPI(240));
-    SetHint('House layout. Make sure your house layout looks like this!');
-    SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png');
-  end;
-
+  Self.CreateHouseBuilder();
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();

@@ -410,7 +410,7 @@ begin
 end;
 
 
-function TBlastFurnace.ProHoverCoalBag(): Boolean;
+function TBlastFurnace.PreHoverCoalBag(): Boolean;
 begin
   if not UseCoalBag then Exit;
   if not Inventory.ContainsItem(Self.CoalBag) then Exit;
@@ -455,7 +455,7 @@ begin
   Self.PotFull := True;
   Self.TotalProfit -= count * Self.Prices.Ore;
 
-  Self.ProHoverCoalBag();
+  Self.PreHoverCoalBag();
 end;
 
 function TBlastFurnace.LoadCoal(): Boolean;
@@ -469,7 +469,7 @@ begin
   Self.LoadedCoal += count;
   Self.TotalProfit -= count * Self.Prices.Coal;
 
-  Self.ProHoverCoalBag();
+  Self.PreHoverCoalBag();
 end;
 
 
