@@ -1,3 +1,12 @@
+## [2.15.23](https://github.com/Torwent/wasp-free/compare/v2.15.22...v2.15.23) (2024-12-26)
+
+
+### Bug Fixes
+
+* **tab maker:** now uses `TRSMap` and `THouseHandler` ([eca999c](https://github.com/Torwent/wasp-free/commit/eca999cb19f05e0a9e124048009df1a4a17d0df1))
+
+
+
 ## [2.15.22](https://github.com/Torwent/wasp-free/compare/v2.15.21...v2.15.22) (2024-11-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** clean debugging ([e041ce1](https://github.com/Torwent/wasp-free/commit/e041ce1715d8d0dfb9360d23cfb3801d0d81d275))
-
-
-
-## [2.15.18](https://github.com/Torwent/wasp-free/compare/v2.15.17...v2.15.18) (2024-10-16)
-
-
-### Bug Fixes
-
-* **blast furnace:** should be working properly for lower level bars now ([2994298](https://github.com/Torwent/wasp-free/commit/2994298089c9f399157b457c03c0f6d71f118861))
 
 
 
