@@ -46,8 +46,8 @@ type
 procedure TAntiban.Setup(); override;
 begin
   Self.Skills := [ERSSkill.TOTAL];
-  Self.MinZoom := 15;
-  Self.MaxZoom := 40;
+  Self.MinZoom := 0;
+  Self.MaxZoom := 20;
 
   inherited;
 end;
@@ -298,11 +298,13 @@ var
 type
   TSawmillRunnerConfig = record(TScriptForm)
     PlankSelector: TLabeledCombobox;
+    Config: TConfigJSON;
   end;
 
 procedure TSawmillRunnerConfig.StartScript(sender: TObject); override;
 begin
   CurrentTask := ERSPlankType(Self.PlankSelector.GetItemIndex());
+  Self.Config.Put('plank', Ord(CurrentTask));
 
   inherited;
 end;
@@ -312,7 +314,11 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Sawmill runner');
+  Self.Config.Setup('wasp-sawmill-runner');
   Self.Start.setOnClick(@Self.StartScript);
+
+  if Self.Config.Has('plank') then
+    CurrentTask := ERSPlankType(Self.Config.GetInt('plank'));
 
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
@@ -326,8 +332,8 @@ begin
     SetLeft(TControl.AdjustToDPI(40));
     SetTop(TControl.AdjustToDPI(170));
     SetStyle(csDropDownList);
-    AddItemArray(['Plank', 'Oak planks', 'Teak planks', 'Mahogany planks']);
-    SetItemIndex(2);
+    AddItemArray(['Normal', 'Oak', 'Teak', 'Mahogany']);
+    SetItemIndex(Ord(CurrentTask));
   end;
 
 
