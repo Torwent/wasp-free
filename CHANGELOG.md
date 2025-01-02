@@ -1,3 +1,12 @@
+## [2.15.24](https://github.com/Torwent/wasp-free/compare/v2.15.23...v2.15.24) (2025-01-02)
+
+
+### Bug Fixes
+
+* **sawmill runner:** now saves settings ([e122f21](https://github.com/Torwent/wasp-free/commit/e122f21639af99485abb77193a9ba9625e2edf14))
+
+
+
 ## [2.15.23](https://github.com/Torwent/wasp-free/compare/v2.15.22...v2.15.23) (2024-12-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **kraken:** compatibility update ([fd2b471](https://github.com/Torwent/wasp-free/commit/fd2b47162a5a6262827357e1dce997c25277ac88))
-
-
-
-## [2.15.19](https://github.com/Torwent/wasp-free/compare/v2.15.18...v2.15.19) (2024-10-25)
-
-
-### Bug Fixes
-
-* **blast furnace:** clean debugging ([e041ce1](https://github.com/Torwent/wasp-free/commit/e041ce1715d8d0dfb9360d23cfb3801d0d81d275))
 
 
 
