@@ -1,5 +1,5 @@
 {$DEFINE SCRIPT_ID := 'f6fc217a-3b03-44e1-8fa7-662dfb48f6d7'}
-{$DEFINE SCRIPT_REVISION := '41'}
+{$DEFINE SCRIPT_REVISION := '42'}
 {$IFNDEF SCRIPT_CHAIN}
   {$DEFINE SCRIPT_GUI}
   {$I SRL-T/osr.simba}
@@ -98,8 +98,13 @@ begin
 
   if Result then
     Self.TotalActions += 1;
+  if Result then
+    begin
+    {$IFNDEF SCRIPT_CHAIN}
+      XPBar.EarnedXP();
+    {$ENDIF}
+    end;
 end;
-
 
 function TAlcher.Terminate(): Boolean; override;
 begin
