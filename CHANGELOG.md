@@ -1,3 +1,12 @@
+## [2.15.25](https://github.com/Torwent/wasp-free/compare/v2.15.24...v2.15.25) (2025-01-05)
+
+
+### Bug Fixes
+
+* **sawmill runner:** small fix for sawmill runner ([19b3864](https://github.com/Torwent/wasp-free/commit/19b3864aed7ef8bfd9efb8731b9ba4f697a8ee5e))
+
+
+
 ## [2.15.24](https://github.com/Torwent/wasp-free/compare/v2.15.23...v2.15.24) (2025-01-02)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **sawmill runner:** should now work with ring of elements in the inventory ([89b7d62](https://github.com/Torwent/wasp-free/commit/89b7d627e5ed929ae83a55b1372593da8da4697f))
-
-
-
-## [2.15.20](https://github.com/Torwent/wasp-free/compare/v2.15.19...v2.15.20) (2024-11-25)
-
-
-### Bug Fixes
-
-* **kraken:** compatibility update ([fd2b471](https://github.com/Torwent/wasp-free/commit/fd2b47162a5a6262827357e1dce997c25277ac88))
 
 
 
