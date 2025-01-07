@@ -1,3 +1,12 @@
+## [2.15.26](https://github.com/Torwent/wasp-free/compare/v2.15.25...v2.15.26) (2025-01-07)
+
+
+### Bug Fixes
+
+* **enchanter:** dragon necklaces ([8b0d5b0](https://github.com/Torwent/wasp-free/commit/8b0d5b08e1ef405c0bf219c482a22797550afe7e))
+
+
+
 ## [2.15.25](https://github.com/Torwent/wasp-free/compare/v2.15.24...v2.15.25) (2025-01-05)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **kraken:** added the loothandler form tab to configure loot ([85cfc44](https://github.com/Torwent/wasp-free/commit/85cfc4409610f4c72c228e59038dee243fbda445))
-
-
-
-## [2.15.21](https://github.com/Torwent/wasp-free/compare/v2.15.20...v2.15.21) (2024-11-26)
-
-
-### Bug Fixes
-
-* **sawmill runner:** should now work with ring of elements in the inventory ([89b7d62](https://github.com/Torwent/wasp-free/commit/89b7d627e5ed929ae83a55b1372593da8da4697f))
 
 
 
