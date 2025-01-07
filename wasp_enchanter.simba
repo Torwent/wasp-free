@@ -395,11 +395,17 @@ type
   TEnchanterConfig = record(TScriptForm)
     GemSelector: TLabeledCombobox;
     JewelSelector: TLabeledCombobox;
+    Config: TConfigJSON;
   end;
 
 procedure TEnchanterConfig.StartScript(sender: TObject); override;
 begin
   CurrentJewel := Self.GemSelector.getText().Replace('Red t', 'T') + ' ' + Self.JewelSelector.getText().ToLower();
+  Self.Config.Put('gem', Self.GemSelector.GetItemIndex());
+  Self.Config.Put('jewel', Self.JewelSelector.GetItemIndex());
+
+  if CurrentJewel = 'Dragonstone necklace' then
+    CurrentJewel := 'Dragon necklace';
   inherited;
 end;
 
@@ -408,6 +414,8 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Enchanter');
+  Self.Config.Setup('wasp-enchanter');
+
   Self.Start.SetOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -423,7 +431,10 @@ begin
     SetTop(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
     AddItemArray(GEM_TYPE);
-    SetItemIndex(3);
+    if Self.Config.Has('gem') then
+      SetItemIndex(Self.Config.GetInt('gem'))
+    else
+      SetItemIndex(3);
   end;
 
   with Self.JewelSelector do
@@ -435,7 +446,10 @@ begin
     SetWidth(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
     AddItemArray(JEWELRY_TYPE);
-    SetItemIndex(0);
+    if Self.Config.Has('jewel') then
+      SetItemIndex(Self.Config.GetInt('jewel'))
+    else
+      SetItemIndex(0);
   end;
 
   Self.CreateAntibanManager();
