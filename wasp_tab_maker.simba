@@ -83,11 +83,8 @@ begin
 
 
   for Self.LecternObj in STUDY_LECTERNS do
-  begin
-    WriteLn Self.LecternObj;
     if House.Objects[Self.LecternObj].Coordinates <> [] then
       Break;
-  end;
 
   if Self.LecternObj > High(EHouseObject) then
     TerminateScript('Your house doesn''t seem to have a lectern. Please configure your house layout in the house builder tab!');
