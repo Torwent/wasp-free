@@ -1,3 +1,12 @@
+## [2.15.27](https://github.com/Torwent/wasp-free/compare/v2.15.26...v2.15.27) (2025-01-14)
+
+
+### Bug Fixes
+
+* **tab maker:** remove leftover debugging ([c95c6ec](https://github.com/Torwent/wasp-free/commit/c95c6eca5e654596da5ec820571890ff1d61f513))
+
+
+
 ## [2.15.26](https://github.com/Torwent/wasp-free/compare/v2.15.25...v2.15.26) (2025-01-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **tab maker:** now uses `TRSMap` and `THouseHandler` ([eca999c](https://github.com/Torwent/wasp-free/commit/eca999cb19f05e0a9e124048009df1a4a17d0df1))
-
-
-
-## [2.15.22](https://github.com/Torwent/wasp-free/compare/v2.15.21...v2.15.22) (2024-11-26)
-
-
-### Bug Fixes
-
-* **kraken:** added the loothandler form tab to configure loot ([85cfc44](https://github.com/Torwent/wasp-free/commit/85cfc4409610f4c72c228e59038dee243fbda445))
 
 
 
