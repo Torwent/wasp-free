@@ -1,4 +1,13 @@
-## [2.15.27](https://github.com/Torwent/wasp-free/compare/v2.15.26...v2.15.27) (2025-01-14)
+## [2.15.28](https://github.com/Torwent/wasp-free/compare/v2.15.27...v2.15.28) (2025-01-15)
+
+
+### Bug Fixes
+
+* **cooker:** emerald benedict should be working properly now ([5ff1459](https://github.com/Torwent/wasp-free/commit/5ff14590e338be88987caa6d8ecb8275f30b796c))
+
+
+
+## [2.15.27](https://github.com/Torwent/wasp-free/compare/v2.15.26...v2.15.27) (2025-01-13)
 
 
 ### Bug Fixes
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **sawmill runner:** now saves settings ([e122f21](https://github.com/Torwent/wasp-free/commit/e122f21639af99485abb77193a9ba9625e2edf14))
-
-
-
-## [2.15.23](https://github.com/Torwent/wasp-free/compare/v2.15.22...v2.15.23) (2024-12-26)
-
-
-### Bug Fixes
-
-* **tab maker:** now uses `TRSMap` and `THouseHandler` ([eca999c](https://github.com/Torwent/wasp-free/commit/eca999cb19f05e0a9e124048009df1a4a17d0df1))
 
 
 
