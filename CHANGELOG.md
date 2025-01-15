@@ -1,3 +1,12 @@
+## [2.15.29](https://github.com/Torwent/wasp-free/compare/v2.15.28...v2.15.29) (2025-01-15)
+
+
+### Bug Fixes
+
+* **cooker:** rework last commit ([f081224](https://github.com/Torwent/wasp-free/commit/f081224df73141914dbe90897158c52725b7bde2))
+
+
+
 ## [2.15.28](https://github.com/Torwent/wasp-free/compare/v2.15.27...v2.15.28) (2025-01-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **sawmill runner:** small fix for sawmill runner ([19b3864](https://github.com/Torwent/wasp-free/commit/19b3864aed7ef8bfd9efb8731b9ba4f697a8ee5e))
-
-
-
-## [2.15.24](https://github.com/Torwent/wasp-free/compare/v2.15.23...v2.15.24) (2025-01-02)
-
-
-### Bug Fixes
-
-* **sawmill runner:** now saves settings ([e122f21](https://github.com/Torwent/wasp-free/commit/e122f21639af99485abb77193a9ba9625e2edf14))
 
 
 
