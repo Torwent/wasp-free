@@ -120,6 +120,8 @@ begin
 end;
 
 procedure TCooker.SetupLocation();
+var
+  i: Int32;
 begin
   case CurrentLocation of
     ERSLocation.HOSIDIUS:
@@ -136,8 +138,14 @@ begin
     ERSLocation.ROGUES_DEN:
     begin
       Map.SetupChunk(ERSChunk.ROGUES_DEN);
-      Objects.Setup(Map.Objects(), @Map.Walker);
-      NPCs.Setup(Map.NPCs(), @Map.Walker);
+      Banks.ObjectsCache += TRSObjectV2.Setup(0.7, 5, [[21128, 30542]]);
+      i := High(Banks.ObjectsCache);
+      Banks.ObjectsCache[i].SetupUpText(['Emerald', 'Benedict']);
+      Banks.ObjectsCache[i].Walker := @Map.Walker;
+      Banks.ObjectsCache[i].Finder.Colors += CTS2(3430243, 19, 0.15, 0.81);
+      Banks.ObjectsCache[i].Finder.Colors += CTS2(6523832, 17, 0.03, 0.89);
+      Banks.MapObjects += @Banks.ObjectsCache[i];
+
       Self.CookingObj := TRSObjectV2.Setup(0.8,1, [[21132,30538]]);
       Self.CookingObj.SetupUpText('Fire');
       Self.CookingObj.Finder.Colors += CTS2(3317724, 14, 0.23, 1.65);
