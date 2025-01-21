@@ -319,6 +319,8 @@ begin
 
   if (Result = 0) and (attempt < 20) then   // increased to 20 attemps to count money
   begin
+    if RSInterface.IsOpen() then
+      RSInterface.Close();
     Wait(600);
     Exit(Self.CountMoney(attempt+1));
   end;
@@ -912,8 +914,6 @@ begin
 
   repeat
     Self.State := Self.GetState();
-
-    WriteLn Self.State;
 
     str := ToStr(Self.LoadedCoal);
     while Length(str) < 3 do
