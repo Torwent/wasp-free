@@ -1,3 +1,12 @@
+## [2.15.30](https://github.com/Torwent/wasp-free/compare/v2.15.29...v2.15.30) (2025-01-21)
+
+
+### Bug Fixes
+
+* **blast furnace:** small fix for when reading money ([b291f0b](https://github.com/Torwent/wasp-free/commit/b291f0b6419c707c973f79f621180854e40a60fb))
+
+
+
 ## [2.15.29](https://github.com/Torwent/wasp-free/compare/v2.15.28...v2.15.29) (2025-01-15)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **enchanter:** dragon necklaces ([8b0d5b0](https://github.com/Torwent/wasp-free/commit/8b0d5b08e1ef405c0bf219c482a22797550afe7e))
-
-
-
-## [2.15.25](https://github.com/Torwent/wasp-free/compare/v2.15.24...v2.15.25) (2025-01-05)
-
-
-### Bug Fixes
-
-* **sawmill runner:** small fix for sawmill runner ([19b3864](https://github.com/Torwent/wasp-free/commit/19b3864aed7ef8bfd9efb8731b9ba4f697a8ee5e))
 
 
 
