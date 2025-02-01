@@ -202,7 +202,7 @@ begin
   case CurrentLocation of
     ERSLocation.ROGUES_DEN:
       begin
-        playerBox := Box(Mainscreen.Center(), 100, 100);
+        playerBox := Box(Mainscreen.Center, 100, 100);
         if SRL.FindColors(tpa, CTS2(2730450, 13, 0.09, 1.45), playerBox) > 0 then
           fire += tpa;
         if SRL.FindColors(tpa, CTS2(15432, 1, 0.15, 0.01), playerBox) > 0 then
