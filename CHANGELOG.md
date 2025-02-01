@@ -1,3 +1,12 @@
+## [2.15.31](https://github.com/Torwent/wasp-free/compare/v2.15.30...v2.15.31) (2025-02-01)
+
+
+### Bug Fixes
+
+* compatibility update with latest SRL-T and WaspLib ([b36d6a4](https://github.com/Torwent/wasp-free/commit/b36d6a47b5b6b1406fbe1662d287e609f5824b87))
+
+
+
 ## [2.15.30](https://github.com/Torwent/wasp-free/compare/v2.15.29...v2.15.30) (2025-01-21)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **tab maker:** remove leftover debugging ([c95c6ec](https://github.com/Torwent/wasp-free/commit/c95c6eca5e654596da5ec820571890ff1d61f513))
-
-
-
-## [2.15.26](https://github.com/Torwent/wasp-free/compare/v2.15.25...v2.15.26) (2025-01-07)
-
-
-### Bug Fixes
-
-* **enchanter:** dragon necklaces ([8b0d5b0](https://github.com/Torwent/wasp-free/commit/8b0d5b08e1ef405c0bf219c482a22797550afe7e))
 
 
 
