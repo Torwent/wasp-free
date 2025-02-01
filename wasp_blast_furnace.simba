@@ -174,7 +174,7 @@ end;
 
 procedure TBlastFurnace.SetMoneyBounds(); //updated bounds 17 August 2024
 begin
-  Self.MoneyBounds := InterfaceArea.Bounds();
+  Self.MoneyBounds := InterfaceArea.Bounds;
   Self.MoneyBounds.Y1 += 48;
   Self.MoneyBounds.X2 -= 4;
   Self.MoneyBounds.X1 := Self.MoneyBounds.X2 - 43;
@@ -291,8 +291,8 @@ end;
 function TBlastFurnace.GaugeIsOpen(): Boolean;
 begin
   Result :=
-    (SRL.CountColor(CTS2(1585365, 10, 0.04, 1.06), MainScreen.Bounds()) +
-     SRL.CountColor(CTS2(2537502, 9, 0.07, 0.30), MainScreen.Bounds())) > 3000;
+    (SRL.CountColor(CTS2(1585365, 10, 0.04, 1.06), MainScreen.Bounds) +
+     SRL.CountColor(CTS2(2537502, 9, 0.07, 0.30), MainScreen.Bounds)) > 3000;
 end;
 
 function TBlastFurnace.CloseGauge(): Boolean;
@@ -300,7 +300,7 @@ var
   tpa: TPointArray;
   b: TBox;
 begin
-  b := MainScreen.Bounds();
+  b := MainScreen.Bounds;
   b.X1 := B.X2 - Round(B.X2/3);
   b.Y2 := Round(B.Y2/3);
   if SRL.FindColors(tpa, CTS1(39167, 0), b) = 0 then
@@ -312,8 +312,11 @@ end;
 
 function TBlastFurnace.CountMoney(attempt: Int32 = 0): Int32;
 begin
-  while XPBar.Bounds().Expand(0, 10).Contains(Mouse.Position) do
-    Mouse.Move(MainScreen.Bounds(), True);
+  while XPBar.Bounds.Expand(0, 10).Contains(Mouse.Position()) do
+  begin
+    WriteLn 'Moving mouse out of the XPBar';
+    Mouse.Move(MainScreen.Bounds, True);
+  end;
 
   Result := SRL.GetItemAmount(Self.MoneyBounds);
 
@@ -456,7 +459,6 @@ begin
   Self.LoadedCoal -= (count * Self.CoalRatio);
   Self.PotFull := True;
   Self.TotalProfit -= count * Self.Prices.Ore;
-
   Self.PreHoverCoalBag();
 end;
 
@@ -616,7 +618,7 @@ begin
     Exit;
 
   if Inventory.ClickSlot(slot, 'Fill') then
-    Result := Inventory.ItemInterface.WaitFade(slot)
+    Result := Inventory.Items.WaitFade(slot)
   else
     Self.RightClickCoalBag();
 
@@ -670,7 +672,7 @@ begin
     Exit;
 
   if Inventory.ClickSlot(slot, 'Fill') then
-    Result := Inventory.ItemInterface.WaitFade(slot);
+    Result := Inventory.Items.WaitFade(slot);
 
   if Result then
     Self.CoalBagAmount := amount
@@ -914,6 +916,8 @@ begin
 
   repeat
     Self.State := Self.GetState();
+
+    WriteLn Self.State;
 
     str := ToStr(Self.LoadedCoal);
     while Length(str) < 3 do

@@ -13,6 +13,7 @@ type
   );
 
 var
+  CurrentBank: EBankChunk = EBankChunk.GRAND_EXCHANGE;
   CurrentRemains: ERSRemains := ERSRemains.MALICIOUS_ASHES;
 
 type
@@ -46,15 +47,6 @@ type
     RemainsLeft: Int32;
     SpellCooldown, NoRunes: Boolean;
   end;
-
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.PRAYER, ERSSkill.TOTAL];
-  Self.MinZoom := 10;
-  Self.MaxZoom := 90;
-
-  inherited;
-end;
 
 procedure TRemainOfferer.SetupSpell();
 begin
@@ -100,8 +92,15 @@ end;
 
 procedure TRemainOfferer.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  Antiban.Skills := [ERSSkill.PRAYER, ERSSkill.TOTAL];
+  Antiban.MinZoom := 10;
+  Antiban.MaxZoom := 90;
+
   inherited;
-  Self.RSW.SetupNamedRegion();
+
+  Map.SetupChunk(CurrentBank.Get());
+  Objects.Setup(Map.Objects(), @Map.Walker);
+  NPCs.Setup(Map.NPCs(), @Map.Walker);
 
   Self.SetupSpell();
   Self.SetupRemains();
@@ -258,12 +257,12 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      EOffererState.OPEN_BANK:        Bank.WalkOpen();
+      EOffererState.OPEN_BANK:        Banks.WalkOpen();
       EOffererState.WITHDRAW_WRATH:   Self.Withdraw(Self.WrathRune);
       EOffererState.WITHDRAW_ALT:     Self.Withdraw(Self.AltRune);
       EOffererState.WITHDRAW_REMAINS: Self.Withdraw(Self.Remains);
 
-      EOffererState.OPEN_COLLECT:   CollectBox.WalkOpen();
+      EOffererState.OPEN_COLLECT:   CollectBoxes.WalkOpen();
       EOffererState.HANDLE_COLLECT: Self.HandleCollectBox([Self.WrathRune.Item, Self.AltRune.Item, Self.Remains.Item]);
 
       EOffererState.CLOSE_INTERFACE: RSInterface.Close();
@@ -287,12 +286,17 @@ var
 {$IFDEF SCRIPT_GUI}
 type
   TOffererConfig = record(TScriptForm)
-    RemainSelector: TLabeledCombobox;
+    BankSelector, RemainSelector: TLabeledCombobox;
+    Config: TConfigJSON;
   end;
 
 procedure TOffererConfig.StartScript(sender: TObject); override;
 begin
+  CurrentBank := EBankChunk(Self.BankSelector.GetItemIndex());
   CurrentRemains := ERSRemains(Self.RemainSelector.GetItemIndex());
+
+  Self.Config.Put('remains', Ord(CurrentRemains));
+
   inherited;
 end;
 
@@ -301,6 +305,11 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Offerer');
+  Self.Config.Setup('wasp-offerer');
+
+  if Self.Config.Has('remains') then
+    CurrentRemains := ERSRemains(Self.Config.GetInt('remains'));
+
   Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -308,24 +317,17 @@ begin
 
   Self.CreateAccountManager(tab);
 
-  with Self.RemainSelector do
-  begin
-    Create(tab);
-    SetCaption('Remains:');
-    SetLeft(TControl.AdjustToDPI(30));
-    SetTop(TControl.AdjustToDPI(200));
-    SetWidth(TControl.AdjustToDPI(200));
-    SetStyle(csDropDownList);
-    AddItemArray(['Fiendish ashes', 'Vile ashes', 'Malicious ashes',
-                  'Abyssal ashes', 'Infernal ashes', 'Babydragon bones',
-                  'Wyrm bones', 'Dragon bones', 'Wyvern bones', 'Drake bones',
-                  'Lava dragon bones', 'Hydra bones', 'Dagannoth bones',
-                  'Superior dragon bones']);
-    SetItemIndex(Ord(CurrentRemains));
-  end;
+  Self.BankSelector := Self.CreateBankSettingsV2(tab, [50, 200], [0,0]);
+  Self.RemainSelector.Create(tab, 'Remains:', 'Pick your type of remains.', [0, 30], [0,0], [Self.BankSelector.GetLeft(), Self.BankSelector.GetBottom()], True);
+  Self.RemainSelector.AddItemArray([
+    'Fiendish ashes', 'Vile ashes', 'Malicious ashes', 'Abyssal ashes',
+    'Infernal ashes', 'Babydragon bones', 'Wyrm bones', 'Dragon bones',
+    'Wyvern bones', 'Drake bones', 'Lava dragon bones', 'Hydra bones',
+    'Dagannoth bones', 'Superior dragon bones'
+  ]);
+  Self.RemainSelector.SetItemIndex(Ord(CurrentRemains));
 
   Self.CreateAntibanManager();
-  Self.CreateBankSettings();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
 

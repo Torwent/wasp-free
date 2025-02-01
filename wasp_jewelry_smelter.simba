@@ -406,10 +406,15 @@ type
 
 procedure TJewelryCrafterConfig.StartScript(sender: TObject); override;
 begin
-  CurrentMetal := ERSMetalType(Self.BarTypeSelector.GetItemIndex());
-  CurrentStone := ERSStoneType(Self.StoneTypeSelector.GetItemIndex());
-  CurrentJewel := ERSJewelType(Self.JewelTypeSelector.GetItemIndex());
   CurrentFurnace := ERSFurnace(Self.FurnaceSelector.GetItemIndex());
+  CurrentJewel := ERSJewelType(Self.JewelTypeSelector.GetItemIndex());
+  CurrentStone := ERSStoneType(Self.StoneTypeSelector.GetItemIndex());
+  CurrentMetal := ERSMetalType(Self.BarTypeSelector.GetItemIndex());
+
+  Self.Config.Put('furnace', Ord(CurrentFurnace));
+  Self.Config.Put('jewel', Ord(CurrentJewel));
+  Self.Config.Put('stone', Ord(CurrentStone));
+  Self.Config.Put('metal', Ord(CurrentMetal));
 
   inherited;
 end;
@@ -461,6 +466,15 @@ begin
   Self.Config.Setup('wasp-jewelry-crafter');
   Self.Start.SetOnClick(@Self.StartScript);
 
+  if Self.Config.Has('furnace') then
+    CurrentFurnace := ERSFurnace(Self.Config.GetInt('furnace'));
+  if Self.Config.Has('jewel') then
+    CurrentJewel := ERSJewelType(Self.Config.GetInt('jewel'));
+  if Self.Config.Has('stone') then
+    CurrentStone := ERSStoneType(Self.Config.GetInt('stone'));
+  if Self.Config.Has('bar') then
+    CurrentMetal := ERSMetalType(Self.Config.GetInt('bar'));
+
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
 
@@ -474,14 +488,9 @@ begin
     SetTop(TControl.AdjustToDPI(200));
     SetStyle(csDropDownList);
     AddItemArray([
-      //'Al Kharid',
       'Edgeville', 'Falador', 'Prifddinnas'
     ]);
-
-    if Self.Config.Has('furnace') then
-      SetItemIndex(Self.Config.GetInt('furnace'))
-    else
-      SetItemIndex(Ord(CurrentFurnace));
+    SetItemIndex(Ord(CurrentFurnace));
   end;
 
   with Self.JewelTypeSelector do
@@ -495,10 +504,7 @@ begin
       'Tiara', 'Holy symbol', 'Unholy symbol', 'Bolts', 'Ring',
       'Necklace', 'Bracelet', 'Amulet'
     ]);
-    if Self.Config.Has('jewel') then
-      SetItemIndex(Self.Config.GetInt('jewel'))
-    else
-      SetItemIndex(Ord(CurrentJewel));
+    SetItemIndex(Ord(CurrentJewel));
     ComboBox.SetOnChange(@Self.JewelSelectorOnChange);
   end;
 
@@ -513,10 +519,7 @@ begin
       'None', 'Opal', 'Jade', 'Red topaz', 'Sapphire', 'Emerald',
       'Ruby', 'Diamond', 'Dragonstone', 'Onyx', 'Zenyte'
     ]);
-    if Self.Config.Has('stone') then
-      SetItemIndex(Self.Config.GetInt('stone'))
-    else
-      SetItemIndex(Ord(CurrentStone));
+    SetItemIndex(Ord(CurrentStone));
     ComboBox.SetOnChange(@Self.StoneSelectorOnChange);
   end;
 
@@ -528,10 +531,7 @@ begin
     SetTop(Self.StoneTypeSelector.GetTop());
     SetStyle(csDropDownList);
     AddItemArray(['Silver', 'Gold']);
-    if Self.Config.Has('bar') then
-      SetItemIndex(Self.Config.GetInt('bar'))
-    else
-      SetItemIndex(Ord(CurrentMetal));
+    SetItemIndex(Ord(CurrentMetal));
     SetEnabled(False);
   end;
 

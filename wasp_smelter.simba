@@ -198,7 +198,7 @@ begin
   Self.BankEmpty := Self.BankEmpty and Bank.IsOpen();
 
   if Self.BankEmpty then
-    SaveScreenshot('bankempty' + DIRECTORYSEPARATOR + 'bankempty', MainScreen.Bounds());
+    SaveScreenshot('bankempty' + DIRECTORYSEPARATOR + 'bankempty', MainScreen.Bounds);
 
   if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
     Self.CollectEmpty := False;

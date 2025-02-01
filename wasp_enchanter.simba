@@ -15,6 +15,7 @@ const
   JEWELRY_TYPE: TStringArray = ['Ring', 'Necklace', 'Bracelet', 'Amulet'];
 
 var
+  CurrentBank: EBankChunk = EBankChunk.GRAND_EXCHANGE;
   CurrentJewel: TRSItem = 'Ruby necklace';
 
 type
@@ -50,16 +51,6 @@ type
     CosmicRune, RegularJewel, EnchantedJewel: TRSBankItem;
     Enchanting: Boolean;
   end;
-
-procedure TAntiban.Setup(); override;
-begin
-  Self.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
-  Self.MinZoom := 15;
-  Self.MaxZoom := 85;
-
-  inherited;
-end;
-
 
 procedure TEnchanter.SetSpell();
 var
@@ -216,8 +207,15 @@ end;
 
 procedure TEnchanter.Init(maxActions: UInt32; maxTime: UInt64); override;
 begin
+  Antiban.Skills := [ERSSkill.MAGIC, ERSSkill.TOTAL];
+  Antiban.MinZoom := 15;
+  Antiban.MaxZoom := 85;
+
   inherited;
-  Self.RSW.SetupNamedRegion();
+
+  Map.SetupChunk(CurrentBank.Get());
+  Objects.Setup(Map.Objects(), @Map.Walker);
+  NPCs.Setup(Map.NPCs(), @Map.Walker);
 
   Self.CosmicRune := TRSBankItem.Setup('Cosmic rune', Bank.QUANTITY_ALL, False);
   Self.SetSpell();
@@ -358,12 +356,12 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      EEnchanterState.OPEN_BANK: Bank.WalkOpen();
+      EEnchanterState.OPEN_BANK: Banks.WalkOpen();
       EEnchanterState.WITHDRAW_TOOL: Self.Withdraw(Self.CosmicRune);
       EEnchanterState.WITHDRAW_MATERIAL: Self.Withdraw(Self.RegularJewel);
       EEnchanterState.DEPOSIT_PRODUCT: Self.Deposit();
 
-      EEnchanterState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EEnchanterState.OPEN_COLLECT: CollectBoxes.WalkOpen();
       EEnchanterState.HANDLE_COLLECT: Self.HandleCollectBox([Self.RegularJewel.Item, Self.CosmicRune.Item]);
       EEnchanterState.CLOSE_INTERFACE: RSInterface.Close();
 
@@ -395,6 +393,7 @@ type
   TEnchanterConfig = record(TScriptForm)
     GemSelector: TLabeledCombobox;
     JewelSelector: TLabeledCombobox;
+    BankSelector: TLabeledComboBox;
     Config: TConfigJSON;
   end;
 
@@ -406,6 +405,9 @@ begin
 
   if CurrentJewel = 'Dragonstone necklace' then
     CurrentJewel := 'Dragon necklace';
+
+  CurrentBank := EBankChunk(Self.BankSelector.GetItemIndex());
+
   inherited;
 end;
 
@@ -423,37 +425,23 @@ begin
 
   Self.CreateAccountManager(tab);
 
-  with Self.GemSelector do
-  begin
-    Create(tab);
-    SetCaption('Gem type:');
-    SetLeft(TControl.AdjustToDPI(50));
-    SetTop(TControl.AdjustToDPI(200));
-    SetStyle(csDropDownList);
-    AddItemArray(GEM_TYPE);
-    if Self.Config.Has('gem') then
-      SetItemIndex(Self.Config.GetInt('gem'))
-    else
-      SetItemIndex(3);
-  end;
+  Self.BankSelector := Self.CreateBankSettingsV2(tab, [50, 200], [0,0]);
 
-  with Self.JewelSelector do
-  begin
-    Create(tab);
-    SetCaption('Jewel type:');
-    SetLeft(Self.GemSelector.GetRight() + TControl.AdjustToDPI(20));
-    SetTop(Self.GemSelector.GetTop());
-    SetWidth(TControl.AdjustToDPI(200));
-    SetStyle(csDropDownList);
-    AddItemArray(JEWELRY_TYPE);
-    if Self.Config.Has('jewel') then
-      SetItemIndex(Self.Config.GetInt('jewel'))
-    else
-      SetItemIndex(0);
-  end;
+  Self.GemSelector.Create(tab, 'Gem type:', 'Pick your type of gem.', [0, 30], [0,0], [Self.BankSelector.GetLeft(), Self.BankSelector.GetBottom()], True);
+  Self.GemSelector.AddItemArray(GEM_TYPE);
+  if Self.Config.Has('gem') then
+    Self.GemSelector.SetItemIndex(Self.Config.GetInt('gem'))
+  else
+    Self.GemSelector.SetItemIndex(3);
+
+  Self.JewelSelector.Create(tab, 'Jewel type:', 'Pick your type of jewellery.', [20, 0], [200,0], [Self.GemSelector.GetRight(), Self.GemSelector.GetTop()], True);
+  Self.JewelSelector.AddItemArray(JEWELRY_TYPE);
+  if Self.Config.Has('jewel') then
+    Self.JewelSelector.SetItemIndex(Self.Config.GetInt('jewel'))
+  else
+    Self.JewelSelector.SetItemIndex(0);
 
   Self.CreateAntibanManager();
-  Self.CreateBankSettings();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
 

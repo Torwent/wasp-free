@@ -10,6 +10,7 @@ type
   ERSGlassItem = (BEER, LANTERN, LAMP, VIAL, FISHBOWL, ORB, LENS, BULB, BEST);
 
 var
+  CurrentBank: EBankChunk = EBankChunk.GRAND_EXCHANGE;
   CurrentGlass: ERSGlassItem = ERSGlassItem.BEST;
 
 type
@@ -108,7 +109,9 @@ begin
 
   inherited;
 
-  Self.RSW.SetupNamedRegion();
+  Map.SetupChunk(CurrentBank.Get());
+  Objects.Setup(Map.Objects(), @Map.Walker);
+  NPCs.Setup(Map.NPCs(), @Map.Walker);
 
   Self.UseBestItem := CurrentGlass = ERSGlassItem.Best;
   Self.ItemChanged := True;
@@ -317,13 +320,13 @@ begin
     Self.SetAction(ToStr(Self.State));
 
     case Self.State of
-      EBlowerState.OPEN_BANK: Bank.WalkOpen();
+      EBlowerState.OPEN_BANK: Banks.WalkOpen();
       EBlowerState.WITHDRAW_TOOL: Self.Withdraw(Self.Tool);
       EBlowerState.WITHDRAW_MATERIAL: Self.Withdraw(Self.Material);
       EBlowerState.DEPOSIT_PRODUCT: Self.Deposit();
       EBlowerState.DEPOSIT_RANDOM_ITEM: Self.DepositExtraItems();
 
-      EBlowerState.OPEN_COLLECT: CollectBox.WalkOpen();
+      EBlowerState.OPEN_COLLECT: CollectBoxes.WalkOpen();
       EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox([Tool.Item, Material.Item]);
       EBlowerState.CLOSE_INTERFACE: RSInterface.Close();
 
@@ -334,8 +337,7 @@ begin
       EBlowerState.LEVEL_UP: Chat.HandleLevelUp();
       EBlowerState.CLOSE_CONTEXT: ChooseOption.Close();
 
-      EBlowerState.OUT_OF_ITEMS,
-      EBlowerState.END_SCRIPT: Break;
+      EBlowerState.OUT_OF_ITEMS, EBlowerState.END_SCRIPT: Break;
     end;
 
     Self.DoAntiban();
@@ -359,12 +361,16 @@ end;
 {$IFDEF SCRIPT_GUI}
 type
   TBlowerConfig = record(TScriptForm)
-    GlassSelector: TLabeledCombobox;
+    BankSelector, GlassSelector: TLabeledCombobox;
+    Config: TConfigJSON;
   end;
 
 procedure TBlowerConfig.StartScript(sender: TObject); override;
 begin
+  CurrentBank := EBankChunk(Self.BankSelector.GetItemIndex());
   CurrentGlass := ERSGlassItem(Self.GlassSelector.GetItemIndex());
+
+  Self.Config.Put('glass', Ord(CurrentGlass));
 
   inherited;
 end;
@@ -375,6 +381,11 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Glassblower');
+  Self.Config.Setup('wasp-glassblower');
+
+  if Self.Config.Has('glass') then
+    CurrentGlass := ERSGlassItem(Self.Config.GetInt('glass'));
+
   Self.Start.setOnClick(@Self.StartScript);
 
   Self.AddTab('Script Settings');
@@ -382,22 +393,13 @@ begin
 
   Self.CreateAccountManager(tab);
 
-  with Self.GlassSelector do
-  begin
-    Create(tab);
-    SetCaption('Glass item:');
-    SetLeft(TControl.AdjustToDPI(30));
-    SetTop(TControl.AdjustToDPI(200));
-    SetWidth(TControl.AdjustToDPI(200));
-    SetStyle(csDropDownList);
-    AddItemArray(['Beer glass', 'Candle lantern', 'Oil lamp', 'Vial',
-                  'Fishbowl', 'Unpowered orb', 'Lantern lens',
-                  'Light orb', 'Best available']);
-    SetItemIndex(Ord(CurrentGlass));
-  end;
+  Self.BankSelector := Self.CreateBankSettingsV2(tab, [50, 200], [0,0]);
+  Self.GlassSelector.Create(tab, 'Glass:', 'Pick your type of glass.', [0, 30], [0,0], [Self.BankSelector.GetLeft(), Self.BankSelector.GetBottom()], True);
+  GlassSelector.AddItemArray(['Beer glass', 'Candle lantern', 'Oil lamp', 'Vial',
+    'Fishbowl', 'Unpowered orb', 'Lantern lens', 'Light orb', 'Best available']);
+  GlassSelector.SetItemIndex(Ord(CurrentGlass));
 
   Self.CreateAntibanManager();
-  Self.CreateBankSettings();
   Self.CreateWaspLibSettings();
   Self.CreateAPISettings();
 

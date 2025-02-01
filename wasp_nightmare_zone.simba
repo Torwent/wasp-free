@@ -412,7 +412,7 @@ function TNMZFighter.HandleNMZSetup(): Boolean;
 var
   TPA: TPointArray;
 begin
-  if SRL.FindColors(TPA, CTS0(65280, 0), InterfaceArea.Bounds()) then
+  if SRL.FindColors(TPA, CTS0(65280, 0), RSInterface.Bounds) then
   begin
     Mouse.Move(TPA.Bounds().Expand(10));
     MainScreen.IsUpText('Continue');

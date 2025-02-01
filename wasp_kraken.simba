@@ -140,6 +140,7 @@ begin
     if LootHandler.Loot[i].Noted then
       Self.Loot += 'noted ' + LootHandler.Loot[i].Item
     else
+    if not Self.Gear.Contains(LootHandler.Loot[i].Item) then
       Self.Loot += LootHandler.Loot[i].Item;
   end;
 
@@ -313,7 +314,7 @@ begin
   Self.CheckedLoot := True;
   Result := True;
 
-  rect := Minimap.GetTileMS(Minimap.Center(), [1,1,0]);
+  rect := Minimap.GetTileMS(Minimap.Center, [1,1,0]);
   while LootHandler.CheckLoot(rect) and Inventory.HasSpace(1) do
     Wait(400, 600);
 end;
@@ -421,6 +422,7 @@ begin
   if Inventory.ContainsAny(Self.Gear) then
     Exit(EKrakenState.EQUIP_GEAR);
 
+  if not Self.HasBloodSpells then
   if not Inventory.ContainsConsumable(ERSConsumable.FOOD) then
     Exit(EKrakenState.OUT_OF_FOOD);
 

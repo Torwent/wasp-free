@@ -383,7 +383,7 @@ begin
   t.Init(1800);
 
   repeat
-    SRL.FindColors(TPA, $00FFFF, MainScreen.Bounds());
+    SRL.FindColors(TPA, $00FFFF, MainScreen.Bounds);
     ATPA := TPA.Cluster(3, 1);
     ATPA.FilterDimensions(32, 10, 32, 10);
   until (ATPA <> []) or t.IsFinished();

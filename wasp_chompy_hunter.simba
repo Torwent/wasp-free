@@ -97,11 +97,11 @@ var
   FinalTPA: TPointArray;
   MMDots: TPointArray;
 begin
-  MinimapTPA := Minimap.GetPolygon().Connect();
+  MinimapTPA := Minimap.Polygon.Connect();
   MinimapTPA.Fill();
   MinimapTPA := MinimapTPA.Erode(3);
 
-  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds());
+  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds);
 
   MMDots := Minimap.GetDots(ERSMinimapDot.NPC).Offset(2, 2);
   MMDots := MMDots.Grow(2);
