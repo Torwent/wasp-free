@@ -373,6 +373,29 @@ begin
     Result := Self.SelectHelper(Buttons[Index], Quantity, UseKeyboard);
 end;
 
+function TRSBanks.WalkOpen(mapObj: PRSMapObject = nil): Boolean; override;
+begin
+  if RSInterface.IsOpen() then
+  begin
+    if Bank.IsOpen() or BankPin.IsOpen() then
+      Exit(True);
+    RSInterface.Close(True);
+  end;
+
+  if mapObj = nil then
+    mapObj := Self.GetClosest();
+
+  case mapObj^.MapObjectType of
+    ERSMapObjectType.OBJ: Result := mapObj^.WalkClick() or (MainScreen.IsUpText(['Emerald', 'Benedict']) and ChooseOption.Select(['Bank B', 'Bank E']));
+    ERSMapObjectType.NPC: Result := mapObj^.WalkSelectOption(['Bank B', 'Bank E']) or (MainScreen.IsUpText('Bank') and ChooseOption.Select(['Bank B', 'Bank E']));
+  end;
+
+  if not Result then
+    Exit;
+
+  Minimap.WaitMoving();
+  Result := WaitUntil(RSInterface.IsOpen(), 300, 3000) and (Bank.IsOpen() or BankPin.IsOpen());
+end;
 
 {$IFNDEF SCRIPT_CHAIN}
 {$IFDEF SCRIPT_GUI}
