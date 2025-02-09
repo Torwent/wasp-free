@@ -1,3 +1,12 @@
+## [2.15.33](https://github.com/Torwent/wasp-free/compare/v2.15.32...v2.15.33) (2025-02-09)
+
+
+### Bug Fixes
+
+* **cooker:** rogues den tweaks and fixes ([9ffd95b](https://github.com/Torwent/wasp-free/commit/9ffd95b0deb6c955964c595ef769a16c32a32676))
+
+
+
 ## [2.15.32](https://github.com/Torwent/wasp-free/compare/v2.15.31...v2.15.32) (2025-02-01)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** rework last commit ([f081224](https://github.com/Torwent/wasp-free/commit/f081224df73141914dbe90897158c52725b7bde2))
-
-
-
-## [2.15.28](https://github.com/Torwent/wasp-free/compare/v2.15.27...v2.15.28) (2025-01-15)
-
-
-### Bug Fixes
-
-* **cooker:** emerald benedict should be working properly now ([5ff1459](https://github.com/Torwent/wasp-free/commit/5ff14590e338be88987caa6d8ecb8275f30b796c))
 
 
 
