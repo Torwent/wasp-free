@@ -382,11 +382,14 @@ begin
     RSInterface.Close(True);
   end;
 
-  if mapObj = nil then
-    mapObj := Self.GetClosest();
+  if mapObj = nil then mapObj := Self.GetClosest();
 
   case mapObj^.MapObjectType of
-    ERSMapObjectType.OBJ: Result := mapObj^.WalkClick() or (MainScreen.IsUpText(['Emerald', 'Benedict']) and ChooseOption.Select(['Bank B', 'Bank E']));
+    ERSMapObjectType.OBJ:
+      case CurrentLocation of
+        ERSLocation.ROGUES_DEN: Result := mapObj^.WalkSelectOption(['Bank']) or (MainScreen.IsUpText('Emerald') and ChooseOption.Select(['Bank B', 'Bank E']));
+        else Result := mapObj^.WalkClick() or (MainScreen.IsUpText('Banker') and ChooseOption.Select(['Bank B', 'Bank E']));
+      end;
     ERSMapObjectType.NPC: Result := mapObj^.WalkSelectOption(['Bank B', 'Bank E']) or (MainScreen.IsUpText('Bank') and ChooseOption.Select(['Bank B', 'Bank E']));
   end;
 
