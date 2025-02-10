@@ -1,3 +1,12 @@
+## [2.15.34](https://github.com/Torwent/wasp-free/compare/v2.15.33...v2.15.34) (2025-02-10)
+
+
+### Bug Fixes
+
+* **cooker:** emerald benedict ffs ([be20051](https://github.com/Torwent/wasp-free/commit/be20051ff1d64e80bcd2fe5bd44689685c0d1ca9))
+
+
+
 ## [2.15.33](https://github.com/Torwent/wasp-free/compare/v2.15.32...v2.15.33) (2025-02-09)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** small fix for when reading money ([b291f0b](https://github.com/Torwent/wasp-free/commit/b291f0b6419c707c973f79f621180854e40a60fb))
-
-
-
-## [2.15.29](https://github.com/Torwent/wasp-free/compare/v2.15.28...v2.15.29) (2025-01-15)
-
-
-### Bug Fixes
-
-* **cooker:** rework last commit ([f081224](https://github.com/Torwent/wasp-free/commit/f081224df73141914dbe90897158c52725b7bde2))
 
 
 
