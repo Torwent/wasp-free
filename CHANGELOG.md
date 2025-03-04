@@ -1,3 +1,12 @@
+## [2.15.35](https://github.com/Torwent/wasp-free/compare/v2.15.34...v2.15.35) (2025-03-04)
+
+
+### Bug Fixes
+
+* **blast furnace:** small reordering of things ([f9e24c8](https://github.com/Torwent/wasp-free/commit/f9e24c8c42cdc05242e287c3e7f7531697673f98))
+
+
+
 ## [2.15.34](https://github.com/Torwent/wasp-free/compare/v2.15.33...v2.15.34) (2025-02-10)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * compatibility update with latest SRL-T and WaspLib ([b36d6a4](https://github.com/Torwent/wasp-free/commit/b36d6a47b5b6b1406fbe1662d287e609f5824b87))
-
-
-
-## [2.15.30](https://github.com/Torwent/wasp-free/compare/v2.15.29...v2.15.30) (2025-01-21)
-
-
-### Bug Fixes
-
-* **blast furnace:** small fix for when reading money ([b291f0b](https://github.com/Torwent/wasp-free/commit/b291f0b6419c707c973f79f621180854e40a60fb))
 
 
 
