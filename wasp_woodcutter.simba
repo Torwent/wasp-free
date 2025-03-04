@@ -687,6 +687,7 @@ type
     PowerCutState: TLabeledCheckbox;
     SawmillState: TLabeledCheckbox;
     PickNestsState: TLabeledCheckbox;
+    Config: TConfigJSON;
   end;
 
 procedure TCutterConfig.StartScript(sender: TObject); override;
@@ -709,6 +710,12 @@ begin
   PowerCut := Self.PowerCutState.IsChecked();
   UseSawmill := Self.SawmillState.IsChecked();
   PickNests := Self.PickNestsState.IsChecked();
+
+  Self.Config.Put('tree', Self.TreeSelector.getItemIndex());
+  Self.Config.Put('location', Self.LocationSelector.GetItemIndex());
+  Self.Config.Put('powercut', PowerCut);
+  Self.Config.Put('sawmill', UseSawmill);
+  Self.Config.Put('nests', PickNests);
 
   inherited;
 end;
@@ -783,7 +790,17 @@ var
   tab: TTabSheet;
 begin
   Self.Setup('Wasp Woodcutter');
+  Self.Config.Setup('wasp-woodcutter');
   Self.Start.setOnClick(@Self.StartScript);
+
+  if Self.Config.Has('tree') then
+    CurrentTree := ERSTree(Self.Config.GetInt('tree'));
+  if Self.Config.Has('powercut') then
+    PowerCut := Self.Config.GetBoolean('powercut');
+  if Self.Config.Has('sawmill') then
+    UseSawmill := Self.Config.GetBoolean('sawmill');
+  if Self.Config.Has('nests') then
+    PickNests := Self.Config.GetBoolean('nests');
 
   Self.AddTab('Script Settings');
   tab := Self.Tabs[High(Self.Tabs)];
@@ -821,7 +838,6 @@ begin
     SetName('powercut');
     SetLeft(Self.TreeSelector.GetRight() + TControl.AdjustToDPI(15));
     SetTop(Self.TreeSelector.GetTop() + TControl.AdjustToDPI(15));
-    SetChecked(PowerCut);
     CheckBox.setOnChange(@Self._CheckBoxToggle);
   end;
 
@@ -849,6 +865,12 @@ begin
   Self.CreateAPISettings();
 
   Self.TreeSelectorOnChange(Self.TreeSelector.Combobox);
+
+  if Self.Config.has('location') then
+    Self.LocationSelector.SetItemIndex(Self.Config.GetInt('location'));
+
+  Self.PowerCutState.SetChecked(PowerCut);
+  Self.SawmillState.SetChecked(UseSawmill);
 
   inherited;
 end;

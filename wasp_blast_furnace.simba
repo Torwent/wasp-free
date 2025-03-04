@@ -841,17 +841,22 @@ begin
     if not ('coal bag' in Chat.GetChat()) then Exit(EBFState.HANDLE_CHAT);
   end;
 
-  if not Minimap.IsRunEnabled() and (Minimap.GetRunEnergy() >= Self.MinEnergy) then
-    Exit(EBFState.ENABLE_RUN);
+  if (Minimap.GetRunEnergy() >= Self.MinEnergy) then
+  begin
+    if not Minimap.IsRunEnabled() and  then
+      Exit(EBFState.ENABLE_RUN);
+  end
+  else if UseEnergyBoosts then
+  begin
+    if not Inventory.ContainsConsumable(ERSConsumable.ENERGY) then
+      Exit(EBFState.OPEN_BANK);
+
+    if not Minimap.HasStamina() then
+      Exit(EBFState.DRINK_ENERGY);
+  end;
 
   if Inventory.ContainsItem('Coins') then
     Exit(EBFState.CLICK_COFFER);
-
-  if UseEnergyBoosts then
-  begin
-    if not Minimap.HasStamina() and Inventory.ContainsConsumable(ERSConsumable.ENERGY) then
-      Exit(EBFState.DRINK_ENERGY);
-  end;
 
   if Inventory.ContainsItem(Self.Ore) then
   begin
