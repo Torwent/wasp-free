@@ -1,3 +1,12 @@
+## [2.15.36](https://github.com/Torwent/wasp-free/compare/v2.15.35...v2.15.36) (2025-03-05)
+
+
+### Bug Fixes
+
+* **blast furnace:** typo ([6722bd4](https://github.com/Torwent/wasp-free/commit/6722bd4077a7e8a5de6f5edc6fb34082465095b9))
+
+
+
 ## [2.15.35](https://github.com/Torwent/wasp-free/compare/v2.15.34...v2.15.35) (2025-03-04)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** interface update ([6b997f2](https://github.com/Torwent/wasp-free/commit/6b997f238b9af90917c8744852b1af629dd510fd))
-
-
-
-## [2.15.31](https://github.com/Torwent/wasp-free/compare/v2.15.30...v2.15.31) (2025-02-01)
-
-
-### Bug Fixes
-
-* compatibility update with latest SRL-T and WaspLib ([b36d6a4](https://github.com/Torwent/wasp-free/commit/b36d6a47b5b6b1406fbe1662d287e609f5824b87))
 
 
 
