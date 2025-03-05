@@ -843,7 +843,7 @@ begin
 
   if (Minimap.GetRunEnergy() >= Self.MinEnergy) then
   begin
-    if not Minimap.IsRunEnabled() and  then
+    if not Minimap.IsRunEnabled()  then
       Exit(EBFState.ENABLE_RUN);
   end
   else if UseEnergyBoosts then
