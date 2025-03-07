@@ -186,7 +186,7 @@ begin
   Self.BankList += 'Clue nest (medium)';
   Self.BankList += 'Clue nest (hard)';
   Self.BankList += 'Clue nest (elite)';
-  Self.BankList += 'Crystal shards';
+  Self.BankList += 'Crystal shard';
 end;
 
 procedure TWoodcutter.SetupBank();
