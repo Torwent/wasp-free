@@ -1,3 +1,12 @@
+## [2.15.37](https://github.com/Torwent/wasp-free/compare/v2.15.36...v2.15.37) (2025-05-31)
+
+
+### Bug Fixes
+
+* **blast furnace:** staminas removed ([070ba78](https://github.com/Torwent/wasp-free/commit/070ba78355c21e6bb5489f298ba90545e9887d21))
+
+
+
 ## [2.15.36](https://github.com/Torwent/wasp-free/compare/v2.15.35...v2.15.36) (2025-03-05)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** rogues den tweaks and fixes ([9ffd95b](https://github.com/Torwent/wasp-free/commit/9ffd95b0deb6c955964c595ef769a16c32a32676))
-
-
-
-## [2.15.32](https://github.com/Torwent/wasp-free/compare/v2.15.31...v2.15.32) (2025-02-01)
-
-
-### Bug Fixes
-
-* **cooker:** interface update ([6b997f2](https://github.com/Torwent/wasp-free/commit/6b997f238b9af90917c8744852b1af629dd510fd))
 
 
 
