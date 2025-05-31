@@ -1029,7 +1029,7 @@ procedure TBlastFurnaceConfig.StartScript(sender: TObject); override;
 begin
   CurrentBar      := EBarType(Self.BarSelector.getItemIndex());
   UseCoalBag      := Self.CoalBagCheckbox.IsChecked();
-  UseEnergyBoosts := Self.EnergyBoostsCheckbox.IsChecked();
+  UseEnergyBoosts := False; // Self.EnergyBoostsCheckbox.IsChecked()
 
   Self.Config.Put('bar', Ord(CurrentBar));
   Self.Config.Put('coal_bag', UseCoalBag);
@@ -1094,6 +1094,7 @@ begin
       SetChecked(UseCoalBag);
   end;
 
+  (*
   with Self.EnergyBoostsCheckbox do
   begin
     Create(tab);
@@ -1105,6 +1106,7 @@ begin
     else
       SetChecked(UseEnergyBoosts);
   end;
+  *)
 
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
