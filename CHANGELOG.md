@@ -1,3 +1,12 @@
+## [2.15.38](https://github.com/Torwent/wasp-free/compare/v2.15.37...v2.15.38) (2025-08-01)
+
+
+### Bug Fixes
+
+* **stall_robber:** should porperly open the doors again at fruit stalls ([8936729](https://github.com/Torwent/wasp-free/commit/8936729f6703874b564b38adfe2b7f670ddc7368))
+
+
+
 ## [2.15.37](https://github.com/Torwent/wasp-free/compare/v2.15.36...v2.15.37) (2025-05-31)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **cooker:** emerald benedict ffs ([be20051](https://github.com/Torwent/wasp-free/commit/be20051ff1d64e80bcd2fe5bd44689685c0d1ca9))
-
-
-
-## [2.15.33](https://github.com/Torwent/wasp-free/compare/v2.15.32...v2.15.33) (2025-02-09)
-
-
-### Bug Fixes
-
-* **cooker:** rogues den tweaks and fixes ([9ffd95b](https://github.com/Torwent/wasp-free/commit/9ffd95b0deb6c955964c595ef769a16c32a32676))
 
 
 
