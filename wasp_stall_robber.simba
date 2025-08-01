@@ -91,6 +91,9 @@ begin
     ERSStall.FRUIT_STALL:
       begin
         Map.SetupChunk([[27,56,28,55], [0]]);
+        Map.Loader.Graph.UseCollisionData := True;
+        Map.Walker._DoorHandler.Enabled := True;
+
         Objects.Setup(Map.Objects(), @Map.Walker);
 
         Self.Stall.Walker := @Map.Walker;
