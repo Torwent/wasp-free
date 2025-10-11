@@ -711,19 +711,19 @@ begin
   combobox := sender;
 
   DownloadToFile(
-    'https://i.imgur.com/CWkZ6ct.png',
+    'https://files.catbox.moe/6d5d58.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png'
   );
 
   DownloadToFile(
-    'https://i.imgur.com/DNtg4MX.png',
+    'https://files.catbox.moe/9mscoc.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png'
   );
 
   DownloadToFile(
-    'https://i.imgur.com/0AKBiN5.png',
+    'https://files.catbox.moe/tqs1bx.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png'
-  );
+  );                                      
 
   case combobox.getItemIndex() of
     0, 1:
