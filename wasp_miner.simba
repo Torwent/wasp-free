@@ -168,10 +168,16 @@ begin
   BankList += 'Clue geode (elite)';
 
   BankList += 'Clue scroll (beginner)';
-  //BankList += 'Clue scroll (easy)';
-  //BankList += 'Clue scroll (medium)';
-  //BankList += 'Clue scroll (hard)';
-  BankList += 12073;
+  BankList += 'Clue scroll (easy)';
+  BankList += 'Clue scroll (medium)';
+  BankList += 'Clue scroll (hard)';
+  BankList += 'Clue scroll (elite)';
+
+  BankList += 'Scroll box (beginner)';
+  BankList += 'Scroll box (easy)';
+  BankList += 'Scroll box (medium)';
+  BankList += 'Scroll box (hard)';
+  BankList += 'Scroll box (elite)';
 end;
 
 procedure TMiner.SetupBank();

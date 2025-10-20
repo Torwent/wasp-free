@@ -219,7 +219,8 @@ begin
   if not CombatHandler.AutoRetaliateEnabled then
     Combat.SetAutoRetaliate(True);
 
-  Self.SetupDamageItem();
+  if not UsePrayerPots then
+    Self.SetupDamageItem();
 
   Self.PrayFlick := Stats.GetLevel(ERSSkill.PRAYER) > 21;
   Self.SetupTimers();
@@ -666,7 +667,7 @@ begin
   if Self.NeedBoost() then
     Exit(ENMZState.DRINK_BOOST);
 
-  if Self.NeedLowerHP() and not UsePrayerPots then
+  if not UsePrayerPots and Self.NeedLowerHP() then
     Exit(ENMZState.LOWER_HEALTH);
 
   if UsePrayerPots then
