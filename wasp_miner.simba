@@ -172,6 +172,12 @@ begin
   BankList += 'Scroll box (medium)';
   BankList += 'Scroll box (hard)';
   BankList += 'Scroll box (elite)';
+
+  BankList += 'Clue scroll (beginner)';
+  BankList += 'Clue scroll (easy)';
+  BankList += 'Clue scroll (medium)';
+  BankList += 'Clue scroll (hard)';
+  BankList += 'Clue scroll (elite)';
 end;
 
 procedure TMiner.SetupBank();
