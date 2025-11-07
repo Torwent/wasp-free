@@ -4,10 +4,9 @@
 {$I SRL-T/osr.simba}
 {$I WaspLib/osr.simba}
 
+//YES AND DON'T ASK IT AGAIN when depositing ORES on the belt.
 type
-  EBarType = (
-    BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANTITE, RUNITE
-  );
+  EBarType = (BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANTITE, RUNITE);
 
 var
   CurrentBar: EBarType = EBarType.GOLD;
@@ -154,7 +153,7 @@ begin
       Self.MaxCoalBag := 27;
   end;
 
-  Self.MinEnergy := 50;
+  Self.MinEnergy := 40;
 
   Self.Prices.Ore  := ItemData.GetAverage(Self.Ore);
   Self.Prices.Coal := ItemData.GetAverage(Self.Coal);
@@ -244,12 +243,7 @@ begin
     TerminateScript('Please start in a Blast Furnace world!');
 
   if UseEnergyBoosts then
-  begin
-    if Antiban.BioDice() then
-      EnergyHandler.MinInvPoints := Bank.QUANTITY_ALL
-    else
-      EnergyHandler.MinInvPoints := 1;
-  end;
+    EnergyHandler.MinInvPoints := 1;
 
   Self.ReSyncPot();
 end;
@@ -267,24 +261,20 @@ end;
 procedure TBlastFurnace.ReadPot();
 var
   option: TRSChatboxOption;
+  oreStr: String;
 begin
+  oreStr := ToString(Self.Ore).Before(' ');
+
+  //2 loops on purpose
   for option in Chat.GetOptions() do
     if 'Coal' in option.Text then
-    begin
       Self.LoadedCoal := StrToInt(option.Text.After(': '));
-      Break;
-    end;
-
-  Chat.ClickContinue();
 
   for option in Chat.GetOptions() do
-    if ToString(Self.Ore).Before(' ') in option.Text then
-    begin
+    if oreStr in option.Text then
       Self.LoadedCoal -= StrToInt(option.Text.After(': ')) * Self.CoalRatio;
-      Break;
-    end;
-  Chat.ClickContinue();
 
+  Chat.ClickContinue();
   Self.OutOfSync := False;
 end;
 
@@ -766,11 +756,14 @@ begin
           Exit(EBFState.DEPOSIT_COAL);
         end;
 
-        if UseEnergyBoosts and (Minimap.GetRunEnergy() < Self.MinEnergy) and not Minimap.HasStamina() then
+        if UseEnergyBoosts then
         begin
-          if Inventory.ContainsConsumable(ERSConsumable.ENERGY) then
-            Exit(EBFState.DRINK_ENERGY);
-          Exit(EBFState.WITHDRAW_ENERGY);
+          if (Minimap.GetRunEnergy() < Self.MinEnergy) and not Minimap.HasStamina() then
+          begin
+            if Inventory.ContainsConsumable(ERSConsumable.ENERGY) then
+              Exit(EBFState.DRINK_ENERGY);
+            Exit(EBFState.WITHDRAW_ENERGY);
+          end;
         end;
 
         if Inventory.ContainsRandomItems(Self.ItemList) then
@@ -830,7 +823,7 @@ begin
     end;
 
     if Self.DispenserFull then      Exit(EBFState.GET_BARS_RESYNC);
-    if 'Ore' in Chat.GetChat() then Exit(EBFState.READ_POT);
+    if 'Melting' in Chat.GetChatTitle() then Exit(EBFState.READ_POT);
 
     Exit(EBFState.OPEN_POT);
   end;
@@ -921,8 +914,6 @@ begin
 
   repeat
     Self.State := Self.GetState();
-
-    WriteLn Self.State;
 
     str := ToStr(Self.LoadedCoal);
     while Length(str) < 3 do
@@ -1029,7 +1020,7 @@ procedure TBlastFurnaceConfig.StartScript(sender: TObject); override;
 begin
   CurrentBar      := EBarType(Self.BarSelector.getItemIndex());
   UseCoalBag      := Self.CoalBagCheckbox.IsChecked();
-  UseEnergyBoosts := False; // Self.EnergyBoostsCheckbox.IsChecked()
+  UseEnergyBoosts := Self.EnergyBoostsCheckbox.IsChecked();
 
   Self.Config.Put('bar', Ord(CurrentBar));
   Self.Config.Put('coal_bag', UseCoalBag);
@@ -1094,7 +1085,6 @@ begin
       SetChecked(UseCoalBag);
   end;
 
-  (*
   with Self.EnergyBoostsCheckbox do
   begin
     Create(tab);
@@ -1106,7 +1096,6 @@ begin
     else
       SetChecked(UseEnergyBoosts);
   end;
-  *)
 
   Self.CreateAntibanManager();
   Self.CreateWaspLibSettings();
