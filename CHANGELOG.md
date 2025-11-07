@@ -1,3 +1,12 @@
+## [2.15.41](https://github.com/Torwent/wasp-free/compare/v2.15.40...v2.15.41) (2025-11-07)
+
+
+### Bug Fixes
+
+* **blast_furnace:** read notes ([8a36549](https://github.com/Torwent/wasp-free/commit/8a365496e898ec9e4385103ad5eb68d6ca6b535e))
+
+
+
 ## [2.15.40](https://github.com/Torwent/wasp-free/compare/v2.15.39...v2.15.40) (2025-10-20)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast furnace:** staminas removed ([070ba78](https://github.com/Torwent/wasp-free/commit/070ba78355c21e6bb5489f298ba90545e9887d21))
-
-
-
-## [2.15.36](https://github.com/Torwent/wasp-free/compare/v2.15.35...v2.15.36) (2025-03-05)
-
-
-### Bug Fixes
-
-* **blast furnace:** typo ([6722bd4](https://github.com/Torwent/wasp-free/commit/6722bd4077a7e8a5de6f5edc6fb34082465095b9))
 
 
 
