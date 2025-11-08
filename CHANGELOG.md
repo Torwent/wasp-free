@@ -1,3 +1,12 @@
+## [2.15.42](https://github.com/Torwent/wasp-free/compare/v2.15.41...v2.15.42) (2025-11-08)
+
+
+### Bug Fixes
+
+* **blast furnace:** fixed iron, silver and gold ([91eeb52](https://github.com/Torwent/wasp-free/commit/91eeb5260a5f526c24237388b5a15d6f55328c7c))
+
+
+
 ## [2.15.41](https://github.com/Torwent/wasp-free/compare/v2.15.40...v2.15.41) (2025-11-07)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **stall_robber:** should porperly open the doors again at fruit stalls ([8936729](https://github.com/Torwent/wasp-free/commit/8936729f6703874b564b38adfe2b7f670ddc7368))
-
-
-
-## [2.15.37](https://github.com/Torwent/wasp-free/compare/v2.15.36...v2.15.37) (2025-05-31)
-
-
-### Bug Fixes
-
-* **blast furnace:** staminas removed ([070ba78](https://github.com/Torwent/wasp-free/commit/070ba78355c21e6bb5489f298ba90545e9887d21))
 
 
 
