@@ -267,8 +267,17 @@ begin
 
   //2 loops on purpose
   for option in Chat.GetOptions() do
+  begin
     if 'Coal' in option.Text then
       Self.LoadedCoal := StrToInt(option.Text.After(': '));
+    if 'melting pot is empty' in option.Text then
+    begin
+      Self.LoadedCoal := 0;
+      Chat.ClickContinue();
+      Self.OutOfSync := False;
+      Exit;
+    end;
+  end;
 
   for option in Chat.GetOptions() do
     if oreStr in option.Text then
@@ -824,6 +833,7 @@ begin
 
     if Self.DispenserFull then      Exit(EBFState.GET_BARS_RESYNC);
     if 'Melting' in Chat.GetChatTitle() then Exit(EBFState.READ_POT);
+    if 'melting pot is empty' in Chat.GetChat() then Exit(EBFState.READ_POT);
 
     Exit(EBFState.OPEN_POT);
   end;
