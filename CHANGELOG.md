@@ -1,3 +1,12 @@
+## [2.15.43](https://github.com/Torwent/wasp-free/compare/v2.15.42...v2.15.43) (2025-11-13)
+
+
+### Bug Fixes
+
+* **builder:** phials text changed ([f0ebd36](https://github.com/Torwent/wasp-free/commit/f0ebd36aa2a4679154a412a31edfd5956b834432))
+
+
+
 ## [2.15.42](https://github.com/Torwent/wasp-free/compare/v2.15.41...v2.15.42) (2025-11-08)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * force bump ([29377c4](https://github.com/Torwent/wasp-free/commit/29377c4bf5cc1fb39f9c0a16633b3f85bea1da1f))
-
-
-
-## [2.15.38](https://github.com/Torwent/wasp-free/compare/v2.15.37...v2.15.38) (2025-08-01)
-
-
-### Bug Fixes
-
-* **stall_robber:** should porperly open the doors again at fruit stalls ([8936729](https://github.com/Torwent/wasp-free/commit/8936729f6703874b564b38adfe2b7f670ddc7368))
 
 
 
