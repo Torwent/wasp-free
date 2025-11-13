@@ -280,7 +280,7 @@ begin
      RSNPCs.Phials.SelectOption(['Use']) then
   begin
     Minimap.WaitFlag();
-    Result := WaitUntil(Chat.GetChatTitle() = 'Select an option', 100, 15000);
+    Result := WaitUntil('Exchange' in Chat.GetChatTitle(), 100, 15000);
   end;
 end;
 
