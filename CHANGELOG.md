@@ -1,3 +1,12 @@
+## [2.15.44](https://github.com/Torwent/wasp-free/compare/v2.15.43...v2.15.44) (2025-11-26)
+
+
+### Bug Fixes
+
+* **blast furnace:** handle new pot message ([f80e507](https://github.com/Torwent/wasp-free/commit/f80e507cd6589ab0d25beb5129b1760fde3c8362))
+
+
+
 ## [2.15.43](https://github.com/Torwent/wasp-free/compare/v2.15.42...v2.15.43) (2025-11-13)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * miner now supports scrollboxes ([a32a4ee](https://github.com/Torwent/wasp-free/commit/a32a4ee8f09a9e3a56b7b9adf2f7fd1c829bb84b))
-
-
-
-## [2.15.39](https://github.com/Torwent/wasp-free/compare/v2.15.38...v2.15.39) (2025-10-11)
-
-
-### Bug Fixes
-
-* force bump ([29377c4](https://github.com/Torwent/wasp-free/commit/29377c4bf5cc1fb39f9c0a16633b3f85bea1da1f))
 
 
 
