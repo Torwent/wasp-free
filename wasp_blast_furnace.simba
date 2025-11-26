@@ -15,7 +15,7 @@ var
 
 type
   EBFState = (
-    OPEN_POT, READ_POT, OPEN_BANK, OPEN_BANK_TAB,
+    OPEN_POT, HANDLE_POT, READ_POT, OPEN_BANK, OPEN_BANK_TAB,
     WITHDRAW_ORE, WITHDRAW_COAL, WITHDRAW_GLOVES, WITHDRAW_COAL_BAG, WITHDRAW_ENERGY,
 
     DEPOSIT_BARS, DEPOSIT_RANDOM_ITEMS, DEPOSIT_ORE, DEPOSIT_COAL,
@@ -254,7 +254,7 @@ begin
   if Self.MeltingPot.WalkClick() then
   begin
     Minimap.WaitMoving();
-    Result := WaitUntil('Ore' in Chat.GetChat(), 100, 2000);   //100 lower interval
+    Result := WaitUntil(Chat.GetChatTitle() = 'Select an option', 200, 2000);
   end;
 end;
 
@@ -285,6 +285,12 @@ begin
 
   Chat.ClickContinue();
   Self.OutOfSync := False;
+end;
+
+function TBlastFurnace.HandlePot(): Boolean;
+begin
+  if Chat.ClickOption('Check pot') then
+    Result := WaitUntil(Chat.GetChatTitle() = 'Melting Pot Contents', 200, 2000);
 end;
 
 function TBlastFurnace.GaugeIsOpen(): Boolean;
@@ -815,8 +821,12 @@ begin
     Exit(EBFState.CLOSE_INTERFACE);
   end;
 
-  if ('Select an' in Chat.GetChatTitle()) and ('Cancel' in Chat.GetChat()) then
-    Exit(EBFState.HANDLE_COFFER_CHAT);
+  if 'Select an' in Chat.GetChatTitle() then
+  begin
+    if 'Cancel' in Chat.GetChat() then
+      Exit(EBFState.HANDLE_COFFER_CHAT);
+    Exit(EBFSTate.HANDLE_POT);
+  end;
 
   if 'Deposit how' in Chat.GetQuery() then Exit(EBFState.ADD_MONEY);
   if Make.IsOpen() then Exit(EBFState.HANDLE_MAKE);
@@ -938,6 +948,7 @@ begin
 
     case Self.State of
       EBFState.OPEN_POT: Self.OpenPot();
+      EBFSTate.HANDLE_POT: Self.HandlePot();
       EBFState.READ_POT: Self.ReadPot();
 
       EBFState.OPEN_BANK: Self.WalkOpenBank();
