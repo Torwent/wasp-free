@@ -1,3 +1,12 @@
+## [2.15.45](https://github.com/Torwent/wasp-free/compare/v2.15.44...v2.15.45) (2025-12-13)
+
+
+### Bug Fixes
+
+* Phials chat ([4545bb5](https://github.com/Torwent/wasp-free/commit/4545bb5fe5b622c35cf64a7a23ac250794b053fe))
+
+
+
 ## [2.15.44](https://github.com/Torwent/wasp-free/compare/v2.15.43...v2.15.44) (2025-11-26)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * **blast_furnace:** read notes ([8a36549](https://github.com/Torwent/wasp-free/commit/8a365496e898ec9e4385103ad5eb68d6ca6b535e))
-
-
-
-## [2.15.40](https://github.com/Torwent/wasp-free/compare/v2.15.39...v2.15.40) (2025-10-20)
-
-
-### Bug Fixes
-
-* miner now supports scrollboxes ([a32a4ee](https://github.com/Torwent/wasp-free/commit/a32a4ee8f09a9e3a56b7b9adf2f7fd1c829bb84b))
 
 
 
