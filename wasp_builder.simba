@@ -50,7 +50,6 @@ type
     LastPoint: TPoint;
   end;
 
-
 procedure TBuilder.SetupNPC();
 begin
   case CurrentNPC of
@@ -189,7 +188,6 @@ begin
             Self.MinPlankCount;
 end;
 
-
 function TBuilder.EnterHouse(): Boolean;
 var
   portalOpen: Boolean;
@@ -258,7 +256,6 @@ begin
   Self.LastPoint := [0,0];
 end;
 
-
 function TBuilder.CallServant(): Boolean;
 begin
   if Self.ServantNPC.Click() then
@@ -280,7 +277,7 @@ begin
      RSNPCs.Phials.SelectOption(['Use']) then
   begin
     Minimap.WaitFlag();
-    Result := WaitUntil('Exchange' in Chat.GetChatTitle(), 100, 15000);
+    Result := WaitUntil(Pos('Exchange', Chat.GetChatTitle()) > 0, 100, 15000)
   end;
 end;
 
@@ -294,7 +291,6 @@ begin
 
   Self.WaitingServant := not Result;
 end;
-
 
 function TBuilder.FillSack(attempt: Int32 = 0): Boolean;
 var
@@ -315,7 +311,6 @@ begin
   else
     Exit(Self.FillSack(attempt + 1));
 end;
-
 
 function TBuilder.HandleServant(): Boolean;
 begin
@@ -397,7 +392,8 @@ function TBuilder.HandlePhialsChat(): Boolean;
 var
   slot: Int32;
 begin
-  Result := Chat.ClickOption('All');
+  Result := Chat.ClickOption('All', True);
+
   if Result then
   begin
     if Self.UsePlankSack and (Self.PlankSackCount < Self.MinPlankCount) then
@@ -410,7 +406,6 @@ begin
     RSObjects.POHPortal.PreHoverHelper(Self.RSW.GetMyPos());
   end;
 end;
-
 
 function TBuilder.GetState(): EBuilderState;
 var
@@ -430,11 +425,13 @@ begin
   if s.Contains('remove') then
     Exit(EBuilderState.HANDLE_BUILD_CHAT);
 
+  if s.Contains('Exchange') then
+    Exit(EBuilderState.HANDLE_PHIALS_CHAT);
+
   if s.Contains('Select') then
   begin
     if 'house' in Chat.GetChat() then
       Exit(EBuilderState.ENTER_HOUSE);
-    Exit(EBuilderState.HANDLE_PHIALS_CHAT);
   end;
 
   if s.Contains('Repeat') then
@@ -693,9 +690,13 @@ begin
        );
 
     1: Self.BuilderInfo.SetCaption(
+       'Make sure to have a Bell-pull in your dining room and a ' +
+       LineEnding +
+       'Servant''s money bag in your south bedroom if using a butler.' +
+       LineEnding + LineEnding +
        'Make sure you have planks in your bank and you have previously' +
        LineEnding +
-       'asked the buttler to fetch you 24 planks.' +
+       'asked the butler to fetch you 24 planks.' +
        LineEnding + LineEnding +
        'You also need money in your servant''s money bag and you need to' +
        LineEnding +
