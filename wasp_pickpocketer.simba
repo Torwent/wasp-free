@@ -619,7 +619,7 @@ begin
       Self.BankTab := Bank.FindItemTab(item);
 
     invCount := Inventory.Count();
-    if Bank.WithdrawItem(Self.BankTab, [item, needed, False], False) then
+    if Bank.WithdrawItem([item, needed, False], False) then
       if WaitUntil(invCount < Inventory.Count(), 300, 5000) then
         Exit(True);
   end;
@@ -811,8 +811,8 @@ begin
     begin
       Self.DebugLn('Consumable found: ' + ToStr(item));
       consumable := Self.Setup(item);
-      consumable.BankItem.Tab := Bank.GetCurrentTab(); //TODO: Search parent maybe?
-      consumable.BankItem.Scroll := Bank.GetScrollPosition();
+      Bank._CachePosition(item, [Bank.GetCurrentTab(), Bank.GetScrollPosition()]);
+      //TODO: Search parent maybe?
 
       Thiever.StackableArray += item;
       Result += consumable;
