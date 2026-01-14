@@ -126,24 +126,6 @@ begin
     Result := Inventory.CountItem(Product.Item);
 end;
 
-
-function TBlower.DepositExtraItems(): Boolean;
-var
-  slots, DepositSlots: TIntegerArray;
-  i: Int32;
-begin
-  if Tool.Quantity = 1 then
-    Inventory.FindItem(Tool.Item, Slots);
-
-  DepositSlots := Slots.Difference(Inventory.GetUsedSlots);
-
-  repeat
-    if Result := Bank.DepositSlot([DepositSlots[i], Bank.QUANTITY_ALL], True) then
-      WaitUntil(not Inventory.IsSlotUsed(DepositSlots[i]), 100, 2000);
-    DepositSlots := Slots.Difference(Inventory.GetUsedSlots);
-  until Result := (DepositSlots = []);
-end;
-
 function TBlower.Deposit(): Boolean;
 var
   ItemCount: Int32 := Self.CountItem;
@@ -324,7 +306,7 @@ begin
       EBlowerState.WITHDRAW_TOOL: Self.Withdraw(Self.Tool);
       EBlowerState.WITHDRAW_MATERIAL: Self.Withdraw(Self.Material);
       EBlowerState.DEPOSIT_PRODUCT: Self.Deposit();
-      EBlowerState.DEPOSIT_RANDOM_ITEM: Self.DepositExtraItems();
+      EBlowerState.DEPOSIT_RANDOM_ITEM: Bank.DepositRandomItems([Tool.Item]);
 
       EBlowerState.OPEN_COLLECT: CollectBoxes.WalkOpen();
       EBlowerState.HANDLE_COLLECT: Self.HandleCollectBox([Tool.Item, Material.Item]);
