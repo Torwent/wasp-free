@@ -1,8 +1,9 @@
-## [2.15.45](https://github.com/Torwent/wasp-free/compare/v2.15.44...v2.15.45) (2025-12-13)
+## [2.15.46](https://github.com/Torwent/wasp-free/compare/v2.15.45...v2.15.46) (2026-01-14)
 
 
 ### Bug Fixes
 
+* glassblower ([213e5f6](https://github.com/Torwent/wasp-free/commit/213e5f64a30f8be76b16317cae5dd7c33ee99a11))
 * Phials chat ([4545bb5](https://github.com/Torwent/wasp-free/commit/4545bb5fe5b622c35cf64a7a23ac250794b053fe))
 
 
@@ -31,15 +32,6 @@
 ### Bug Fixes
 
 * **blast furnace:** fixed iron, silver and gold ([91eeb52](https://github.com/Torwent/wasp-free/commit/91eeb5260a5f526c24237388b5a15d6f55328c7c))
-
-
-
-## [2.15.41](https://github.com/Torwent/wasp-free/compare/v2.15.40...v2.15.41) (2025-11-07)
-
-
-### Bug Fixes
-
-* **blast_furnace:** read notes ([8a36549](https://github.com/Torwent/wasp-free/commit/8a365496e898ec9e4385103ad5eb68d6ca6b535e))
 
 
 
