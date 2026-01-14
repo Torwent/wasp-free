@@ -1,3 +1,12 @@
+## [2.15.47](https://github.com/Torwent/wasp-free/compare/v2.15.46...v2.15.47) (2026-01-14)
+
+
+### Bug Fixes
+
+* **pickpocketer:** by XJ ([4a9e071](https://github.com/Torwent/wasp-free/commit/4a9e0715d0a78eb54e42057bedb598c848ea9672))
+
+
+
 ## [2.15.46](https://github.com/Torwent/wasp-free/compare/v2.15.45...v2.15.46) (2026-01-14)
 
 
@@ -23,15 +32,6 @@
 ### Bug Fixes
 
 * **builder:** phials text changed ([f0ebd36](https://github.com/Torwent/wasp-free/commit/f0ebd36aa2a4679154a412a31edfd5956b834432))
-
-
-
-## [2.15.42](https://github.com/Torwent/wasp-free/compare/v2.15.41...v2.15.42) (2025-11-08)
-
-
-### Bug Fixes
-
-* **blast furnace:** fixed iron, silver and gold ([91eeb52](https://github.com/Torwent/wasp-free/commit/91eeb5260a5f526c24237388b5a15d6f55328c7c))
 
 
 
