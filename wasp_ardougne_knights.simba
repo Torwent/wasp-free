@@ -489,7 +489,7 @@ begin
   Result := Bank.DepositItem(Self.Necklace, False);
 end;
 
-function TKnightsThiever.Withdraw(out item: TRSBankItem; attempts: Int32 = 3): Boolean; override;
+function TKnightsThiever.Withdraw(item: TRSBankItem; attempts: Int32 = 3): Boolean; override;
 begin
   if item = Self.Necklace then
     item.Quantity := NeckAmount - Inventory.CountItem(Self.Necklace.Item);
