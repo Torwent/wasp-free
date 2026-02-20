@@ -712,17 +712,17 @@ begin
   combobox := sender;
 
   DownloadToFile(
-    'https://files.catbox.moe/6d5d58.png',
+    'https://db.waspscripts.com/storage/v1/object/public/imgs/assets/img1.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png'
   );
 
   DownloadToFile(
-    'https://files.catbox.moe/9mscoc.png',
+    'https://db.waspscripts.com/storage/v1/object/public/imgs/assets/img2.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png'
   );
 
   DownloadToFile(
-    'https://files.catbox.moe/tqs1bx.png',
+    'https://db.waspscripts.com/storage/v1/object/public/imgs/assets/img3.png',
     WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png'
   );                                      
 
