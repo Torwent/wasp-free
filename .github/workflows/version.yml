@@ -56,7 +56,16 @@ jobs:
           body: ${{ steps.changelog.outputs.clean_changelog }}
     
       - name: Discord notification
-        uses: rguillaume/discord-action-embed@v1.0.4
-        with:
-          webhook: ${{ secrets.UPDATES_WEBHOOK }}
-          embed: '{"title": "Update: ${{ github.event.repository.name }}", "description": ${{ toJSON(github.event.head_commit.message) }}, "url": "${{ github.event.head_commit.url }}", "footer": {"text": "Committer: ${{ github.event.head_commit.author.username }}"}, "color": "16760576"}'
+        shell: bash
+        run: |
+            BODY=$(jq -nc \
+              --arg title "Update: ${{ github.event.repository.name }}" \
+              --arg desc "${{ toJSON(github.event.head_commit.message) }}" \
+              --arg url  "${{ github.event.head_commit.url }}" \
+              --arg foot "Author: ${{ github.event.head_commit.author.username }}" \
+              --argjson color 16760576 \
+              '{embeds:[{title:$title,description:$desc,url:$url,color:$color,footer:{text:$foot}}]}')
+            curl \
+                -H "Content-Type: application/json" \
+                -d "$BODY" \
+                ${{ secrets.UPDATES_WEBHOOK }}
