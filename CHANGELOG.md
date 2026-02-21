@@ -1,3 +1,12 @@
+## [2.15.50](https://github.com/Torwent/wasp-free/compare/v2.15.49...v2.15.50) (2026-02-21)
+
+
+### Bug Fixes
+
+* discord notification ([24d99b4](https://github.com/Torwent/wasp-free/commit/24d99b468486fb714bf6e96f56fa1cd4dcc6f917))
+
+
+
 ## [2.15.49](https://github.com/Torwent/wasp-free/compare/v2.15.48...v2.15.49) (2026-02-20)
 
 
@@ -31,7 +40,6 @@
 ### Bug Fixes
 
 * glassblower ([213e5f6](https://github.com/Torwent/wasp-free/commit/213e5f64a30f8be76b16317cae5dd7c33ee99a11))
-* Phials chat ([4545bb5](https://github.com/Torwent/wasp-free/commit/4545bb5fe5b622c35cf64a7a23ac250794b053fe))
 
 
 
