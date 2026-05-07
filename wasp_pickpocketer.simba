@@ -14,6 +14,7 @@ var
   FoodAmount: Int32 := Random(8, 12);
   NeckAmount: Int32 := Random(3, 5);
   MinHealth: Int32 := Random(20, 40);
+  HealToFullAtBank: Boolean = True;
 
 type
   EThieverState = (
@@ -22,6 +23,7 @@ type
     WITHDRAW_FOOD,
     WITHDRAW_NECKLACES,
     CLOSE_INTERFACE,
+    HEAL_TO_FULL,
 
     OPEN_CHAT,
     CHANGE_CHAT_FILTER,
@@ -63,9 +65,10 @@ type
     LasPickPosition: TPoint;
 
     //run variables (to be used while the script is running)
-    RenderDisabled, HasNeck, FreshNeck, RedemptionEnabled: Boolean;
+    RenderDisabled, HasNeck, FreshNeck, RedemptionEnabled, RestockFoodAfterHeal,
+    BankHealFinished: Boolean;
 
-    CoinPouchLimit, MaxHit, NextHeal, VeilAttempts: Int32;
+    CoinPouchLimit, MaxHit, NextHeal, VeilAttempts, FoodPointsAfterWithdraw: Int32;
   end;
 
 
@@ -311,7 +314,7 @@ begin
     else if Equipment.ContainsItem('Thieving cape(t)') then
       Self.RogueEquipment += 'Thieving cape(t)'
     else if Equipment.ContainsItem('Max cape') then
-      Self.RogueEquipment += 'Max cape'; 
+      Self.RogueEquipment += 'Max cape';
 
     //Lava staves for shadow veil spell
     if Equipment.ContainsItem('Lava battlestaff') then
@@ -521,6 +524,78 @@ begin
     Self.NextHeal := 0; //This will be reset when TThiever.IsLowHP() is called.
 end;
 
+function TThiever.HealToFull(): Boolean;
+var
+  currentHP, maxHP, oldHP: Int32;
+begin
+  maxHP := Stats.GetLevel(ERSSkill.HITPOINTS);
+  if maxHP < 1 then
+    Exit;
+
+  currentHP := Minimap.GetHPLevel();
+  Result := currentHP >= maxHP;
+
+  while (currentHP < maxHP) and Inventory.ContainsConsumable(ERSConsumable.FOOD) do
+  begin
+    oldHP := currentHP;
+    if not Inventory.Consume(ERSConsumable.FOOD) then
+      Break;
+
+    currentHP := Minimap.GetHPLevel();
+    if currentHP <= oldHP then
+      Break;
+
+    Result := currentHP >= maxHP;
+  end;
+
+  if currentHP >= maxHP then
+    Self.NextHeal := 0; //This will be reset when TThiever.IsLowHP() is called.
+
+  Self.BankHealFinished := True;
+  Result := True;
+end;
+
+function TThiever.WithdrawFood(): Boolean;
+var
+  oldAmount, oldMinInvPoints: Int32;
+begin
+  if not HealToFullAtBank then
+    Exit(Bank.WithdrawConsumable(ERSConsumable.FOOD));
+
+  if Self.RestockFoodAfterHeal and
+     (Self.FoodPointsAfterWithdraw > 0) and
+     (Inventory.CountPoints(ERSConsumable.FOOD) < Self.FoodPointsAfterWithdraw) then
+  begin
+    oldAmount := FoodHandler.Amount;
+    oldMinInvPoints := FoodHandler.MinInvPoints;
+
+    FoodHandler.Amount := 0;
+    FoodHandler.MinInvPoints := Self.FoodPointsAfterWithdraw;
+    Result := Bank.WithdrawConsumable(ERSConsumable.FOOD);
+
+    FoodHandler.Amount := oldAmount;
+    FoodHandler.MinInvPoints := oldMinInvPoints;
+    Result := WaitUntil(Inventory.CountPoints(ERSConsumable.FOOD) >= Self.FoodPointsAfterWithdraw, 300, 3000);
+
+    if Result then
+    begin
+      Self.RestockFoodAfterHeal := False;
+      Self.BankHealFinished := False;
+      Self.FoodPointsAfterWithdraw := 0;
+    end;
+
+    Exit;
+  end;
+
+  Result := Bank.WithdrawConsumable(ERSConsumable.FOOD);
+  if Result then
+  begin
+    Self.FoodPointsAfterWithdraw := Inventory.CountPoints(ERSConsumable.FOOD);
+    Self.RestockFoodAfterHeal := True;
+    Self.BankHealFinished := False;
+  end;
+end;
+
 function TThiever.EquipNeck(): Boolean;
 begin
   if Result := Inventory.ClickItem(Necklace) then Wait(300, 400);
@@ -690,11 +765,39 @@ begin
         Exit(EThieverState.DEPOSIT_LOOT);
       if Inventory.CountItem(Necklace) < NeckAmount then
         Exit(EThieverState.WITHDRAW_NECKLACES);
+      if Self.RestockFoodAfterHeal and
+         (Inventory.CountPoints(ERSConsumable.FOOD) < Self.FoodPointsAfterWithdraw) then
+        Exit(EThieverState.WITHDRAW_FOOD);
       if not Inventory.HasEnoughConsumable(ERSConsumable.FOOD) then
         Exit(EThieverState.WITHDRAW_FOOD);
     end;
 
     Exit(EThieverState.CLOSE_INTERFACE);
+  end;
+
+  if Self.RestockFoodAfterHeal then
+  begin
+    if not HealToFullAtBank then
+    begin
+      Self.RestockFoodAfterHeal := False;
+      Self.BankHealFinished := False;
+      Self.FoodPointsAfterWithdraw := 0;
+    end
+    else if not Self.BankHealFinished and
+       (Minimap.GetHPLevel() < Stats.GetLevel(ERSSkill.HITPOINTS)) then
+    begin
+      if Inventory.ContainsConsumable(ERSConsumable.FOOD) then
+        Exit(EThieverState.HEAL_TO_FULL);
+
+      Exit(EThieverState.OPEN_BANK);
+    end;
+
+    if Inventory.CountPoints(ERSConsumable.FOOD) < Self.FoodPointsAfterWithdraw then
+      Exit(EThieverState.OPEN_BANK);
+
+    Self.RestockFoodAfterHeal := False;
+    Self.BankHealFinished := False;
+    Self.FoodPointsAfterWithdraw := 0;
   end;
 
   if Self.IsPouchFull() then
@@ -762,9 +865,10 @@ begin
     case Self.State of
       OPEN_BANK: Bank.WalkOpen();
       DEPOSIT_LOOT: Self.Deposit();
-      WITHDRAW_FOOD: Bank.WithdrawConsumable(ERSConsumable.FOOD);
+      WITHDRAW_FOOD: Self.WithdrawFood();
       WITHDRAW_NECKLACES: Self.WithdrawNecks();
       CLOSE_INTERFACE: RSInterface.Close();
+      HEAL_TO_FULL: Self.HealToFull();
 
       OPEN_CHAT: ChatButtons.Open(ERSChatButton.GAME_CHAT);
       CHANGE_CHAT_FILTER: ChatButtons.ChangeState(ERSChatButton.GAME_CHAT, ERSChatButtonState.ENABLED);
@@ -883,7 +987,7 @@ type
     NPCSelector: TLabeledCombobox;
     DiaryLevelSelector: TLabeledComboBox;
     NeckAmountEdit: TLabeledEdit;
-    SuicideState: TLabeledCheckbox;
+    SuicideState, HealToFullAtBankState: TLabeledCheckbox;
   end;
 
 procedure TThieverConfig.StartScript(sender: TObject); override;
@@ -895,6 +999,7 @@ begin
 
   PickedNPC := ENPC(Self.NPCSelector.GetItemIndex());
   SuicideMode := Self.SuicideState.IsChecked();
+  HealToFullAtBank := Self.HealToFullAtBankState.IsChecked();
 
   DiaryLevel := Self.DiaryLevelSelector.GetItemIndex() + 1;
   FoodAmount := StrToInt(foodAmountEdit.GetText());
@@ -1017,6 +1122,16 @@ begin
     SetTop(Self.NPCSelector.GetTop() + TControl.AdjustToDPI(15));
     SetEnabled(True);
     Self.NPCSelectorOnChange(@Self.SuicideState);
+  end;
+
+  with Self.HealToFullAtBankState do
+  begin
+    Create(tab);
+    SetCaption('Heal to full at bank');
+    SetLeft(Self.SuicideState.GetLeft());
+    SetTop(Self.SuicideState.GetBottom() + TControl.AdjustToDPI(8));
+    SetChecked(HealToFullAtBank);
+    SetEnabled(True);
   end;
 
   panel := Self.CreateConsumableSettings(tab, ERSConsumable.FOOD, False);
