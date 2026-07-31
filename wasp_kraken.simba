@@ -1,0 +1,606 @@
+{$DEFINE SCRIPT_ID := 'a398a083-63fd-4f13-936b-3963354fb4c1'}
+{$DEFINE SCRIPT_REVISION := '47'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+{$I WaspLib/optional/handlers/combathandler.simba}
+{$I WaspLib/optional/interfaces/mainscreen/fairyring.simba}
+{$SCOPEDENUMS ON}
+
+type
+  EKrakenState = (
+    WAIT_STATE,
+    EQUIP_STAFF, USE_FAIRYRING,
+
+    OPEN_BANK, DEPOSIT_LOOT, WITHDRAW_FOOD, HANDLE_PIN, CLOSE_INTERFACE,
+
+    //Outside
+    ENTER_COVE, ENTER_CREVICE,
+    HANDLE_CHAT, HANDLE_WARNING,
+
+    //Inside
+    WALK_BRIDGE,
+    CHECK_LOOT,
+    WAKE_KRAKEN, ATTACK_KRAKEN, SELECT_SPELL, CAST_BLOOD,
+    BOOST, EAT_FOOD, DRINK_PRAYER, ENABLE_QPRAY,
+    OUT_OF_FOOD,
+    ALCH_DROP,
+
+    EQUIP_GEAR, EQUIP_BRACELET,
+    END_SCRIPT
+  );
+
+  TKrakenKiller = record(TBaseScript)
+    State: EKrakenState;
+
+    Bridge: TPoint;
+    SleepyKraken, KrakenTPA: TPointArray;
+
+    Kraken: TNPCV2;
+    KrakenFinder: TObjectFinder;
+
+    Crevice, CaveEntrance: TGameObjectV2;
+
+    AnotherPLayer, IsAttacking, CheckedLoot, UseImbuedHeart,
+    HasBloodSpells: Boolean;
+    BloodSpell: ESpell;
+
+    Loot, Gear: TItemArray;
+
+    ImbuedHeart: TCountDown;
+  end;
+
+
+procedure TAntiban.SetupBreaks(); override;
+begin
+  if Self.Breaks <> [] then
+    Exit;
+
+  Self.AddBreak(30 * ONE_MINUTE, 2 * ONE_MINUTE, 0.33, 0.01);
+  Self.AddBreak(45 * ONE_MINUTE, 4 * ONE_MINUTE, 0.33, 0.15);
+
+  Self.OnBreaking := @OnBreakingTask;
+end;
+
+function TKrakenKiller.CanCastBloodSpells(): Boolean;
+const
+  BLOOD_SPELLS: array of ESpell = [
+    ESpell.BLOOD_BARRAGE, ESpell.BLOOD_BLITZ,
+    ESpell.BLOOD_BURST, ESpell.BLOOD_RUSH
+  ];
+var
+  i: Int32;
+begin
+  if not Magic.IsSpellBook(ESpellBook.ANCIENT) or not Magic.Open() then
+    Exit;
+
+  for i := 0 to 3 do
+  begin
+    if Magic.ContainsSpell(BLOOD_SPELLS[i]) then
+    begin
+      Self.BloodSpell := BLOOD_SPELLS[i];
+      Exit(True);
+    end;
+  end;
+end;
+
+procedure TKrakenKiller.Init(maxActions: UInt32; maxTime: UInt64); override;
+var
+  i: Int32;
+  qPrayers: EPrayerArray;
+begin
+  Antiban.Skills := [ESKILL.MAGIC, ESKILL.HITPOINTS, ESKILL.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 40;
+
+  inherited;
+
+  Map.SetupChunks([Chunk(Box(35,56,36,56), 0), Chunk(Box(35,156,35,156), 0), Chunk(Box(48,54,50,53), 0)]);
+  Objects.Setup(Map.Objects(), @Map.Walker);
+
+  Self.Crevice := Objects.Get('Crevice');
+  Self.CaveEntrance := Objects.Get('Cave Entrance');
+
+  Self.Kraken.Setup(14, 4, 14, [[5024, 10286]]);
+  Self.Kraken.SetupUpText('Kraken');
+  Self.Kraken.Finder.Colors += CTS2(14407349, 13, 0.13, 1.43);
+
+  Self.Bridge := [5024, 10304];
+
+  FoodHandler.Amount := -1;
+
+  Self.KrakenFinder.ClusterDistance := 3;
+  Self.KrakenFinder.Erode := 2;
+  Self.KrakenFinder.Grow := 4;
+  Self.KrakenFinder.Colors += CTS2(14407349, 13, 0.13, 1.43);
+  Self.KrakenFinder.MinShortSide := 70;
+
+  Self.UseImbuedHeart := True;
+  Self.ImbuedHeart.Setup(7 * ONE_MINUTE);
+
+  Options.SetNPCAttackOption(EAttackOption.ALWAYS_LEFT_CLICK);
+  Combat.SetAutoRetaliate(False);
+  CombatHandler.Setup(True, Self.Kraken, 5000, 4000);
+
+  Self.HasBloodSpells :=  Self.CanCastBloodSpells();
+
+  Self.Gear := Equipment.DiscoverAll();
+
+  i := Self.Gear.Find('expeditious bracelet');
+  if i > -1 then Delete(Self.Gear, i, 1);
+  i := Self.Gear.Find('bracelet of slaughter');
+  if i > -1 then Delete(Self.Gear, i, 1);
+  i := Self.Gear.Find('ring of recoil');
+  if i > -1 then Delete(Self.Gear, i, 1);
+
+  for i := 0 to High(LootHandler.Loot) do
+  begin
+    if LootHandler.Loot[i].Item = 'Shark' then Continue;
+
+    if LootHandler.Loot[i].Noted then
+      Self.Loot += 'noted ' + LootHandler.Loot[i].Item
+    else
+    if not Self.Gear.Contains(LootHandler.Loot[i].Item) then
+      Self.Loot += LootHandler.Loot[i].Item;
+  end;
+
+  if QuickPrayer.Open() then
+  begin
+    qPrayers := QuickPrayer.GetSelectedPrayers();
+
+    for i := 0 to High(qPrayers) do
+    begin
+      if qPrayers[i] = EPrayer.AUGURY then Continue;
+      if qPrayers[i] = EPrayer.MYSTIC_MIGHT then Continue;
+      if qPrayers[i] = EPrayer.MYSTIC_LORE then Continue;
+      if qPrayers[i] = EPrayer.MYSTIC_WILL then Continue;
+      QuickPrayer.DeselectPrayer(qPrayers[i]);
+    end;
+
+    qPrayers := [EPrayer.AUGURY, EPrayer.MYSTIC_MIGHT, EPrayer.MYSTIC_LORE, EPrayer.MYSTIC_WILL];
+
+    for i := 0 to High(qPrayers) do
+      if Prayer.CanActivate(qPrayers[i]) and QuickPrayer.SelectPrayer(qPrayers[i]) then
+        Break;
+
+    QuickPrayer.Close();
+  end;
+end;
+
+
+function TKrakenKiller.InsideBossRoom(): Boolean;
+begin
+  Result := MainScreen.InMultiCombat();
+  if not Result then
+    Self.CheckedLoot := True;
+end;
+
+function TKrakenKiller.EnterCove(): Boolean;
+begin
+  if Self.CaveEntrance.WalkSelectOption(['Enter']) then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(not Minimap.OnGroundLevel(), 300, 5000);
+  end;
+end;
+
+function TKrakenKiller.EnterCrevice(): Boolean;
+begin
+  if Self.Crevice.WalkSelectOption(['Private']) then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(('Pay' in Chat.GetChatTitle()) or BankPin.IsOpen(), 300, 5000);
+  end;
+end;
+
+function TKrakenKiller.HandlePayment(): Boolean;
+begin
+  Chat.ClickOption('Yes', BioHash);
+  Result := WaitUntil(Self.InsideBossRoom() or Chat.HasContinue(), 300, 8000);
+end;
+
+
+function TKrakenKiller.FindSleepyKraken(): Boolean;
+var
+  ATPA: T2DPointArray;
+begin
+  ATPA := MainScreen.FindObject(Self.KrakenFinder);
+  Result := ATPA <> [];
+  if Result then
+    Self.SleepyKraken := ATPA[0];
+end;
+
+function TKrakenKiller.FindRagingKraken(): Boolean;
+var
+  MMDots: TPointArray;
+  cuboid: TCuboidEx;
+  KrakenDot: TPoint;
+begin
+  MMDots := Minimap.GetDots(EMinimapDot.NPC);
+  Result := (Length(MMDots) >= 5) and not Self.FindSleepyKraken();
+
+  if not Result then
+    Exit;
+
+  Self.CheckedLoot := False;
+
+  MMDots.Sort(MMDots.Mean());
+  KrakenDot := MMDots[0];
+
+  cuboid := Minimap.GetCuboidMS(KrakenDot, [3, 3, 8], [-3, -3]);
+  Self.KrakenTPA := cuboid.ShapeFill();
+end;
+
+
+function TKrakenKiller.FinishedSlayerTask(): Boolean;
+begin
+  Result := ('Lieve' in Chat.GetChat) or ('Lieve' in Chat.GetMessage(7));
+  if Result then
+    TerminateScript('FINISHED SLAYER TASK');
+end;
+
+
+function TKrakenKiller.WakeKraken(): Boolean;
+begin
+  if MainScreen.IsUpText('>') then ChooseOption.Select('Cancel');
+  if not Inventory.SetSelectedItem('Fishing explosive') then Exit;
+
+  Mouse.Move(Self.SleepyKraken);
+  if MainScreen.IsUpText('Whirl') then
+  begin
+    Mouse.Click(MOUSE_LEFT);
+    if MainScreen.DidRedClick() then
+    begin
+      Result := WaitUntil(Self.FindRagingKraken() or Self.FinishedSlayerTask(), 100, 7000);
+      Self.IsAttacking := Result;
+    end;
+  end;
+
+  if Result then
+    WL.Activity.Restart();
+end;
+
+function TKrakenKiller.AttackKraken(): Boolean;
+begin
+  Mouse.Move(KrakenTPA.Mean());
+  if MainScreen.IsUpText('Attack K') then
+  begin
+    Mouse.Click(MOUSE_LEFT);
+    Result := MainScreen.DidRedClick();
+    Self.IsAttacking := Result;
+  end;
+end;
+
+function TKrakenKiller.CastBlood(): Boolean;
+begin
+  Mouse.Move(KrakenTPA.Mean());
+
+  if MainScreen.IsUpText('> K') then
+  begin
+    XPBar.EarnedXP();
+    Mouse.Click(MOUSE_LEFT);
+    Result := MainScreen.DidRedClick() and XPBar.WaitXP(1200);
+    if Result then
+      Self.IsAttacking := False;
+  end;
+end;
+
+
+
+function TKrakenKiller.BoostMagic(): Boolean;
+var
+  slot: Int32;
+begin
+  Self.UseImbuedHeart := Inventory.FindItem('Imbued heart', slot) or
+                         Inventory.FindItem('Saturated heart', slot);
+
+  Result := Self.UseImbuedHeart;
+  if not Result then Exit;
+
+  Inventory.ClickSlot(slot);
+  ImbuedHeart.Restart(Random(3000, 35000));
+  IsAttacking := False
+end;
+
+function TKrakenKiller.CheckLoot(): Boolean;
+var
+  rect: TRectangle;
+begin
+  if MainScreen.IsUpText('>') then ChooseOption.Select('Cancel');
+
+  while Inventory.IsFull() and Inventory.ContainsConsumable(EConsumable.FOOD) do
+    Inventory.Consume(EConsumable.FOOD);
+
+  Self.CheckedLoot := True;
+  Result := True;
+
+  rect := Minimap.GetTileMS(Minimap.Center, [1,1,0]);
+  while LootHandler.CheckLoot(rect) and Inventory.HasSpace(1) do
+    Wait(400, 600);
+end;
+
+
+function TKrakenKiller.EquipGear(): Boolean;
+var
+  item: TItem;
+begin
+  for item in Self.Gear do
+    if Inventory.ClickItem(item) then
+      Exit(True);
+end;
+
+
+function TKrakenKiller.InVarrock(): Boolean;
+begin
+  Map.Position();
+  Result := Map.RegionIndex = 2;
+end;
+
+
+function TKrakenKiller.TeleportOut(): Boolean;
+begin
+  if Magic.IsSpellBook(ESpellBook.STANDARD) then
+    Result := Magic.CastSpell(ESpell.VARROCK_TELEPORT)
+  else
+    Result := Inventory.ClickItem('Varrock teleport');
+
+  if not Result then
+    TerminateScript('Out of food and we failed to teleport out!');
+
+  Result := WaitUntil(Self.InVarrock(), 300, 5000);
+end;
+
+
+function TKrakenKiller.GetVarrockState(): EKrakenState;
+begin
+  if Inventory.ContainsAny(Self.Loot) or not Inventory.IsFull() then
+    Exit(EKrakenState.OPEN_BANK);
+
+
+  if Inventory.ContainsAny(['Dramen staff', 'Lunar staff']) then
+    Exit(EKrakenState.EQUIP_STAFF);
+
+  Result := EKrakenState.USE_FAIRYRING;
+end;
+
+function TKrakenKiller.GetState(): EKrakenState;
+var
+  health: Int32;
+  pos: TPoint;
+begin
+  if WL.Activity.IsFinished() and not MainScreen.InCombat() then
+    Exit(EKrakenState.END_SCRIPT);
+
+  if GameInterface.IsOpen() then
+  begin
+    if BankPin.IsOpen() then
+      Exit(EKrakenState.HANDLE_PIN);
+
+    if Bank.IsOpen() then
+    begin
+      if Inventory.ContainsAny(Self.Loot) then
+        Exit(EKrakenState.DEPOSIT_LOOT);
+
+      if not Inventory.IsFull() then
+        Exit(EKrakenState.WITHDRAW_FOOD);
+    end;
+
+    Exit(EKrakenState.CLOSE_INTERFACE);
+  end;
+
+  pos := Map.Position();
+  if not Self.InsideBossRoom() then
+  begin
+    if 'Pay' in Chat.GetChatTitle ()then
+      Exit(EKrakenState.HANDLE_CHAT);
+
+    if Chat.HasContinue() then
+      Exit(EKrakenState.HANDLE_WARNING);
+
+    case Map.RegionIndex of
+      0: Exit(EKrakenState.ENTER_COVE);
+      1: Exit(EKrakenState.ENTER_CREVICE);
+      2: Exit(Self.GetVarrockState());
+    end;
+  end;
+
+  if (Minimap.GetPrayerLevel() <= 30) and Inventory.ContainsItem('Prayer potion(1..4)') then
+    Exit(EKrakenState.DRINK_PRAYER);
+
+  if CombatHandler.NeedBracelet() then
+    Exit(EKrakenState.EQUIP_BRACELET);
+
+  if Self.UseImbuedHeart and ImbuedHeart.IsFinished() then
+    Exit(EKrakenState.BOOST);
+
+  if not Minimap.IsPrayerEnabled() and (Minimap.GetPrayerLevel() > 0) then
+    Exit(EKrakenState.ENABLE_QPRAY);
+
+  if not pos.InRange(Self.Bridge, 5) then
+    Exit(EKrakenState.WALK_BRIDGE);
+
+  if Inventory.ContainsAny(Self.Gear) then
+    Exit(EKrakenState.EQUIP_GEAR);
+
+  if not Self.HasBloodSpells then
+  if not Inventory.ContainsConsumable(EConsumable.FOOD) then
+    Exit(EKrakenState.OUT_OF_FOOD);
+
+  health := Minimap.GetHPLevel();
+
+  if Self.FindRagingKraken() then
+  begin
+    if health <= 40 then
+    begin
+      if Self.HasBloodSpells then
+      begin
+        if not MainScreen.IsUpText('Blood') then
+        begin
+          if health <= 25 then
+            Exit(EKrakenState.EAT_FOOD);
+
+          Exit(EKrakenState.SELECT_SPELL);
+        end;
+
+        Exit(EKrakenState.CAST_BLOOD);
+      end;
+
+      Exit(EKrakenState.EAT_FOOD);
+    end;
+
+    if Self.IsAttacking then
+      Exit(EKrakenState.WAIT_STATE);
+    Exit(EKrakenState.ATTACK_KRAKEN);
+  end;
+
+  if health <= 75 then
+    Exit(EKrakenState.EAT_FOOD);
+
+  if not Self.CheckedLoot then
+    Exit(EKrakenState.CHECK_LOOT);
+
+  if not Self.HasBloodSpells and Inventory.ContainsAny(RSAlchHandler.ItemArray) then
+    Exit(EKrakenState.ALCH_DROP);
+
+  if Self.FindSleepyKraken() then
+    Exit(EKrakenState.WAKE_KRAKEN);
+end;
+
+procedure TKrakenKiller.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      EKrakenState.EQUIP_STAFF: FairyRing.HandleItem();
+      EKrakenState.USE_FAIRYRING: FairyRing.WalkTeleport('AKQ');
+      EKrakenState.OPEN_BANK: Banks.WalkOpen();
+      EKrakenState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
+      EKrakenState.DEPOSIT_LOOT: Bank.DepositItems(Self.Loot, True);
+      EKrakenState.WITHDRAW_FOOD: Bank.WithdrawConsumable(EConsumable.FOOD);
+      EKrakenState.CLOSE_INTERFACE: GameInterface.Close();
+
+      //Outside
+      EKrakenState.ENTER_COVE: Self.EnterCove();
+      EKrakenState.ENTER_CREVICE: Self.EnterCrevice();
+      EKrakenState.HANDLE_CHAT: Self.HandlePayment();
+      EKrakenState.HANDLE_WARNING: Chat.ClickContinue(BioHash);
+
+      //Inside
+      EKrakenState.WALK_BRIDGE: Map.Walker.WebWalk(Self.Bridge, 5, 0.2);
+      EKrakenState.WAIT_STATE: WaitUntil(not Self.FindRagingKraken(), 100, 3000);
+      EKrakenState.CHECK_LOOT: Self.CheckLoot();
+      EKrakenState.WAKE_KRAKEN: Self.WakeKraken();
+      EKrakenState.SELECT_SPELL: Magic.CastSpell(Self.BloodSpell);
+      EKrakenState.CAST_BLOOD: Self.CastBlood();
+      EKrakenState.ATTACK_KRAKEN: Self.AttackKraken();
+      EKrakenState.BOOST: Self.BoostMagic();
+      EKrakenState.EAT_FOOD: Inventory.Consume(EConsumable.FOOD);
+      EKrakenState.DRINK_PRAYER: Inventory.Consume(EConsumable.PRAYER);
+      EKrakenState.ENABLE_QPRAY: Minimap.EnablePrayer();
+      EKrakenState.OUT_OF_FOOD: Self.TeleportOut();
+      EKrakenState.ALCH_DROP: RSAlchHandler.CastAlchemy(True, True);
+      EKrakenState.EQUIP_GEAR: Self.EquipGear();
+      EKrakenState.EQUIP_BRACELET: CombatHandler.EquipBracelet();
+      EKrakenState.END_SCRIPT: Break;
+    end;
+
+    Self.DoAntiban(not Self.FindRagingKraken(), False);
+  until Self.ShouldStop();
+end;
+
+
+var
+  KrakenKiller: TKrakenKiller;
+
+function TInventory.Consume(ConsumableType: EConsumable; out Slots: TIntegerArray): Boolean; override;
+begin
+  Result := inherited(ConsumableType);
+
+  if Result then
+    KrakenKiller.IsAttacking := False;
+end;
+
+function TConsumableHandler.FindInInventory(): TConsumableArray; override;
+var
+  consumable: TConsumable;
+  item: TItem;
+begin
+  Self.DebugLn('Setting up consumable of type: ' + ToStr(Self.ConsumableType));
+
+  for item in CONSUMABLE_ARRAYS[Self.ConsumableType] do
+  begin
+    if item = 'Sanfew serum(1..4)' then
+      Continue;
+    if Self.ConsumableArray.Contains(item) then //avoid resetting leftover items.
+      Continue;
+
+    if Inventory.ContainsItem(item) then
+    begin
+      Self.DebugLn('Consumable found: ' + ToStr(item));
+      consumable := Self.Setup(item);
+
+      Result += consumable;
+    end;
+  end;
+end;
+{$IFDEF SCRIPT_GUI}
+type
+  TKrakenConfig = record(TScriptForm)
+    InfoText: TLabel;
+  end;
+
+procedure TKrakenConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Kraken');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.InfoText do
+  begin
+    Create(tab);
+    SetCaption(
+      'Keep in mind this script doesn''t bank so Sang Staff is highly recommended.'
+      + LINEENDING +
+      'If you have issues staying alive consider using magic and defense boosting prayers.'
+      + LINEENDING +
+      'Overhead prayers have no effect on kraken.'
+      + LINEENDING + LINEENDING +
+      'Also keep in mind this won''t stop when you have your inventory full of loot.'
+      + LINEENDING +
+      'I recommend you check it every 40 mins or so to see if it needs banking.'
+      + LINEENDING + LINEENDING +
+      'FISHING EXPLOSIVES ARE REQUIRED!'
+    );
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(200));
+  end;
+
+  LootHandler.Setup('Kraken', 5000);
+  Self.CreateLootManager();
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  inherited;
+end;
+
+var
+  KrakenConfig: TKrakenConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  KrakenConfig.Run();
+  {$ENDIF}
+  KrakenKiller.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

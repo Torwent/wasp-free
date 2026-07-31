@@ -1,0 +1,356 @@
+{$DEFINE SCRIPT_ID := 'b6feb67b-9949-45f4-a175-e92f219dfa46'}
+{$DEFINE SCRIPT_REVISION := '21'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+
+type
+  EPlankType = (
+    NORMAL, OAK, TEAK, MAHOGANY
+  );
+
+var
+  CurrentTask: EPlankType := EPlankType.TEAK;
+
+type
+  ESawmillRunnerState = (
+    WAIT_STATE,
+
+    OPEN_BANK,
+    WITHDRAW_ITEMS,
+    DEPOSIT_ITEMS,
+    DEPOSIT_RANDOM_ITEMS,
+    OPEN_COLLECT,
+    HANDLE_COLLECT,
+    CLOSE_INTERFACE,
+
+    TELEPORT_SAWMILL,
+    TELEPORT_GE,
+    BUY_PLANKS,
+    HANDLE_MAKE,
+
+    OUT_OF_SUPPLIES,
+    END_SCRIPT
+  );
+
+  TSawmillRunner = record(TBaseBankScript)
+    State: ESawmillRunnerState;
+    Coins, Plank, Ring: TItem;
+    Logs: TBankItem;
+    NeededItems: TItemArray;
+    RingPosition: (UNKOWN, INV, EQUIP);
+    TeleportCost: Int32;
+    ROECost: Int32;
+  end;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ESKILL.TOTAL];
+  Self.MinZoom := 0;
+  Self.MaxZoom := 20;
+
+  inherited;
+end;
+
+procedure TSawmillRunner.Init(maxActions: UInt32; maxTime: UInt64); override;
+var
+  lawCost, airCost, fireCost: Int32;
+begin
+  inherited;
+
+  Self.RSW.SetupRegions([RSRegions.VARROCK]);
+
+  Self.Coins := 'Coins';
+  Self.Ring := 'Ring of the elements';
+
+  case CurrentTask of
+    EPlankType.NORMAL:
+      begin
+        Self.Logs  := TBankItem.Setup('Logs', Bank.QUANTITY_ALL, False);
+        Self.Plank := 'Plank';
+        Self.ActionProfit := -100;
+      end;
+
+    EPlankType.OAK:
+      begin
+        Self.Logs  := TBankItem.Setup('Oak logs', Bank.QUANTITY_ALL, False);
+        Self.Plank := 'Oak plank';
+        Self.ActionProfit := -250;
+      end;
+
+    EPlankType.TEAK:
+      begin
+        Self.Logs  := TBankItem.Setup('Teak logs', Bank.QUANTITY_ALL, False);
+        Self.Plank := 'Teak plank';
+        Self.ActionProfit := -500;
+      end;
+
+    EPlankType.MAHOGANY:
+      begin
+        Self.Logs  := TBankItem.Setup('Mahogany logs', Bank.QUANTITY_ALL, False);
+        Self.Plank := 'Mahogany plank';
+        Self.ActionProfit := -1500;
+      end;
+    end;
+
+  Self.ActionProfit += ItemData.GetAverage(Self.Plank) - ItemData.GetAverage(Self.Logs.Item);
+  //teleport from spell and ring of the elements prices
+  lawCost := ItemData.GetAverage('Law rune');
+  airCost := ItemData.GetAverage('Air rune');
+  fireCost := ItemData.GetAverage('Fire rune');
+
+  Self.TeleportCost := lawCost + fireCost + airCost * 3;
+  Self.ROECost := lawCost + fireCost + airCost +
+                  ItemData.GetAverage('Water rune') +
+                  ItemData.GetAverage('Earth rune');
+
+  Self.NeededItems := [
+    Self.Coins, Self.Logs.Item, Self.Ring, 'Law rune', 'Air rune', 'Fire rune', 'Rune pouch', 'Divine rune pouch'
+  ];
+end;
+
+
+function TSawmillRunner.Deposit(): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.CountItem(Self.Plank);
+  if Bank.DepositItem(Self.Plank, True) then
+    Result := WaitUntil(not Inventory.ContainsItem(Self.Plank), 200, 4000);
+
+  if Result then
+  begin
+    Self.TotalActions += count;
+    Self.TotalProfit += count * Self.ActionProfit;
+    WL.Activity.Restart();
+  end;
+end;
+
+
+function TSawmillRunner.InGE(p: TPoint): Boolean;
+begin
+  Result := p.AnyInRange(GameObjects.GEBank.Coordinates, 200);
+end;
+
+function TSawmillRunner.VarrockTeleport(): Boolean;
+begin
+  if not Magic.CastSpell(ESpell.VARROCK_TELEPORT) then
+    Exit;
+
+  Self.TotalProfit -= Self.TeleportCost;
+  Result := WaitUntil(Self.InGE(Self.RSW.GetMyPos()), 300, 5000);
+end;
+
+function TSawmillRunner.SawmillTeleport(): Boolean;
+var
+  option: String;
+begin
+  if Self.RingPosition = UNKOWN then
+  begin
+    if Inventory.ContainsItem(Self.Ring) then
+      Self.RingPosition := INV
+    else if Equipment.ContainsItem(Self.Ring) then
+      Self.RingPosition := EQUIP
+    else
+      TerminateScript('Can''t find the ring of the elements.');
+  end;
+
+  case Self.RingPosition of
+    INV:
+    begin
+      if (Self.TotalActions = 0) then
+      begin
+        if not Inventory.ClickItem(Self.Ring, 'Rub') then Exit;
+        if not WaitUntil(Chat.FindOption('Earth'), 300, 4000) then Exit;
+        Result := Chat.ClickOption('Earth');
+      end
+      else
+        Result := Inventory.ClickItem(Self.Ring, 'Last');
+    end;
+
+    EQUIP:
+    begin
+      if (Self.TotalActions = 0) or Antiban.BioDice() then
+        option := 'Earth'
+      else
+        option := 'Last';
+
+      Result := Equipment.ClickItem(Self.Ring, option);
+    end;
+  end;
+
+  if Result then
+  begin
+    Self.TotalProfit -= Self.ROECost;
+    Result := WaitUntil(not Self.InGE(Self.RSW.GetMyPos()), 300, 5000);
+  end;
+end;
+
+function TSawmillRunner.BuyPlanks(): Boolean;
+begin
+  if RSNPCs.SawmillOperator.WalkSelectOption(['Buy']) then
+  begin
+    Minimap.WaitMoving();
+    Result := Make.IsOpen(3000);
+  end;
+end;
+
+function TSawmillRunner.HandleSawmill(): Boolean;
+begin
+  if Make.Select(Ord(CurrentTask), Make.QUANTITY_ALL) then
+    Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 200, 3000);
+end;
+
+
+function TSawmillRunner.GetState(): ESawmillRunnerState;
+begin
+  if WL.Activity.IsFinished() then
+    Exit(ESawmillRunnerState.END_SCRIPT);
+
+  if GameInterface.IsOpen() then
+  begin
+    if not Self.BankEmpty and Bank.IsOpen() then
+    begin
+      if Inventory.ContainsItem(Self.Plank) then
+        Exit(ESawmillRunnerState.DEPOSIT_ITEMS);
+
+      if Inventory.ContainsRandomItems(Self.NeededItems) then
+        Exit(ESawmillRunnerState.DEPOSIT_RANDOM_ITEMS);
+
+      if not Inventory.IsFull() then
+        Exit(ESawmillRunnerState.WITHDRAW_ITEMS);
+    end;
+
+    if not Self.CollectEmpty and CollectBox.IsOpen() then
+      Exit(ESawmillRunnerState.HANDLE_COLLECT);
+
+    Exit(ESawmillRunnerState.CLOSE_INTERFACE);
+  end;
+
+  if Inventory.ContainsItem(Self.Plank) or not Inventory.ContainsItem(Self.Logs.Item) then
+  begin
+    if Self.InGE(Self.RSW.GetMyPos()) then
+    begin
+      if Self.BankEmpty then
+      begin
+        if Self.CollectEmpty then
+          Exit(ESawmillRunnerState.OUT_OF_SUPPLIES);
+
+        Exit(ESawmillRunnerState.OPEN_COLLECT);
+      end;
+
+      Exit(ESawmillRunnerState.OPEN_BANK);
+    end;
+
+    Exit(ESawmillRunnerState.TELEPORT_GE);
+  end;
+
+  if Make.IsOpen() then
+    Exit(ESawmillRunnerState.HANDLE_MAKE);
+
+  if Inventory.ContainsItem(Self.Logs.Item) then
+  begin
+    if Self.InGE(Self.RSW.GetMyPos()) then
+      Exit(ESawmillRunnerState.TELEPORT_SAWMILL);
+
+    Exit(ESawmillRunnerState.BUY_PLANKS);
+  end;
+
+  Exit(ESawmillRunnerState.WAIT_STATE);
+end;
+
+procedure TSawmillRunner.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      ESawmillRunnerState.WAIT_STATE: Wait(500, 800);
+
+      ESawmillRunnerState.OPEN_BANK: Bank.WalkOpen();
+
+      ESawmillRunnerState.WITHDRAW_ITEMS: Self.Withdraw(Self.Logs);
+      ESawmillRunnerState.DEPOSIT_ITEMS: Self.Deposit();
+      ESawmillRunnerState.DEPOSIT_RANDOM_ITEMS: Bank.DepositRandomItems(Self.NeededItems);
+      ESawmillRunnerState.OPEN_COLLECT: CollectBox.WalkOpen();
+      ESawmillRunnerState.HANDLE_COLLECT: Self.HandleCollectBox([]);
+      ESawmillRunnerState.CLOSE_INTERFACE: GameInterface.Close();
+
+      ESawmillRunnerState.TELEPORT_SAWMILL: Self.SawmillTeleport();
+      ESawmillRunnerState.TELEPORT_GE: Self.VarrockTeleport();
+      ESawmillRunnerState.BUY_PLANKS: Self.BuyPlanks();
+      ESawmillRunnerState.HANDLE_MAKE: Self.HandleSawmill();
+
+      ESawmillRunnerState.OUT_OF_SUPPLIES, ESawmillRunnerState.END_SCRIPT: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+end;
+
+var
+  SawmillRunner: TSawmillRunner;
+
+{$IFDEF SCRIPT_GUI}
+type
+  TSawmillRunnerConfig = record(TScriptForm)
+    PlankSelector: TLabeledCombobox;
+    Config: TConfigJSON;
+  end;
+
+procedure TSawmillRunnerConfig.StartScript(sender: TObject); override;
+begin
+  CurrentTask := EPlankType(Self.PlankSelector.GetItemIndex());
+  Self.Config.Put('plank', Ord(CurrentTask));
+
+  inherited;
+end;
+
+procedure TSawmillRunnerConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Sawmill runner');
+  Self.Config.Setup('wasp-sawmill-runner');
+  Self.Start.setOnClick(@Self.StartScript);
+
+  if Self.Config.Has('plank') then
+    CurrentTask := EPlankType(Self.Config.GetInt('plank'));
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.PlankSelector do
+  begin
+    Create(tab);
+    SetCaption('Plank type:');
+    SetLeft(TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(170));
+    SetStyle(csDropDownList);
+    AddItemArray(['Normal', 'Oak', 'Teak', 'Mahogany']);
+    SetItemIndex(Ord(CurrentTask));
+  end;
+
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  inherited;
+end;
+
+var
+  SawmillRunnerConfig: TSawmillRunnerConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  SawmillRunnerConfig.Run();
+  {$ENDIF}
+  SawmillRunner.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

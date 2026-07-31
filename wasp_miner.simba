@@ -1,0 +1,538 @@
+{$DEFINE SCRIPT_ID := 'bffb9ec8-588b-406d-9872-9ab274b5c934'}
+{$DEFINE SCRIPT_REVISION := '30'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+
+type
+  EBank = (
+    POWER_MINE, VARROCK_E, VARROCK_W,
+    CRAFTING_GUILD_MINE, MINE_GUILD
+  );
+
+  ERock = (
+    CLAY, TIN, COPPER, IRON, SILVER, COAL, GOLD,
+    MITHRIL, ADAMANTITE, RUNITE, AMETHYST
+  );
+
+var
+  CurrentRock: ERock := ERock.IRON;
+  BankLocation: EBank := EBank.POWER_MINE;
+
+type
+  EMinerState = (
+    OPEN_BANK,
+    DEPOSIT_ITEMS,
+    CLOSE_INTERFACE,
+
+    WALK_SPOT,
+    WAIT_STATE,
+
+    EQUIP_GEAR,
+    LEVEL_UP,
+    USE_SPEC,
+    MINE_ROCK,
+
+    DROP_ITEMS,
+
+    END_SCRIPT
+  );
+
+  TMiner = record(TBaseBankScript)
+    State: EMinerState;
+
+    RSRock: TGameObject;
+
+    ProspectorOutfit: TItemArray;
+    BankList: TItemArray;
+    DropList: TItemArray;
+
+    Mining: Boolean;
+    UseBank: Boolean;
+    InvCount: Int32;
+    PrevInvCount: Int32;
+  end;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ESKILL.MINING, ESKILL.TOTAL];
+  Self.MinZoom := 30;
+  Self.MaxZoom := 60;
+
+  inherited;
+end;
+
+
+procedure TMiner.SetupRock();
+begin
+  if not Self.UseBank then
+    GameObjects.Setup();
+
+  case CurrentRock of
+    ERock.CLAY:
+      begin
+        RSRock := GameObjects.ClayRock;
+        ActionProfit := ItemData.GetAverage('Clay');
+      end;
+
+    ERock.TIN:
+    begin
+      RSRock := GameObjects.TinRock;
+        ActionProfit := ItemData.GetAverage('Tin ore');
+      end;
+
+    ERock.COPPER:
+      begin
+        RSRock := GameObjects.CopperRock;
+        ActionProfit := ItemData.GetAverage('Copper ore');
+      end;
+
+    ERock.IRON:
+      begin
+        RSRock := GameObjects.IronRock;
+        ActionProfit := ItemData.GetAverage('Iron ore');
+      end;
+
+    ERock.SILVER:
+      begin
+        RSRock := GameObjects.SilverRock;
+        ActionProfit := ItemData.GetAverage('Silver ore');
+      end;
+
+    ERock.COAL:
+      begin
+        RSRock := GameObjects.CoalRock;
+        ActionProfit := ItemData.GetAverage('Coal');
+      end;
+
+    ERock.GOLD:
+      begin
+        RSRock := GameObjects.GoldRock;
+        ActionProfit := ItemData.GetAverage('Gold ore');
+      end;
+
+    ERock.MITHRIL:
+      begin
+        RSRock := GameObjects.MithrilRock;
+        ActionProfit := ItemData.GetAverage('Mithril ore');
+      end;
+
+    ERock.ADAMANTITE:
+      begin
+        RSRock := GameObjects.AdamantiteRock;
+        ActionProfit := ItemData.GetAverage('Adamantite ore');
+      end;
+
+    ERock.RUNITE:
+      begin
+        RSRock := GameObjects.RuniteRock;
+        ActionProfit := ItemData.GetAverage('Runite ore');
+      end;
+
+    ERock.AMETHYST:
+      begin
+        RSRock := GameObjects.AmethystRock;
+        ActionProfit := ItemData.GetAverage('Amethyst');
+      end;
+  end;
+
+  if not Self.UseBank then
+  begin
+    Self.RSRock.Filter.Skip := False;
+    Self.RSRock.SetupUpText(['Mine', 'Rocks']);
+  end;
+
+  RSRock.Filter.UpText := False;
+
+  DropList := [
+    'Clay', 'Tin ore', 'Copper ore',
+    'Iron ore', 'Silver ore', 'Gold ore', 'Uncut sapphire'
+  ];
+
+  BankList := DropList;
+
+  BankList += 'Uncut emerald';
+  BankList += 'Uncut ruby';
+  BankList += 'Uncut diamond';
+
+  BankList += 'Coal';
+  BankList += 'Mithril ore';
+  BankList += 'Adamantite ore';
+  BankList += 'Amethyst';
+  BankList += 'Unidentified minerals';
+
+  BankList += 'Clue geode (beginner)';
+  BankList += 'Clue geode (easy)';
+  BankList += 'Clue geode (medium)';
+  BankList += 'Clue geode (hard)';
+  BankList += 'Clue geode (elite)';
+
+  BankList += 'Clue scroll (beginner)';
+  BankList += 'Clue scroll (easy)';
+  BankList += 'Clue scroll (medium)';
+  BankList += 'Clue scroll (hard)';
+  BankList += 'Clue scroll (elite)';
+
+  BankList += 'Scroll box (beginner)';
+  BankList += 'Scroll box (easy)';
+  BankList += 'Scroll box (medium)';
+  BankList += 'Scroll box (hard)';
+  BankList += 'Scroll box (elite)';
+end;
+
+procedure TMiner.SetupBank();
+begin
+  case BankLocation of
+    MINE_GUILD:
+      begin
+        RSW.SetupRegions([RSRegions.MINING_GUILD]);
+        UseBank := True;
+      end;
+
+    CRAFTING_GUILD_MINE:
+      begin
+        RSW.SetupRegions([RSRegions.CRAFTING_GUILD]);
+        UseBank := True;
+      end;
+
+    VARROCK_E:
+      begin
+        RSW.SetupRegions([RSRegions.VARROCK_EAST]);
+        UseBank := True;
+      end;
+
+    VARROCK_W:
+      begin
+        RSW.SetupRegions([RSRegions.VARROCK_WEST]);
+        UseBank := True;
+      end;
+
+    POWER_MINE: UseBank := False;
+  end;
+end;
+
+procedure TMiner.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  inherited;
+
+  Self.SetupBank();
+  Self.SetupRock();
+
+  ProspectorOutfit := [
+    'Prospector helmet',
+    'Prospector jacket',
+    'Prospector legs',
+    'Prospector boots',
+    'Varrock armour 1',
+    'Varrock armour 2',
+    'Varrock armour 3',
+    'Varrock armour 4',
+    'Mining gloves',
+    'Superior mining gloves',
+    'Expert mining gloves',
+    'Mining cape',
+    'Mining cape(t)',
+    'Elven signet',
+    'Celestial ring',
+    'Celestial signet'
+  ];
+
+  Options.SetZoomLevel(40);
+
+  if Antiban.BioDice() then
+    Options.SetNPCAttackOption(EAttackOption.HIDDEN)
+  else
+    Options.SetNPCAttackOption(EAttackOption.ALWAYS_RIGHT_CLICK);
+
+  if WLSettings.RemoteInput.HUDDebug then
+    DebugObjectArray += RSRock;
+end;
+
+
+function TMiner.MineRock(): Boolean;
+begin
+  Result := Mining := RSRock.Click() or RSRock.WalkClick();
+  if Result then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Wait(1500, 2000);
+  end;
+end;
+
+function TMiner.HasGear(): Boolean;
+var
+  Item: TItem;
+begin
+  for Item in ProspectorOutfit do
+    if Inventory.ContainsItem(Item) then
+      Exit(True);
+
+  Result := False;
+end;
+
+function TMiner.EquipGear(): Boolean;
+var
+  Item: TItem;
+begin
+  for Item in ProspectorOutfit do
+    if Inventory.ClickItem(Item) then
+      Wait(200, 300);
+
+  Result := not Self.HasGear;
+end;
+
+
+function TMiner.DropItems(): Boolean;
+var
+  invCount: Int32;
+begin
+  invCount := Inventory.Count();
+  Result := Inventory.ShiftDrop(Self.DropList, Inventory.RandomPattern());
+
+  TotalActions += (invCount - Inventory.Count());
+
+  if Result then
+    WL.Activity.Restart();
+end;
+
+function TMiner.Deposit(): Boolean;
+begin
+  Result := Bank.DepositItems(Self.BankList, True);
+  if Result then
+    WL.Activity.Restart();
+end;
+
+
+function TMiner.IsMining(): Boolean;
+begin
+  Result := SRL.IsAnimating(MainScreen.GetPlayerBox(), MainScreen.NormalizeDistance(450), 350, 3);
+end;
+
+function TMiner.WaitMining(t: UInt32 = 1400): Boolean;
+var
+  gotXP: Boolean;
+begin
+  if Inventory.Count() <> PrevInvCount then
+  begin
+    Self.Mining := False;
+    Exit(False);
+  end;
+
+  Result := WaitUntil((Self.Mining := Self.IsMining) or (gotXP := XPBar.EarnedXP()), 100, t);
+  if gotXP then
+    Result := Self.Mining := False;
+end;
+
+
+function TMiner.GetState(): EMinerState;
+begin
+  if WL.Activity.IsFinished() then
+    Exit(EMinerState.END_SCRIPT);
+
+  if Chat.LeveledUp then
+  begin
+    Mining := False;
+    Exit(EMinerState.LEVEL_UP);
+  end;
+
+  if GameInterface.IsOpen then
+  begin
+    if Bank.IsOpen and Inventory.ContainsAny(BankList) then
+      Exit(EMinerState.DEPOSIT_ITEMS);
+
+    Exit(EMinerState.CLOSE_INTERFACE);
+  end;
+
+  if Self.HasGear then
+    Exit(EMinerState.EQUIP_GEAR);
+
+  if Inventory.IsFull then
+  begin
+    Mining := False;
+
+    if not UseBank then
+      Exit(EMinerState.DROP_ITEMS);
+
+    Exit(EMinerState.OPEN_BANK);
+  end;
+
+  if Mining then
+    Exit(EMinerState.WAIT_STATE);
+
+  if UseBank and not RSW.AtTile(RSRock.Coordinates, 15) then
+    Exit(EMinerState.WALK_SPOT);
+
+  if Minimap.IsSpecWeapon and (Minimap.GetSpecLevel = 100) then
+    Exit(EMinerState.USE_SPEC);
+
+  Exit(EMinerState.MINE_ROCK);
+end;
+
+procedure TMiner.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
+
+    Self.InvCount := Inventory.Count();
+
+    if Self.InvCount <> Self.PrevInvCount then
+      WL.Activity.Restart();
+
+    case Self.State of
+      EMinerState.OPEN_BANK: Bank.WalkOpen();
+      EMinerState.DEPOSIT_ITEMS: Self.Deposit();
+      EMinerState.CLOSE_INTERFACE: GameInterface.Close();
+      EMinerState.WALK_SPOT: RSW.WebWalk(RSRock.Coordinates, 5, 0.2);
+      EMinerState.WAIT_STATE: Self.WaitMining();
+      EMinerState.LEVEL_UP: Chat.HandleLevelUp();
+      EMinerState.EQUIP_GEAR: Self.EquipGear();
+      EMinerState.USE_SPEC: Minimap.EnableSpec(100);
+      EMinerState.MINE_ROCK: Self.MineRock();
+      EMinerState.DROP_ITEMS: Self.DropItems();
+      EMinerState.END_SCRIPT: Break;
+    end;
+
+    Self.PrevInvCount := Self.InvCount;
+
+    Self.DoAntiban;
+  until Self.ShouldStop();
+end;
+
+var
+  Miner: TMiner;
+
+{$IFDEF SCRIPT_GUI}
+type
+  TMinerConfig = record(TScriptForm)
+    RockSelector: TLabeledCombobox;
+    BankSelector: TLabeledCombobox;
+  end;
+
+procedure TMinerConfig.StartScript(sender: TObject); override;
+begin
+  CurrentRock := ERock(Self.RockSelector.Combobox.getItemIndex());
+
+  case Self.BankSelector.Combobox.getText() of
+    'Power mine (mine and drop)': BankLocation := EBank.POWER_MINE;
+    'P2P Mining Guild':           BankLocation := EBank.MINE_GUILD;
+    'Crafting guild':             BankLocation := EBank.CRAFTING_GUILD_MINE;
+    'Varrock west':               BankLocation := EBank.VARROCK_W;
+    'Varrock east':               BankLocation := EBank.VARROCK_E;
+  end;
+
+  inherited;
+end;
+
+procedure TMinerConfig.RockSelectorOnChange({$H-}sender: TObject);{$H+}
+begin
+  Self.BankSelector.Clear();
+
+  case ERock(Self.RockSelector.Combobox.getItemIndex()) of
+    ERock.CLAY:
+      begin
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Crafting guild');
+        Self.BankSelector.AddItem('Varrock west');
+      end;
+
+    ERock.TIN:
+      begin
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Varrock east');
+        Self.BankSelector.AddItem('Varrock west');
+      end;
+
+    ERock.COPPER:
+      begin
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Varrock east');
+      end;
+
+    ERock.IRON:
+      begin
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('P2P Mining Guild');
+        Self.BankSelector.AddItem('Varrock east');
+        Self.BankSelector.AddItem('Varrock west');
+      end;
+
+    ERock.SILVER:
+      begin
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Crafting guild');
+        Self.BankSelector.AddItem('Varrock west');
+      end;
+
+    ERock.GOLD:
+      begin
+        Self.BankSelector.AddItem('Power mine (mine and drop)');
+        Self.BankSelector.AddItem('Crafting guild');
+      end;
+
+    else
+      Self.BankSelector.AddItem('P2P Mining Guild');
+
+  end;
+
+  Self.BankSelector.SetItemIndex(0);
+end;
+
+procedure TMinerConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Miner');
+  Self.Start.setOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.RockSelector do
+  begin
+    Create(tab);
+    SetCaption('Rock type:');
+    SetLeft(TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(170));
+    SetStyle(csDropDownList);
+    AddItemArray(['Clay', 'Tin', 'Copper', 'Iron', 'Silver', 'Coal', 'Gold',
+                  'Mithril', 'Adamantite', 'Runite (doesn''t hop worlds)',
+                  'Amethyst']);
+    SetItemIndex(Ord(CurrentRock));
+    Combobox.SetOnChange(@Self.RockSelectorOnChange);
+  end;
+
+  with Self.BankSelector do
+  begin
+    Create(tab);
+    SetCaption('Bank location:');
+    SetLeft(Self.RockSelector.GetRight() + TControl.AdjustToDPI(40));
+    SetTop(Self.RockSelector.GetTop());
+    SetWidth(TControl.AdjustToDPI(200));
+    Combobox.setStyle(csDropDownList);
+  end;
+
+  Self.RockSelectorOnChange(Self.RockSelector.ComboBox);
+
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  inherited;
+end;
+
+var
+  MinerConfig: TMinerConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  MinerConfig.Run();
+  {$ENDIF}
+  Miner.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

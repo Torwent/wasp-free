@@ -1,0 +1,887 @@
+{$DEFINE SCRIPT_ID := '207b1ab4-561d-4543-8467-705cdfce98ec'}
+{$DEFINE SCRIPT_REVISION := '69'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+
+type
+  ETreeLocation = (
+    VARROCK_WEST, VARROCK_EAST, EDGEVILLE, SEERS_VILLAGE, DRAYNOR_VILLAGE,
+    WOODCUT_GUILD, PRIFDDINAS, ISLE_OF_SOULS, CASTLE_WARS, RUINS_OF_UZER
+  );
+
+  ETree = (
+    REGULAR_TREE, OAK_TREE, WILLOW_TREE, TEAK_TREE, MAPLE_TREE, MAHOGANY_TREE,
+    YEW_TREE, MAGIC_TREE
+  );
+
+var
+  CurrentTree: ETree := ETree.TEAK_TREE;
+  TreeLocation: ETreeLocation := ETreeLocation.PRIFDDINAS;
+  PowerCut: Boolean := True;
+  DoFletch: Boolean := False;
+  UseSawmill: Boolean := True;
+  PickNests: Boolean := True;
+
+type
+  EWoodcutterState = (
+    OPEN_BANK,
+    DEPOSIT_ITEMS,
+    EMPTY_SACK,
+    CLOSE_INTERFACE,
+
+    WALK_SPOT,
+    WAIT_STATE,
+
+    EQUIP_GEAR,
+    PICKUP_NEST,
+    LEVEL_UP,
+    USE_SPEC,
+    CUT_TREE,
+
+    FLETCH,
+    OPEN_SAWMILL,
+    HANDLE_MAKE,
+
+    DROP_ITEMS,
+    END_SCRIPT
+  );
+
+  TWoodcutter = record(TBaseBankScript)
+    State: EWoodcutterState;
+
+    RSTree: TGameObject;
+
+    TreeWalkerCoord: TPoint;
+    TreeCuboids: TCuboidExArray;
+
+    Logs, Plank: TItem;
+    LogPrice, PlankSawmillPrice, PlankPrice: Int32;
+
+    SawmillString: String;
+
+    GearOutfit, BankList, DropList: TItemArray;
+    TreeTimer: TCountDown;
+
+    Woodcutting, IsFletching, UseBank, UsePlankSack, PlankSackFull: Boolean;
+  end;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ESKILL.WOODCUTTING, ESKILL.TOTAL];
+  Self.MinZoom := 15;
+  Self.MaxZoom := 60;
+
+  inherited;
+end;
+
+procedure TWoodcutter.SetupTree();
+var
+  p: TPoint;
+  i: Int32;
+begin
+  case CurrentTree of
+    ETree.REGULAR_TREE:
+      begin
+        Self.RSTree := GameObjects.RegularTree;
+        Self.Logs := 'Logs';
+        Self.Plank := 'Plank';
+        Self.PlankSawmillPrice := 100;
+        Self.SawmillString := 'Wood - 100gp';
+        Self.TreeTimer.Setup(10000);
+      end;
+
+    ETree.OAK_TREE:
+      begin
+        Self.RSTree := GameObjects.OakTree;
+        Self.Logs := 'Oak logs';
+        Self.Plank := 'Oak plank';
+        Self.PlankSawmillPrice := 250;
+        Self.SawmillString := 'Oak - 250gp';
+        Self.TreeTimer.Setup(10000);
+      end;
+
+    ETree.TEAK_TREE:
+      begin
+        Self.RSTree := GameObjects.TeakTree;
+        Self.Logs := 'Teak logs';
+        Self.Plank := 'Teak plank';
+        Self.PlankSawmillPrice := 500;
+        Self.SawmillString := 'Teak - 500gp';
+        Self.TreeTimer.Setup(9300);
+      end;
+
+    ETree.MAHOGANY_TREE:
+      begin
+        Self.RSTree := GameObjects.MahoganyTree;
+
+        for i := High(Self.RSTree.Coordinates) downto 0 do
+          if Self.RSTree.Coordinates[i].X > 4070 then
+            Delete(Self.RSTree.Coordinates, i, 1);
+
+        Self.Logs := 'Mahogany logs';
+        Self.Plank := 'Mahogany plank';
+        Self.PlankSawmillPrice := 1500;
+        Self.SawmillString := 'Mahogany - 1,500gp';
+        Self.TreeTimer.Setup(16800);
+      end;
+
+    ETree.WILLOW_TREE:
+      begin
+        Self.RSTree := GameObjects.WillowTree;
+        Self.Logs := 'Willow logs';
+        Self.TreeTimer.Setup(12000);
+      end;
+
+    ETree.MAPLE_TREE:
+      begin
+        Self.RSTree := GameObjects.MapleTree;
+        Self.Logs := 'Maple logs';
+        Self.TreeTimer.Setup(15000);
+      end;
+
+    ETree.YEW_TREE:
+      begin
+        Self.RSTree := GameObjects.YewTree;
+        Self.Logs := 'Yew logs';
+        Self.TreeTimer.Setup(20000);
+      end;
+
+    ETree.MAGIC_TREE:
+      begin
+        Self.RSTree := GameObjects.MagicTree;
+        Self.Logs := 'Magic logs';
+        Self.TreeTimer.Setup(32000);
+      end;
+  end;
+
+  for p in Self.RSTree.Coordinates do
+  begin
+    RSGroundItems.BirdNest.Coordinates += p;
+    RSGroundItems.BirdNest.DotFilter.SetupCircle([p.X, p.Y, 16], True);
+  end;
+
+  RSGroundItems.BirdNest.ShapeArray.SetShape([1, 1, 1]);
+  RSGroundItems.BirdNest.Filter.Walker := True;
+
+  Self.LogPrice := ItemData.GetAverage(Self.Logs);
+
+  Self.DropList := [
+    'Logs', 'Oak logs', 'Willow logs', 'Teak logs', 'Maple logs',
+    'Mahogany logs', 'Yew logs', 'Blisterwood logs', 'Magic logs',
+    'Teak stock'
+  ];
+
+  Self.BankList := Self.DropList;
+
+  if ToStr(Self.Plank) <> '' then
+  begin
+    Self.BankList += Self.Plank;
+    Self.PlankPrice := ItemData.GetAverage(Self.Plank);
+  end;
+
+  Self.BankList += 'Bird nest';
+  Self.BankList += 'Clue nest (beginner)';
+  Self.BankList += 'Clue nest (easy)';
+  Self.BankList += 'Clue nest (medium)';
+  Self.BankList += 'Clue nest (hard)';
+  Self.BankList += 'Clue nest (elite)';
+  Self.BankList += 'Crystal shards';
+end;
+
+procedure TWoodcutter.SetupBank();
+const
+  FILTER: TPointArray = [[1647, 2473], [1703, 2469], [1721, 2448], [1826, 2450], [1854, 2402], [1888, 2387], [2007, 2396], [2012, 2473], [1984, 2504], [1925, 2504], [1905, 2487], [1888, 2488], [1860, 2512], [1838, 2512], [1816, 2468], [1780, 2533], [1768, 2565], [1746, 2566], [1711, 2548], [1647, 2547]];
+var
+  filtered: TPointArray;
+  p: TPoint;
+begin
+  Self.UseBank := not PowerCut;
+
+  case TreeLocation of
+    ETreeLocation.WOODCUT_GUILD:
+    begin
+      Self.RSW.SetupRegions([RSRegions.WOODCUTTING_GUILD]);
+      for p in Self.RSTree.Coordinates do
+        if SRL.PointInPoly(p, FILTER) then
+          filtered += p;
+      Self.RSTree.Coordinates := filtered;
+    end;
+
+    ETreeLocation.VARROCK_EAST:    Self.RSW.SetupRegion(RSRegions.VARROCK_EAST);
+    ETreeLocation.VARROCK_WEST:    Self.RSW.SetupRegion(RSRegions.VARROCK_WEST);
+    ETreeLocation.EDGEVILLE:       Self.RSW.SetupRegion(RSRegions.EDGEVILLE);
+    ETreeLocation.PRIFDDINAS:      Self.RSW.SetupRegion(RSRegions.PRIFDDINAS);
+    ETreeLocation.ISLE_OF_SOULS:   Self.RSW.SetupRegion(RSRegions.ISLE_OF_SOULS);
+    ETreeLocation.CASTLE_WARS:     Self.RSW.SetupRegion(RSRegions.CASTLE_WARS);
+    ETreeLocation.DRAYNOR_VILLAGE: Self.RSW.SetupRegion(RSRegions.DRAYNOR_VILLAGE);
+    ETreeLocation.SEERS_VILLAGE:   Self.RSW.SetupRegion(RSRegions.SEERS_VILLAGE);
+    ETreeLocation.RUINS_OF_UZER:   Self.RSW.SetupRegion(RSRegions.RUINS_OF_UZER);
+  end;
+
+  RSHeightMap.Disabled := TreeLocation = ETreeLocation.RUINS_OF_UZER;
+
+  //WC Guild
+  GameObjects.BankWood1.Filter.Finder := False;
+
+  //Remove cooking guild banks
+  GameObjects.BankWood3.Coordinates.Remove([7981, 2651], True);
+  GameObjects.BankWood3.Coordinates.Remove([7985, 2651], True);
+end;
+
+
+procedure TWoodcutter.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  inherited;
+
+  Self.SetupBank();
+  Self.SetupTree();
+
+  Self.GearOutfit := [
+    'Lumberjack hat',
+    'Lumberjack top',
+    'Lumberjack legs',
+    'Lumberjack boots',
+    'Strung rabbit foot'
+  ];
+
+  if Antiban.BioDice() then
+    Options.SetNPCAttackOption(EAttackOption.HIDDEN)
+  else
+    Options.SetNPCAttackOption(EAttackOption.ALWAYS_RIGHT_CLICK);
+
+  Self.UsePlankSack := UseSawmill and Inventory.ContainsItem('Plank sack');
+
+  if WLSettings.RemoteInput.HUDDebug then
+  begin
+    DebugObjectArray += RSTree;
+    DebugMMDotArray += RSNPCs.SawmillOperator;
+  end;
+end;
+
+
+function TCuboidExArray.ToBoxArray() : TBoxArray;
+var
+  i: Int32;
+begin
+  SetLength(Result, Length(Self));
+  for i := 0 to High(Self) do
+  begin
+    Result[i] := Self[i].Bounds();
+  end;
+end;
+
+function TWoodcutter.CutTree(): Boolean;
+var
+  Trees: T2DPointArray;
+  iterItem : TPointArray;
+  searchBox : TBox;
+  MScuboids : TCuboidExArray;
+  cuboidBoxArr : TBoxArray;
+
+begin
+  MScuboids := Self.RSW.GetCuboidArrayMS(Self.RSW.GetMyPos(), Self.RSTree.Coordinates, Self.RSTree.ShapeArray, [-2, 0]);
+  cuboidBoxArr := MScuboids.ToBoxArray();
+  cuboidBoxArr.SortFromMidPoint(MainScreen.GetPlayerBox().Center());
+
+  for searchBox in cuboidBoxArr do
+  begin
+    Trees += MainScreen.FindObject(Self.RSTree.Finder, searchBox);
+  end;
+
+  if Trees.Len() < 1 then
+  begin
+    Minimap.SetCompassAngle(Minimap.GetCompassAngle() + Random(-50, 50), 10);
+    Exit;
+  end;
+
+  for iterItem in Trees do
+  begin
+    Mouse.Move(iterItem.Mean());
+    if MainScreen.IsUpText(Self.RSTree.UpText, 500) then
+    begin
+      Mouse.Click(MOUSE_LEFT);
+      Minimap.WaitMoving();
+      Self.TreeWalkerCoord := Self.RSW.MSToWorld(Mouse.Position(), Round(Self.RSTree.ShapeArray[0].Tile.Z/2));
+      Result := True;
+      XPBar.EarnedXP();
+      Self.Woodcutting := True;
+      Self.TreeTimer.Restart();
+      Exit;
+    end;
+  end;
+end;
+
+function TWoodcutter.EquipGear(): Boolean;
+var
+  item: TItem;
+begin
+  for item in Self.GearOutfit do
+    if Inventory.ClickItem(item) then
+      Wait(200, 300);
+
+  Result := not Inventory.ContainsAny(Self.GearOutfit);
+end;
+
+function TWoodcutter.DropItems(): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.Count();
+  Result := Inventory.ShiftDrop(Self.DropList, Inventory.RandomPattern());
+
+  count := count - Inventory.Count();
+  Self.TotalActions += count;
+end;
+
+
+function TWoodcutter.HasEnoughMoney(): Boolean;
+begin
+  Result := Inventory.CountItemStack('Coins') >= Self.PlankSawmillPrice;
+end;
+
+
+function TWoodcutter.CheckNest(): Boolean;
+var
+  atpa: T2DPointArray;
+begin
+  Result := PickNests and RSGroundItems.BirdNest.Find(atpa);
+end;
+
+function TWoodcutter.PickNest(): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.Count();
+  if count >= 28 then
+    Exit;
+
+  if RSGroundItems.BirdNest.Click(True, 1) then
+  begin
+    Self.TreeTimer.Timeout := GetTickCount();
+    Minimap.WaitMoving();
+    Result := WaitUntil(count < Inventory.Count(), 300, 8000);
+  end;
+end;
+
+
+function TWoodcutter.Fletch(): Boolean;
+begin
+  if Inventory.Use('Knife', Self.Logs) then
+    Result := Make.IsOpen(3000);
+
+  Self.IsFletching := Result;
+end;
+
+
+function TWoodcutter.OpenSawmill(): Boolean;
+begin
+  if TreeLocation = ETreeLocation.PRIFDDINAS then
+  begin
+    if not Self.RSW.WebWalk([4103, 2075], 15, 0.2) then
+      Exit;
+
+    if not RSNPCs.SawmillOperator.SelectOption(['Buy', 'plank']) then
+      Exit;
+  end
+  else if not RSNPCs.SawmillOperator.WalkSelectOption(['Buy', 'plank']) then
+    Exit;
+
+  Minimap.WaitMoving();
+  Result := WaitUntil(Make.IsOpen(), 100, 8000);
+end;
+
+function TWoodcutter.MakePlanks(): Boolean;
+var
+  logCount: Int32;
+  plankCount: Int32;
+  planksInSackCount: Int32;
+begin
+  if DoFletch then
+  begin
+    Self.IsFletching := False;
+    XPBar.EarnedXP();
+    if Make.Select(0, Make.QUANTITY_ALL, SRL.Dice(95)) then
+      Self.IsFletching := XPBar.WaitXP(4000);
+    Exit(Self.IsFletching);
+  end;
+
+  logCount := Inventory.CountItem(Self.Logs);
+
+  if Make.Select(Self.SawmillString, Make.QUANTITY_ALL, SRL.Dice(95)) then
+    Result := WaitUntil(not Inventory.ContainsItem(Self.Logs), 200, 10000);
+
+  if Result then
+  begin
+    // Planks are placed directly in the sack. Count missing planks as in the sack.
+    plankCount := Inventory.CountItem(self.Plank);
+    planksInSackCount := logCount - plankCount;
+
+    TotalProfit -= (plankCount + planksInSackCount) * Self.PlankSawmillPrice;
+
+    if planksInSackCount > 0 then
+      Self.PlankSackFull := True;
+
+  end;
+end;
+
+function TWoodcutter.Deposit(): Boolean;
+var
+  count: Int32;
+begin
+  if UseSawmill then
+    count := Inventory.CountItem(Self.Plank)
+  else
+    count := Inventory.CountItem(Self.Logs);
+
+  Result := Bank.DepositItems(Self.BankList, True);
+
+  if Result then
+  begin
+    Self.TotalActions += count;
+    if UseSawmill then
+      Self.TotalProfit += count * Self.PlankPrice
+    else
+      Self.TotalProfit += count * Self.LogPrice;
+  end
+  else
+    WriteLn 'Failed to deposit!';
+end;
+
+function TWoodcutter.EmptySack():Boolean;
+begin
+  // This withdraws 26 of 28 planks.
+  if Inventory.ClickItem('Plank sack', 'Empty') then
+    Result := WaitUntil(Inventory.ContainsItem(Self.Plank), 300, 3000);
+
+  Self.PlankSackFull := False;
+end;
+
+function TWoodCutter.AtTree(): Boolean;
+var
+  searchBox : TBox;
+  cuboid: TCuboidEx;
+  atpa: T2DPointArray;
+  tpa: TPointArray;
+begin
+  cuboid := Self.RSW.GetCuboidMS(Self.TreeWalkerCoord, Self.RSTree.ShapeArray[0]);
+  searchBox := cuboid.Bounds().Expand(2);
+  atpa := MainScreen.FindObject(Self.RSTree.Finder, searchBox);
+  if atpa = [] then
+    Exit;
+
+  tpa := cuboid.Filter(atpa.Merge());
+  Result := tpa <> [];
+end;
+
+function TWoodcutter.IsCutting(): Boolean;
+var
+  gotXP: Boolean;
+begin
+  if Self.TreeTimer.IsFinished()
+    or Inventory.IsFull()
+    or (PowerCut
+        and not Mainscreen.IsUpText(Self.RSTree.UpText)) then
+  begin
+    Self.Woodcutting := False;
+    Exit;
+  end;
+
+  gotXP := XPBar.EarnedXP();
+  Result := gotXP or Self.AtTree();
+  Self.Woodcutting := Result;
+  if Result then
+    WL.Activity.Restart();
+
+  if gotXP then
+  begin
+    if CurrentTree = ETree.REGULAR_TREE then
+      Exit(False);
+    TreeTimer.Restart();
+  end;
+end;
+
+function TWoodcutter.WaitCutting(): Boolean;
+begin
+  Result := WaitUntil(not Self.IsCutting(), 300, 20000);
+end;
+
+
+function TWoodcutter.WalkOpenBank(): Boolean;
+var
+  tpa: TPointArray;
+begin
+  if TreeLocation <> ETreeLocation.WOODCUT_GUILD then
+    Exit(Bank.WalkOpen());
+
+  tpa := [[1756, 2547]];
+  if Self.RSW.WebWalk(tpa.Grow(6).RandomValue(), 8, 0.2) then
+    Result := Bank.Open();
+end;
+
+
+function TWoodcutter.GetState(): EWoodcutterState;
+var
+  me: TPoint;
+begin
+  if WL.Activity.IsFinished() then
+    Exit(EWoodcutterState.END_SCRIPT);
+
+  if Chat.LeveledUp() then
+  begin
+    Self.Woodcutting := False;
+    Self.IsFletching := False;
+    Exit(EWoodcutterState.LEVEL_UP);
+  end;
+
+  if (UseSawmill or DoFletch) and Make.IsOpen() then
+    Exit(EWoodcutterState.HANDLE_MAKE);
+
+  if Self.IsFletching then
+  begin
+    if Inventory.ContainsItem(Self.Logs) then
+      Exit(EWoodcutterState.WAIT_STATE);
+    Self.IsFletching := False;
+  end;
+
+  if GameInterface.IsOpen() then
+  begin
+    Self.Woodcutting := False;
+    if Bank.IsOpen() and Inventory.ContainsAny(Self.BankList) then
+      Exit(EWoodcutterState.DEPOSIT_ITEMS);
+    Exit(EWoodcutterState.CLOSE_INTERFACE);
+  end;
+
+  if Inventory.ContainsAny(Self.GearOutfit) then
+    Exit(EWoodcutterState.EQUIP_GEAR);
+
+  if UseBank then
+    me := Self.RSW.GetMyPos();
+
+  if UseBank and not me.AnyInRange(Self.RSTree.Coordinates, 40) then
+  begin
+    if UseSawmill then
+    begin
+      if Inventory.ContainsAny([Self.Plank, Self.Logs]) then
+        Exit(EWoodcutterState.OPEN_BANK);
+    end
+    else if Inventory.ContainsItem(Self.Logs) then
+      Exit(EWoodcutterState.OPEN_BANK);
+  end;
+
+  if UseBank and not me.AnyInRange(Self.RSTree.Coordinates, 40) and Self.UsePlankSack and Self.PlankSackFull then
+    Exit(EWoodcutterState.EMPTY_SACK);
+
+  if Inventory.IsFull() then
+  begin
+    Self.Woodcutting := False;
+
+    if DoFletch and Inventory.ContainsItem(Self.Logs) then
+      Exit(EWoodcutterState.FLETCH);
+
+    if not UseBank then
+      Exit(EWoodcutterState.DROP_ITEMS);
+
+    if UseSawmill then
+    begin
+      if Inventory.ContainsItem(Self.Plank) then
+      begin
+        if not Self.UsePlankSack or Self.PlankSackFull then
+          Exit(EWoodcutterState.OPEN_BANK);
+      end;
+      if Self.HasEnoughMoney() then
+        Exit(EWoodcutterState.OPEN_SAWMILL);
+    end;
+
+    Exit(EWoodcutterState.OPEN_BANK);
+  end;
+
+  if Self.Woodcutting then
+  begin
+    if Self.CheckNest() then
+      Exit(EWoodcutterState.PICKUP_NEST);
+
+    Exit(EWoodcutterState.WAIT_STATE);
+  end;
+
+  if UseBank and not me.AnyInRange(Self.RSTree.Coordinates, 15) then
+    Exit(EWoodcutterState.WALK_SPOT);
+
+  if Minimap.IsSpecWeapon() and (Minimap.GetSpecLevel() = 100) then
+    Exit(EWoodcutterState.USE_SPEC);
+  Exit(EWoodcutterState.CUT_TREE);
+end;
+
+procedure TWoodcutter.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      EWoodcutterState.OPEN_BANK: Self.WalkOpenBank();
+      EWoodcutterState.DEPOSIT_ITEMS: Self.Deposit();
+      EWoodcutterState.EMPTY_SACK: Self.EmptySack();
+      EWoodcutterState.CLOSE_INTERFACE: GameInterface.Close();
+      EWoodcutterState.WALK_SPOT: RSW.WebWalk(RSTree.Coordinates, 10, 0.2);
+      EWoodcutterState.WAIT_STATE: Self.WaitCutting();
+      EWoodcutterState.LEVEL_UP: Chat.HandleLevelUp();
+      EWoodcutterState.EQUIP_GEAR: Self.EquipGear();
+      EWoodcutterState.USE_SPEC: Minimap.EnableSpec(100);
+      EWoodcutterState.PICKUP_NEST: Self.PickNest();
+      EWoodcutterState.CUT_TREE: Self.CutTree();
+      EWoodcutterState.FLETCH: Self.Fletch();
+      EWoodcutterState.OPEN_SAWMILL: Self.OpenSawmill();
+      EWoodcutterState.HANDLE_MAKE: Self.MakePlanks();
+      EWoodcutterState.DROP_ITEMS: Self.DropItems();
+      EWoodcutterState.END_SCRIPT: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+end;
+
+var
+  Woodcutter: TWoodcutter;
+
+function TWalkerObject.FindOnMainScreen(cuboidArray: TCuboidExArray): T2DPointArray; override;
+var
+  i: Int32;
+  tpa: TPointArray;
+  tempFinder: TObjectFinder;
+begin
+  if Self.Filter.Finder then
+    tempFinder := Self.Finder.Unlimited();
+
+  cuboidArray := MainScreen.Filter(cuboidArray);
+  Woodcutter.TreeCuboids := cuboidArray;
+
+  for i := 0 to High(cuboidArray) do
+  begin
+    if Self.Filter.Finder then
+    begin
+      tpa := MainScreen.FindObject(tempFinder, cuboidArray[i].Bounds()).Merge();
+      if tpa = [] then
+        Continue;
+
+      tpa := cuboidArray[i].Filter(tpa);
+      if tpa <> [] then
+        Result += tpa;
+
+      Continue;
+    end;
+
+    tpa := cuboidArray[i].ShapeFill();
+    if tpa <> [] then
+      Result += tpa;
+  end;
+end;
+
+{$IFDEF SCRIPT_GUI}
+type
+  TCutterConfig = record(TScriptForm)
+    TreeSelector: TLabeledCombobox;
+    LocationSelector: TLabeledCombobox;
+    PowerCutState: TLabeledCheckbox;
+    SawmillState: TLabeledCheckbox;
+    PickNestsState: TLabeledCheckbox;
+    Config: TConfigJSON;
+  end;
+
+procedure TCutterConfig.StartScript(sender: TObject); override;
+begin
+  CurrentTree := ETree(Self.TreeSelector.getItemIndex());
+
+  case Self.LocationSelector.GetText() of
+    'Varrock east':      TreeLocation := ETreeLocation.VARROCK_EAST;
+    'Varrock west':      TreeLocation := ETreeLocation.VARROCK_WEST;
+    'Edgeville':         TreeLocation := ETreeLocation.EDGEVILLE;
+    'Draynor':           TreeLocation := ETreeLocation.DRAYNOR_VILLAGE;
+    'Seers'' village':   TreeLocation := ETreeLocation.SEERS_VILLAGE;
+    'Woodcutting guild': TreeLocation := ETreeLocation.WOODCUT_GUILD;
+    'Prifddinas':        TreeLocation := ETreeLocation.PRIFDDINAS;
+    'Isle of souls':     TreeLocation := ETreeLocation.ISLE_OF_SOULS;
+    'Castle wars':       TreeLocation := ETreeLocation.CASTLE_WARS;
+    'Ruins of Uzer':     TreeLocation := ETreeLocation.RUINS_OF_UZER;
+  end;
+
+  PowerCut := Self.PowerCutState.IsChecked();
+  UseSawmill := Self.SawmillState.IsChecked();
+  PickNests := Self.PickNestsState.IsChecked();
+
+  Self.Config.Put('tree', Self.TreeSelector.getItemIndex());
+  Self.Config.Put('location', Self.LocationSelector.GetItemIndex());
+  Self.Config.Put('powercut', PowerCut);
+  Self.Config.Put('sawmill', UseSawmill);
+  Self.Config.Put('nests', PickNests);
+
+  inherited;
+end;
+
+procedure TCutterConfig.TreeLocationOnChange(sender: TObject);
+var
+  text: String;
+begin
+  text := TComboBox(sender).GetText();
+  Self.SawmillState.SetChecked(False);
+  Self.SawmillState.SetEnabled(False);
+
+  case ETree(Self.TreeSelector.GetItemIndex()) of
+    REGULAR_TREE, OAK_TREE, TEAK_TREE, MAHOGANY_TREE:
+      Self.SawmillState.SetEnabled(text.ContainsAny(['east', 'ddinas'])); //, 'guild'
+  end;
+end;
+
+procedure TCutterConfig.TreeSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+  Self.LocationSelector.Clear();
+
+  case ETree(combobox.getItemIndex()) of
+    ETree.REGULAR_TREE: Self.LocationSelector.AddItemArray([
+                            'Varrock west', 'Varrock east'
+                          ]);
+    ETree.OAK_TREE: Self.LocationSelector.AddItemArray([
+                        'Varrock west', 'Varrock east', 'Woodcutting guild'
+                      ]);
+    ETree.WILLOW_TREE: Self.LocationSelector.AddItemArray(['Draynor']);
+    ETree.TEAK_TREE: Self.LocationSelector.AddItemArray(['Prifddinas', 'Isle of souls', 'Castle wars', 'Ruins of Uzer']);
+    ETree.MAPLE_TREE: Self.LocationSelector.AddItemArray([
+                  'Seers'' village', 'Woodcutting guild'
+                ]);
+    ETree.MAHOGANY_TREE: Self.LocationSelector.AddItem('Prifddinas');
+    ETree.YEW_TREE: Self.LocationSelector.AddItemArray([
+                        'Seers'' village', 'Varrock west', 'Edgeville',
+                        'Woodcutting guild'
+                      ]);
+    ETree.MAGIC_TREE: Self.LocationSelector.AddItemArray([
+                          'Woodcutting guild', 'Prifddinas'
+                        ]);
+  end;
+
+  Self.LocationSelector.SetItemIndex(0);
+  Self.LocationSelector.SetEnabled(Self.LocationSelector.ComboBox.getItems().getCount() > 1);
+  Self.TreeLocationOnChange(Self.LocationSelector.ComboBox);
+end;
+
+procedure TCutterConfig._CheckBoxToggle(sender: TObject);
+var
+  checkbox: TCheckBox;
+begin
+  checkbox := sender;
+  if not checkbox.IsEnabled() then
+    Exit;
+  if not checkbox.IsChecked() then
+    Exit;
+
+  case checkbox.getName() of
+    'sawmill_checkbox': Self.PowerCutState.SetChecked(False);
+    'powercut_checkbox': Self.SawmillState.SetChecked(False);
+  end;
+end;
+
+
+procedure TCutterConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Woodcutter');
+  Self.Config.Setup('wasp-woodcutter');
+  Self.Start.setOnClick(@Self.StartScript);
+
+  if Self.Config.Has('tree') then
+    CurrentTree := ETree(Self.Config.GetInt('tree'));
+  if Self.Config.Has('powercut') then
+    PowerCut := Self.Config.GetBoolean('powercut');
+  if Self.Config.Has('sawmill') then
+    UseSawmill := Self.Config.GetBoolean('sawmill');
+  if Self.Config.Has('nests') then
+    PickNests := Self.Config.GetBoolean('nests');
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.TreeSelector do
+  begin
+    Create(tab);
+    SetCaption('Tree type:');
+    SetLeft(TControl.AdjustToDPI(15));
+    SetTop(TControl.AdjustToDPI(150));
+    SetStyle(csDropDownList);
+    AddItemArray(['Regular tree', 'Oak tree', 'Willow tree', 'Teak tree',
+                  'Maple tree', 'Mahogany tree', 'Yew tree',
+                  'Magic tree']);
+    SetItemIndex(Ord(CurrentTree));
+    Combobox.SetOnChange(@Self.TreeSelectorOnChange);
+  end;
+
+  with Self.LocationSelector do
+  begin
+    Create(tab);
+    SetCaption('Tree location:');
+    SetLeft(Self.TreeSelector.GetLeft());
+    SetTop(Self.TreeSelector.GetBottom() + TControl.AdjustToDPI(15));
+    SetStyle(csDropDownList);
+    Combobox.SetOnChange(@Self.TreeLocationOnChange);
+  end;
+
+  with Self.PowerCutState do
+  begin
+    Create(tab);
+    SetCaption('Powercut');
+    SetName('powercut');
+    SetLeft(Self.TreeSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetTop(Self.TreeSelector.GetTop() + TControl.AdjustToDPI(15));
+    CheckBox.setOnChange(@Self._CheckBoxToggle);
+  end;
+
+  with Self.PickNestsState do
+  begin
+    Create(tab);
+    SetCaption('Pick nests');
+    SetLeft(Self.PowerCutState.GetLeft());
+    SetTop(Self.LocationSelector.GetTop() + TControl.AdjustToDPI(15));
+    SetChecked(PickNests);
+  end;
+
+  with Self.SawmillState do
+  begin
+    Create(tab);
+    SetCaption('Sawmill');
+    SetName('sawmill');
+    SetLeft(Self.PickNestsState.GetLeft());
+    SetTop(Self.LocationSelector.GetBottom() + TControl.AdjustToDPI(30));
+    CheckBox.setOnChange(@Self._CheckBoxToggle);
+  end;
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  Self.TreeSelectorOnChange(Self.TreeSelector.Combobox);
+
+  if Self.Config.has('location') then
+    Self.LocationSelector.SetItemIndex(Self.Config.GetInt('location'));
+
+  Self.PowerCutState.SetChecked(PowerCut);
+  Self.SawmillState.SetChecked(UseSawmill);
+
+  inherited;
+end;
+
+var
+  CutterConfig: TCutterConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  CutterConfig.Run();
+  {$ENDIF}
+  Woodcutter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

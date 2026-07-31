@@ -1,0 +1,857 @@
+{$DEFINE SCRIPT_ID := 'bee77a9c-8ff3-4b11-b0fc-2fbbaa788d15'}
+{$DEFINE SCRIPT_REVISION := '72'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+
+type
+  ERSNPC = (PHIALS, SERVANT);
+  ERSFurniture = (REGULAR_LARDER, OAK_LARDER, MYTH_CAPE, MAHOGANY_TABLE);
+
+var
+  CurrentNPC: ERSNPC := PHIALS;
+  CurrentFurniture: ERSFurniture := ERSFurniture.MYTH_CAPE;
+
+type
+  EBuilderState = (
+    LEVEL_UP,
+    WAIT_STATE,
+    EXIT_HOUSE,
+    ENTER_HOUSE,
+
+    BUILD_FURNITURE,
+    HANDLE_FURNITURE_UI,
+    DESTROY_FURNITURE,
+    HANDLE_BUILD_CHAT,
+    HANDLE_PIN,
+    CLOSE_INTERFACE,
+
+    GET_PLANKS,
+    HANDLE_PHIALS_CHAT,
+    FILL_SACK,
+    CALL_SERVANT,
+    TALK_SERVANT,
+    HANDLE_SERVANT,
+
+    NO_ACTIVITY,
+    END_SCRIPT
+  );
+
+  TBuilder = record(TBaseWalkerScript)
+    State: EBuilderState;
+
+    BuiltFurniture, FurnitureSpace: TGameObject;
+    ServantNPC: TNPC;
+
+    UsePlankSack, FurnitureIsBuilt, UsePhials, WaitingServant: Boolean;
+
+    Plank: TItem;
+    PlankSackCount, NotedPlanksSlot, MinPlankCount: Int32;
+    LastPoint: TPoint;
+  end;
+
+procedure TBuilder.SetupNPC();
+begin
+  case CurrentNPC of
+    PHIALS: Self.UsePhials := True;
+
+    SERVANT:
+      begin
+        ServantNPC.Filter.Skip := False;
+        ServantNPC.Filter.Finder := False;
+        ServantNPC.Filter.Walker := False;
+        ServantNPC.Filter.MinimapDot := True;
+
+        ServantNPC.ShapeArray += [[1, 1, 7], 0];
+        ServantNPC.SetupUpText(['Talk-to']);
+      end;
+  end;
+end;
+
+procedure TBuilder.SetupPlank();
+begin
+  case CurrentFurniture of
+    REGULAR_LARDER:
+      begin
+        Self.Plank := 'Plank';
+        Self.MinPlankCount := 8;
+      end;
+
+    OAK_LARDER:
+      begin
+        Self.Plank := 'Oak plank';
+        Self.MinPlankCount := 8;
+      end;
+
+    MYTH_CAPE:
+      begin
+        Self.Plank := 'Teak plank';
+        Self.MinPlankCount := 3;
+      end;
+
+    MAHOGANY_TABLE:
+	    begin
+        Self.Plank := 'Mahogany plank';
+        Self.MinPlankCount := 6;
+      end;
+  end;
+end;
+
+procedure TBuilder.SetupObjects();
+begin
+  case CurrentFurniture of
+  ERSFurniture.MYTH_CAPE:
+    begin
+      Self.BuiltFurniture.Setup(0.3, 4, [[1858, 138]]);
+      Self.BuiltFurniture.SetupUpText(['Teleport']);
+      Self.BuiltFurniture.Finder.Colors += CTS2(15198185, 9, 0.29, 0.68);
+      Self.BuiltFurniture.Finder.Colors += CTS2(13083513, 7, 0.03, 1.71);
+      Self.BuiltFurniture.Finder.Colors += CTS2(5799055, 10, 0.07, 0.85);
+
+      Self.FurnitureSpace.Setup(0.3, 4, [[1858, 138]]);
+      Self.FurnitureSpace.SetupUpText(['2 more']);
+      Self.FurnitureSpace.Finder.Colors += CTS2(13293015, 14, 0.23, 0.37);
+    end;
+
+  ERSFurniture.MAHOGANY_TABLE:
+    begin
+      Self.BuiltFurniture.Setup(1.3, 5, [[1848, 127]]);
+      Self.BuiltFurniture.Setup(['2 more']);
+      Self.BuiltFurniture.Filter.Finder := False;
+      Self.BuiltFurniture.Filter.UpText := False;
+
+      Self.FurnitureSpace.Setup(1.3, 5, [[1848, 127]]);
+      Self.FurnitureSpace.Setup(['2 more']);
+      Self.FurnitureSpace.Filter.Finder := False;
+      Self.FurnitureSpace.Filter.UpText := False;
+    end;
+
+  ERSFurniture.REGULAR_LARDER, ERSFurniture.OAK_LARDER:
+    begin
+      Self.BuiltFurniture.Setup(1.5, 7, [[1856, 115]]);
+      Self.BuiltFurniture.SetupUpText(['Larder']);
+      Self.BuiltFurniture.Filter.Finder := False;
+      Self.BuiltFurniture.Filter.UpText := False;
+
+      Self.FurnitureSpace.Setup(1.5, 7, [[1856, 115]]);
+      Self.FurnitureSpace.SetupUpText(['2 more']);
+      Self.FurnitureSpace.Filter.Finder := False;
+    end;
+  end;
+end;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ESKILL.CONSTRUCTION, ESKILL.TOTAL];
+  Self.MinZoom := 0;
+  Self.MaxZoom := 35;
+
+  inherited;
+end;
+
+procedure TBuilder.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  inherited;
+
+  RSW.SetupRegions([RSRegions.RIMMINGTON, RSRegions.POH]);
+  Self.LastPoint := [0, 0];
+  Self.SetupNPC();
+  Self.SetupObjects();
+  Self.SetupPlank();
+
+  Self.UsePlankSack := Inventory.ContainsItem('Plank sack');
+
+  Self.ActionProfit -= (ItemData.GetAverage(Plank) * 8 + 40);
+
+  if CurrentNPC = PHIALS then
+    case CurrentFurniture of
+      ERSFurniture.REGULAR_LARDER: Inventory.FindItem('noted Plank', NotedPlanksSlot);
+      ERSFurniture.OAK_LARDER: Inventory.FindItem('noted Oak plank', NotedPlanksSlot);
+      ERSFurniture.MYTH_CAPE: Inventory.FindItem('noted Teak plank', NotedPlanksSlot);
+      ERSFurniture.MAHOGANY_TABLE: Inventory.FindItem('noted Mahogany plank', NotedPlanksSlot);
+    end;
+
+  if WLSettings.RemoteInput.HUDDebug then
+  begin
+    DebugObjectArray += Self.BuiltFurniture;
+    DebugObjectArray += Self.FurnitureSpace;
+    DebugObjectArray += GameObjects.POHPortal;
+    DebugMMDotArray += RSNPCs.Phials;
+    DebugMMDotArray += Self.ServantNPC;
+  end;
+end;
+
+
+function TBuilder.ContainsEnoughPlanks(): Boolean;
+begin
+  Result := (Inventory.CountItem(Self.Plank) + Self.PlankSackCount) >=
+            Self.MinPlankCount;
+end;
+
+function TBuilder.EnterHouse(): Boolean;
+var
+  portalOpen: Boolean;
+begin
+  portalOpen := 'house' in Chat.GetChat();
+
+  if (portalOpen and Chat.ClickOption('building')) or GameObjects.POHPortal.WalkSelectOption(['Build', 'mode']) then
+  begin
+    Minimap.WaitMoving();
+    WaitUntil((BankPin.IsOpen() and BankPin.Enter(Login.GetPlayerPin())) or MainScreen.LoadingPOH(), 300, 10000);
+    Result := MainScreen.WaitLoadingPOH(10000);
+  end;
+end;
+
+function TBuilder.BuildFurniture(): Boolean;
+var
+  tpa: TPointArray;
+begin
+  if Self.LastPoint <> [0, 0] then
+  begin
+    tpa := TPAGrow([Self.LastPoint], 6);
+    Mouse.Move(tpa);
+  end;
+
+  if Self.FurnitureSpace.WalkSelectOption(['Build La', 'Build Gu', 'Build Ta']) then
+  begin
+    Minimap.WaitMoving();
+    Exit(WaitUntil(GameInterface.IsOpen(EInterfaceType.CLASSIC), 200, 5000));
+  end;
+
+  if ChooseOption.HasOption(['Remove La', 'Remove My', 'Remove Ma']) then
+  begin
+    ChooseOption.Close();
+    FurnitureIsBuilt := True;
+    Exit;
+  end;
+
+  Antiban.RandomRotate();
+  Self.LastPoint := [0,0];
+end;
+
+function TBuilder.DestroyFurniture(): Boolean;
+var
+  tpa: TPointArray;
+begin
+  if Self.LastPoint <> [0, 0] then
+  begin
+    tpa := TPAGrow([Self.LastPoint], 6);
+    Mouse.Move(tpa);
+  end;
+
+  if Self.BuiltFurniture.WalkSelectOption(['Remove La', 'Remove My', 'Remove Ma']) then
+  begin
+    Minimap.WaitMoving();
+    Exit(WaitUntil(Chat.GetChatTitle() = 'Really remove it?', 200, 3000));
+  end;
+
+  if ChooseOption.HasOption(['Build La', 'Build Gu', 'Build Ta']) or Inventory.ContainsItem('Mythical cape') then
+  begin
+    ChooseOption.Close();
+    FurnitureIsBuilt := False;
+    Exit;
+  end;
+
+  Antiban.RandomRotate();
+  Self.LastPoint := [0,0];
+end;
+
+function TBuilder.CallServant(): Boolean;
+begin
+  if Self.ServantNPC.Click() then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(Chat.GetChatTitle() = 'Repeat last task?',
+                        SRL.TruncatedGauss(50, 1500), 5000);
+  end
+  else
+    Result := Options.CallServant();
+end;
+
+function TBuilder.PhialsGetPlanks(): Boolean;
+begin
+  if not RSNPCs.Phials.IsVisible() and not RSW.AtTile(RSNPCs.Phials.Coordinates, 8) then
+    RSW.WebWalk(RSNPCs.Phials.Coordinates, 15, 0.2);
+
+  if Inventory.SetSelectedSlot(Self.NotedPlanksSlot) and
+     RSNPCs.Phials.SelectOption(['Use']) then
+  begin
+    Minimap.WaitFlag();
+    Result := WaitUntil(Pos('Exchange', Chat.GetChatTitle()) > 0, 100, 15000)
+  end;
+end;
+
+function TBuilder.TalkServant(): Boolean;
+begin
+  if Self.ServantNPC.Click() then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(Inventory.IsFull(), 100, 5000);
+  end;
+
+  Self.WaitingServant := not Result;
+end;
+
+function TBuilder.FillSack(attempt: Int32 = 0): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.CountItem(Self.Plank);
+
+  if Inventory.ClickItem('Plank sack', 'Fill') then
+    Result := WaitUntil(Inventory.CountItem(Self.Plank) < count, 300, 3000);
+
+  if Result then
+    Self.PlankSackCount += count
+  else if attempt = 2 then
+  begin
+    Self.PlankSackCount := 28;
+    Exit(True);
+  end
+  else
+    Exit(Self.FillSack(attempt + 1));
+end;
+
+function TBuilder.HandleServant(): Boolean;
+begin
+  Result := Chat.ClickOption('Fetch', BioHash);
+  if Result then
+  begin
+    Self.WaitingServant := True;
+    WaitUntil(Chat.GetChatTitle() <> 'Repeat last task?', 200, 3000)
+  end;
+end;
+
+function TBuilder.HandleBuildChat(): Boolean;
+var
+  tpa: TPointArray;
+begin
+  if Chat.ClickOption('Yes') then
+  begin
+    if (Self.LastPoint <> [0, 0]) and Self.ContainsEnoughPlanks() then
+    begin
+      tpa := TPAGrow([Self.LastPoint], 6);
+      ASyncMouse.Move(tpa);
+    end;
+    Result := WaitUntil(Chat.GetChatTitle() <> 'Really remove it?', 200, 3000);
+  end;
+
+  if Result then
+  begin
+    if CurrentFurniture = ERSFurniture.MYTH_CAPE then
+      Result := WaitUntil(Inventory.ContainsItem('Mythical cape'), 50, 3000)
+    else
+      Wait(100, 150);
+
+    Self.FurnitureIsBuilt := not Result;
+  end;
+end;
+
+function TBuilder.HandleFurniture(): Boolean;
+var
+  count: Int32;
+  tpa: TPointArray;
+begin
+  count := Inventory.CountItem(Self.Plank);
+
+  case CurrentFurniture of
+    ERSFurniture.REGULAR_LARDER: Keyboard.PressKey(VK_1);
+    ERSFurniture.OAK_LARDER: Keyboard.PressKey(VK_2);
+    ERSFurniture.MYTH_CAPE: Keyboard.PressKey(VK_4);
+    ERSFurniture.MAHOGANY_TABLE: Keyboard.PressKey(VK_6);
+  end;
+
+  if (Self.LastPoint <> [0, 0]) then
+  begin
+    tpa := TPAGrow([Self.LastPoint], 6);
+    ASyncMouse.Move(tpa);
+  end;
+
+  Result := WaitUntil(not GameInterface.IsOpen(EInterfaceType.CLASSIC), 100, 3000);
+  Self.FurnitureIsBuilt := Result;
+
+  XPBar.EarnedXP();
+
+  if Result then
+  begin
+    if Self.UsePlankSack and (count < Self.MinPlankCount) then
+    begin
+      count := Self.MinPlankCount - count;
+      Self.PlankSackCount -= count;
+    end;
+
+    Self.TotalActions += 1;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+    WL.Activity.Restart();
+    Wait(600, 800);
+  end else
+    GameInterface.Close();
+end;
+
+function TBuilder.HandlePhialsChat(): Boolean;
+var
+  slot: Int32;
+begin
+  Result := Chat.ClickOption('All', True);
+
+  if Result then
+  begin
+    if Self.UsePlankSack and (Self.PlankSackCount < Self.MinPlankCount) then
+    begin
+      if Inventory.FindItem('Plank sack', slot) then
+        AsyncMouse.Move(SRL.rowp(Mouse.Position(), Inventory.GetSlotBox(slot)));
+      Exit;
+    end;
+
+    GameObjects.POHPortal.PreHoverHelper(Self.RSW.GetMyPos());
+  end;
+end;
+
+function TBuilder.GetState(): EBuilderState;
+var
+  s: String;
+begin
+  if Self.ShouldStop() then
+    Exit(EBuilderState.END_SCRIPT);
+
+  if WL.Activity.IsFinished() then
+    Exit(EBuilderState.NO_ACTIVITY);
+
+  if Chat.LeveledUp() then
+    Exit(EBuilderState.LEVEL_UP);
+
+  s := Chat.GetChatTitle();
+
+  if s.Contains('remove') then
+    Exit(EBuilderState.HANDLE_BUILD_CHAT);
+
+  if s.Contains('Exchange') then
+    Exit(EBuilderState.HANDLE_PHIALS_CHAT);
+
+  if s.Contains('Select') then
+  begin
+    if 'house' in Chat.GetChat() then
+      Exit(EBuilderState.ENTER_HOUSE);
+  end;
+
+  if s.Contains('Repeat') then
+    Exit(EBuilderState.HANDLE_SERVANT);
+
+  if GameInterface.IsOpen(EInterfaceType.CLASSIC) then
+  begin
+    if BankPin.IsOpen() then
+      Exit(EBuilderState.HANDLE_PIN);
+
+    if not Minimap.InPOH() then
+      Exit(EBuilderState.CLOSE_INTERFACE);
+    Exit(EBuilderState.HANDLE_FURNITURE_UI);
+  end;
+
+  if not Minimap.InPOH() then
+  begin
+    if not UsePhials then
+      Exit(EBuilderState.ENTER_HOUSE);
+
+    if (CurrentFurniture = ERSFurniture.MYTH_CAPE) and not Inventory.ContainsItem('Mythical cape') then
+      Exit(EBuilderState.ENTER_HOUSE);
+
+    if Inventory.IsFull() then
+    begin
+      if Self.UsePlankSack and (Self.PlankSackCount < Self.MinPlankCount) then
+        Exit(EBuilderState.FILL_SACK);
+      Exit(EBuilderState.ENTER_HOUSE);
+    end;
+
+    Exit(EBuilderState.GET_PLANKS);
+  end;
+
+  if Self.FurnitureIsBuilt then
+    Exit(EBuilderState.DESTROY_FURNITURE);
+
+  if Self.ContainsEnoughPlanks() then
+  begin
+    Self.WaitingServant := False;
+    Exit(EBuilderState.BUILD_FURNITURE);
+  end;
+
+  if Self.UsePhials then
+    Exit(EBuilderState.EXIT_HOUSE);
+
+  if WaitingServant then
+  begin
+    if ServantNPC.IsVisible() then
+      Exit(EBuilderState.TALK_SERVANT);
+    Exit(EBuilderState.WAIT_STATE);
+  end;
+
+  Exit(EBuilderState.CALL_SERVANT);
+end;
+
+procedure TBuilder.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      EBuilderState.LEVEL_UP: Chat.HandleLevelUp();
+
+      EBuilderState.HANDLE_BUILD_CHAT: Self.HandleBuildChat();
+      EBuilderState.HANDLE_PHIALS_CHAT: Self.HandlePhialsChat();
+      EBuilderState.HANDLE_FURNITURE_UI: Self.HandleFurniture();
+      EBuilderState.HANDLE_SERVANT: Self.HandleServant();
+      EBuilderState.HANDLE_PIN: BankPin.Enter(Login.GetPlayerPin());
+      EBuilderState.CLOSE_INTERFACE: GameInterface.Close(True);
+
+      EBuilderState.CALL_SERVANT: Self.CallServant();
+      EBuilderState.TALK_SERVANT: Self.TalkServant();
+      EBuilderState.EXIT_HOUSE: Options.LeaveHouse();
+      EBuilderState.GET_PLANKS: Self.PhialsGetPlanks();
+      EBuilderState.FILL_SACK: Self.FillSack();
+
+      EBuilderState.ENTER_HOUSE: Self.EnterHouse();
+      EBuilderState.BUILD_FURNITURE: Self.BuildFurniture();
+      EBuilderState.DESTROY_FURNITURE: Self.DestroyFurniture();
+
+      EBuilderState.WAIT_STATE: Wait(7000, 8000);
+
+      EBuilderState.NO_ACTIVITY, EBuilderState.END_SCRIPT: Break;
+    end;
+
+    Self.DoAntiban();
+  until False;
+end;
+
+var
+  Builder: TBuilder;
+
+function TMinimap.GetCleanMinimap(angle: Double = $FFFF): TMufasaBitmap; override;
+var
+  Bitmap: TMufasaBitmap;
+begin
+  Bitmap := GetMufasaBitmap(BitmapFromClient(Minimap.Bounds));
+  Bitmap.ReplaceColor(0, 1); // We need zero to be unique
+
+  Self.CleanMinimap(Bitmap);
+  Bitmap.ReplaceColor(1, $32A072);
+
+  Result.Init();
+  if angle = $FFFF then
+    angle := Self.GetCompassAngle(False);
+  Bitmap.RotateBitmapEx(angle, False, True, Result);
+  Bitmap.Free();
+end;
+
+function TInterfaceArea.ClickClose(pressEscape: Boolean = False): Boolean; override;
+var
+  button: TGameButton;
+  i: Int32;
+begin
+  button := Self.GetCloseButton();
+  Result := button <> [];
+
+  if not Result and Minimap.InPOH() or not Self.IsOpen() then
+    Exit;
+
+  if not Result or (pressEscape and Self.EscapeEnabled) then
+  begin
+    Keyboard.PressKey(VK_ESCAPE);
+
+    //Antiban stuff.
+    if Random() < Antiban.GetUniqueDouble(0.15, 0.1, 0.2) then
+      for i := 0 to Antiban.GetUniqueInt(2, 1, 3) do
+      begin
+        if not Keyboard.IsKeyDown(VK_ESCAPE) then
+        begin
+          if Antiban.BioDice() then
+            Keyboard.PressKey(VK_ESCAPE)
+          else
+            Keyboard.KeyDown(VK_ESCAPE);
+        end;
+
+        Wait(20, 150, wdLeft);
+
+        if Keyboard.IsKeyDown(VK_ESCAPE) and Antiban.BioDice(0.5) then
+        begin
+          Keyboard.KeyUp(VK_ESCAPE);
+          Wait(20, 80, wdLeft);
+        end;
+      end;
+
+    if Keyboard.IsKeyDown(VK_ESCAPE) then
+      Keyboard.KeyUp(VK_ESCAPE);
+
+    Exit;
+  end;
+
+  Result := button.Click();
+end;
+
+function TWalkerObject.FindOnMainScreen(cuboidArray: TCuboidExArray): T2DPointArray; override;
+var
+  i: Int32;
+  tpa: TPointArray;
+  tempFinder: TObjectFinder;
+begin
+  if (CurrentFurniture <> ERSFurniture.MYTH_CAPE) or
+     ((Self <> Builder.BuiltFurniture) and (Self <> Builder.FurnitureSpace)) then
+    Exit(inherited);
+
+  tempFinder := Self.Finder.Unlimited();
+  cuboidArray := MainScreen.Filter(cuboidArray);
+
+  for i := 0 to High(cuboidArray) do
+  begin
+    tpa := MainScreen.FindObject(tempFinder, cuboidArray[i].Bounds()).Merge();
+    if tpa <> [] then
+    begin
+      tpa := cuboidArray[i].Filter(tpa);
+      if tpa <> [] then
+      begin
+        Result += tpa;
+        Continue;
+      end;
+    end;
+
+    tpa := cuboidArray[i].ShapeFill();
+    if tpa <> [] then
+      Result += tpa;
+  end;
+end;
+
+function TWalkerObject._SelectHelper(action: TStringArray): Boolean; override;
+begin
+  if Self.CurrentUpText <> [] then
+    Self.CurrentUpText := [];
+
+  if Self.RedClicked then
+  begin
+    Self.RedClicked := False;
+    Exit(True);
+  end;
+
+  if ChooseOption.IsOpen() and ChooseOption.Select(action) then
+    Exit(True);
+
+  if MainScreen.IsUpText(action) then
+  begin
+    Mouse.Click(MOUSE_LEFT);
+    Exit(MainScreen.DidRedClick());
+  end;
+
+  Builder.LastPoint := Mouse.Position();
+
+  Result := ChooseOption.Select(action, MOUSE_LEFT, True, (False));
+end;
+
+procedure TMinimap.SetCompassAngleEx(degrees, accuracy: Double); override;
+begin
+  if MainScreen.IsUpText('>') then
+    ChooseOption.Select('Cancel');
+
+  inherited;
+end;
+
+procedure TSRL.Debug(bitmap: TMufasaBitmap); override;
+begin
+  inherited;
+
+  Builder.RSW.Draw(bitmap);
+end;
+
+{$IFDEF SCRIPT_GUI}
+type
+  TBuilderConfig = record(TScriptForm)
+    NPCSelector: TLabeledCombobox;
+    FurnitureSelector: TLabeledCombobox;
+    LayoutInfo, BuilderInfo: TLabel;
+    ImagePanel: TPanel;
+  end;
+
+procedure TBuilderConfig.StartScript(sender: TObject); override;
+begin
+  CurrentNPC := ERSNPC(Self.NPCSelector.GetItemIndex());
+  CurrentFurniture := ERSFurniture(Self.FurnitureSelector.GetItemIndex());
+  inherited;
+end;
+
+procedure TBuilderConfig.NPCSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+  case combobox.getItemIndex() of
+    0: Self.BuilderInfo.SetCaption(
+       'Make sure you have noted planks with you, hammer, saw and coins.'
+       + LineEnding +
+       'You may also bring a plank sack if you have one.'
+       );
+
+    1: Self.BuilderInfo.SetCaption(
+       'Make sure to have a Bell-pull in your dining room and a ' +
+       LineEnding +
+       'Servant''s money bag in your south bedroom if using a butler.' +
+       LineEnding + LineEnding +
+       'Make sure you have planks in your bank and you have previously' +
+       LineEnding +
+       'asked the butler to fetch you 24 planks.' +
+       LineEnding + LineEnding +
+       'You also need money in your servant''s money bag and you need to' +
+       LineEnding +
+       'replenish it MANUALLY once in a while.'
+       );
+  end;
+end;
+
+procedure TBuilderConfig.FurnitureSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+
+  DownloadToFile(
+    'https://db.waspscripts.com/storage/v1/object/public/imgs/assets/img1.png',
+    WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png'
+  );
+
+  DownloadToFile(
+    'https://db.waspscripts.com/storage/v1/object/public/imgs/assets/img2.png',
+    WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png'
+  );
+
+  DownloadToFile(
+    'https://db.waspscripts.com/storage/v1/object/public/imgs/assets/img3.png',
+    WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png'
+  );
+
+  case combobox.getItemIndex() of
+    0, 1:
+      begin
+        ImagePanel.SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'kitchen.png');
+        Self.LayoutInfo.setCaption(
+          'Your POH layout must look like this on the minimap, no other room should be seen.'
+          + LineEnding +
+          'If you have more rooms move them 2 or 3 squares away with the house options.'
+          + LineEnding +
+          'You may be able to use other rooms but I cannot guarantee it will work.'
+          + LineEnding + LineEnding +
+          'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
+          + LineEnding + LineEnding +
+          'Have your larder in the NORTHEAST side of the kitchen.'
+        );
+      end;
+    2:
+      begin
+        ImagePanel.SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'hall.png');
+        Self.LayoutInfo.setCaption(
+          'Your POH layout must look like this on the minimap, no other room should be seen.'
+          + LineEnding +
+          'If you have more rooms move them 2 or 3 squares away with the house options.'
+          + LineEnding +
+          'You may be able to use other rooms but I cannot guarantee it will work.'
+          + LineEnding + LineEnding +
+          'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
+          + LineEnding + LineEnding +
+          'Have your cape mount in the SOUTHEAST side of the hall.'
+        );
+      end;
+    3:
+      begin
+        ImagePanel.SwapImage(WL_DATAPATH + 'assets' + DirectorySeparator + 'dining.png');
+        Self.LayoutInfo.setCaption(
+          'Your POH layout must look like this on the minimap, no other room should be seen.'
+          + LineEnding +
+          'If you have more rooms move them 2 or 3 squares away with the house options.'
+          + LineEnding +
+          'You may be able to use other rooms but I cannot guarantee it will work.'
+          + LineEnding + LineEnding +
+          'TRY TO MATCH THE DOORS AND WINDOWS POSITIONS to the image.'
+        );
+      end;
+  end;
+end;
+
+procedure TBuilderConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Builder');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.NPCSelector do
+  begin
+    Create(tab);
+    SetCaption('Method:');
+    SetLeft(TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(150));
+    SetStyle(csDropDownList);
+    AddItemArray(['Phials', 'Demon butler']);
+    SetItemIndex(Ord(CurrentNPC));
+    Combobox.SetOnChange(@Self.NPCSelectorOnChange);
+  end;
+
+  with Self.FurnitureSelector do
+  begin
+    Create(tab);
+    SetCaption('Furniture:');
+    SetTop(Self.NPCSelector.GetTop());
+    SetLeft(Self.NPCSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetStyle(csDropDownList);
+    AddItemArray(['Regular larder', 'Oak larder', 'Myth cape', 'Mahogany table']);
+    SetItemIndex(Ord(CurrentFurniture));
+    ComboBox.setOnChange(@Self.FurnitureSelectorOnChange);
+  end;
+
+  with Self.LayoutInfo do
+  begin
+    Create(tab);
+    SetLeft(Self.NPCSelector.GetLeft());
+    SetTop(Self.NPCSelector.GetBottom() + TControl.AdjustToDPI(15));
+    SetHint('House layout instructions.');
+  end;
+
+  with Self.BuilderInfo do
+  begin
+    Create(tab);
+    SetLeft(Self.LayoutInfo.GetLeft());
+    SetTop(Self.LayoutInfo.GetBottom() + TControl.AdjustToDPI(95));
+    SetHint('NPC mode instructions.');
+  end;
+
+  with Self.ImagePanel do
+  begin
+    Create(tab);
+    SetTop(Self.FurnitureSelector.GetTop() + TControl.AdjustToDPI(15));
+    SetLeft(Self.FurnitureSelector.GetRight() + TControl.AdjustToDPI(90));
+    SetWidth(TControl.AdjustToDPI(253));
+    SetHeight(TControl.AdjustToDPI(245));
+    setHint('House layout. Make sure your house layout looks like this!');
+  end;
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  Self.NPCSelectorOnChange(Self.NPCSelector.ComboBox);
+  Self.FurnitureSelectorOnChange(Self.FurnitureSelector.ComboBox);
+
+  inherited;
+end;
+
+var
+  BuilderConfig: TBuilderConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  BuilderConfig.Run();
+  {$ENDIF}
+  Builder.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

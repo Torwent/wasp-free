@@ -1,0 +1,449 @@
+{$DEFINE SCRIPT_ID := 'b15f8a8b-1a7e-457c-9e69-87dc70e90480'}
+{$DEFINE SCRIPT_REVISION := '22'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+{$I WaspLib/optional/interfaces/mainscreen/lectern.simba}
+{$I WaspLib/optional/handlers/house/house.simba}
+
+type
+  ENPC = (PHIALS, SERVANT);
+
+var
+  CurrentNPC: ENPC = ENPC.PHIALS;
+  CurrentLectern: ERSLecternType = ERSLecternType.STANDARD;
+  CurrentTablet: TItem = 'Teleport to house';
+
+type
+  ETabMakerState = (
+    LEVEL_UP,
+
+    WAIT_SERVANT, WAIT_TABS, FINISHED_TABS,
+    ENTER_HOUSE, EXIT_HOUSE, CLOSE_INTERFACE,
+
+    OPEN_LECTERN, HANDLE_TAB_UI,
+    TALK_TO_PHIALS, HANDLE_PHIALS_CHAT,
+
+    CALL_SERVANT, TALK_SERVANT, HANDLE_SERVANT,
+
+    END_SCRIPT
+  );
+
+  TTabMaker = record(TBaseWalkerScript)
+    State: ETabMakerState;
+
+    Phials, ServantNPC: TNPCV2;
+
+    IsTabbing, UsePhials, WaitingServant: Boolean;
+    LecternObj: EHouseObject;
+
+    SpellTab, SoftClay, NotedSoftClay: TItem;
+    NotesSlot, SoftClayCount: Int32;
+  end;
+
+
+procedure TTabMaker.SetupNPC();
+begin
+  case CurrentNPC of
+    ENPC.PHIALS:
+      begin
+        Self.Phials := TNPCV2.Setup(10, 1, 6, [[7704, 37582]]);
+        Self.Phials.SetupUpText(['Phials']);
+        Self.Phials.Finder.Colors += CTS2(4803153, 19, 0.12, 0.19);
+        Self.Phials.Finder.Colors += CTS2(5538225, 19, 0.02, 0.80);
+        Self.Phials.Walker := @Map.Walker;
+        Self.UsePhials := True;
+      end;
+
+    ENPC.SERVANT:
+      begin
+        Self.ServantNPC.SetupUpText(['Talk-to']);
+        Self.ServantNPC.Filter.Finder := False;
+        Self.ServantNPC.Filter.Walker := False;
+        Self.ServantNPC.Filter.Minimap := True;
+      end;
+  end;
+end;
+
+procedure TTabMaker.SetupItems();
+begin
+  Self.SoftClay := 'Soft clay';
+  Self.NotedSoftClay := 'Noted soft clay';
+  Self.SpellTab := CurrentTablet;
+end;
+
+
+procedure TTabMaker.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  Antiban.Skills := [ESKILL.MAGIC, ESKILL.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 20;
+
+  inherited;
+
+
+  for Self.LecternObj in STUDY_LECTERNS do
+    if House.Objects[Self.LecternObj].Coordinates <> [] then
+      Break;
+
+  if Self.LecternObj > High(EHouseObject) then
+    TerminateScript('Your house doesn''t seem to have a lectern. Please configure your house layout in the house builder tab!');
+
+  if House.Objects[EHouseObject.EXIT].Coordinates = [] then
+    TerminateScript('Your house doesn''t seem to have a exit portal added. Please configure your house layout in the house builder tab!');
+
+  Map.SetupChunk(Chunk([45,51,47,49], 0));
+
+  Self.SetupNPC();
+  Self.SetupItems();
+
+  Self.ActionProfit := ItemData.GetAverage(Self.SpellTab) - ItemData.GetAverage(Self.SoftClay);
+end;
+
+
+function TTabMaker.CallServant(): Boolean;
+begin
+  if ServantNPC.Click then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(Chat.GetChatTitle = 'Repeat last task?',
+                        SRL.TruncatedGauss(50, 1500), 5000);
+  end
+  else
+    Result := Options.CallServant();
+end;
+
+function TTabMaker.PhialsGetSoftClay(): Boolean;
+begin
+  if not Self.Phials.IsVisible() and not Map.InRange(Self.Phials.Coordinates, 8) then
+    Map.Walker.WebWalk(Self.Phials.Coordinates, 15, 0.2);
+
+  if Inventory.SetSelectedSlot(Self.NotesSlot) and
+     Self.Phials.SelectOption(['Use', '>']) then
+  begin
+    Minimap.WaitFlag();
+    Result := WaitUntil(Chat.GetChatTitle() = 'Select an option', 100, 15000);
+  end;
+end;
+
+function TTabMaker.FinishPhialsChat(): Boolean;
+var
+  count, newCount: Int32;
+begin
+  count := Inventory.Count();
+  if Chat.ClickOption('All') then
+    Result := WaitUntil(count <> (newCount := Inventory.Count()), 300, 3000);
+
+  if Result then
+    Self.SoftClayCount := newCount - count;
+end;
+
+
+function TTabMaker.TalkServant(): Boolean;
+begin
+  if ServantNPC.Click then
+  begin
+    Minimap.WaitMoving;
+    Result := WaitUntil(Inventory.IsFull, 100, 5000);
+  end;
+
+  WaitingServant := not Result;
+end;
+
+
+function TTabMaker.HandleServant(): Boolean;
+begin
+  Result := Chat.ClickOption('Fetch', BioHash);
+  if Result then
+  begin
+    WaitingServant := True;
+    WaitUntil(Chat.GetChatTitle() <> 'Repeat last task?', 200, 3000)
+  end;
+end;
+
+
+function TTabMaker.OpenLectern(): Boolean;
+begin
+  if House.Objects[Self.LecternObj].WalkClick() then
+  begin
+    Minimap.WaitMoving();
+    Result := Lectern.IsOpen(8000);
+  end;
+end;
+
+function TTabMaker.HandleLectern(): Boolean;
+begin
+  Result := Lectern.MakeTablet(CurrentTablet) and XPBar.WaitXP(5000);
+  Self.IsTabbing := Result;
+end;
+
+function TTabMaker.WaitTabs(): Boolean;
+begin
+  Result := XPBar.WaitXP(2800);
+  Self.IsTabbing := Result;
+end;
+
+procedure TTabMaker.FinishedTabs();
+begin
+  Self.IsTabbing := False;
+  Self.TotalActions += Self.SoftClayCount;
+  Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+  Self.SoftClayCount := 0;
+end;
+
+
+function TTabMaker.GetState(): ETabMakerState;
+var
+  s: String;
+begin
+  if WL.Activity.IsFinished() then
+    Exit(ETabMakerState.END_SCRIPT);
+
+  if Chat.LeveledUp() then
+    Exit(ETabMakerState.LEVEL_UP);
+
+  if Self.IsTabbing then
+  begin
+    if Inventory.ContainsItem(Self.SoftClay) then
+      Exit(ETabMakerState.WAIT_TABS);
+    Exit(ETabMakerState.FINISHED_TABS);
+  end;
+
+  s := Chat.GetChatTitle();
+
+  if s.Contains('Select') then
+    Exit(ETabMakerState.HANDLE_PHIALS_CHAT);
+
+  if s.Contains('Repeat') then
+    Exit(ETabMakerState.HANDLE_SERVANT);
+
+  if GameInterface.IsOpen() then
+  begin
+    if Lectern.IsOpen() then
+      Exit(ETabMakerState.HANDLE_TAB_UI);
+    Exit(ETabMakerState.CLOSE_INTERFACE);
+  end;
+
+  if not Minimap.InPOH() then
+  begin
+    if not Self.UsePhials or Inventory.IsFull() then
+      Exit(ETabMakerState.ENTER_HOUSE);
+
+    if not Inventory.ContainsItem(Self.NotedSoftClay) then
+      Exit(ETabMakerState.END_SCRIPT);
+
+    Exit(ETabMakerState.TALK_TO_PHIALS);
+  end;
+
+  if Inventory.ContainsItem(Self.SoftClay) then
+  begin
+    Self.WaitingServant := False;
+    Exit(ETabMakerState.OPEN_LECTERN);
+  end;
+
+  if Self.UsePhials then
+    Exit(ETabMakerState.EXIT_HOUSE);
+
+  if WaitingServant then
+  begin
+    if Self.ServantNPC.IsVisible() then
+      Exit(ETabMakerState.TALK_SERVANT);
+    Exit(ETabMakerState.WAIT_SERVANT);
+  end;
+
+  Exit(ETabMakerState.CALL_SERVANT);
+end;
+
+procedure TTabMaker.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      ETabMakerState.LEVEL_UP:
+        begin
+          Self.IsTabbing := False;
+          Chat.HandleLevelUp();
+        end;
+
+      ETabMakerState.OPEN_LECTERN: Self.OpenLectern();
+
+      ETabMakerState.HANDLE_PHIALS_CHAT: Self.FinishPhialsChat();
+      ETabMakerState.HANDLE_TAB_UI: Self.HandleLectern();
+      ETabMakerState.HANDLE_SERVANT: Self.HandleServant();
+      ETabMakerState.CLOSE_INTERFACE: GameInterface.Close();
+
+      ETabMakerState.CALL_SERVANT: Self.CallServant();
+      ETabMakerState.TALK_SERVANT: Self.TalkServant();
+      ETabMakerState.EXIT_HOUSE: House.Leave();
+      ETabMakerState.TALK_TO_PHIALS: Self.PhialsGetSoftClay();
+
+      ETabMakerState.ENTER_HOUSE: House.Enter();
+
+      ETabMakerState.WAIT_SERVANT: Wait(7000, 8000);
+      ETabMakerState.WAIT_TABS: Self.WaitTabs();
+      ETabMakerState.FINISHED_TABS: Self.FinishedTabs();
+
+      ETabMakerState.END_SCRIPT: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+end;
+
+var
+  TabMaker: TTabMaker;
+
+procedure TMinimap.SetCompassAngleEx(degrees, accuracy: Double); override;
+begin
+  if MainScreen.IsUpText('>') then
+    ChooseOption.Select('Cancel');
+
+  inherited;
+end;
+
+{$IFDEF SCRIPT_GUI}
+type
+  TTabMakerConfig = record(TScriptForm)
+    LecternSelector: TLabeledCombobox;
+    NPCSelector: TLabeledCombobox;
+    TabletSelector: TLabeledCombobox;
+    TabMakerInfo: TLabel;
+    ImagePanel: TPanel;
+    Config: TConfigJSON;
+  end;
+
+procedure TTabMakerConfig.StartScript(sender: TObject); override;
+begin
+  CurrentNPC := ENPC(Self.NPCSelector.GetItemIndex());
+  CurrentTablet := Lectern.TABLETS[CurrentLectern][Self.TabletSelector.GetItemIndex()];
+
+  Self.Config.Put('npc', Ord(CurrentNPC));
+  Self.Config.Put('lectern', Ord(CurrentLectern));
+  Self.Config.Put('tablet', ToStr(CurrentTablet));
+
+  inherited;
+end;
+
+procedure TTabMakerConfig.LecternSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+  CurrentLectern := ERSLecternType(combobox.getItemIndex() + 1);
+  Self.NPCSelector.SetVisible(CurrentLectern = ERSLecternType.STANDARD);
+  Self.TabletSelector.SetItemIndex(Lectern.TABLETS[CurrentLectern].Find(LowerCase(CurrentTablet)));
+end;
+
+procedure TTabMakerConfig.NPCSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+begin
+  combobox := sender;
+  case combobox.getItemIndex() of
+    0: Self.TabMakerInfo.SetCaption(
+        'Make sure you have noted soft clay with you, coins and the spell available.'
+       );
+
+    1: Self.TabMakerInfo.SetCaption(
+       'Make sure you have soft clay in your bank and you have previously' +
+       LineEnding +
+       'asked the buttler to fetch it for you. I recommend you fetch a ' +
+       LineEnding +
+       'number that has no left overs. You also need money in your servant''s' +
+       LineEnding +
+       ' money bag and you need to replenish it MANUALLY once in a while.'
+       );
+  end;
+end;
+
+procedure TTabMakerConfig.Run(); override;
+var
+  tab: TTabSheet;
+  i: Int32;
+begin
+  Self.Setup('Wasp TabMaker');
+  Self.Config.Setup('wasp-tab-maker');
+
+  if Self.Config.Has('lectern') then
+    CurrentLectern := ERSLecternType(Self.Config.GetInt('lectern'));
+  if Self.Config.Has('npc') then
+    CurrentNPC := ENPC(Self.Config.GetInt('npc'));
+  if Self.Config.Has('tablet') then
+    CurrentTablet := Self.Config.GetString('tablet');
+
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.LecternSelector do
+  begin
+    Create(tab);
+    SetCaption('Lectern:');
+    SetLeft(TControl.AdjustToDPI(20));
+    SetTop(TControl.AdjustToDPI(150));
+    SetStyle(csDropDownList);
+    AddItemArray(['Standard', 'Ancient', 'Lunar', 'Arceuus']);
+    Combobox.SetOnChange(@Self.LecternSelectorOnChange);
+    SetItemIndex(Ord(CurrentLectern)-1);
+    SetEnabled(False);
+  end;
+
+  with Self.NPCSelector do
+  begin
+    Create(tab);
+    SetCaption('Method:');
+    SetLeft(Self.LecternSelector.GetLeft());
+    SetTop(Self.LecternSelector.GetBottom() + TControl.AdjustToDPI(10));
+    SetStyle(csDropDownList);
+    AddItemArray(['Phials', 'Demon butler']);
+    SetItemIndex(Ord(CurrentNPC));
+    Combobox.SetOnChange(@Self.NPCSelectorOnChange);
+  end;
+
+  with Self.TabletSelector do
+  begin
+    Create(tab);
+    SetCaption('Spell tab:');
+    SetTop(Self.LecternSelector.GetTop());
+    SetLeft(Self.LecternSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetStyle(csDropDownList);
+    for i := 0 to High(Lectern.TABLETS[CurrentLectern]) do
+      AddItem(ToStr(Lectern.TABLETS[CurrentLectern][i]).SentenceCase());
+  end;
+
+  with Self.TabMakerInfo do
+  begin
+    Create(tab);
+    SetLeft(Self.NPCSelector.GetLeft());
+    SetTop(Self.NPCSelector.GetBottom() + TControl.AdjustToDPI(15));
+    SetHint('NPC mode instructions.');
+  end;
+
+  Self.CreateHouseBuilder();
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  Self.NPCSelectorOnChange(Self.NPCSelector.ComboBox);
+  Self.LecternSelectorOnChange(Self.LecternSelector.ComboBox);
+
+  inherited;
+end;
+
+var
+  TabMakerConfig: TTabMakerConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  TabMakerConfig.Run();
+  {$ENDIF}
+  TabMaker.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

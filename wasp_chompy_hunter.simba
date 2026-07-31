@@ -1,0 +1,280 @@
+{$DEFINE SCRIPT_ID := '7c40c4ac-0009-4a08-ab61-4887d9456420'}
+{$DEFINE SCRIPT_REVISION := '35'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+{$I WaspLib/optional/handlers/combathandler.simba}
+
+type
+  EChompyState = (
+    WAIT_STATE, WAIT_COMBAT, FILL_TOAD, FILL_BELLOWS, PLACE_TOAD, CLICK_CHOMPY
+  );
+
+  TChompyHunter = record(TBaseWalkerScript)
+    State: EChompyState;
+    Chompy, Toad: TNPCV2;
+    Bubbles: TGameObjectV2;
+    OgreBellows: TItemArray;
+    FillingBellows: Boolean;
+  end;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ESKILL.TOTAL, ESKILL.RANGE];
+  Self.MinZoom := 5;
+  Self.MaxZoom := 35;
+
+  inherited;
+end;
+
+procedure TChompyHunter.Init(maxActions: UInt32; maxTime: UInt64); override;
+var
+  chompy: TNPCV2;
+begin
+  inherited;
+
+  ItemFinder.Similarity := 0.9999;
+  Map.SetupChunk(Chunk(Box(36,48,38,47), 0));
+  Objects.Setup(Map.Objects(), @Map.Walker);
+
+  chompy := TNPCV2.Setup(70, 4, [[5488, 38238]]);
+  chompy.SetupUpText('Chompy bird');
+  chompy.Finder.Colors := [
+    CTS2(8557684, 13, 0.06, 0.32),
+    CTS2(10603982, 11, 0.04, 0.58)
+  ];
+  chompy.Walker := @Map.Walker;
+
+  CombatHandler.Setup(chompy, 2000);
+
+  Self.Toad.SetupEx(40, [0.5, 0.5, 0], [[5488, 38238]]);
+  Self.Toad.SetupUpText(['Inflate', 'Swamp', 'toad']);
+  Self.Toad.Finder.Colors += CTS2(3373670, 17, 0.02, 0.10);
+  Self.Toad.Walker := @Map.Walker;
+
+  Self.Bubbles := Objects.Get('Swamp bubbles');
+  Self.Bubbles.Finder.Colors := [CTS2(5464637, 3, 0.23, 0.28)];
+
+  Self.OgreBellows := ['Ogre bellows (3)', 'Ogre bellows (2)', 'Ogre bellows (1)'];
+
+  Options.SetNPCAttackOption(EAttackOption.ALWAYS_LEFT_CLICK);
+end;
+
+
+function TChompyHunter.CountBellows(): Int32;
+begin
+  Result := Inventory.CountItem('Ogre bellows (3)') +
+            Inventory.CountItem('Ogre bellows (2)') +
+            Inventory.CountItem('Ogre bellows (1)');
+end;
+
+function TChompyHunter.FillBellows(): Boolean;
+var
+  InvCount: Int32 := Self.CountBellows();
+  TempCount: Int32;
+begin
+  if Self.Bubbles.WalkClick() then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000);
+  end;
+
+  if Result then
+    while Inventory.ContainsItem('Ogre bellows') do
+    begin
+      InvCount := TempCount;
+      if not WaitUntil(InvCount <> (TempCount := Self.CountBellows), 100, 5000) then
+        Break;
+    end;
+end;
+
+
+function TChompyHunter.MoveAround(): Boolean;
+var
+  MinimapTPA: TPointArray;
+  SwampTPA: TPointArray;
+  P: TPoint;
+  FinalTPA: TPointArray;
+  MMDots: TPointArray;
+begin
+  MinimapTPA := Minimap.Polygon.Connect();
+  MinimapTPA.Fill();
+  MinimapTPA := MinimapTPA.Erode(3);
+
+  SRL.FindColors(SwampTPA, CTS0(9083745, 0), Minimap.Bounds);
+
+  MMDots := Minimap.GetDots(EMinimapDot.NPC).Offset(2, 2);
+  MMDots := MMDots.Grow(2);
+
+  SwampTPA := SwampTPA + MMDots;
+
+  for P in MinimapTPA do
+    if SwampTPA.Find(P) = -1 then
+      FinalTPA += P;
+
+  Mouse.Click(FinalTPA.RandomValue(), MOUSE_LEFT);
+
+  Minimap.WaitMoving();
+  Result := not Minimap.HasDotUnder();
+end;
+
+function TChompyHunter.PlaceToad(): Boolean;
+begin
+  if Minimap.HasDotUnder() then
+    Self.MoveAround();
+
+  if Inventory.ClickItem('Bloated toad') then
+  begin
+    Wait(1400, 1800);
+    Result := WaitUntil(not Inventory.ContainsItem('Bloated toad'), 100, 5000);
+  end;
+end;
+
+function TChompyHunter.FillToad(): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.Count();
+
+  if Self.Toad.WalkClick(True, 10) then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(count < Inventory.Count(), 300, 5000);
+  end;
+
+  if Result then
+    Self.PlaceToad();
+end;
+
+
+function TChompyHunter.ClickedChompy(featherCount: Int32): Boolean;
+begin
+  Result := MainScreen.InCombat() or (featherCount < Inventory.CountItemStack('Feather'));
+end;
+
+function TChompyHunter.ClickChompy(): Boolean;
+var
+  featherCount: Int32;
+begin
+  if CombatHandler.Monster.WalkSelectOption(['Attack', 'Pluck']) then
+  begin
+    featherCount := Inventory.CountItemStack('Feather');
+    Minimap.WaitMoving();
+    Result := WaitUntil(Self.ClickedChompy(featherCount) or MainScreen.InCombat(), 100, 3000);
+  end;
+
+  if Result then TotalActions += 1;
+end;
+
+
+
+function TChompyHunter.GetState(): EChompyState;
+begin
+  if Self.FillingBellows then
+  begin
+    if Self.FillingBellows := Inventory.ContainsItem('Ogre bellows') then
+      Exit(EChompyState.WAIT_STATE);
+
+    Exit(EChompyState.WAIT_STATE);
+  end;
+
+  if Inventory.ContainsItem('Bloated toad') then
+    Exit(EChompyState.PLACE_TOAD);
+
+  if MainScreen.InCombat() then
+    Exit(EChompyState.WAIT_COMBAT);
+
+  if CombatHandler.Monster.IsVisible() then
+    Exit(EChompyState.CLICK_CHOMPY);
+
+  if Inventory.ContainsAny(OgreBellows) then
+    Exit(EChompyState.FILL_TOAD);
+
+  Exit(EChompyState.FILL_BELLOWS);
+end;
+
+procedure TChompyHunter.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      EChompyState.WAIT_STATE: Wait(1200, 2400);
+      EChompyState.WAIT_COMBAT: WaitUntil(not MainScreen.WaitInCombat(2400), 100, 5000);
+      EChompyState.FILL_TOAD: Self.FillToad();
+      EChompyState.FILL_BELLOWS: Self.FillBellows();
+      EChompyState.PLACE_TOAD: Self.PlaceToad();
+      EChompyState.CLICK_CHOMPY: Self.ClickChompy();
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+end;
+
+
+var
+  ChompyHunter: TChompyHunter;
+
+function TMainScreen.InCombat(): Boolean; override;
+begin
+  if Self.FindDepletedHPBar then
+    Exit(False);
+
+  Result := (CombatHandler.IsSetup and not CombatHandler.InCombatTimer.IsFinished())
+            or XPBar.EarnedXP or (Self.FindHitsplats <> []);
+end;
+
+{$IFDEF SCRIPT_GUI}
+type
+  TChompyHunterConfig = record(TScriptForm)
+    ChompyHunterInfo: TLabel;
+  end;
+
+procedure TChompyHunterConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Chompy Hunter');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.ChompyHunterInfo do
+  begin
+    Create(tab);
+
+    SetCaption('Have ogre bellows in your inventory and an ogre bow/arrows equipped.' +
+                LineEnding +
+                'Start south of castle wars, in the middle pools close to the smoke dungeon.' +
+                LineEnding + LineEnding +
+                'This is a simple script only meant to get the job done!' +
+                LineEnding +
+                'It''s probably a good idea to baby sit!');
+
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(200));
+  end;
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  inherited;
+end;
+
+var
+  ChompyHunterConfig: TChompyHunterConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  ChompyHunterConfig.Run();
+  {$ENDIF}
+  ChompyHunter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

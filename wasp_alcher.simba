@@ -1,0 +1,279 @@
+{$DEFINE SCRIPT_ID := 'f6fc217a-3b03-44e1-8fa7-662dfb48f6d7'}
+{$DEFINE SCRIPT_REVISION := '43'}
+{$IFNDEF SCRIPT_CHAIN}
+  {$DEFINE SCRIPT_GUI}
+  {$I SRL-T/main.simba}
+  {$I WaspLib/main.simba}
+  {$I WaspLib/optional/handlers/alchhandler.simba}
+{$ENDIF}
+
+var
+  AlchSpell: ESpell := ESpell.HIGH_LEVEL_ALCHEMY;
+  LossProtection: Boolean := True;
+  WalkGE: Boolean := True;
+
+type
+  EAlcherState = (
+    OPEN_BANK, WITHDRAW_NATS, WITHDRAW_MONEY,
+
+    OPEN_COLLECT, HANDLE_COLLECT,
+    CLOSE_INTERFACE,
+
+    CAST_ALCHEMY, WAIT_ALCH, WALK_ALCH,
+    CLOSE_CONTEXT,
+
+    SWITCH_ITEM,
+    OUT_OF_ITEMS, OUT_OF_NATURES, END_SCRIPT
+  );
+
+  TAlcher = record(TBaseBankScript)
+    State: EAlcherState;
+    AlchItem: TItem;
+    NatureRune, Coins: TBankItem;
+    InGE: Boolean;
+    GEObj: TGameObjectV2;
+  end;
+
+procedure TAntiban.Setup(); override;
+begin
+  Self.Skills := [ESKILL.MAGIC, ESKILL.TOTAL];
+  Self.MinZoom := 10;
+  Self.MaxZoom := 90;
+
+  inherited;
+end;
+
+procedure TAlcher.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  inherited;
+
+  if WalkGE then
+  begin
+    Map.SetupChunk(EChunk.VARROCK);
+    Objects.Setup(Map.Objects(), @Map.Walker);
+    Self.GEObj := Objects.Get('Grand Exchange booth');
+  end;
+
+  if not Magic.IsSpellBook(ESpellBook.STANDARD) then
+    Self.Fatal('Not on Standard Spell Book');
+
+  Self.NatureRune := TBankItem.Setup('Nature rune', Bank.QUANTITY_ALL, False);
+  Self.Coins := TBankItem.Setup('Coins', Bank.QUANTITY_ALL, False);
+end;
+
+function TAlcher.HandleWarning(): Boolean;
+begin
+  if Chat.HasContinue then
+    Chat.ClickContinue();
+  Chat.ClickOption('Cancel the', False);
+
+  if not Magic.Open then
+    Exit;
+
+  if Magic.ClickSpell(AlchSpell) and ChooseOption.IsOpen()  then
+    ChooseOption.Select('Warnings');
+
+  WaitUntil(Chat.HasContinue(), 50, 2000);
+  Chat.ClickContinue();
+  WaitUntil(Chat.ClickOption('Set value', False), 50, 3000);
+  Wait(2000);
+  Result := Chat.AnswerQuery('Set value threshold for', '50000', 1000);
+  WaitUntil(Chat.HasContinue, 50, 2000);
+  Chat.ClickContinue();
+  WaitUntil(Chat.ClickOption('Cancel', False), 50, 3000);
+  Wait(2000);
+end;
+
+function TAlcher.CastAlchemy(attempts: Int32 = 0): Boolean;
+begin
+  Result := RSAlchHandler.CastAlchemy(AlchSpell = ESpell.HIGH_LEVEL_ALCHEMY, True);
+
+  if Chat.HasContinue() then
+    Self.HandleWarning();
+
+  if attempts > 5 then
+    TerminateScript('Can''t cast alchemy for some reason.');
+  if not Result and GameClient.IsLoggedIn() then
+    Self.CastAlchemy(Inc(attempts));
+
+  if Result then
+    Self.TotalActions += 1;
+end;
+
+
+function TAlcher.Terminate(): Boolean; override;
+begin
+  Result := True;
+end;
+
+
+function TAlcher.GetState(): EAlcherState;
+begin
+  if WL.Activity.IsFinished() then
+    Exit(EAlcherState.END_SCRIPT);
+
+  if RSAlchHandler.Disabled then
+    Exit(EAlcherState.OUT_OF_ITEMS);
+
+  if ChooseOption.IsOpen() then
+    Exit(EAlcherState.CLOSE_CONTEXT);
+
+  if GameInterface.IsOpen() then
+  begin
+    if Bank.IsOpen() then
+    begin
+      if not Inventory.ContainsItem('Nature rune') then
+        Exit(EAlcherState.WITHDRAW_NATS);
+
+      if not Inventory.ContainsItem('Coins') then
+        Exit(EAlcherState.WITHDRAW_MONEY);
+
+      Exit(EAlcherState.CLOSE_INTERFACE);
+    end;
+
+    if CollectBox.IsOpen() then
+    begin
+      if Self.CollectEmpty then
+        Exit(EAlcherState.CLOSE_INTERFACE);
+      Exit(EAlcherState.HANDLE_COLLECT);
+    end;
+
+    Exit(EAlcherState.CLOSE_INTERFACE);
+  end;
+
+  if WalkGE and not Self.InGE then
+  begin
+    Self.InGE := Map.InRange(Self.GEObj.Coordinates, 30);
+    if not Self.InGE then
+      Exit(EAlcherState.WALK_ALCH);
+  end;
+
+  if RSAlchHandler.Timer.TimeRemaining() >= Random(300, 1800) then
+    Exit(EAlcherState.WAIT_ALCH);
+
+  Result := EAlcherState.CAST_ALCHEMY;
+end;
+
+procedure TAlcher.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
+
+    case Self.State of
+      EAlcherState.WALK_ALCH: InGe := Map.Walker.WebWalk(Self.GEObj.Coordinates, 10, 0.2);
+
+      EAlcherState.OPEN_BANK: Banks.WalkOpen();
+      EAlcherState.WITHDRAW_NATS: Self.Withdraw(Self.NatureRune);
+      EAlcherState.WITHDRAW_MONEY: Self.Withdraw(Self.Coins);
+
+      EAlcherState.OPEN_COLLECT: CollectBoxes.WalkOpen();
+      EAlcherState.HANDLE_COLLECT: Self.HandleCollectBox(['Coins', 'Nature rune']);
+      EAlcherState.CLOSE_INTERFACE: GameInterface.Close();
+
+      EAlcherState.WAIT_ALCH: Wait(100);
+      EAlcherState.CAST_ALCHEMY: Self.CastAlchemy();
+
+      EAlcherState.CLOSE_CONTEXT: ChooseOption.Close();
+
+      EAlcherState.END_SCRIPT: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+
+  if not Self.Terminate() then
+    Self.Fatal('Didn''t terminate properly. Stopping execution.');
+end;
+
+var
+  Alcher: TAlcher;
+
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
+type
+  TAlcherConfig = record(TScriptForm)
+    AlchSelector: TLabeledCombobox;
+    IgnoreProfit: TLabeledCheckbox;
+    WalkGECheckbox: TLabeledCheckbox;
+    CustomItemSelector: TLabeledEdit;
+  end;
+
+procedure TAlcherConfig.StartScript(sender: TObject); override;
+begin
+  case Self.AlchSelector.GetItemIndex() of
+    0: AlchSpell := ESpell.HIGH_LEVEL_ALCHEMY;
+    1: AlchSpell := ESpell.LOW_LEVEL_ALCHEMY;
+  end;
+
+  LossProtection := Self.IgnoreProfit.IsChecked();
+  WalkGE := Self.WalkGECheckbox.IsChecked();
+
+  inherited;
+end;
+
+procedure TAlcherConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Alcher');
+  Self.Start.setOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.AlchSelector do
+  begin
+    Create(tab);
+    SetCaption('Alchemy spell:');
+    SetLeft(TControl.AdjustToDPI(20));
+    SetTop(TControl.AdjustToDPI(200));
+    Combobox.setStyle(csDropDownList);
+    Combobox.getItems.Add('High alchemy');
+    Combobox.getItems.Add('Low alchemy');
+    Combobox.setItemIndex(0);
+  end;
+
+  with Self.IgnoreProfit do
+  begin
+    Create(tab);
+    SetCaption('Prevent loss');
+    SetLeft(Self.AlchSelector.GetRight() + TControl.AdjustToDPI(20));
+    SetTop(Self.AlchSelector.GetTop() + TControl.AdjustToDPI(17));
+    SetChecked(LossProtection);
+  end;
+
+  with Self.WalkGECheckbox do
+  begin
+    Create(tab);
+    SetCaption('Walk to GE (Varrock only)');
+    SetLeft(Self.IgnoreProfit.GetRight() + TControl.AdjustToDPI(20));
+    SetTop(Self.IgnoreProfit.GetTop());
+    SetChecked(WalkGE);
+  end;
+
+  Self.CreateAlchemyPanel();
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  inherited;
+end;
+
+var
+  AlcherConfig: TAlcherConfig;
+{$ENDIF}
+{$ENDIF}
+
+{$IFNDEF SCRIPT_CHAIN}
+begin
+  {$IFDEF SCRIPT_GUI}
+  AlcherConfig.Run();
+  {$ENDIF}
+  Alcher.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.
+{$ENDIF}

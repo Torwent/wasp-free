@@ -1,0 +1,1138 @@
+{$DEFINE SCRIPT_ID := 'a17eeda7-b3e7-4aba-9d9a-cc2d338e41ba'}
+{$DEFINE SCRIPT_REVISION := '37'}
+{$DEFINE SCRIPT_GUI}
+{$I SRL-T/main.simba}
+{$I WaspLib/main.simba}
+
+//YES AND DON'T ASK IT AGAIN when depositing ORES on the belt.
+type
+  EBarType = (BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANTITE, RUNITE);
+
+var
+  CurrentBar: EBarType = EBarType.GOLD;
+  UseCoalBag: Boolean = False;
+  UseEnergyBoosts: Boolean = False;
+
+type
+  EBFState = (
+    OPEN_POT, HANDLE_POT, READ_POT, OPEN_BANK, OPEN_BANK_TAB,
+    WITHDRAW_ORE, WITHDRAW_COAL, WITHDRAW_GLOVES, WITHDRAW_COAL_BAG, WITHDRAW_ENERGY,
+
+    DEPOSIT_BARS, DEPOSIT_RANDOM_ITEMS, DEPOSIT_ORE, DEPOSIT_COAL,
+    OUT_OF_ORE, OUT_OF_COAL,
+
+    OPEN_COLLECT, HANDLE_COLLECT,
+    CLOSE_BANK, CLOSE_INTERFACE, CLOSE_GAUGE, CLOSE_CONTEXT_MENU,
+
+    ENABLE_RUN, DRINK_ENERGY,
+    CLICK_COFFER, HANDLE_COFFER_CHAT, ADD_MONEY, REMOVE_MONEY,
+
+    FILL_COAL_BAG, REFILL_COAL_BAG, EMPTY_COAL_BAG,
+
+    EQUIP_GOLD_GLOVES, EQUIP_ICE_GLOVES,
+    LOAD_ORE, LOAD_COAL, WALK_DISPENSER, HOVER_DISPENSER, WAIT_BARS, GET_BARS,
+    GET_BARS_RESYNC,
+
+    HANDLE_MAKE, HANDLE_LEVEL, HANDLE_CHAT,
+
+    RESYNC_POT,
+
+    OUT_OF_SUPPLIES, OUT_OF_MONEY, BAD_WORLD, END_SCRIPT
+  );
+
+  TBlastFurnace = record(TBaseBankScript)
+    State: EBFState;
+    HasGloves, PotFull, DispenserFull, OutOfSync: Boolean;
+
+    Bar, Ore, Coal, GoldGloves, IceGloves, CoalBag: TItem;
+    BarB, OreB, CoalB, GoldGlovesB, CoalBagB: TBankItem;
+
+    CoalRatio, LoadedCoal, AvailableSlots, MinEnergy,
+    CoalBagAmount, MaxCoalBag, Attempts: Int32;
+
+    Prices: record
+      Ore, Coal, Bar: Int32;
+    end;
+
+    Fee: Double;
+    ItemList: TItemArray;
+
+    DispenserWaitTiles: TPointArray;
+    MoneyBounds: TBox;
+
+    BarDispenser, MeltingPot, ConveyorBelt, Coffer, BankChest: TGameObjectV2;
+  end;
+
+procedure TBlastFurnace.SetupVariables();
+var
+  item: TItem;
+begin
+  Self.CoalBag    := 'Coal bag';
+  Self.GoldGloves := 'Goldsmith gauntlets';
+  Self.IceGloves  := 'Ice gloves';
+
+  for item in ItemFinder.GetItemIDs('Open coal bag') do
+    ItemFinder.AddItemName('Coal bag', item); //bind "open coal bag" to "coal bag" in itemfinder
+
+  for item in ItemFinder.GetItemIDs('Smiths gloves (i)') do
+    ItemFinder.AddItemName('Ice gloves', item); //bind "smiths gloves (i)" to "ice gloves" in itemfinder
+
+  Self.CoalRatio := 0;
+  Self.AvailableSlots := 28;
+  Self.Coal := 'Coal';
+
+  case CurrentBar of
+    BRONZE:
+      begin
+        Self.Ore  := 'Copper ore';
+        Self.Coal := 'Tin ore';
+        Self.Bar  := 'Bronze bar';
+        Self.CoalRatio := 1;
+      end;
+
+    IRON:
+      begin
+        Self.Ore := 'Iron ore';
+        Self.Bar := 'Iron bar';
+      end;
+
+    SILVER:
+      begin
+        Self.Ore := 'Silver ore';
+        Self.Bar := 'Silver bar';
+      end;
+
+    STEEL:
+      begin
+        Self.Ore  := 'Iron ore';
+        Self.Bar  := 'Steel bar';
+        Self.CoalRatio := 1;
+      end;
+
+    GOLD:
+      begin
+        Self.Ore := 'Gold ore';
+        Self.Bar := 'Gold bar';
+        Self.AvailableSlots -= 1;
+      end;
+
+    MITHRIL:
+      begin
+        Self.Ore  := 'Mithril ore';
+        Self.Bar  := 'Mithril bar';
+        Self.CoalRatio := 2;
+      end;
+
+    ADAMANTITE:
+      begin
+        Self.Ore := 'Adamantite ore';
+        Self.Bar := 'Adamantite bar';
+        Self.CoalRatio := 3;
+      end;
+
+    RUNITE:
+      begin
+        Self.Ore  := 'Runite ore';
+        Self.Bar  := 'Runite bar';
+        Self.CoalRatio := 4;
+      end;
+  end;
+
+  Self.ItemList := [Self.IceGloves, Self.Coal, Self.Ore, Self.Bar ];
+
+  if CurrentBar = EBarType.GOLD then
+    Self.ItemList += Self.GoldGloves;
+
+  if UseCoalBag then
+  begin
+    Self.ItemList += Self.CoalBag;
+    Self.AvailableSlots -= 1;
+    if Equipment.ContainsAny(['Smithing cape', 'Smithing cape(t)', 'Max cape']) then
+      Self.MaxCoalBag := 36
+    else
+      Self.MaxCoalBag := 27;
+  end;
+
+  Self.MinEnergy := 40;
+
+  Self.Prices.Ore  := ItemData.GetAverage(Self.Ore);
+  Self.Prices.Coal := ItemData.GetAverage(Self.Coal);
+  Self.Prices.Bar  := ItemData.GetAverage(Self.Bar);
+
+  Self.BarB := TBankItem.Setup(Self.Bar);
+  Self.OreB := TBankItem.Setup(Self.Ore);
+  Self.CoalB := TBankItem.Setup(Self.Coal);
+  Self.GoldGlovesB := TBankItem.Setup(Self.GoldGloves);
+  Self.CoalBagB := TBankItem.Setup(Self.CoalBag);
+
+  if Stats.GetLevel(ESKILL.SMITHING) < 60 then
+    Self.Fee := 0.02667
+  else
+    Self.Fee := 0.02;
+end;
+
+procedure TBlastFurnace.SetMoneyBounds(); //updated bounds 17 August 2024
+begin
+  Self.MoneyBounds := InterfaceArea.Bounds;
+  Self.MoneyBounds.Y1 += 48;
+  Self.MoneyBounds.X2 -= 4;
+  Self.MoneyBounds.X1 := Self.MoneyBounds.X2 - 43;
+  Self.MoneyBounds.Y2 := Self.MoneyBounds.Y1 + 53;
+end;
+
+function TBlastFurnace.ContainsOverlay(): Boolean;
+begin
+  Result := SRL.CountColor(CTS0(4148052, 1), Self.MoneyBounds) > 0;    // for some reason has 2 different browns. 4213588 & 4082259, 4148052 the combo and is only present in the overlay
+end;
+
+procedure TBlastFurnace.ReSyncPot();
+begin
+  Self.OutOfSync := True;
+  Self.DispenserFull := True;
+end;
+
+
+procedure TBlastFurnace.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  Antiban.Skills := [ESKILL.SMITHING, ESKILL.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 10;
+
+  inherited;
+
+  Map.SetupChunk(EChunk.BLAST_FURNACE);
+  Objects.Setup(Map.Objects(), @Map.Walker);
+
+  with Map.Loader do
+  begin
+    Graph.LoadNodesFromString('xgAAAHicPY7bCQAxCARbsYQka3zUEtJ/G7eCuQ9hWJfRA0A49wBLYElQE2wlrAc6BemVbEFYgXZiXMWuDpOoJKM9nl12dDl5IkuYtULDb9b1wPoN1warE0GzFhg9mPfoGIIV9wPAkC2r');
+    Graph.LoadPathsFromString('AgEAAHicTY7bEYBACANbSQnCvbxaGPpvwwQf44+DyyZc2MhwNHQMTJywBTszDE0fJyWbD5OyBKwMhhRZ+lGeTr8DBxVWvQul2occ1kvZcBYt7FoR0+kCXHbVfGi/lZxr+iHP4DAzqI4qPXT3eVcrcxLWsbpZttcDdl6AajUZ');
+    Graph.Nodes := Graph.Nodes.Offset(Regions[0].Offset - [Regions[0].Region.X1, Regions[0].Region.Y1] + [40,40])
+  end;
+
+  Map.Filters := [[Box(350,360,456,444), True]];
+
+  Self.BarDispenser := TGameObjectV2.Setup(7, [[3664, 30578]]);
+  Self.BarDispenser.SetupUpText('Bar dispenser');
+  Self.BarDispenser.Finder.Colors += CTS2(7434872, 9, 0.28, 0.10);
+  Self.BarDispenser.Walker := @Map.Walker;
+
+  Self.DispenserWaitTiles := PopulateTile(Self.BarDispenser.Coordinates[0], 1);
+  Self.DispenserWaitTiles.Remove(Self.BarDispenser.Coordinates[0]);
+
+  Self.MeltingPot := Objects.Get('Melting Pot');
+  Self.MeltingPot.Finder.Colors := [CTS2(5085891, 15, 0.04, 1.62)];
+
+  Self.ConveyorBelt := Objects.Get('9100'); //Belt id that you can interact with, using the string gets all of them
+  Self.ConveyorBelt.Finder.Colors := [CTS2(1196888, 11, 0.16, 3.39)];
+
+  Self.Coffer := TGameObjectV2.Setup(0.7, 3, [[3688, 30602]]);
+  Self.Coffer.SetupUpText('Coffer');
+  Self.Coffer.Finder.Colors += CTS2(7040114, 5, 0.58, 0.09);
+  Self.Coffer.Finder.Colors += CTS2(48, 2, 28.34, 0.01);
+  Self.Coffer.Walker := @Map.Walker;
+
+  Self.BankChest := Objects.Get('Bank chest');
+
+  Self.SetupVariables();
+  Self.SetMoneyBounds();
+
+  Self.HasGloves := (CurrentBar = GOLD) and Inventory.ContainsAny([Self.GoldGloves, Self.IceGloves]);
+
+  if not Self.ContainsOverlay() then
+    TerminateScript('Please start in a Blast Furnace world!');
+
+  if UseEnergyBoosts then
+    EnergyHandler.MinInvPoints := 1;
+
+  Self.ReSyncPot();
+end;
+
+
+function TBlastFurnace.OpenPot(): Boolean;
+begin
+  if Self.MeltingPot.WalkClick() then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil(Chat.GetChatTitle() = 'Select an option', 200, 2000);
+  end;
+end;
+
+procedure TBlastFurnace.ReadPot();
+var
+  option: TChatboxOption;
+  oreStr: String;
+begin
+  oreStr := ToString(Self.Ore).Before(' ');
+
+  //2 loops on purpose
+  for option in Chat.GetOptions() do
+  begin
+    if 'Coal' in option.Text then
+      Self.LoadedCoal := StrToInt(option.Text.After(': '));
+    if 'melting pot is empty' in option.Text then
+    begin
+      Self.LoadedCoal := 0;
+      Chat.ClickContinue();
+      Self.OutOfSync := False;
+      Exit;
+    end;
+  end;
+
+  for option in Chat.GetOptions() do
+    if oreStr in option.Text then
+      Self.LoadedCoal -= StrToInt(option.Text.After(': ')) * Self.CoalRatio;
+
+  Chat.ClickContinue();
+  Self.OutOfSync := False;
+end;
+
+function TBlastFurnace.HandlePot(): Boolean;
+begin
+  if Chat.ClickOption('Check pot') then
+    Result := WaitUntil(Chat.GetChatTitle() = 'Melting Pot Contents', 200, 2000);
+end;
+
+function TBlastFurnace.GaugeIsOpen(): Boolean;
+begin
+  Result :=
+    (SRL.CountColor(CTS2(1585365, 10, 0.04, 1.06), MainScreen.Bounds) +
+     SRL.CountColor(CTS2(2537502, 9, 0.07, 0.30), MainScreen.Bounds)) > 3000;
+end;
+
+function TBlastFurnace.CloseGauge(): Boolean;
+var
+  tpa: TPointArray;
+  b: TBox;
+begin
+  b := MainScreen.Bounds;
+  b.X1 := B.X2 - Round(B.X2/3);
+  b.Y2 := Round(B.Y2/3);
+  if SRL.FindColors(tpa, CTS1(39167, 0), b) = 0 then
+    Exit;
+
+  Mouse.Click(tpa.Bounds(), MOUSE_LEFT);
+  Result := WaitUntil(not Self.GaugeIsOpen(), 300, 2000);
+end;
+
+function TBlastFurnace.CountMoney(attempt: Int32 = 0): Int32;
+begin
+  while XPBar.Bounds.Expand(0, 10).Contains(Mouse.Position()) do
+  begin
+    WriteLn 'Moving mouse out of the XPBar';
+    Mouse.Move(MainScreen.Bounds, True);
+  end;
+
+  Result := SRL.GetItemAmount(Self.MoneyBounds);
+
+  if (Result = 0) and (attempt < 20) then   // increased to 20 attemps to count money
+  begin
+    if GameInterface.IsOpen() then
+      GameInterface.Close();
+    Wait(600);
+    Exit(Self.CountMoney(attempt+1));
+  end;
+end;
+
+function TBlastFurnace.WaitBars(): Boolean;
+begin
+  Self.PotFull := False;
+  XPBar.EarnedXP();
+
+  Result := WaitUntil(XPBar.EarnedXP() or MainScreen.IsUpText('Take'), 300, 5000);
+
+  if Result or not Inventory.ContainsItem(Self.Ore) then
+  begin
+    Self.DispenserFull := True;
+    Self.PotFull := True;
+  end;
+end;
+
+function TBlastFurnace.WalkOpenBank(): Boolean;
+begin
+  if GameInterface.IsOpen() then
+  begin
+    if Bank.IsOpen() or BankPin.IsOpen() then
+      Exit(True);
+    GameInterface.Close();
+  end;
+
+  if Self.BankChest.WalkSelectOption(['Use B']) then
+  begin
+    if Inventory.ContainsItem(Self.Bar) then
+      Inventory.MouseItem(Self.Bar)
+    else if Inventory.ContainsItem(Self.CoalBag) then
+      Inventory.MouseItem(Self.CoalBag);
+
+    Minimap.WaitMoving();
+    Result := WaitUntil(GameInterface.IsOpen(), 300, 6000) and (Bank.IsOpen() or BankPin.IsOpen());
+  end;
+end;
+
+function TBlastFurnace.WithdrawTool(out item: TBankItem): Boolean;
+var
+  invCount: Int32;
+begin
+  invCount := Inventory.Count();
+
+  if (invCount = 28) then
+    Exit;
+
+  if Bank.WithdrawItem(item, True) then
+    Result := WaitUntil(invCount <> Inventory.Count(), 300, 3000);
+end;
+
+
+function TBlastFurnace.DepositBars(): Boolean;
+var
+  count: Int32;
+begin
+  count := Inventory.Count();
+  Result := Self.DepositItem(Self.BarB);
+
+  if Result then
+  begin
+    count -= Inventory.Count();
+    Self.TotalActions += count;
+    Self.TotalProfit += count * Self.Prices.Bar;
+  end;
+end;
+
+function TBlastFurnace.PotReady(): Boolean;
+var
+  totalCoal: Int32;
+  ratio: Double;
+begin
+  if Self.CoalRatio = 0 then
+    Exit(True);
+
+  if UseCoalBag then
+    totalCoal := Self.CoalBagAmount;
+
+  totalcoal += Self.LoadedCoal;
+  ratio := totalCoal/Self.CoalRatio;
+  Self.DebugLn('Coal adjusted to ratio: ' + ToStr(ratio));
+
+  Result := ratio >= Self.AvailableSlots;
+
+  if ratio > (Self.AvailableSlots * 2) then
+    Self.DebugLn('Something went wrong! There''s more coal loaded than it should.');
+end;
+
+
+function TBlastFurnace.PreHoverCoalBag(): Boolean;
+begin
+  if not UseCoalBag then Exit;
+  if not Inventory.ContainsItem(Self.CoalBag) then Exit;
+  if (Self.CoalBagAmount > 0) then Result := Inventory.MouseItem(Self.CoalBag);
+end;
+
+(* debug rs/ri bug
+function TInventory.Count(): Int32; override;
+begin
+  Result := inherited;
+
+  if InRange(Result, 2, 27) and (Result <> 10) and (Result <> 2) then
+    Debug([Point(0,0)]);
+end;
+// *)
+
+function TBlastFurnace._Load(out count: Int32): Boolean;
+var
+  newCount: Int32;
+begin
+  count := Inventory.Count();
+
+  XPBar.EarnedXP(); //Reset xp cache.
+  Self.DispenserFull := False;
+
+  if Self.ConveyorBelt.WalkSelectOption(['Put-ore']) then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil((newCount := Inventory.Count()) < 3, 300, 6000);
+    if Result then count := count - newCount;
+  end;
+end;
+
+function TBlastFurnace.LoadOre(): Boolean;
+var
+  count: Int32;
+begin
+  Result := Self._Load(count);
+  if not Result then Exit;
+
+  Self.LoadedCoal -= (count * Self.CoalRatio);
+  Self.PotFull := True;
+  Self.TotalProfit -= count * Self.Prices.Ore;
+  Self.PreHoverCoalBag();
+end;
+
+function TBlastFurnace.LoadCoal(): Boolean;
+var
+  count: Int32;
+begin
+  Result := Self._Load(count);
+  if not Result then Exit;
+
+  Self.DebugLn('Loaded ' + ToStr(count) + ' coal into the pot!');
+  Self.LoadedCoal += count;
+  Self.TotalProfit -= count * Self.Prices.Coal;
+
+  Self.PreHoverCoalBag();
+end;
+
+
+procedure TBlastFurnace.WaitMoving(doAntiban: Boolean = True; change: Boolean = False);
+var
+  timeout, countdown: TCountDown;
+  moving: Boolean;
+  changeGloves: Boolean;
+begin
+  changeGloves := (CurrentBar = EBarType.GOLD) and change;
+  timeout.Init(Round(SRL.TruncatedGauss(20000, 25000)));
+
+  countdown.Init(Round(SRL.TruncatedGauss(500, 1500)));
+  countdown.timeout := GetTickCount() + Round(SRL.TruncatedGauss(2500, 3500));
+
+  repeat
+    if doAntiban then Antiban.WalkingTasks();
+    if not Self.DispenserFull then Self.DispenserFull := XPBar.EarnedXP();
+
+    if changeGloves and Inventory.ContainsAll([Self.GoldGloves, 'Gold Ore']) then
+    begin
+      if not GameInterface.IsOpen() and Inventory.ClickItem(Self.GoldGloves) then
+      begin
+        Map.Walker.RedClicked := False;
+        Exit;
+      end;
+    end;
+
+    moving := Minimap.IsPlayerMoving();
+
+    if moving then countdown.Restart();
+  until timeout.IsFinished() or (not moving and countdown.IsFinished()) or not Minimap.HasFlag();
+end;
+
+function TBlastFurnace.WalkDispenser(): Boolean;
+var
+  p: TPoint;
+begin
+  p := Map.Map2MM(Self.DispenserWaitTiles.RandomValue());
+
+  Result := Map.Walker.Click(p, 2);
+
+  if Inventory.ContainsItem(Self.IceGloves) then
+    Inventory.MouseItem(Self.IceGloves);
+  Self.WaitMoving(False, False);
+end;
+
+function TBlastFurnace.GetBars(): Boolean;
+var
+  upText: String;
+begin
+  Self.DispenserFull := False;
+  if not Self.BarDispenser.WalkHover() then Exit;
+
+  upText := MainScreen.GetUpText();
+
+  try
+    if upText.Contains('Check') or not upText.Contains('Take') then
+      Exit;
+    Mouse.Click(MOUSE_LEFT);
+
+    if MainScreen.DidRedClick() then
+    begin
+      Self.WaitMoving(True, False);
+      Result := Make.IsOpen(5000, 100);
+    end;
+
+  finally
+    if Result then
+    begin
+      Self.Attempts := 0;
+      Exit;
+    end;
+
+    if Inc(Self.Attempts) > 5 then
+    begin
+      Self.OutOfSync := True;
+      Self.Attempts := 0;
+      Exit;
+    end;
+
+    if Chat.HasContinue() then
+    begin
+      Chat.ClickContinue();
+      Exit;
+    end;
+
+    if not Self.BarDispenser.Coordinates.AnyInRange(Map.Position(), 8) then
+      Self.WalkDispenser();
+  end;
+end;
+
+function TBlastFurnace.HandleMake(): Boolean;
+var
+  i: Int32;
+begin
+  i := High(Make.GetItemButtons());
+
+  if Make.Select(i, Make.QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+    Result := WaitUntil(Inventory.IsFull(), 300, 5000);
+
+  if Result then
+  begin
+    Self.PotFull := False;
+
+  end;
+end;
+
+function TBlastFurnace.EquipIceGloves(): Boolean;
+var
+  slot: Int32;
+begin
+  Result := Inventory.FindItem(Self.IceGloves, slot) and
+            Inventory.ClickSlot(slot);
+
+  if not Result then
+    Exit;
+
+  if WaitUntil(not Inventory.IsSlotUsed(slot), 300, 2400) then
+    Self.BarDispenser.Hover();
+end;
+
+function TBlastFurnace.EnableRun(): Boolean;
+begin
+  Result := Minimap.EnableRun();
+
+  if Result then
+    Self.MinEnergy := Antiban.GetUniqueInt(50, 20, 60);
+end;
+
+
+function TBlastFurnace.CoalBagFull(): Boolean;
+begin
+  Result := Self.CoalBagAmount = Self.MaxCoalBag;
+end;
+
+function TBlastFurnace.FillCoalBag(): Boolean;
+var
+  slot: Int32;
+begin
+  if not Bank.IsOpen() or not Inventory.FindItem(Self.CoalBag, slot) then
+    Exit;
+
+  if Inventory.ClickSlot(slot, 'Fill') then
+    Result := Inventory.Items.WaitFade(slot)
+  else
+    Self.RightClickCoalBag();
+
+  if Result then
+    Self.CoalBagAmount := Self.MaxCoalBag;
+end;
+
+procedure TBlastFurnace.RightClickCoalBag();
+var
+  count, tmp: Int32;
+begin
+  count := Inventory.CountEmptySlots();
+  if Inventory.ClickItem(Self.CoalBag, 'Empty ') then
+    Self.ConveyorBelt.Hover();
+
+  if WaitUntil(count <> (tmp := Inventory.CountEmptySlots()), 100, 6000) then
+    Self.CoalBagAmount -= count - tmp
+  else
+    Self.CoalBagAmount := 0;
+end;
+
+function TBlastFurnace.ShiftClickCoalBag(): Boolean;
+var
+  count, tmp: Int32;
+begin
+  count := Inventory.CountEmptySlots();
+  if Inventory.ShiftDrop([Self.CoalBag], Inventory.RandomPattern()) then
+    Self.ConveyorBelt.Hover();
+
+  Result := WaitUntil(count <> (tmp := Inventory.CountEmptySlots()), 300, 4000);
+
+  if Result then
+  begin
+    Self.CoalBagAmount -= count - tmp;
+    Exit;
+  end;
+
+  Self.RightClickCoalBag();
+end;
+
+function TBlastFurnace.RefillCoalBag(): Boolean;
+var
+  slot, amount: Int32;
+begin
+  if not Bank.IsOpen() then
+    amount := Inventory.CountItem('Coal')
+  else
+    amount := Self.MaxCoalBag;
+
+  if not Inventory.FindItem(Self.CoalBag, slot) then
+    Exit;
+
+  if Inventory.ClickSlot(slot, 'Fill') then
+    Result := Inventory.Items.WaitFade(slot);
+
+  if Result then
+    Self.CoalBagAmount := amount
+  else
+    Self.RightClickCoalBag();
+end;
+
+function TBlastFurnace.ClickCoffer(): Boolean;
+begin
+  if Self.Coffer.WalkClick() then
+  begin
+    Minimap.WaitMoving();
+    Result := WaitUntil('Select an' in Chat.GetChatTitle(), 300, 5000);
+  end;
+end;
+
+function TBlastFurnace.HandleCofferChat(): Boolean;
+begin
+  if Chat.ClickOption('Deposit') then
+    Result := Chat.FindQuery('Deposit how', 5000);
+end;
+
+function TBlastFurnace.AddMoney(): Boolean;
+var
+  query: String;
+  currentMoney, totalMoney: Int32;
+  letters: TCharArray;
+  letter: Char;
+begin
+  query := Chat.GetQuery();
+  if not ('Deposit how' in query) then Exit;
+
+  currentMoney := Self.CountMoney();
+  totalMoney := query.Before(',').ExtractNumber(0);
+
+  case totalMoney of
+    0: TerminateScript('Something went wrong reading your money');
+    1..999999: letters := ['k', 'm', 'b'];
+    1000000..999999999: letters := ['m', 'b'];
+    else letters := ['b'];
+  end;
+
+  letter := letters[Random(Length(letters))];
+
+  totalMoney := Random(totalMoney, 999);
+
+  if Chat.AnswerQuery('Deposit how', ToString(totalMoney) + letter, 3000) then
+    Result := WaitUntil(currentMoney < Self.CountMoney(), 300, 5000);
+end;
+
+
+function TBlastFurnace.HoveringBarDispenser(): Boolean;
+var
+  upText: String;
+  atpa: T2DPointArray;
+begin
+  upText := MainScreen.GetUpText();
+
+  if 'Check' in upText then Exit(True);
+  if 'Take'  in upText then Exit(True);
+
+  if not Self.BarDispenser.Find(atpa) then Exit;
+
+  Result := atpa.Contains([Mouse.Position()]);
+end;
+
+
+function TBlastFurnace.GetState(): EBFState;
+begin
+  if WL.Activity.IsFinished() then Exit(EBFState.END_SCRIPT);
+  if ChooseOption.IsOpen()    then Exit(EBFState.CLOSE_CONTEXT_MENU);
+  if Self.GaugeIsOpen()       then Exit(EBFState.CLOSE_GAUGE);
+
+  if GameInterface.IsOpen() then
+  begin
+    if not Self.BankEmpty and Bank.IsOpen() then
+    begin
+      if Inventory.ContainsItem(Self.Bar) then Exit(EBFState.DEPOSIT_BARS);
+
+      if not Inventory.IsFull() and not Self.OutOfSync then
+      begin
+        if Inventory.ContainsItem(Self.Ore) then
+        begin
+          if Self.RanOut(Self.OreB) then Exit(EBFState.OUT_OF_ORE);
+          Exit(EBFState.DEPOSIT_ORE);
+        end;
+
+        if Inventory.ContainsItem(Self.Coal) then
+        begin
+          if Self.RanOut(Self.OreB) then Exit(EBFState.OUT_OF_COAL);
+          Exit(EBFState.DEPOSIT_COAL);
+        end;
+
+        if UseEnergyBoosts then
+        begin
+          if (Minimap.GetRunEnergy() < Self.MinEnergy) and not Minimap.HasStamina() then
+          begin
+            if Inventory.ContainsConsumable(EConsumable.ENERGY) then
+              Exit(EBFState.DRINK_ENERGY);
+            Exit(EBFState.WITHDRAW_ENERGY);
+          end;
+        end;
+
+        if Inventory.ContainsRandomItems(Self.ItemList) then
+          Exit(EBFState.DEPOSIT_RANDOM_ITEMS);
+
+        if (CurrentBar = GOLD) and not Self.HasGloves and not Inventory.ContainsAny([Self.GoldGloves, Self.IceGloves]) then
+          Exit(EBFState.WITHDRAW_GLOVES);
+
+        if (UseCoalBag and not Inventory.ContainsItem(Self.CoalBag)) or (UseCoalBag and Bank.ContainsItem(Self.CoalBag)) then
+          Exit(EBFState.WITHDRAW_COAL_BAG);
+
+        if Boolean(Self.CoalRatio) and UseCoalBag and not Self.CoalBagFull() then
+          Exit(EBFState.FILL_COAL_BAG);
+
+        if Self.PotReady() then
+          Exit(EBFState.WITHDRAW_ORE);
+
+        if CurrentBar in [EBarType.BRONZE, EBarType.STEEL, EBarType.MITHRIL, EBarType.ADAMANTITE, EBarType.RUNITE] then
+          Exit(EBFState.WITHDRAW_COAL);
+      end;
+
+      if UseEnergyBoosts and not Minimap.HasStamina() and Inventory.ContainsConsumable(EConsumable.ENERGY) then
+        Exit(EBFState.DRINK_ENERGY);
+
+      if Self.OutOfSync then
+      begin
+        if Inventory.ContainsItem(Self.Ore) then  Exit(EBFState.DEPOSIT_ORE);
+        if Inventory.ContainsItem(Self.Coal) then Exit(EBFState.DEPOSIT_COAL);
+      end;
+
+      if Inventory.ContainsRandomItems(Self.ItemList) then
+        Exit(EBFState.DEPOSIT_RANDOM_ITEMS);
+
+      Exit(EBFState.CLOSE_BANK);
+    end;
+
+    if not Self.CollectEmpty and CollectBox.IsOpen() then
+      Exit(EBFState.HANDLE_COLLECT);
+
+    Exit(EBFState.CLOSE_INTERFACE);
+  end;
+
+  if 'Select an' in Chat.GetChatTitle() then
+  begin
+    if 'Cancel' in Chat.GetChat() then
+      Exit(EBFState.HANDLE_COFFER_CHAT);
+    Exit(EBFSTate.HANDLE_POT);
+  end;
+
+  if 'Deposit how' in Chat.GetQuery() then Exit(EBFState.ADD_MONEY);
+  if Make.IsOpen() then Exit(EBFState.HANDLE_MAKE);
+  if Chat.LeveledUp() then Exit(EBFState.HANDLE_LEVEL);
+
+  if Self.OutOfSync then
+  begin
+    if Inventory.IsFull() then
+    begin
+      if Inventory.ContainsItem(Self.Coal) and not Self.CoalBagFull() then
+        Exit(EBFState.REFILL_COAL_BAG);
+      Exit(EBFState.OPEN_BANK);
+    end;
+
+    if Self.DispenserFull then      Exit(EBFState.GET_BARS_RESYNC);
+    if 'Melting' in Chat.GetChatTitle() then Exit(EBFState.READ_POT);
+    if 'melting pot is empty' in Chat.GetChat() then Exit(EBFState.READ_POT);
+
+    Exit(EBFState.OPEN_POT);
+  end;
+
+  if Chat.HasContinue() then
+  begin
+    if 'should collect' in Chat.GetChat() then Exit(EBFState.RESYNC_POT);
+    if not ('coal bag' in Chat.GetChat()) then Exit(EBFState.HANDLE_CHAT);
+  end;
+
+  if (Minimap.GetRunEnergy() >= Self.MinEnergy) then
+  begin
+    if not Minimap.IsRunEnabled()  then
+      Exit(EBFState.ENABLE_RUN);
+  end
+  else if UseEnergyBoosts then
+  begin
+    if not Inventory.ContainsConsumable(EConsumable.ENERGY) then
+      Exit(EBFState.OPEN_BANK);
+
+    if not Minimap.HasStamina() then
+      Exit(EBFState.DRINK_ENERGY);
+  end;
+
+  if Inventory.ContainsItem('Coins') then
+    Exit(EBFState.CLICK_COFFER);
+
+  if Inventory.ContainsItem(Self.Ore) then
+  begin
+    if (CurrentBar = EBarType.GOLD) and Inventory.ContainsItem(Self.GoldGloves) then
+      Exit(EBFState.EQUIP_GOLD_GLOVES);
+    Exit(EBFState.LOAD_ORE);
+  end;
+
+  if Inventory.ContainsItem(Self.Coal) then
+    Exit(EBFState.LOAD_COAL);
+
+  if not Inventory.IsFull() then
+  begin
+    if UseCoalBag and (Self.CoalBagAmount > 0) then
+      Exit(EBFState.EMPTY_COAL_BAG);
+
+    if Self.PotFull and (Self.LoadedCoal >= 0) then
+    begin
+      if Self.DispenserFull then
+      begin
+        if Inventory.ContainsItem(Self.IceGloves) then
+          Exit(EBFState.EQUIP_ICE_GLOVES);
+
+        Exit(EBFState.GET_BARS);
+      end;
+
+      if not Self.BarDispenser.Coordinates.AnyInRange(Map.Position(), 16) then
+        Exit(EBFState.WALK_DISPENSER);
+
+      if not Self.HoveringBarDispenser() then
+        Exit(EBFState.HOVER_DISPENSER);
+
+      Exit(EBFState.WAIT_BARS);
+    end;
+
+    if Self.BankEmpty then
+    begin
+      if Self.CollectEmpty then Exit(EBFState.OUT_OF_SUPPLIES);
+      Exit(EBFState.OPEN_COLLECT);
+    end;
+
+    Exit(EBFState.OPEN_BANK);
+  end;
+
+  if not Self.ContainsOverlay() then
+    Exit(EBFState.BAD_WORLD);
+
+  if (Self.CountMoney() = 0) then
+    Exit(EBFState.OUT_OF_MONEY);
+
+  if (CurrentBar = EBarType.GOLD) and XPBar.EarnedXP() then
+    Exit(EBFState.RESYNC_POT);
+
+  Exit(EBFState.OPEN_BANK);
+end;
+
+procedure TBlastFurnace.Run(maxActions: UInt32; maxTime: UInt64);
+var
+  str: String;
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+
+    str := ToStr(Self.LoadedCoal);
+    while Length(str) < 3 do
+    begin
+      if Self.LoadedCoal < 0 then
+        str := '-0' + str.After('-')
+      else
+        str := '0' + str;
+    end;
+
+    Self.SetAction('[' + str + ' Coal]: ' + ToStr(Self.State));
+
+    case Self.State of
+      EBFState.OPEN_POT: Self.OpenPot();
+      EBFSTate.HANDLE_POT: Self.HandlePot();
+      EBFState.READ_POT: Self.ReadPot();
+
+      EBFState.OPEN_BANK: Self.WalkOpenBank();
+
+      EBFState.WITHDRAW_ORE:      Self.Withdraw(Self.OreB);
+      EBFState.WITHDRAW_COAL:     Self.Withdraw(Self.CoalB);
+      EBFState.WITHDRAW_GLOVES:   Self.WithdrawTool(Self.GoldGlovesB);
+      EBFState.WITHDRAW_COAL_BAG: Self.WithdrawTool(Self.CoalBagB);
+      EBFState.WITHDRAW_ENERGY:   Bank.WithdrawConsumable(EConsumable.ENERGY);
+
+      EBFState.DEPOSIT_BARS: Self.DepositBars();
+      EBFState.DEPOSIT_ORE, DEPOSIT_COAL: Bank.DepositItems([Self.Ore, Self.Coal], True);
+      EBFState.DEPOSIT_RANDOM_ITEMS: Bank.DepositRandomItems(Self.ItemList);
+
+      EBFState.OPEN_COLLECT:   CollectBoxes.WalkOpen();
+      EBFState.HANDLE_COLLECT: Self.HandleCollectBox([Self.Ore, Self.Coal]);
+
+      EBFState.OUT_OF_ORE, EBFState.OUT_OF_COAL,
+      EBFState.CLOSE_BANK, CLOSE_INTERFACE: GameInterface.Close();
+
+      EBFState.CLOSE_GAUGE: Self.CloseGauge();
+      EBFState.CLOSE_CONTEXT_MENU: ChooseOption.Close();
+
+      EBFState.FILL_COAL_BAG: Self.FillCoalBag();
+      EBFState.REFILL_COAL_BAG: Self.RefillCoalBag();
+      EBFState.EMPTY_COAL_BAG: Self.ShiftClickCoalBag();
+
+      EBFState.CLICK_COFFER: Self.ClickCoffer();
+      EBFState.HANDLE_COFFER_CHAT: Self.HandleCofferChat();
+      EBFState.ADD_MONEY: Self.AddMoney();
+      EBFState.REMOVE_MONEY: ;
+
+      EBFState.EQUIP_GOLD_GLOVES: Inventory.ClickItem(Self.GoldGloves);
+      EBFState.EQUIP_ICE_GLOVES: Self.EquipIceGloves();
+
+      EBFState.ENABLE_RUN: Self.EnableRun();
+      EBFState.DRINK_ENERGY: Inventory.Consume(EConsumable.ENERGY);
+
+      EBFState.LOAD_ORE: Self.LoadOre();
+      EBFState.LOAD_COAL: Self.LoadCoal();
+      EBFState.WALK_DISPENSER: Self.WalkDispenser();
+      EBFState.HOVER_DISPENSER: Self.BarDispenser.Hover();
+      EBFState.WAIT_BARS: Self.WaitBars();
+      EBFState.GET_BARS, EBFState.GET_BARS_RESYNC: Self.GetBars();
+
+      EBFState.HANDLE_MAKE: Self.HandleMake();
+      EBFState.HANDLE_LEVEL: Chat.HandleLevelUp();
+      EBFState.HANDLE_CHAT: Chat.ClickContinue();
+
+      EBFState.RESYNC_POT: Self.ReSyncPot();
+
+      EBFState.BAD_WORLD, EBFState.OUT_OF_MONEY, EBFState.OUT_OF_SUPPLIES,
+      EBFState.END_SCRIPT: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+
+  Logout.ClickLogout();
+end;
+
+
+var
+  BlastFurnace: TBlastFurnace;
+
+procedure TMinimap.WaitMoving(doAntiban: Boolean); override;
+begin
+  BlastFurnace.WaitMoving(doAntiban, Antiban.BioDice());
+end;
+
+function TBlastFurnace.BuildTextReport(): TStringArray; override;
+var
+  cache: Int32;
+begin
+  cache := Self.TotalProfit;
+  Self.TotalProfit -= Round(Self.Fee * Self.TimeRunning.ElapsedTime);
+  Result := inherited();
+  Self.TotalProfit := cache;
+end;
+
+{$IFDEF SCRIPT_GUI}
+type
+  TBlastFurnaceConfig = record(TScriptForm)
+    BarSelector: TLabeledCombobox;
+    CoalBagCheckbox, EnergyBoostsCheckbox: TLabeledCheckBox;
+    Config: TConfigJSON;
+  end;
+
+procedure TBlastFurnaceConfig.StartScript(sender: TObject); override;
+begin
+  CurrentBar      := EBarType(Self.BarSelector.getItemIndex());
+  UseCoalBag      := Self.CoalBagCheckbox.IsChecked();
+  UseEnergyBoosts := Self.EnergyBoostsCheckbox.IsChecked();
+
+  Self.Config.Put('bar', Ord(CurrentBar));
+  Self.Config.Put('coal_bag', UseCoalBag);
+  Self.Config.Put('energy_boosts', UseEnergyBoosts);
+
+  if not Self.CoalBagCheckbox.CheckBox.getEnabled() then
+    UseCoalBag := False;
+
+  inherited;
+end;
+
+procedure TBlastFurnaceConfig.BarSelectorOnChange(sender: TObject);
+var
+  combobox: TComboBox;
+  i: Int32;
+  value: Boolean;
+begin
+  combobox := sender;
+  i := combobox.getItemIndex();
+  value := InRange(i, 0, 2) or (i = 4);
+
+  Self.CoalBagCheckbox.SetEnabled(not value);
+end;
+
+procedure TBlastFurnaceConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Blast Furnace');
+  Self.Config.Setup('wasp-blast-furnace');
+  Self.Start.setOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.BarSelector do
+  begin
+    Create(tab);
+    SetCaption('Bar type:');
+    SetLeft(TControl.AdjustToDPI(40));
+    SetTop(TControl.AdjustToDPI(170));
+    SetStyle(csDropDownList);
+    AddItemArray(['Bronze', 'Iron', 'Silver', 'Steel', 'Gold', 'Mithril', 'Adamantite', 'Runite']);
+    ComboBox.setOnChange(@Self.BarSelectorOnChange);
+    if Self.Config.Has('bar') then
+      SetItemIndex(Self.Config.GetInt('bar'))
+    else
+      SetItemIndex(Ord(CurrentBar));
+  end;
+
+  with Self.CoalBagCheckbox do
+  begin
+    Create(tab);
+    SetCaption('Coal bag');
+    SetLeft(Self.BarSelector.GetRight() + TControl.AdjustToDPI(10));
+    SetTop(Self.BarSelector.GetTop() + TControl.AdjustToDPI(15));
+    if Self.Config.Has('coal_bag') then
+      SetChecked(Self.Config.GetBoolean('coal_bag'))
+    else
+      SetChecked(UseCoalBag);
+  end;
+
+  with Self.EnergyBoostsCheckbox do
+  begin
+    Create(tab);
+    SetCaption('Energy boosts');
+    SetLeft(Self.BarSelector.GetRight() + TControl.AdjustToDPI(10));
+    SetTop(Self.BarSelector.GetTop() + TControl.AdjustToDPI(35));
+    if Self.Config.Has('energy_boosts') then
+      SetChecked(Self.Config.GetBoolean('energy_boosts'))
+    else
+      SetChecked(UseEnergyBoosts);
+  end;
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+  Self.BarSelectorOnChange(Self.BarSelector.ComboBox);
+
+  inherited;
+end;
+
+var
+  BlastFurnaceConfig: TBlastFurnaceConfig;
+{$ENDIF}
+
+begin
+  {$IFDEF SCRIPT_GUI}
+  BlastFurnaceConfig.Run();
+  {$ENDIF}
+  BlastFurnace.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.

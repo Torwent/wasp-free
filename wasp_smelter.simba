@@ -1,0 +1,465 @@
+{$DEFINE SCRIPT_ID := 'e8df872a-afaf-44b8-9fc5-eef079ada50b'}
+{$DEFINE SCRIPT_REVISION := '43'}
+{$IFNDEF SCRIPT_CHAIN}
+  {$DEFINE SCRIPT_GUI}
+  {$I SRL-T/main.simba}
+  {$I WaspLib/main.simba}
+{$ENDIF}
+
+type
+  EBarType = (
+    BRONZE, IRON, SILVER, STEEL, GOLD, MITHRIL, ADAMANT, RUNITE, MOLTEN_GLASS
+  );
+
+  EFurnace = (AL_KHARID, EDGEVILLE, FALADOR, PRIFDDINAS);
+
+var
+  CurrentBar = EBarType.GOLD;
+  CurrentFurnace = EFurnace.EDGEVILLE;
+
+type
+  ESmelterState = (
+    HOVER_BANK,
+    OPEN_BANK,
+    WITHDRAW_MATERIALS,
+    DEPOSIT_BAR,
+    DEPOSIT_RANDOM_ITEM,
+
+    OPEN_COLLECT,
+    HANDLE_COLLECT,
+
+    OPEN_FURNACE,
+    SMELT_BAR,
+    WAIT_SMELT,
+
+    CLOSE_INTERFACE,
+
+    LEVEL_UP,
+    CLOSE_CONTEXT,
+
+    END_SCRIPT,
+    OUT_OF_SUPPLIES
+  );
+
+  TSmelter = record(TBaseBankScript)
+    State: ESmelterState;
+
+    Furnace: TGameObjectV2;
+
+    Ore1, Ore2, Bar: TBankItem;
+    Materials: TItemArray;
+    Smelting: Boolean;
+
+    BarAmount, Multiplier: Int32;
+  end;
+
+
+
+procedure TSmelter.SetupItems();
+begin
+  case CurrentBar of
+    EBarType.BRONZE:
+      begin
+        Self.Bar  := TBankItem.Setup('Bronze bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Copper ore', 14, False);
+        Self.Ore2 := TBankItem.Setup('Tin ore', 14, False);
+      end;
+
+    EBarType.IRON:
+      begin
+        Self.Bar  := TBankItem.Setup('Iron bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Iron ore', Bank.QUANTITY_ALL, False);
+      end;
+
+    EBarType.SILVER:
+      begin
+        Self.Bar  := TBankItem.Setup('Silver bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Silver ore', Bank.QUANTITY_ALL, False);
+      end;
+
+    EBarType.STEEL:
+      begin
+        Self.Bar  := TBankItem.Setup('Steel bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Iron ore', 9, False);
+        Self.Ore2 := TBankItem.Setup('Coal', 18, False);
+      end;
+
+    EBarType.GOLD:
+      begin
+        Self.Bar  := TBankItem.Setup('Gold bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Gold ore', Bank.QUANTITY_ALL, False);
+      end;
+
+    EBarType.MITHRIL:
+      begin
+        Self.Bar  := TBankItem.Setup('Mithril bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Mithril ore', 5, False);
+        Self.Ore2 := TBankItem.Setup('Coal', 20, False);
+      end;
+
+    EBarType.ADAMANT:
+      begin
+        Self.Bar  := TBankItem.Setup('Adamantite bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Adamantite ore', 4, False);
+        Self.Ore2 := TBankItem.Setup('Coal', 24, False);
+      end;
+
+    EBarType.RUNITE:
+      begin
+        Self.Bar  := TBankItem.Setup('Runite bar', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Runite ore', 4, False);
+        Self.Ore2 := TBankItem.Setup('Coal', 24, False);
+      end;
+
+    EBarType.MOLTEN_GLASS:
+      begin
+        Self.Bar  := TBankItem.Setup('Molten glass', Bank.QUANTITY_ALL, False);
+        Self.Ore1 := TBankItem.Setup('Soda ash', 14, False);
+        Self.Ore2 := TBankItem.Setup('Bucket of sand', 14, False);
+        Antiban.Skills := [ESKILL.CRAFTING, ESKILL.TOTAL];
+      end;
+  end;
+
+  Self.Materials += Self.Ore1.Item;
+  Self.ActionProfit := (ItemData.GetAverage(Self.Bar.Item)) -
+                  (ItemData.GetAverage(Self.Ore1.Item) * Self.Ore1.Quantity);
+
+  if Self.Ore2 <> [] then
+  begin
+    Self.ActionProfit -= (ItemData.GetAverage(Self.Ore2.Item) * Round(Self.Ore2.Quantity / Self.Ore1.Quantity));
+    Materials += Self.Ore2.Item;
+  end;
+end;
+
+procedure TSmelter.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  Antiban.Skills := [ESKILL.Smithing, ESKILL.TOTAL];
+  Antiban.MinZoom := 0;
+  Antiban.MaxZoom := 40;
+
+  inherited;
+
+  case CurrentFurnace of
+    EFurnace.AL_KHARID:  Map.SetupChunk(EChunk.AL_KHARID);
+    EFurnace.EDGEVILLE:  Map.SetupChunk(EChunk.EDGEVILLE);
+    EFurnace.FALADOR:    Map.SetupChunk(EChunk.FALADOR);
+    EFurnace.PRIFDDINAS: Map.SetupChunk(EChunk.PRIFDDINAS);
+  end;
+
+  Objects.Setup(Map.Objects(), @Map.Walker);
+  NPCs.Setup(Map.NPCs(), @Map.Walker);
+  Self.Furnace := Objects.Get('Furnace');
+
+  Self.SetupItems();
+end;
+
+
+function TSmelter.Withdraw(): Boolean; overload;
+var
+  invCount: Int32;
+  item: TBankItem;
+  find1, find2: Boolean;
+begin
+  find1 := Inventory.ContainsItem(Self.Ore1.Item);
+  find2 := (Self.Ore2 = []) or Inventory.ContainsItem(Self.Ore2.Item);
+
+  if find1 then
+  begin
+    if find2 then
+      Exit;
+    item := Self.Ore2;
+    item.Quantity := Self.Ore1.Quantity;
+  end
+  else if find2 or (Self.Ore1.Quantity > Self.Ore2.Quantity) or
+          ((Self.Ore1.Quantity = Self.Ore2.Quantity) and Antiban.BioDice()) then
+  begin
+    item := Self.Ore1;
+    if Self.Ore2 <> [] then
+      item.Quantity := Self.Ore2.Quantity;
+  end
+  else
+    item := Self.Ore2;
+
+  invCount := Inventory.Count();
+
+  if Bank.WithdrawItem(item, True) then
+    Result := WaitUntil(Inventory.Count() > invCount, 100, 3000);
+
+  if not Result then
+  begin
+    Bank.UnHoverIncinerator();
+    Self.BankEmpty := not Bank.IsSearchOpen() and
+                      not WaitUntil(Bank.ContainsItem(item), 300, 3000);
+
+    if Bank.IsSearchOpen() then
+      Bank.CloseSearch();
+  end;
+
+  Self.BankEmpty := Self.BankEmpty and Bank.IsOpen();
+
+  if Self.BankEmpty then
+    SaveScreenshot('bankempty' + DIRECTORYSEPARATOR + 'bankempty', MainScreen.Bounds);
+
+  if Self.CollectEmpty and Self.CollectTimer.IsFinished() then
+    Self.CollectEmpty := False;
+end;
+
+function TSmelter.Deposit(): Boolean;
+var
+  itemCount: Int32;
+begin
+  itemCount := Inventory.Count();
+
+  if Bank.DepositAll() then
+    Result := WaitUntil(Inventory.Count() = 0, 100, 3000);
+
+  if Result then
+  begin
+    Self.TotalActions += itemCount;
+    Self.TotalProfit := Self.TotalActions * Self.ActionProfit;
+  end;
+end;
+
+
+function TSmelter.OpenFurnace(): Boolean;
+begin
+  if Self.Furnace.WalkSelectOption(['Smelt']) then
+  begin
+    Minimap.WaitPlayerMoving(300, 10000);
+    Result := Make.IsOpen(8000);
+  end;
+end;
+
+
+function TSmelter.SmeltBar(): Boolean;
+begin
+  if not Inventory.ContainsAll(Materials) then
+    Exit;
+
+  if Result := Make.Select(ToStr(Self.Bar.Item), Make.QUANTITY_ALL, Antiban.BioDice(EBioBehavior.KEYBOARD_CHAT_CHANCE)) then
+    Smelting := XPBar.WaitXP(4000);
+end;
+
+function TSmelter.IsMakingItem(waitTime: Int32 = 6000): Boolean;
+var
+  itemCount: Int32 := Inventory.CountItem(Self.Bar.Item);
+begin
+  if Result := WaitUntil((itemCount < Inventory.CountItem(Self.Bar.Item)) or not Inventory.ContainsAll(Materials), 100, waitTime) then
+    WL.Activity.Restart();
+end;
+
+function TSmelter.WaitSmelt(): Boolean;
+begin
+  if Smelting then
+    Result := Smelting := (Inventory.ContainsAll(Materials) and Self.IsMakingItem())
+  else
+    Result := Smelting := Self.IsMakingItem();
+
+  if Result then
+    WL.Activity.Restart();
+end;
+
+
+function TSmelter.GetState(): ESmelterState;
+begin
+  if WL.Activity.IsFinished() then
+    Exit(ESmelterState.END_SCRIPT);
+
+  if Chat.LeveledUp() then
+  begin
+    Self.Smelting := False;
+    Exit(ESmelterState.LEVEL_UP);
+  end;
+
+  if GameInterface.IsOpen() then
+  begin
+    Self.Smelting := False;
+    Self.HoveringBank := False;
+
+    if Bank.IsOpen() then
+    begin
+      if Inventory.ContainsItem(Self.Bar.Item) then
+        Exit(ESmelterState.DEPOSIT_BAR);
+
+      if Inventory.ContainsRandomItems(Materials) then
+        Exit(ESmelterState.DEPOSIT_RANDOM_ITEM);
+
+      if not Self.BankEmpty and not Inventory.ContainsAll(Materials) then
+        Exit(ESmelterState.WITHDRAW_MATERIALS);
+    end;
+
+    if not Self.CollectEmpty and CollectBox.IsOpen() then
+      Exit(ESmelterState.HANDLE_COLLECT);
+
+    Exit(ESmelterState.CLOSE_INTERFACE);
+  end;
+
+  if Inventory.ContainsAll(Materials) then
+  begin
+    if Self.Smelting then
+    begin
+      if not Self.HoveringBank then
+      begin
+        Self.CountItemsLeft(Self.Ore1.Item);
+
+        if Self.ShouldHoverBank() then
+          Exit(ESmelterState.HOVER_BANK);
+      end;
+
+      Exit(ESmelterState.WAIT_SMELT);
+    end;
+
+    if Make.IsOpen() then
+      Exit(ESmelterState.SMELT_BAR);
+
+    Exit(ESmelterState.OPEN_FURNACE);
+  end;
+
+  if Self.BankEmpty then
+  begin
+    if Self.CollectEmpty then
+      Exit(ESmelterState.OUT_OF_SUPPLIES);
+
+    Exit(ESmelterState.OPEN_COLLECT);
+  end;
+
+  if Self.BankEmpty then
+    Exit(ESmelterState.OPEN_COLLECT);
+
+  Exit(ESmelterState.OPEN_BANK);
+end;
+
+function TSmelter.Terminate(): Boolean; override;
+begin
+  Result := inherited;
+  Self.Bar.Noted := True;
+  if Result then
+    for 0 to 5 do
+      if Result := Bank.WithdrawItem(Self.Bar, True) then
+        Break;
+end;
+
+procedure TSmelter.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    State := Self.GetState();
+    Self.SetAction(ToStr(State));
+
+    case Self.State of
+      ESmelterState.HOVER_BANK: Self.HoverBank();
+      ESmelterState.OPEN_BANK: Banks.WalkOpen();
+      ESmelterState.WITHDRAW_MATERIALS: Self.Withdraw();
+      ESmelterState.DEPOSIT_BAR: Self.Deposit();
+      ESmelterState.DEPOSIT_RANDOM_ITEM: Bank.DepositRandomItems(Self.Materials);
+
+      ESmelterState.OPEN_COLLECT: CollectBoxes.WalkOpen();
+      ESmelterState.HANDLE_COLLECT: Self.HandleCollectBox(Self.Materials);
+
+      ESmelterState.OPEN_FURNACE: Self.OpenFurnace();
+      ESmelterState.SMELT_BAR: Self.SmeltBar();
+      ESmelterState.WAIT_SMELT: Self.WaitSmelt();
+
+      ESmelterState.CLOSE_INTERFACE: GameInterface.Close();
+      ESmelterState.CLOSE_CONTEXT: ChooseOption.Close();
+      ESmelterState.LEVEL_UP: Chat.HandleLevelUp();
+
+      ESmelterState.END_SCRIPT, ESmelterState.OUT_OF_SUPPLIES: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+
+  if not Self.Terminate() then
+    TerminateScript(Self.Name + ' didn''t terminate properly. Stopping execution.');
+end;
+
+var
+  Smelter: TSmelter;
+
+{$IFNDEF SCRIPT_CHAIN}
+{$IFDEF SCRIPT_GUI}
+type
+  TSmelterConfig = record(TScriptForm)
+    BarTypeSelector: TLabeledCombobox;
+    FurnaceSelector: TLabeledCombobox;
+    Config: TConfigJSON;
+  end;
+
+procedure TSmelterConfig.StartScript(sender: TObject); override;
+begin
+  CurrentBar := EBarType(Self.BarTypeSelector.GetItemIndex());
+  CurrentFurnace := EFurnace(Self.FurnaceSelector.GetItemIndex());
+
+  Self.Config.Put('bar', Ord(CurrentBar));
+  Self.Config.Put('furnace', Ord(CurrentFurnace));
+  inherited;
+end;
+
+procedure TSmelterConfig.Run(); override;
+var
+  tab: TTabSheet;
+begin
+  Self.Setup('Wasp Smelter');
+  Self.Config.Setup('wasp-smelter');
+  Self.Start.SetOnClick(@Self.StartScript);
+
+  Self.AddTab('Script Settings');
+  tab := Self.Tabs[High(Self.Tabs)];
+
+  Self.CreateAccountManager(tab);
+
+  with Self.BarTypeSelector do
+  begin
+    Create(tab);
+    SetCaption('Self.Bar type:');
+    SetLeft(TControl.AdjustToDPI(50));
+    SetTop(TControl.AdjustToDPI(200));
+    SetStyle(csDropDownList);
+    AddItemArray(['Bronze', 'Iron', 'Silver', 'Steel', 'Gold', 'Mithril', 'Adamantite', 'Runite', 'Molten glass']);
+
+    if Self.Config.Has('bar') then
+      SetItemIndex(Self.Config.GetInt('bar'))
+    else
+      SetItemIndex(Ord(CurrentBar));
+  end;
+
+  with Self.FurnaceSelector do
+  begin
+    Create(tab);
+    SetCaption('Furnace:');
+    SetLeft(Self.BarTypeSelector.GetRight() + TControl.AdjustToDPI(15));
+    SetTop(Self.BarTypeSelector.GetTop());
+    SetStyle(csDropDownList);
+    AddItemArray([
+      'Al Kharid',
+      'Edgeville', 'Falador', 'Prifddinnas'
+    ]);
+
+    if Self.Config.Has('furnace') then
+      SetItemIndex(Self.Config.GetInt('furnace'))
+    else
+      SetItemIndex(Ord(CurrentFurnace));
+  end;
+
+  Self.CreateAntibanManager();
+  Self.CreateWaspLibSettings();
+  Self.CreateAPISettings();
+
+  inherited;
+end;
+
+var
+  SmelterConfig: TSmelterConfig;
+{$ENDIF}
+{$ENDIF}
+
+{$IFNDEF SCRIPT_CHAIN}
+begin
+  {$IFDEF SCRIPT_GUI}
+  SmelterConfig.Run();
+  {$ENDIF}
+  Smelter.Run(WLSettings.MaxActions, WLSettings.MaxTime);
+end.
+{$ENDIF}
